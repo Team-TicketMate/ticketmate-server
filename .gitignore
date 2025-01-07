@@ -67,7 +67,8 @@ Thumbs.db
 /src/main/resources/application-prod.yml
 
 ### CICD ###
-/.github/workflows
+# FIXME: 초기세팅 이후 주석 해제
+#/.github/workflows
 
 ### macOS ###
 # General
