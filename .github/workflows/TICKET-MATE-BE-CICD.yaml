@@ -52,7 +52,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${{ github.ref_name }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${{ github.ref_name replace('/', '-') }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:cache
           cache-to: type=inline
 
