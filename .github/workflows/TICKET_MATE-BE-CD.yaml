@@ -3,8 +3,7 @@ name: TICKET-MATE-BE-PR-BUILD
 on:
   pull_request:
     branches:
-      - chuseok22/**
-      - mr6208/**
+      - test
 
 jobs:
   build:
