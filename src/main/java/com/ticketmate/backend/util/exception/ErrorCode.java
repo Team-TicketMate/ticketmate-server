@@ -14,7 +14,11 @@ public enum ErrorCode {
 
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 
-  ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다.");
+  ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
+
+  // AUTH
+
+  MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다.");
 
 
 
