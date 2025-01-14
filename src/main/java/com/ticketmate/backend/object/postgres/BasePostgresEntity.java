@@ -22,7 +22,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @NoArgsConstructor
-@RequiredArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BasePostgresEntity {
 
