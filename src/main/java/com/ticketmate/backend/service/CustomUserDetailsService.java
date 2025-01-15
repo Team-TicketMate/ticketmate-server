@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
   private final MemberRepository memberRepository;
 
   @Override
-  public UserDetails loadUserByUsername(String stringMemberId) throws UsernameNotFoundException {
+  public CustomUserDetails loadUserByUsername(String stringMemberId) throws UsernameNotFoundException {
     UUID memberId;
     try {
       memberId = UUID.fromString(stringMemberId);
