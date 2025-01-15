@@ -1,7 +1,9 @@
 package com.ticketmate.backend.util.config;
 
+import com.ticketmate.backend.service.CustomUserDetailsService;
+import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +27,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtUtil jwtUtil;
+  private final CustomUserDetailsService customUserDetailsService;
 
   /**
    * 허용된 CORS Origin 목록
@@ -60,6 +66,10 @@ public class SecurityConfig {
         )
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .addFilterBefore(
+            new TokenAuthenticationFilter(jwtUtil, customUserDetailsService),
+            UsernamePasswordAuthenticationFilter.class
         )
         .build();
   }
