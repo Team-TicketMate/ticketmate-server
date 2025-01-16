@@ -11,7 +11,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.Email;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -37,15 +36,12 @@ public class Member extends BasePostgresEntity {
   @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
   private UUID memberId;
 
-  // 아이디
+  // 이메일
   @Column(unique = true)
-  private String username;
+  private String email;
 
   // 비밀번호
   private String password;
-
-  // 이메일
-  private String email;
 
   // 닉네임
   @Column(unique = true)
