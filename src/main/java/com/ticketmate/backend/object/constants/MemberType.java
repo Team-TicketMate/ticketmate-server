@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum MemberType {
   AGENT("대리인"),
-  CUSTOMER("구매자");
+  CLIENT("의뢰인");
 
   private final String description;
 }
