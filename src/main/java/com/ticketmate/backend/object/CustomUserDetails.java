@@ -5,10 +5,7 @@ import com.ticketmate.backend.object.postgres.Member;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.UUID;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.task.TaskExecutionProperties.Simple;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,9 +61,5 @@ public class CustomUserDetails implements UserDetails {
   public boolean isEnabled() {
     // AccountStatus가 ACTIVE_ACCOUNT 인 경우, 계정이 활성화
     return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
-  }
-
-  public UUID getMemberId() {
-    return member.getMemberId();
   }
 }
