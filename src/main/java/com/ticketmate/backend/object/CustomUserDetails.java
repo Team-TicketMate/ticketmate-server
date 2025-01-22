@@ -37,7 +37,7 @@ public class CustomUserDetails implements UserDetails {
 
   @Override
   public String getUsername() {
-    return member.getMemberId().toString(); // memberId UUID를 문자열로 변환 후 반환
+    return member.getUsername(); // 회원 email(username) 반환
   }
 
   @Override
@@ -61,5 +61,9 @@ public class CustomUserDetails implements UserDetails {
   public boolean isEnabled() {
     // AccountStatus가 ACTIVE_ACCOUNT 인 경우, 계정이 활성화
     return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
+  }
+
+  public String getMemberId() {
+    return member.getMemberId().toString(); // 회원의 memberId (UUID)를 string 으로 반환
   }
 }
