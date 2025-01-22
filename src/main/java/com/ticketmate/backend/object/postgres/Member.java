@@ -38,7 +38,7 @@ public class Member extends BasePostgresEntity {
 
   // 이메일
   @Column(unique = true)
-  private String email;
+  private String username;
 
   // 비밀번호
   private String password;
