@@ -9,9 +9,8 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 @Builder
-public record ErrorDetail(
-        String errorCode,
-        String errorMessage,
-        Map<String, String> validation) {
-
+public class ErrorDetail {
+    private final String errorCode;
+    private final String errorMessage;
+    private final Map<String, String> validation;
 }

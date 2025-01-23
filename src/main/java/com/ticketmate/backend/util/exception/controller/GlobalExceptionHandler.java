@@ -1,6 +1,6 @@
 package com.ticketmate.backend.util.exception.controller;
 
-import com.ticketmate.backend.object.ApiResponse;
+import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;

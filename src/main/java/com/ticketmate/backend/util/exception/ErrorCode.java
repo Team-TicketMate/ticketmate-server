@@ -18,6 +18,8 @@ public enum ErrorCode {
 
   // AUTH
 
+  UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증에 실패했습니다."),
+
   MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다."),
 
   INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 엑세스 토큰입니다."),
@@ -25,6 +27,8 @@ public enum ErrorCode {
   EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
 
   EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
+
+  DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 가입된 이메일입니다"),
 
   // MEMBER
 
