@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
         // 공통 응답 DTO를 활용
         ApiResponse<?> response = ApiResponse.error(
-                String.valueOf(errorCode.getStatus().value()),  // 예: "400", "404" 등
+                String.valueOf(errorCode.getStatus()),  // 예: "400", "404" 등
                 errorCode.getMessage()
         );
 
