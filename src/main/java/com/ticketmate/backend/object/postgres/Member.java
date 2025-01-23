@@ -4,22 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.Role;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
@@ -48,7 +38,7 @@ public class Member extends BasePostgresEntity {
   private String nickname;
 
   // 생년월일 (ex.19980114)
-  @Column(length = 6)
+  @Column(length = 8)
   private String birth;
 
   // 전화번호
