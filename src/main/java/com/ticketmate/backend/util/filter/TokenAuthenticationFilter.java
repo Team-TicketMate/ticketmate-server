@@ -106,7 +106,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       if (isApiRequest) {
         sendErrorResponse(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
       } else {
-        response.sendRedirect("login");
+        response.sendRedirect("/login");
       }
       return;
     }
