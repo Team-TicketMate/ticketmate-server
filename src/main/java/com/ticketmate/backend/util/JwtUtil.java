@@ -1,6 +1,6 @@
 package com.ticketmate.backend.util;
 
-import com.ticketmate.backend.object.CustomUserDetails;
+import com.ticketmate.backend.object.dto.CustomUserDetails;
 import com.ticketmate.backend.service.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
