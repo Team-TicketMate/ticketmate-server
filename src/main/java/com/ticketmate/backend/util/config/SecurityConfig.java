@@ -2,26 +2,26 @@ package com.ticketmate.backend.util.config;
 
 import com.ticketmate.backend.service.CustomUserDetailsService;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.filter.LoginFilter;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
-import java.util.Arrays;
-import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +30,7 @@ public class SecurityConfig {
 
   private final JwtUtil jwtUtil;
   private final CustomUserDetailsService customUserDetailsService;
+  private final AuthenticationConfiguration authenticationConfiguration;
 
   /**
    * 허용된 CORS Origin 목록
@@ -71,6 +72,10 @@ public class SecurityConfig {
             new TokenAuthenticationFilter(jwtUtil, customUserDetailsService),
             UsernamePasswordAuthenticationFilter.class
         )
+        .addFilterAt(
+            new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), null),
+            UsernamePasswordAuthenticationFilter.class
+        )
         .build();
   }
 
@@ -79,14 +84,10 @@ public class SecurityConfig {
    */
   @Bean
   public AuthenticationManager authenticationManager(
-      HttpSecurity http,
-      BCryptPasswordEncoder bCryptPasswordEncoder,
-      UserDetailsService userDetailsService
-  ) {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService);
-    authProvider.setPasswordEncoder(bCryptPasswordEncoder);
-    return new ProviderManager(authProvider);
+          AuthenticationConfiguration authenticationConfiguration)
+          throws Exception {
+
+    return authenticationConfiguration.getAuthenticationManager();
   }
 
   /**
