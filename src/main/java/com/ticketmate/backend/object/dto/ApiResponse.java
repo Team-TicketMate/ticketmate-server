@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object;
+package com.ticketmate.backend.object.dto;
 
 import com.ticketmate.backend.util.exception.ErrorDetail;
 import lombok.Builder;

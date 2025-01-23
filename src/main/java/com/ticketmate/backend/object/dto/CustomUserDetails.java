@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object;
+package com.ticketmate.backend.object.dto;
 
 import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.postgres.Member;

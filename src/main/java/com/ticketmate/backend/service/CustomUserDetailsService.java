@@ -1,6 +1,6 @@
 package com.ticketmate.backend.service;
 
-import com.ticketmate.backend.object.CustomUserDetails;
+import com.ticketmate.backend.object.dto.CustomUserDetails;
 import com.ticketmate.backend.object.postgres.Member;
 import com.ticketmate.backend.repository.postgres.MemberRepository;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -8,7 +8,6 @@ import com.ticketmate.backend.util.exception.ErrorCode;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
