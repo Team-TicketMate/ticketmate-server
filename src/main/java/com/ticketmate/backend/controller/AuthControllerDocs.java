@@ -2,7 +2,7 @@ package com.ticketmate.backend.controller;
 
 
 import com.ticketmate.backend.object.dto.ApiResponse;
-import com.ticketmate.backend.object.dto.SignUpDto;
+import com.ticketmate.backend.object.dto.SignUpRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 
@@ -29,5 +29,5 @@ public interface AuthControllerDocs {
 
                     """
     )
-    ResponseEntity<ApiResponse<Void>> signUp(SignUpDto dto);
+    ResponseEntity<ApiResponse<Void>> signUp(SignUpRequest request);
 }

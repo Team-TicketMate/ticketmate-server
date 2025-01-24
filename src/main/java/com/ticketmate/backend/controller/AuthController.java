@@ -1,7 +1,7 @@
 package com.ticketmate.backend.controller;
 
 import com.ticketmate.backend.object.dto.ApiResponse;
-import com.ticketmate.backend.object.dto.SignUpDto;
+import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.service.MemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signUp(SignUpDto dto) {
-        return ResponseEntity.ok(memberService.signUp(dto));
+    public ResponseEntity<ApiResponse<Void>> signUp(SignUpRequest request) {
+        return ResponseEntity.ok(memberService.signUp(request));
     }
 }

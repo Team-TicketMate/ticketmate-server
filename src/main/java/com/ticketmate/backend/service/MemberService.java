@@ -4,7 +4,7 @@ import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.Role;
 import com.ticketmate.backend.object.dto.ApiResponse;
-import com.ticketmate.backend.object.dto.SignUpDto;
+import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.object.postgres.Member;
 import com.ticketmate.backend.repository.postgres.MemberRepository;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -28,24 +28,24 @@ public class MemberService {
     /**
      * 회원가입
      *
-     * @param dto username, password, nickname, birth, phone, profileUrl
+     * @param request username, password, nickname, birth, phone, profileUrl
      * @return 없음
      */
     @Transactional
-    public ApiResponse<Void> signUp(SignUpDto dto) {
+    public ApiResponse<Void> signUp(SignUpRequest request) {
 
         // 사용자 이메일 검증 (중복 이메일 사용 불가)
-        if (memberRepository.existsByUsername(dto.getUsername())) {
-            log.error("이미 가입된 이메일 주소입니다: {}", dto.getUsername());
+        if (memberRepository.existsByUsername(request.getUsername())) {
+            log.error("이미 가입된 이메일 주소입니다: {}", request.getUsername());
             throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
         }
 
         memberRepository.save(Member.builder()
-                .username(dto.getUsername())
-                .password(bCryptPasswordEncoder.encode(dto.getPassword()))
-                .nickname(dto.getNickname())
-                .birth(dto.getBirth())
-                .phone(dto.getPhone())
+                .username(request.getUsername())
+                .password(bCryptPasswordEncoder.encode(request.getPassword()))
+                .nickname(request.getNickname())
+                .birth(request.getBirth())
+                .phone(request.getPhone())
                 .profileUrl(null)
                 .role(Role.ROLE_USER)
                 .memberType(MemberType.CLIENT)
@@ -53,7 +53,7 @@ public class MemberService {
                 .lastLoginTime(LocalDateTime.now())
                 .build()
         );
-        log.debug("회원가입 성공: username={}", dto.getUsername());
+        log.debug("회원가입 성공: username={}", request.getUsername());
 
         return ApiResponse.success(null);
     }

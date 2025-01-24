@@ -7,6 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class SignInDto {
+public class SignInRequest {
 
 }
