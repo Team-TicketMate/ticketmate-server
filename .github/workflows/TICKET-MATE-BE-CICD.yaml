@@ -39,10 +39,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 기존 이미지 삭제
-        run: |
-          docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${{ github.ref_name }} | xargs -r docker rmi -f
-
       - name: Docker 이미지 빌드 및 푸시
         uses: docker/build-push-action@v3
         with:
@@ -85,10 +81,6 @@ jobs:
             echo "컨테이너 이름: $CONTAINER_NAME"
             echo "포트: $PORT"
             
-            # 기존 이미지 삭제
-            echo "기존 이미지 삭제..."
-            sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH} | xargs -r sudo docker rmi -f
-            
             echo "도커 이미지 풀 : ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}"
             echo $PW | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
             
@@ -108,5 +100,9 @@ jobs:
               -v /etc/localtime:/etc/localtime:ro \
               -v /home/***/Desktop/projects/ticket-mate:/mnt/ticket-mate \
               ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
-
+            
+            # <none> 태그로 남은 이미지 정리
+            echo "불필요한 dangling(<none>) 이미지 정리..."
+            echo $PW | sudo -S docker image prune -af
+            
             echo "배포가 성공적으로 완료되었습니다."
