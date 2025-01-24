@@ -36,7 +36,7 @@ public class SecurityConfig {
      * 허용된 CORS Origin 목록
      */
     private static final String[] ALLOWED_ORIGINS = {
-            "http://34,22,77,73:8087", // 메인 API 서버
+            "http://34.22.77.73:8087", // 메인 API 서버
             "http://34.22.77.73:8088", // 테스트 API 서버
             // TODO: 메인 웹 서버 추가
             "http://localhost:8080", // 로컬 API 서버
