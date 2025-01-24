@@ -100,5 +100,9 @@ jobs:
               -v /etc/localtime:/etc/localtime:ro \
               -v /home/***/Desktop/projects/ticket-mate:/mnt/ticket-mate \
               ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
-
+            
+            # <none> 태그로 남은 이미지 정리
+            echo "불필요한 dangling(<none>) 이미지 정리..."
+            echo $PW | sudo -S docker image prune -af
+            
             echo "배포가 성공적으로 완료되었습니다."
