@@ -4,6 +4,7 @@ import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.service.MemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signUp(SignUpRequest request) {
+    public ResponseEntity<ApiResponse<Void>> signUp(@Valid SignUpRequest request) {
         return ResponseEntity.ok(memberService.signUp(request));
     }
 }
