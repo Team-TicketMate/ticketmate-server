@@ -25,7 +25,7 @@ jobs:
 
       - name: application-prod.yml 생성
         run: |
-          echo "${{ secrets.APPLICATION_PROD_YML }}" | base64 --decode > ./src/main/resources/application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > ./src/main/resources/application-prod.yml
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test -Dspring.profiles.active=prod
