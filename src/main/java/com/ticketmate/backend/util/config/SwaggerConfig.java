@@ -28,8 +28,8 @@ import java.util.List;
                 version = "1.0v"
         ),
         servers = {
-                @Server(url = "https://34.22.77.73:8087", description = "메인 서버"),
-                @Server(url = "https://34.22.77.73:8088", description = "테스트 서버"),
+                @Server(url = "http://34.22.77.73:8087", description = "메인 서버"),
+                @Server(url = "http://34.22.77.73:8088", description = "테스트 서버"),
                 @Server(url = "http://localhost:8080", description = "로컬 서버")
         }
 )
