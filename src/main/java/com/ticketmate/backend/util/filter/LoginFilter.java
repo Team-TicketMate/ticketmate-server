@@ -3,6 +3,8 @@ package com.ticketmate.backend.util.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.CustomUserDetails;
+import com.ticketmate.backend.object.postgres.Member;
+import com.ticketmate.backend.repository.postgres.MemberRepository;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -19,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +33,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MemberRepository memberRepository;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -54,6 +58,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // CustomUserDetails
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member member = customUserDetails.getMember();
         String accessToken = jwtUtil.createAccessToken(customUserDetails);
         String refreshToken = jwtUtil.createRefreshToken(customUserDetails);
 
@@ -77,6 +82,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         new ObjectMapper().writeValue(response.getWriter(), ApiResponse.success(tokenMap));
+
+        // isFirstLogin 이 true 인 경우 false 변경
+        if (member.getIsFirstLogin()) {
+            // TODO: 첫 로그인 시 로직 작성
+
+            member.setIsFirstLogin(false);
+        }
+
+        // lastLoginTime 업데이트
+        member.setLastLoginTime(LocalDateTime.now());
+
+        memberRepository.save(member);
     }
 
     // 로그인 실패
