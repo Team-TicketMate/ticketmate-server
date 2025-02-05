@@ -1,5 +1,6 @@
 package com.ticketmate.backend.util.config;
 
+import com.ticketmate.backend.repository.postgres.MemberRepository;
 import com.ticketmate.backend.service.CustomUserDetailsService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.filter.LoginFilter;
@@ -7,6 +8,7 @@ import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +33,8 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final MemberRepository memberRepository;
 
     /**
      * 허용된 CORS Origin 목록
@@ -73,7 +77,10 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .addFilterAt(
-                        new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), null),
+                        new LoginFilter(jwtUtil,
+                                authenticationManager(authenticationConfiguration),
+                                redisTemplate,
+                                memberRepository),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .build();
