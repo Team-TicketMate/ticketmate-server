@@ -55,7 +55,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // 인정 정보 항상 유효
+        return true; // 인증 정보 항상 유효
     }
 
     @Override
