@@ -1,12 +1,13 @@
 package com.ticketmate.backend.util.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.CustomUserDetails;
+import com.ticketmate.backend.object.postgres.Member;
+import com.ticketmate.backend.repository.postgres.MemberRepository;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -30,6 +30,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final MemberRepository memberRepository;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -54,6 +55,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // CustomUserDetails
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member member = customUserDetails.getMember();
         String accessToken = jwtUtil.createAccessToken(customUserDetails);
         String refreshToken = jwtUtil.createRefreshToken(customUserDetails);
 
@@ -66,17 +68,31 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 "RT:" + customUserDetails.getMemberId(),
                 refreshToken,
                 jwtUtil.getRefreshExpirationTime(),
-                TimeUnit.MICROSECONDS
+                TimeUnit.MILLISECONDS
         );
 
-        // JSON 응답
-        Map<String, String> tokenMap = new HashMap<>();
-        tokenMap.put("accessToken", accessToken);
-        tokenMap.put("refreshToken", refreshToken);
+        // 헤더에 accessToken 추가
+        response.setHeader("Authorization", "Bearer " + accessToken);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        new ObjectMapper().writeValue(response.getWriter(), ApiResponse.success(tokenMap));
+        // 쿠키에 refreshToken 추가
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true); // HttpOnly 설정
+        cookie.setSecure(false); // FIXME: HTTPS 환경에서는 secure 속성 true로 설정 (현재는 HTTP)
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
+        response.addCookie(cookie);
+
+        // isFirstLogin 이 true 인 경우 false 변경
+        if (member.getIsFirstLogin()) {
+            // TODO: 첫 로그인 시 로직 작성
+
+            member.setIsFirstLogin(false);
+        }
+
+        // lastLoginTime 업데이트
+        member.setLastLoginTime(LocalDateTime.now());
+
+        memberRepository.save(member);
     }
 
     // 로그인 실패

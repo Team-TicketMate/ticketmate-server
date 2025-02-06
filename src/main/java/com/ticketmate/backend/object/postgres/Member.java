@@ -1,5 +1,6 @@
 package com.ticketmate.backend.object.postgres;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.constants.MemberType;
@@ -60,6 +61,11 @@ public class Member extends BasePostgresEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private AccountStatus accountStatus = AccountStatus.ACTIVE_ACCOUNT;
+
+    // 첫 로그인 여부
+    @Builder.Default
+    @JsonIgnore
+    private Boolean isFirstLogin = true;
 
     // 마지막 로그인 시간
     private LocalDateTime lastLoginTime;

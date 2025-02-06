@@ -15,8 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -50,7 +48,7 @@ public class MemberService {
                 .role(Role.ROLE_USER)
                 .memberType(MemberType.CLIENT)
                 .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
-                .lastLoginTime(LocalDateTime.now())
+                .lastLoginTime(null)
                 .build()
         );
         log.debug("회원가입 성공: username={}", request.getUsername());
