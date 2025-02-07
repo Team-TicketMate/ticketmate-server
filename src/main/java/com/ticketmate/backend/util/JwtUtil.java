@@ -112,6 +112,7 @@ public class JwtUtil {
     private String createToken(String category, CustomUserDetails customUserDetails, Long expiredAt) {
 
         return Jwts.builder()
+                .subject(customUserDetails.getUsername())
                 .claim("category", category)
                 .claim("username", customUserDetails.getUsername())
                 .claim("role", customUserDetails.getMember().getRole())
@@ -208,6 +209,7 @@ public class JwtUtil {
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String username = claims.getSubject();
+        log.debug("JWT에서 인증정보 파싱: username={}", username);
         CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
