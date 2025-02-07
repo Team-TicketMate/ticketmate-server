@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.postgres;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ticketmate.backend.object.constants.City;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -31,6 +32,10 @@ public class ConcertHall extends BasePostgresEntity{
 
     // 주소
     private String address;
+
+    // city
+    @Enumerated(EnumType.STRING)
+    private City city;
 
     // 홈페이지 url
     private String concertHallUrl;

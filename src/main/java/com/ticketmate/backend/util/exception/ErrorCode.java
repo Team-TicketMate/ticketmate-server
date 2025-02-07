@@ -32,7 +32,13 @@ public enum ErrorCode {
 
     // MEMBER
 
-    MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다.");
+    MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."),
+
+    // CONCERT_HALL
+
+    DUPLICATE_CONCERT_HALL_NAME(HttpStatus.BAD_REQUEST, "중복된 공연장 이름입니다."),
+
+    CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다.");
 
 
     private final HttpStatus status;
