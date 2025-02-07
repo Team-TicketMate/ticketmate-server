@@ -35,6 +35,7 @@ public class ConcertHallController implements ConcertHallControllerDocs{
 
     @Override
     @PostMapping(value = "/api/concert-hall/filtered")
+    @LogMonitoringInvocation
     public ResponseEntity<ApiResponse<Page<ConcertHallFilteredResponse>>> filteredConcertHall(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody ConcertHallFilteredRequest request) {
