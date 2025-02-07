@@ -1,13 +1,12 @@
 package com.ticketmate.backend.repository.postgres;
 
-import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.postgres.ConcertHall;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> {
@@ -29,11 +28,11 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
                     and (trim(:city) = '' or :city = city)
                     """,
             nativeQuery = true)
-    List<ConcertHall> filteredConcertHall(
+    Page<ConcertHall> filteredConcertHall(
             @Param("concertHallName") String concertHallName,
-            @Param("maxCapacity") Integer maxCapacity,
-            @Param("minCapacity") Integer minCapacity,
-            @Param("city") City city,
+            @Param("maxCapacity") int maxCapacity,
+            @Param("minCapacity") int minCapacity,
+            @Param("city") String city,
             Pageable pageable
     );
 

@@ -29,8 +29,17 @@ public class CommonUtil {
         return str1;
     }
 
+    /**
+     * Integer val 값이 null 인 경우 0으로 변환 후 반환
+     *
+     * @param val 검증할 Integer 래퍼클래스 정수 val
+     * @return null 이 아닌 정수 값
+     */
     public static int null2ZeroInt(Integer val) {
-
+        if (val == null) { // val 이 null 인경우 0 반환
+            return 0;
+        }
+        return val;
     }
 
     /**

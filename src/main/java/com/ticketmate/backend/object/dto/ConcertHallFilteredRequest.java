@@ -25,16 +25,20 @@ public class ConcertHallFilteredRequest {
 
     private Member member;
 
+    @Schema(defaultValue = "인스파")
     private String concertHallName; // 공연장 이름 검색어
 
     @Min(value = 0, message = "수용인원 범위에 음수는 입력될 수 없습니다.")
     @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
+    @Schema(defaultValue = "30000")
     private Integer maxCapacity; // 수용인원 범위 최댓값
 
     @Min(value = 0, message = "수용인원 범위에 음수는 입력될 수 없습니다.")
     @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
+    @Schema(defaultValue = "10000")
     private Integer minCapacity; // 수용인원 범위 최솟값
 
+    @Schema(defaultValue = "SEOUL")
     private City city; // 도시
 
     @Schema(defaultValue = "0")
