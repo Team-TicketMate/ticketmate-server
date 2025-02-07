@@ -2,6 +2,7 @@ package com.ticketmate.backend.controller;
 
 
 import com.ticketmate.backend.object.dto.ApiResponse;
+import com.ticketmate.backend.object.dto.SignInRequest;
 import com.ticketmate.backend.object.dto.SignUpRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -30,4 +31,21 @@ public interface AuthControllerDocs {
                     """
     )
     ResponseEntity<ApiResponse<Void>> signUp(SignUpRequest request);
+
+    @Operation(
+            summary = "로그인",
+            description = """
+                                        
+                    이 API는 인증이 필요하지 않습니다.
+
+                    ### 요청 파라미터
+                    - **username** (String): 사용자 이메일
+                    - **password** (String): 사용자 비밀번호
+                                
+                    ### 유의사항
+                    - 개발자의 편의를 위해 만들어진 API 입니다.
+
+                    """
+    )
+    ResponseEntity<ApiResponse<Void>> signIn(SignInRequest request);
 }
