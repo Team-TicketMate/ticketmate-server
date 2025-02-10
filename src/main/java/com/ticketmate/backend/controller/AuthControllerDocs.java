@@ -1,7 +1,6 @@
 package com.ticketmate.backend.controller;
 
 
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.SignInRequest;
 import com.ticketmate.backend.object.dto.SignUpRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +29,7 @@ public interface AuthControllerDocs {
 
                     """
     )
-    ResponseEntity<ApiResponse<Void>> signUp(SignUpRequest request);
+    ResponseEntity<Void> signUp(SignUpRequest request);
 
     @Operation(
             summary = "로그인",
@@ -47,5 +46,5 @@ public interface AuthControllerDocs {
 
                     """
     )
-    ResponseEntity<ApiResponse<Void>> signIn(SignInRequest request);
+    ResponseEntity<Void> signIn(SignInRequest request);
 }

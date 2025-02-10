@@ -25,7 +25,7 @@ public interface ConcertHallControllerDocs {
 
                     """
     )
-    ResponseEntity<ApiResponse<Void>> saveHallInfo(
+    ResponseEntity<Void> saveHallInfo(
             CustomUserDetails customUserDetails,
             ConcertHallInfoRequest request);
 
@@ -79,7 +79,7 @@ public interface ConcertHallControllerDocs {
                     - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
                     """
     )
-    ResponseEntity<ApiResponse<Page<ConcertHallFilteredResponse>>> filteredConcertHall(
+    ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
             CustomUserDetails customUserDetails,
             ConcertHallFilteredRequest request);
 }

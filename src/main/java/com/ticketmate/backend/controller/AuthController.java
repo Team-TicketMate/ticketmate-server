@@ -1,6 +1,5 @@
 package com.ticketmate.backend.controller;
 
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.SignInRequest;
 import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.service.MemberService;
@@ -27,15 +26,16 @@ public class AuthController implements AuthControllerDocs {
     @Override
     @PostMapping(value = "/api/auth/signup")
     @LogMonitoringInvocation
-    public ResponseEntity<ApiResponse<Void>> signUp(
+    public ResponseEntity<Void> signUp(
             @Valid @RequestBody SignUpRequest request) {
-        return ResponseEntity.ok(memberService.signUp(request));
+        memberService.signUp(request);
+        return ResponseEntity.ok().build();
     }
 
     @Override
     @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
-    public ResponseEntity<ApiResponse<Void>> signIn(SignInRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(null));
+    public ResponseEntity<Void> signIn(SignInRequest request) {
+        return ResponseEntity.ok().build();
     }
 }
