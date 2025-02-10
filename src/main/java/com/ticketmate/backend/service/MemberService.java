@@ -47,6 +47,7 @@ public class MemberService {
                 .role(Role.ROLE_USER)
                 .memberType(MemberType.CLIENT)
                 .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
+                .isFirstLogin(true)
                 .lastLoginTime(null)
                 .build()
         );
