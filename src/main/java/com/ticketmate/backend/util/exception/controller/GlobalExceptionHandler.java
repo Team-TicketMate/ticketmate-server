@@ -1,8 +1,9 @@
 package com.ticketmate.backend.util.exception.controller;
 
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
+import com.ticketmate.backend.util.exception.ErrorResponse;
+import com.ticketmate.backend.util.exception.ValidErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,8 @@ public class GlobalExceptionHandler {
      * 1) Validation 예외 처리
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<?>> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<ValidErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        log.error("ValidationException 발생: {}", e.getMessage(), e);
         // Validation 에러 정보를 담을 Map 생성
         Map<String, String> validation = new HashMap<>();
         for (FieldError fieldError : e.getFieldErrors()) {
@@ -31,11 +33,11 @@ public class GlobalExceptionHandler {
 
         // 공통 응답 DTO를 활용해 반환
         // ErrorCode.INVALID_REQUEST -> 400
-        ApiResponse<?> response = ApiResponse.errorWithValidation(
-                String.valueOf(HttpStatus.BAD_REQUEST.value()), // "400"
-                "잘못된 요청입니다.",
-                validation
-        );
+        ValidErrorResponse response = ValidErrorResponse.builder()
+                .errorCode(HttpStatus.BAD_REQUEST.toString())
+                .errorMessage("잘못된 요청입니다.")
+                .validation(validation)
+                .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -44,15 +46,15 @@ public class GlobalExceptionHandler {
      * 2) 커스텀 예외 처리
      */
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ApiResponse<?>> handleCustomException(CustomException e) {
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         log.error("CustomException 발생: {}", e.getMessage(), e);
 
         ErrorCode errorCode = e.getErrorCode();
-        // 공통 응답 DTO를 활용
-        ApiResponse<?> response = ApiResponse.error(
-                String.valueOf(errorCode.getStatus()),  // 예: "400", "404" 등
-                errorCode.getMessage()
-        );
+
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(errorCode)
+                .errorMessage(errorCode.getMessage())
+                .build();
 
         return ResponseEntity.status(errorCode.getStatus()).body(response);
     }
@@ -61,14 +63,14 @@ public class GlobalExceptionHandler {
      * 3) 그 외 예외 처리
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
         log.error("Unhandled Exception 발생: {}", e.getMessage(), e);
 
-        // 예상치 못한 예외 => 500
-        ApiResponse<?> response = ApiResponse.error(
-                String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
-                "서버에 문제가 발생했습니다."
-        );
+        // 예상치 못한 에러 => 500
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
+                .errorMessage(ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
+                .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }

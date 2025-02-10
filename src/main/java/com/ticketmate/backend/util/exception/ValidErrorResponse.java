@@ -1,5 +1,6 @@
 package com.ticketmate.backend.util.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,17 +13,12 @@ import java.util.Map;
  * "title" : "값을 입력해주세요"
  */
 @Getter
+@Builder
+@AllArgsConstructor
 public class ValidErrorResponse {
-    private final String code;
-    private final String message;
+    private final String errorCode;
+    private final String errorMessage;
     private final Map<String, String> validation;
-
-    @Builder
-    public ValidErrorResponse(String code, String message, Map<String, String> validation) {
-        this.code = code;
-        this.message = message;
-        this.validation = validation;
-    }
 
     public void addValidation(String field, String message) {
         this.validation.put(field, message);

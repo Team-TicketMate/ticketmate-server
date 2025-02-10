@@ -3,7 +3,6 @@ package com.ticketmate.backend.service;
 import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.Role;
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.object.postgres.Member;
 import com.ticketmate.backend.repository.postgres.MemberRepository;
@@ -30,7 +29,7 @@ public class MemberService {
      * @return 없음
      */
     @Transactional
-    public ApiResponse<Void> signUp(SignUpRequest request) {
+    public void signUp(SignUpRequest request) {
 
         // 사용자 이메일 검증 (중복 이메일 사용 불가)
         if (memberRepository.existsByUsername(request.getUsername())) {
@@ -52,8 +51,6 @@ public class MemberService {
                 .build()
         );
         log.debug("회원가입 성공: username={}", request.getUsername());
-
-        return ApiResponse.success(null);
     }
 
 
