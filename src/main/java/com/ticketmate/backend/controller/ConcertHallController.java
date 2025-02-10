@@ -26,17 +26,18 @@ public class ConcertHallController implements ConcertHallControllerDocs{
     @Override
     @PostMapping(value = "/admin/concert-hall/save")
     @LogMonitoringInvocation
-    public ResponseEntity<ApiResponse<Void>> saveHallInfo(
+    public ResponseEntity<Void> saveHallInfo(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody ConcertHallInfoRequest request) {
         request.setMember(customUserDetails.getMember());
-        return ResponseEntity.ok(concertHallService.saveHallInfo(request));
+        concertHallService.saveHallInfo(request);
+        return ResponseEntity.ok().build();
     }
 
     @Override
     @PostMapping(value = "/api/concert-hall/filtered")
     @LogMonitoringInvocation
-    public ResponseEntity<ApiResponse<Page<ConcertHallFilteredResponse>>> filteredConcertHall(
+    public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody ConcertHallFilteredRequest request) {
         return ResponseEntity.ok(concertHallService.filteredConcertHall(request));

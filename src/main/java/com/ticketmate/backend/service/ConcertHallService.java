@@ -1,13 +1,11 @@
 package com.ticketmate.backend.service;
 
 import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.dto.ApiResponse;
 import com.ticketmate.backend.object.dto.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.postgres.ConcertHall;
 import com.ticketmate.backend.repository.postgres.ConcertHallRepository;
-import com.ticketmate.backend.util.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ticketmate.backend.util.CommonUtil.null2ZeroInt;
-import static com.ticketmate.backend.util.CommonUtil.nvl;
+import static com.ticketmate.backend.util.CommonUtil.*;
 
 @Service
 @Slf4j
@@ -34,7 +31,7 @@ public class ConcertHallService {
      * 관리자만 저장 가능합니다
      */
     @Transactional
-    public ApiResponse<Void> saveHallInfo(ConcertHallInfoRequest request) {
+    public void saveHallInfo(ConcertHallInfoRequest request) {
 
         // 중복된 공연장이름 검증
         if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
@@ -53,7 +50,6 @@ public class ConcertHallService {
                 .city(city)
                 .concertHallUrl(request.getConcertHallUrl())
                 .build());
-        return ApiResponse.success(null);
     }
 
     /**
@@ -71,7 +67,7 @@ public class ConcertHallService {
      *                sortDirection 정렬 방향 (기본: DESC)
      */
     @Transactional(readOnly = true)
-    public ApiResponse<Page<ConcertHallFilteredResponse>> filteredConcertHall(ConcertHallFilteredRequest request) {
+    public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
 
         // String, Integer 값 검증
         String concertHallName = nvl(request.getConcertHallName(), "");
@@ -100,12 +96,9 @@ public class ConcertHallService {
                         pageable);
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        Page<ConcertHallFilteredResponse> dtoPage = concertHallPage.map(
-                ch -> CommonUtil.convertEntityToDto(ch, ConcertHallFilteredResponse.class)
+        return concertHallPage.map(
+                ch -> convertEntityToDto(ch, ConcertHallFilteredResponse.class)
         );
-
-        // ApiResponse는 프로젝트에서 응답 포맷을 위한 공통 Wrapper로 가정
-        return ApiResponse.success(dtoPage);
     }
 
     /**
