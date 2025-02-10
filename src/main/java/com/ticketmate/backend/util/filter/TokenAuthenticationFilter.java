@@ -54,11 +54,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             String bearerToken = request.getHeader("Authorization");
             // 토큰 추출: 요청 타입에 따라 헤더 또는 파라미터에서 토큰 추출
             if (isApiRequest) {
+                log.debug("일반 API 요청입니다.");
                 // API 요청 : Authorization 헤더에서 "Bearer " 토큰 추출
                 if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
                     token = bearerToken.substring(7).trim(); // "Bearer " 제거
                 }
             } else if (isAdminPageRequest) {
+                log.debug("관리자 페이지 요청입니다.");
                 // 관리자 페이지 요청: Authorization 헤더 우선 확인
                 if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
                     token = bearerToken.substring(7).trim();
@@ -78,6 +80,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
                 // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트
                 if (isAdminPageRequest && !hasAdminRole(authentication)) {
+                    log.error("관리자 권한이 없습니다. 로그인페이지로 리다이렉트합니다.");
                     response.sendRedirect("/login");
                     return;
                 }
@@ -91,13 +94,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (isApiRequest) {
                 // 토큰 없음
                 if (token == null) {
+                    log.error("토큰이 존재하지 않습니다.");
                     sendErrorResponse(response, ErrorCode.MISSING_AUTH_TOKEN);
                 } else { // 유효하지 않은 토큰
+                    log.error("토큰이 유효하지 않습니다.");
                     sendErrorResponse(response, ErrorCode.INVALID_ACCESS_TOKEN);
                 }
                 return; // 필터 체인 진행하지 않음
             } else if (isAdminPageRequest) {
                 // 관리자 페이지: 로그인 페이지로 리다이렉트
+                log.error("관리자 페이지 요청 시, 토큰이 없거나 유효하지 않습니다.");
                 response.sendRedirect("/login");
                 return;
             }
