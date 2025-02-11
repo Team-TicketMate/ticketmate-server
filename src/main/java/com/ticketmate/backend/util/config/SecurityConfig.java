@@ -52,6 +52,13 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        LoginFilter loginFilter = new LoginFilter(jwtUtil,
+                authenticationManager(authenticationConfiguration),
+                redisTemplate,
+                memberRepository);
+        loginFilter.setFilterProcessesUrl("/api/auth/sign-in");
+
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -76,12 +83,7 @@ public class SecurityConfig {
                         new TokenAuthenticationFilter(jwtUtil, customUserDetailsService),
                         UsernamePasswordAuthenticationFilter.class
                 )
-                .addFilterAt(
-                        new LoginFilter(jwtUtil,
-                                authenticationManager(authenticationConfiguration),
-                                redisTemplate,
-                                memberRepository),
-                        UsernamePasswordAuthenticationFilter.class
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class
                 )
                 .build();
     }
