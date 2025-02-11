@@ -1,13 +1,12 @@
 package com.ticketmate.backend.controller;
 
-import com.ticketmate.backend.object.dto.ConcertHallFilteredRequest;
-import com.ticketmate.backend.object.dto.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.dto.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.dto.CustomUserDetails;
 import com.ticketmate.backend.service.ConcertHallService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,21 +16,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/concert-hall")
+@RequestMapping("/admin")
 @Tag(
-        name = "공연장 관련 API",
-        description = "공연장 관련 API 제공"
+        name = "관리자 API",
+        description = "관리자 페이지 관련 API 제공"
 )
-public class ConcertHallController implements ConcertHallControllerDocs{
+public class AdminController implements AdminControllerDocs{
 
     private final ConcertHallService concertHallService;
 
     @Override
-    @PostMapping(value = "/filtered")
+    @PostMapping(value = "/concert-hall/save")
     @LogMonitoringInvocation
-    public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
+    public ResponseEntity<Void> saveHallInfo(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody ConcertHallFilteredRequest request) {
-        return ResponseEntity.ok(concertHallService.filteredConcertHall(request));
+            @Valid @RequestBody ConcertHallInfoRequest request) {
+        request.setMember(customUserDetails.getMember());
+        concertHallService.saveHallInfo(request);
+        return ResponseEntity.ok().build();
     }
 }

@@ -11,10 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/auth")
 @Tag(
         name = "인증 관련 API",
         description = "회원 인증 관련 API 제공"
@@ -24,7 +26,7 @@ public class AuthController implements AuthControllerDocs {
     private final MemberService memberService;
 
     @Override
-    @PostMapping(value = "/api/auth/signup")
+    @PostMapping(value = "/sign-up")
     @LogMonitoringInvocation
     public ResponseEntity<Void> signUp(
             @Valid @RequestBody SignUpRequest request) {
@@ -33,7 +35,7 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @Override
-    @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/sign-in", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Void> signIn(SignInRequest request) {
         return ResponseEntity.ok().build();
