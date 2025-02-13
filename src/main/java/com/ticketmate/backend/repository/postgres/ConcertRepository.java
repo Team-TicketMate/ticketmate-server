@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface ConcertRepository extends JpaRepository<Concert, UUID> {
 
+    Boolean existsByConcertName(String concertName);
 }
