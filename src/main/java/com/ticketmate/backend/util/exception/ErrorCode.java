@@ -34,11 +34,21 @@ public enum ErrorCode {
 
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."),
 
+    // CONCERT
+
+    DUPLICATE_CONCERT_NAME(HttpStatus.BAD_REQUEST, "중복된 공연 제목입니다."),
+
     // CONCERT_HALL
+
+    CONCERT_HALL_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 공연장 정보를 찾을 수 없습니다."),
 
     DUPLICATE_CONCERT_HALL_NAME(HttpStatus.BAD_REQUEST, "중복된 공연장 이름입니다."),
 
-    CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다.");
+    CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다."),
+
+    // FILE IO
+
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생했습니다.");
 
 
     private final HttpStatus status;
