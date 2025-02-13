@@ -7,8 +7,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -34,23 +32,18 @@ public class Concert extends BasePostgresEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     private ConcertHall concertHall;
 
+    // 티켓 선구매 오픈일
+    private LocalDateTime ticketPreOpenDate;
+
     // 티켓오픈일
     private LocalDateTime ticketOpenDate;
 
-    // 좌석 수
-    private int seatCount;
-
     // 공연 시간 (분 단위)
-    private int duration;
-
-    // 좌석 가격
-    @ElementCollection(fetch = FetchType.LAZY)
-    @Builder.Default
-    private Map<String, Integer> seatPrice = new HashMap<>();
+    private Integer duration;
 
     // 공연 회차 (기본 1회차)
     @Builder.Default
-    private int session = 1;
+    private Integer session = 1;
 
     // 콘서트 썸네일 이미지 url
     private String concertThumbnailUrl;
