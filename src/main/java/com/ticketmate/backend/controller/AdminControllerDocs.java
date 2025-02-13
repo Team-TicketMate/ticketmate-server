@@ -1,6 +1,7 @@
 package com.ticketmate.backend.controller;
 
 import com.ticketmate.backend.object.dto.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,10 @@ public interface AdminControllerDocs {
                     이 API는 관리자 인증이 필요합니다
 
                     ### 요청 파라미터
-                    - **concertHallName** (String): 공연장 명 (중복 불가)
-                    - **capacity** (Integer): 수용인원
-                    - **address** (String): 공연장 주소
-                    - **concertHallUrl** (String): 공연장 웹사이트 URL
+                    - **concertHallName** (String): 공연장 명 (중복 불가) [필수]
+                    - **capacity** (Integer): 수용인원 [필수]
+                    - **address** (String): 공연장 주소 [필수]
+                    - **concertHallUrl** (String): 공연장 웹사이트 URL [필수]
                                 
                     ### 유의사항
                     - `concertHallName`은 고유해야 합니다.
@@ -28,4 +29,40 @@ public interface AdminControllerDocs {
     ResponseEntity<Void> saveHallInfo(
             CustomUserDetails customUserDetails,
             ConcertHallInfoRequest request);
+
+    @Operation(
+            summary = "공연 정보 저장",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **concertName** (String): 공연 제목 (중복 불가) [필수]
+                    - **concertHallName** (String): 공연장 명 [필수]
+                    - **ticketPreOpenDate** (LocalDateTime): 선구매 오픈일 [선택]
+                    - **ticketOpenDate** (LocalDateTime): 티켓 구매 오픈일 [필수]
+                    - **duration** (Integer): 공연 시간 (분 단위) [필수]
+                    - **session** (Integer): 공연 회차 [필수]
+                    - **concertThumbNailUrl** (String): 콘서트 썸네일 URL [필수]
+                    - **ticketReservationSite** (enum): 예매 사이트 [필수]
+                                        
+                    ### TicketReservationSite
+                    INTERPARK_TICKET ("인터파크 티켓")
+                                    
+                    YES24_TICKET ("예스24 티켓")
+                                    
+                    TICKET_LINK ("티켓 링크")
+                                    
+                    MELON_TICKET ("멜론 티켓")
+                                
+                    ### 유의사항
+                    - `concertName`은 고유해야 합니다.
+                    - 단일 회차 공연의 경우 "1"을 입력하면 됩니다.
+                    - 선예매 오픈일, 티켓 오픈일은 LocalDateTime으로 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 입력해야합니다
+
+                    """
+    )
+    ResponseEntity<Void> saveConcertInfo(
+            CustomUserDetails customUserDetails,
+            ConcertInfoRequest request);
 }
