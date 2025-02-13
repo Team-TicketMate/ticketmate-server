@@ -1,5 +1,7 @@
 package com.ticketmate.backend.service;
 
+import com.ticketmate.backend.object.dto.ConcertFilteredRequest;
+import com.ticketmate.backend.object.dto.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.ConcertInfoRequest;
 import com.ticketmate.backend.object.postgres.Concert;
 import com.ticketmate.backend.object.postgres.ConcertHall;
@@ -9,6 +11,7 @@ import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class ConcertService {
      *
      * @param request concertName 공연 제목
      *                concertHallName 공연장 이름
+     *                concertType 공연 카테고리
      *                ticketPreOpenDate 선구매 오픈일
      *                ticketOpenDate 티켓 구매 오픈일
      *                duration 공연 시간 (분)
@@ -56,6 +60,7 @@ public class ConcertService {
         concertRepository.save(Concert.builder()
                 .concertName(request.getConcertName())
                 .concertHall(concertHall)
+                .concertType(request.getConcertType())
                 .ticketPreOpenDate(request.getTicketPreOpenDate())
                 .ticketOpenDate(request.getTicketOpenDate())
                 .duration(request.getDuration())
@@ -64,5 +69,16 @@ public class ConcertService {
                 .ticketReservationSite(request.getTicketReservationSite())
                 .build());
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    }
+
+    /**
+     * 콘서트 필터링 로직
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(readOnly = true)
+    public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
+        return null;
     }
 }

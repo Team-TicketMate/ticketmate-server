@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.postgres.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,6 +30,10 @@ public class ConcertInfoRequest {
     @NotBlank(message = "공연장 정보를 입력하세요.")
     @Schema(defaultValue = "인스파이어 아레나")
     private String concertHallName; // 공연장 이름
+
+    @NotNull(message = "공연 카테고리를 입력하세요.")
+    @Schema(defaultValue = "CONCERT")
+    private ConcertType concertType; // 공연 카테고리
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Schema(defaultValue = "2025-02-11T20:00")

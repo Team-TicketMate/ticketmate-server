@@ -39,6 +39,7 @@ public interface AdminControllerDocs {
                     ### 요청 파라미터
                     - **concertName** (String): 공연 제목 (중복 불가) [필수]
                     - **concertHallName** (String): 공연장 명 [필수]
+                    - **concertType** (Enum): 공연 카테고리 [필수]
                     - **ticketPreOpenDate** (LocalDateTime): 선구매 오픈일 [선택]
                     - **ticketOpenDate** (LocalDateTime): 티켓 구매 오픈일 [필수]
                     - **duration** (Integer): 공연 시간 (분 단위) [필수]
@@ -54,6 +55,21 @@ public interface AdminControllerDocs {
                     TICKET_LINK ("티켓 링크")
                                     
                     MELON_TICKET ("멜론 티켓")
+                                        
+                    ### ConcertType
+                    CONCERT ("콘서트")
+                                    
+                    MUSICAL ("뮤지컬")
+                                    
+                    SPORTS ("스포츠")
+                                    
+                    CLASSIC ("클래식")
+                                    
+                    EXHIBITIONS ("전시")
+                                    
+                    OPERA ("오페라")
+
+                    ETC ("기타")
                                 
                     ### 유의사항
                     - `concertName`은 고유해야 합니다.

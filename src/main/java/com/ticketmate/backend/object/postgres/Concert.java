@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.postgres;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Concert extends BasePostgresEntity{
+public class Concert extends BasePostgresEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -31,6 +32,11 @@ public class Concert extends BasePostgresEntity{
     // 공연장
     @ManyToOne(fetch = FetchType.LAZY)
     private ConcertHall concertHall;
+
+    // 공연 카테고리 (콘서트, 뮤지컬...)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    ConcertType concertType;
 
     // 티켓 선구매 오픈일
     private LocalDateTime ticketPreOpenDate;
