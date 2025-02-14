@@ -5,6 +5,8 @@ import com.ticketmate.backend.object.dto.SignUpRequest;
 import com.ticketmate.backend.service.MemberService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -38,6 +40,14 @@ public class AuthController implements AuthControllerDocs {
     @PostMapping(value = "/sign-in", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Void> signIn(SignInRequest request) {
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping(value = "/reissue")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
+        memberService.reissue(request, response);
         return ResponseEntity.ok().build();
     }
 }

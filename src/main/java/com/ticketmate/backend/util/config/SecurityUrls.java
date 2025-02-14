@@ -15,6 +15,7 @@ public class SecurityUrls {
             // API
             "/api/auth/sign-up", // 회원가입
             "/api/auth/sign-in", // 로그인
+            "/api/auth/reissue", // accessToken 재발급
 
             // 썸네일 파일 TODO: 추후 url 매핑 관련 규칙 수정
             "/concert/thumbnail/**", // 콘서트 썸네일 파일 경로
