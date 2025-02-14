@@ -38,6 +38,8 @@ public enum ErrorCode {
 
     DUPLICATE_CONCERT_NAME(HttpStatus.BAD_REQUEST, "중복된 공연 제목입니다."),
 
+    INVALID_RANGE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 범위가 입력되었습니다."),
+
     // CONCERT_HALL
 
     CONCERT_HALL_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 공연장 정보를 찾을 수 없습니다."),

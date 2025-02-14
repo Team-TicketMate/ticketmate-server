@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface ConcertHallControllerDocs {
 
-
-
     @Operation(
             summary = "공연장 정보 필터링",
             description = """
