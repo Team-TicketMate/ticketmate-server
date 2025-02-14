@@ -7,9 +7,9 @@ import com.ticketmate.backend.object.postgres.Concert;
 import com.ticketmate.backend.object.postgres.ConcertHall;
 import com.ticketmate.backend.repository.postgres.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.ConcertRepository;
-import com.ticketmate.backend.util.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
+import com.ticketmate.backend.util.common.EntityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,11 +19,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.ticketmate.backend.util.CommonUtil.null2ZeroInt;
-import static com.ticketmate.backend.util.CommonUtil.nvl;
+import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
 @Slf4j
@@ -33,6 +30,7 @@ public class ConcertService {
     private final ConcertRepository concertRepository;
     private final ConcertHallRepository concertHallRepository;
     private final FileService fileService;
+    private final EntityMapper mapper;
 
     /**
      * 콘서트 정보 저장
@@ -151,12 +149,6 @@ public class ConcertService {
         );
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertPage.map(c -> {
-                    // Convert 엔티티에서 concertHall.concertHallName을 DTO의 concertHallName으로 매핑
-                    Map<String, String> nestedMappings = new HashMap<>();
-                    nestedMappings.put("concertHallName", "concertHall.concertHallName");
-                    return CommonUtil.convertEntityToDto(c, ConcertFilteredResponse.class, nestedMappings);
-                }
-        );
+        return concertPage.map(mapper::toConcertFilteredResponse);
     }
 }

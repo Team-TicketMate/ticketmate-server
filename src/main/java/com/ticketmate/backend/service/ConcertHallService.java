@@ -6,6 +6,7 @@ import com.ticketmate.backend.object.dto.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.postgres.ConcertHall;
 import com.ticketmate.backend.repository.postgres.ConcertHallRepository;
+import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ticketmate.backend.util.CommonUtil.*;
+import static com.ticketmate.backend.util.common.CommonUtil.*;
 
 @Service
 @Slf4j
@@ -25,6 +26,7 @@ import static com.ticketmate.backend.util.CommonUtil.*;
 public class ConcertHallService {
 
     private final ConcertHallRepository concertHallRepository;
+    private final EntityMapper mapper;
 
     /**
      * 공연장 정보 저장
@@ -97,9 +99,7 @@ public class ConcertHallService {
                         pageable);
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertHallPage.map(
-                ch -> convertEntityToDto(ch, ConcertHallFilteredResponse.class)
-        );
+        return concertHallPage.map(mapper::toConcertHallFilteredResponse);
     }
 
     /**
