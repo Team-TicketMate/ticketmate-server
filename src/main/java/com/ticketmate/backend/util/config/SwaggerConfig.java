@@ -18,8 +18,8 @@ import java.util.List;
         info = @Info(
                 title = "🎫 티켓메이트 : TICKET-MATE 🎫",
                 description = """
-                        ### 🌐 티켓메이트 웹사이트 🌐 : ticketmate.co.kr
-                        [**웹사이트 바로가기**](http://34.22.77.73:8087) 
+                        ### 🌐 티켓메이트 웹사이트 🌐 : ticketmate.site
+                        [**웹사이트 바로가기**](https://ticketmate.site)
 
                         ### 💻 **GitHub 저장소**
                         - **[백엔드 소스코드](https://github.com/Team-TicketMate/ticketmate-server)**
@@ -28,8 +28,8 @@ import java.util.List;
                 version = "1.0v"
         ),
         servers = {
-                @Server(url = "http://34.22.77.73:8087", description = "메인 서버"),
-                @Server(url = "http://34.22.77.73:8088", description = "테스트 서버"),
+                @Server(url = "https://ticketmate.site", description = "메인 서버"),
+                @Server(url = "https://test.ticketmate.site", description = "테스트 서버"),
                 @Server(url = "http://localhost:8080", description = "로컬 서버")
         }
 )
@@ -56,10 +56,10 @@ public class SwaggerConfig {
                                         .url("http://localhost:8080")
                                         .description("로컬 서버"),
                                 new io.swagger.v3.oas.models.servers.Server()
-                                        .url("http://34.22.77.73:8088")
+                                        .url("https://test.ticketmate.site")
                                         .description("테스트 서버"),
                                 new io.swagger.v3.oas.models.servers.Server()
-                                        .url("http://34.22.77.73:8087")
+                                        .url("https://ticketmate.site")
                                         .description("메인 서버")
                         )
                 );
