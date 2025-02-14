@@ -98,7 +98,7 @@ jobs:
               -e TZ=Asia/Seoul \
               -e "SPRING_PROFILES_ACTIVE=prod" \
               -v /etc/localtime:/etc/localtime:ro \
-              -v /home/***/Desktop/projects/ticket-mate:/mnt/ticket-mate \
+              -v /home/ticketmate98/Desktop/projects/ticket-mate:/mnt/ticket-mate \
               ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
             
             # <none> 태그로 남은 이미지 정리
