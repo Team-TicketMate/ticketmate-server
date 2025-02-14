@@ -44,12 +44,12 @@ public class ConcertHallFilteredRequest {
     @Schema(defaultValue = "0")
     @Min(value = 0, message = "페이지 번호 인덱스에 음수는 입력될 수 없습니다.")
     @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
-    private int pageNumber; // 페이지 번호
+    private Integer pageNumber; // 페이지 번호
 
     @Schema(defaultValue = "30")
     @Min(value = 0, message = "페이지 사이즈에 음수는 입력될 수 없습니다.")
     @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
-    private int pageSize; // 페이지 사이즈
+    private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
     @Pattern(regexp = "^(created_date|capacity)")
