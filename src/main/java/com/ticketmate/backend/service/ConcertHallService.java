@@ -54,7 +54,8 @@ public class ConcertHallService {
 
     /**
      * 공연장 정보 필터링 로직
-     * 필터링 조건: 공연장 이름 검색어, 수용 인원(범위), 도시
+     *
+     * 필터링 조건: 공연장 이름 (검색어), 수용 인원(범위), 도시
      * 정렬 조건: created_date, capacity
      *
      * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)

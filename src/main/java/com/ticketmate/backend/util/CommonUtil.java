@@ -2,6 +2,10 @@ package com.ticketmate.backend.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
+
+import java.util.Map;
 
 /**
  * 공통 메서드
@@ -58,6 +62,42 @@ public class CommonUtil {
         try {
             D dto = dtoClass.getDeclaredConstructor().newInstance();
             BeanUtils.copyProperties(entity, dto);
+            return dto;
+        } catch (Exception e) {
+            log.error("Entity를 DTO로 변환하는 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("Entity를 DTO로 변환하는 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    /**
+     * Entity 객체를 지정된 DTO 타입으로 변환합니다.
+     * 기본 프로퍼티 복사 후, 추가로 nested 매핑 정보를 적용하여 DTO 필드에 값을 주입합니다.
+     *
+     * @param entity         변환할 Entity 객체 (null이면 null 반환)
+     * @param dtoClass       DTO 클래스 타입
+     * @param nestedMappings Map의 Key는 DTO 필드 이름, value는 Entity의 nested property 경로
+     * @param <D>            DTO 타입
+     * @param <E>            Entity 타입
+     * @return Entity의 프로퍼티를 복사한 DTO 객체
+     */
+    public static <D, E> D convertEntityToDto(E entity, Class<D> dtoClass, Map<String, String> nestedMappings) {
+        if (entity == null) {
+            return null;
+        }
+        try {
+            // 기본 복사: 필드명이 동일한 프로퍼티를 복사합니다.
+            D dto = dtoClass.getDeclaredConstructor().newInstance();
+            BeanUtils.copyProperties(entity, dto);
+
+            // BeanWrapper를 이용해 동적으로 nested 프로퍼티를 매핑합니다.
+            BeanWrapper sourceWrapper = new BeanWrapperImpl(entity);
+            BeanWrapper targetWrapper = new BeanWrapperImpl(dto);
+            if (nestedMappings != null) {
+                for (Map.Entry<String, String> entry : nestedMappings.entrySet()) {
+                    Object value = sourceWrapper.getPropertyValue(entry.getValue());
+                    targetWrapper.setPropertyValue(entry.getKey(), value);
+                }
+            }
             return dto;
         } catch (Exception e) {
             log.error("Entity를 DTO로 변환하는 중 오류가 발생했습니다.", e);
