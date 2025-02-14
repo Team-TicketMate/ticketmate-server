@@ -43,8 +43,9 @@ public class ConcertService {
      *                ticketPreOpenDate 선구매 오픈일
      *                ticketOpenDate 티켓 구매 오픈일
      *                duration 공연 시간 (분)
-     *                seatPrices 좌석 가격
      *                session 공연 회차
+     *                concertThumbnailUrl 공연 썸네일
+     *                ticketReservationSite 티켓 예매처 사이트
      */
     @Transactional
     public void saveConcertInfo(ConcertInfoRequest request) {
