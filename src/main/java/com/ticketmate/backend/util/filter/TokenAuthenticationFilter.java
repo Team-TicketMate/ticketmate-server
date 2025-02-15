@@ -1,7 +1,7 @@
 package com.ticketmate.backend.util.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.service.CustomUserDetailsService;
+import com.ticketmate.backend.service.member.CustomUserDetailsService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.config.SecurityUrls;
 import com.ticketmate.backend.util.exception.ErrorCode;
