@@ -1,8 +1,8 @@
 package com.ticketmate.backend.util.filter;
 
-import com.ticketmate.backend.object.dto.CustomUserDetails;
-import com.ticketmate.backend.object.postgres.Member;
-import com.ticketmate.backend.repository.postgres.MemberRepository;
+import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.postgres.Member.Member;
+import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
