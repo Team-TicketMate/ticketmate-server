@@ -1,7 +1,7 @@
 package com.ticketmate.backend.util;
 
-import com.ticketmate.backend.object.dto.CustomUserDetails;
-import com.ticketmate.backend.service.CustomUserDetailsService;
+import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.service.member.CustomUserDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

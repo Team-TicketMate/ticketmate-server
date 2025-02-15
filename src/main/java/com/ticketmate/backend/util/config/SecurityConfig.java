@@ -1,7 +1,7 @@
 package com.ticketmate.backend.util.config;
 
-import com.ticketmate.backend.repository.postgres.MemberRepository;
-import com.ticketmate.backend.service.CustomUserDetailsService;
+import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.service.member.CustomUserDetailsService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.filter.LoginFilter;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
