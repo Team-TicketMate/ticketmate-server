@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.postgres.portfolio;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
 import jakarta.persistence.*;
@@ -32,6 +33,9 @@ public class Portfolio extends BasePostgresEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     private Member member;
+
+    @Enumerated(EnumType.STRING)
+    private PortfolioType portfolioType;
 
     public void addImg(PortfolioImg img) {
         this.getImgList().add(img);
