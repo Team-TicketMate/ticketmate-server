@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.portfolio;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.dto.portfolio.request.PortfolioRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
@@ -52,6 +53,7 @@ public class PortfolioService {
         Portfolio portfolio = Portfolio.builder()
                 .member(member)
                 .publicRelations(request.getPublicRelations())
+                .portfolioType(PortfolioType.UNDER_REVIEW)
                 .build();
 
         /**
