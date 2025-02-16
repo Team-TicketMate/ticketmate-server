@@ -54,8 +54,22 @@ public enum ErrorCode {
 
     // FILE IO
 
-    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생했습니다.");
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생했습니다."),
 
+    // S3
+
+    S3_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드 중 오류가 발생했습니다."),
+
+    WRONG_INPUT_IMAGE(HttpStatus.BAD_REQUEST, "파일의 이름이 잘못되었습니다."),
+
+    WRONG_IMAGE_FORMAT(HttpStatus.BAD_REQUEST, "이미지의 확장자가 잘못되었습니다. 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다"),
+
+
+    // PORTFOLIO
+
+    PORTFOLIO_IMG_BLACK(HttpStatus.BAD_REQUEST, "자신을 소개할 수 있는 포트폴리오 이미지를 첨부해주세요."),
+
+    PORTFOLIO_IMG_MAX_SIZE(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다.");
 
     private final HttpStatus status;
     private final String message;
