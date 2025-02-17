@@ -42,10 +42,6 @@ public class PortfolioService {
      */
     @Transactional
     public UUID uploadPortfolio(PortfolioRequest request, Member member){
-
-        if (request.getPortfolioImg() == null || request.getPortfolioImg().isEmpty()) {
-            throw new CustomException(ErrorCode.PORTFOLIO_IMG_BLACK);
-        }
         if (request.getPortfolioImg().size() > MAX_IMAGE) {
             throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_SIZE);
         }
@@ -59,15 +55,17 @@ public class PortfolioService {
         /**
          * Cascade 옵션을 활용해서 부모 엔티티만 Save 해서 update 쿼리 최소화
          */
-        for (MultipartFile imgFile : request.getPortfolioImg()) {
-            String fileName = s3Upload(imgFile, portfolio);
+        if (request.getPortfolioImg().size() > 0) {
+            for (MultipartFile imgFile : request.getPortfolioImg()) {
+                String fileName = s3Upload(imgFile, portfolio);
 
-            PortfolioImg portfolioImg = PortfolioImg.builder()
-                    .imgName(fileName)
-                    .portfolio(portfolio)
-                    .build();
+                PortfolioImg portfolioImg = PortfolioImg.builder()
+                        .imgName(fileName)
+                        .portfolio(portfolio)
+                        .build();
 
-            portfolio.addImg(portfolioImg);
+                portfolio.addImg(portfolioImg);
+            }
         }
 
         portfolioRepository.save(portfolio);
