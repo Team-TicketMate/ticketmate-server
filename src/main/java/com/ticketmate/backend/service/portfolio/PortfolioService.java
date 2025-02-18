@@ -5,7 +5,6 @@ import com.ticketmate.backend.object.dto.portfolio.request.PortfolioRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
-import com.ticketmate.backend.repository.postgres.portfolio.PortfolioImgRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.service.s3.S3Service;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -25,7 +24,6 @@ import java.util.UUID;
 @Slf4j
 public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
-    private final PortfolioImgRepository portfolioImgRepository;
     private final S3Service s3Service;
     private static final Integer MAX_IMAGE_COUNT = 20;
 
@@ -62,7 +60,6 @@ public class PortfolioService {
                 portfolioImgList.add(portfolioImg);
                 portfolio.addImg(portfolioImg);
             }
-            portfolioImgRepository.saveAll(portfolioImgList);
 
             log.debug("총 저장된 이미지 파일 갯수 : {}", portfolioImgList.size());
         }
