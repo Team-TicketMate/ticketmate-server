@@ -60,7 +60,7 @@ public enum ErrorCode {
 
     S3_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드 중 오류가 발생했습니다."),
 
-    WRONG_INPUT_IMAGE(HttpStatus.BAD_REQUEST, "파일의 이름이 잘못되었습니다."),
+    INVALID_INPUT_IMAGE(HttpStatus.BAD_REQUEST, "파일의 이름이 잘못되었습니다."),
 
     WRONG_IMAGE_FORMAT(HttpStatus.BAD_REQUEST, "이미지의 확장자가 잘못되었습니다. 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다"),
 

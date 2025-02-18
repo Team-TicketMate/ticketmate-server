@@ -127,7 +127,7 @@ public class PortfolioService {
      */
     private void getFileExtension(String fileName) {
         if (fileName.length() == 0) {
-            throw new CustomException(ErrorCode.WRONG_INPUT_IMAGE);
+            throw new CustomException(ErrorCode.INVALID_INPUT_IMAGE);
         }
         ArrayList<String> fileValidate = new ArrayList<>();
         fileValidate.add(".jpg");
