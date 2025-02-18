@@ -1,12 +1,13 @@
 package com.ticketmate.backend.controller.concert;
 
 import com.ticketmate.backend.controller.concert.docs.ConcertControllerDocs;
+import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
 import com.ticketmate.backend.service.concert.ConcertService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class ConcertController implements ConcertControllerDocs {
     @LogMonitoringInvocation
     public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestBody ConcertFilteredRequest request) {
+            @Valid @RequestBody ConcertFilteredRequest request) {
         return ResponseEntity.ok(concertService.filteredConcert(request));
     }
 }
