@@ -32,7 +32,7 @@ public class PortfolioService {
     private String bucket;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String domain;
-    private static final Integer MAX_IMAGE = 20;
+    private static final Integer MAX_IMAGE_COUNT = 20;
 
     /**
      * 포트폴리오 업로드
@@ -42,7 +42,7 @@ public class PortfolioService {
      */
     @Transactional
     public UUID uploadPortfolio(PortfolioRequest request, Member member){
-        if (request.getPortfolioImg().size() > MAX_IMAGE) {
+        if (request.getPortfolioImg().size() > MAX_IMAGE_COUNT) {
             throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_SIZE);
         }
 
