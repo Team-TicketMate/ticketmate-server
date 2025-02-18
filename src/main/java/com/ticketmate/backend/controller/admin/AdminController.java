@@ -43,7 +43,7 @@ public class AdminController implements AdminControllerDocs {
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveConcertInfo(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @ModelAttribute ConcertInfoRequest request) {
+            @Valid @ModelAttribute ConcertInfoRequest request) {
         request.setMember(customUserDetails.getMember());
         concertService.saveConcertInfo(request);
         return ResponseEntity.ok().build();
