@@ -75,19 +75,19 @@ public class S3Service {
      */
     private void validateImgFileExtension(String fileName) {
         if (fileName.length() == 0) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_IMAGE);
+            throw new CustomException(ErrorCode.INVALID_INPUT_IMG);
         }
 
         int lastDot = fileName.lastIndexOf('.');
         if (lastDot < 0) {
-            throw new CustomException(ErrorCode.INVALID_INPUT_IMAGE);
+            throw new CustomException(ErrorCode.INVALID_INPUT_IMG);
         }
 
         String extension = fileName.substring(lastDot);
 
         // 유효 확장자 목록에 없으면 예외
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new CustomException(ErrorCode.INVALID_IMAGE_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_IMG_FORMAT);
         }
     }
 }

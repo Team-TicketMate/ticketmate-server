@@ -25,7 +25,7 @@ import java.util.UUID;
 public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final S3Service s3Service;
-    private static final Integer MAX_IMAGE_COUNT = 20;
+    private static final Integer MAX_IMG_COUNT = 20;
 
     /**
      * 포트폴리오 업로드
@@ -35,7 +35,7 @@ public class PortfolioService {
      */
     @Transactional
     public UUID uploadPortfolio(PortfolioRequest request, Member member){
-        if (request.getPortfolioImgs().size() > MAX_IMAGE_COUNT) {
+        if (request.getPortfolioImgs().size() > MAX_IMG_COUNT) {
             throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_COUNT_EXCEEDED);
         }
 
@@ -50,7 +50,7 @@ public class PortfolioService {
         if (request.getPortfolioImgs().size() > 0) {
             List<PortfolioImg> portfolioImgList = new ArrayList<>();
             for (MultipartFile imgFile : request.getPortfolioImgs()) {
-                String fileName = uploadPortfolioImage(imgFile, portfolio);
+                String fileName = uploadPortfolioImg(imgFile, portfolio);
 
                 PortfolioImg portfolioImg = PortfolioImg.builder()
                         .imgName(fileName)
@@ -68,7 +68,7 @@ public class PortfolioService {
     }
 
     @Transactional
-    public String uploadPortfolioImage(MultipartFile portfolioImg, Portfolio portfolio){
+    public String uploadPortfolioImg(MultipartFile portfolioImg, Portfolio portfolio){
         String randomFilename = s3Service.s3UploadImgForCloudFront(portfolioImg);
 
         PortfolioImg img = PortfolioImg.builder()
