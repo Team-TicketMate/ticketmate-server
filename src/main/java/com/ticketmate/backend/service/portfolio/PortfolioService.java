@@ -20,6 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -33,6 +35,7 @@ public class PortfolioService {
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String domain;
     private static final Integer MAX_IMAGE_COUNT = 20;
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG");
 
     /**
      * 포트폴리오 업로드
@@ -68,10 +71,6 @@ public class PortfolioService {
             }
         }
 
-        portfolioRepository.save(portfolio);
-
-        log.debug("총 저장된 파일 갯수 : {}", portfolio.getImgList().size());
-
         return portfolio.getPortfolioId();
     }
 
@@ -83,7 +82,7 @@ public class PortfolioService {
     public String s3Upload(MultipartFile portfolioImg, Portfolio portfolio){
         String originalFilename = portfolioImg.getOriginalFilename();
 
-        getFileExtension(originalFilename);
+        validateFileExtension(originalFilename);
 
         // 중복이 되지 않는 고유한 파일이름 생성
         String randomFilename = generateRandomFilename(originalFilename);
@@ -125,19 +124,20 @@ public class PortfolioService {
     /**
      * 이미지 파일만 저장될 수 있도록 파일의 유효성을 검사하는 메서드입니다.
      */
-    private void getFileExtension(String fileName) {
+    private void validateFileExtension(String fileName) {
         if (fileName.length() == 0) {
             throw new CustomException(ErrorCode.INVALID_INPUT_IMAGE);
         }
-        ArrayList<String> fileValidate = new ArrayList<>();
-        fileValidate.add(".jpg");
-        fileValidate.add(".jpeg");
-        fileValidate.add(".png");
-        fileValidate.add(".JPG");
-        fileValidate.add(".JPEG");
-        fileValidate.add(".PNG");
-        String idxFileName = fileName.substring(fileName.lastIndexOf("."));
-        if (!fileValidate.contains(idxFileName)) {
+
+        int lastDot = fileName.lastIndexOf('.');
+        if (lastDot < 0) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_IMAGE);
+        }
+
+        String extension = fileName.substring(lastDot);
+
+        // 유효 확장자 목록에 없으면 예외
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
             throw new CustomException(ErrorCode.INVALID_IMAGE_FORMAT);
         }
     }
