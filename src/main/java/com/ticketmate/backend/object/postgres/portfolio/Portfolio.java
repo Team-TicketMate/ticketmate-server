@@ -26,7 +26,7 @@ public class Portfolio extends BasePostgresEntity {
     @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     private UUID portfolioId;
 
-    private String publicRelations;  // 자기소개
+    private String portfolioDescription;  // 자기소개
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<PortfolioImg> imgList = new ArrayList<>();

@@ -48,7 +48,7 @@ public class PortfolioService {
 
         Portfolio portfolio = Portfolio.builder()
                 .member(member)
-                .publicRelations(request.getPublicRelations())
+                .portfolioDescription(request.getPortfolioDescription())
                 .portfolioType(PortfolioType.UNDER_REVIEW)
                 .build();
 
