@@ -70,7 +70,7 @@ public class PortfolioService {
 
         portfolioRepository.save(portfolio);
 
-        log.info("총 저장된 파일 갯수 : {}", portfolio.getImgList().size());
+        log.debug("총 저장된 파일 갯수 : {}", portfolio.getImgList().size());
 
         return portfolio.getPortfolioId();
     }
@@ -87,7 +87,7 @@ public class PortfolioService {
 
         // 중복이 되지 않는 고유한 파일이름 생성
         String randomFilename = generateRandomFilename(originalFilename);
-        log.info("filename: {}", randomFilename);
+        log.debug("filename: {}", randomFilename);
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(portfolioImg.getSize());
@@ -101,17 +101,17 @@ public class PortfolioService {
         }
 
         String s3UrlString = amazonS3.getUrl(bucket, randomFilename).toString();
-        log.info("S3URL: {}", s3UrlString);
+        log.debug("S3URL: {}", s3UrlString);
         String cloudFrontUrl = domain + randomFilename;
 
-        log.info("ImgURL: {}", cloudFrontUrl);
+        log.debug("ImgURL: {}", cloudFrontUrl);
 
         PortfolioImg img = PortfolioImg.builder()
                 .imgName(randomFilename)
                 .portfolio(portfolio)
                 .build();
 
-        log.info("Img : {}", img.getImgName());
+        log.debug("Img : {}", img.getImgName());
         return randomFilename;
     }
 
