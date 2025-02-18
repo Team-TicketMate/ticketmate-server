@@ -42,7 +42,7 @@ public class PortfolioService {
      */
     @Transactional
     public UUID uploadPortfolio(PortfolioRequest request, Member member){
-        if (request.getPortfolioImg().size() > MAX_IMAGE_COUNT) {
+        if (request.getPortfolioImgs().size() > MAX_IMAGE_COUNT) {
             throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_COUNT_EXCEEDED);
         }
 
@@ -55,8 +55,8 @@ public class PortfolioService {
         /**
          * Cascade 옵션을 활용해서 부모 엔티티만 Save 해서 update 쿼리 최소화
          */
-        if (request.getPortfolioImg().size() > 0) {
-            for (MultipartFile imgFile : request.getPortfolioImg()) {
+        if (request.getPortfolioImgs().size() > 0) {
+            for (MultipartFile imgFile : request.getPortfolioImgs()) {
                 String fileName = s3Upload(imgFile, portfolio);
 
                 PortfolioImg portfolioImg = PortfolioImg.builder()

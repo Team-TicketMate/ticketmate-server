@@ -19,5 +19,5 @@ public class PortfolioRequest {
     @Schema(defaultValue = "NCT드림, 세븐틴, 투바투, 보넥도등 남자 아이돌 티켓팅 전문입니다. 최대한 고객님의 니즈에 맞춰 자리 잡아드립니다.")
     private String publicRelations;
 
-    private List<MultipartFile> portfolioImg;
+    private List<MultipartFile> portfolioImgs;
 }
