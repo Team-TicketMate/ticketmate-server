@@ -138,7 +138,7 @@ public class PortfolioService {
         fileValidate.add(".PNG");
         String idxFileName = fileName.substring(fileName.lastIndexOf("."));
         if (!fileValidate.contains(idxFileName)) {
-            throw new CustomException(ErrorCode.WRONG_IMAGE_FORMAT);
+            throw new CustomException(ErrorCode.INVALID_IMAGE_FORMAT);
         }
     }
 }
