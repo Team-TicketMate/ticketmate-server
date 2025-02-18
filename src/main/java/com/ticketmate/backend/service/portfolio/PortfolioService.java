@@ -43,7 +43,7 @@ public class PortfolioService {
     @Transactional
     public UUID uploadPortfolio(PortfolioRequest request, Member member){
         if (request.getPortfolioImg().size() > MAX_IMAGE_COUNT) {
-            throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_SIZE);
+            throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_COUNT_EXCEEDED);
         }
 
         Portfolio portfolio = Portfolio.builder()
