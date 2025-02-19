@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Portfolio extends BasePostgresEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    @Column(name = "portfolio_id", columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     private UUID portfolioId;
 
     private String portfolioDescription;  // 자기소개
