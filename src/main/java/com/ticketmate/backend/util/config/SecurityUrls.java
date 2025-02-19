@@ -32,8 +32,8 @@ public class SecurityUrls {
      */
     public static final List<String> ADMIN_PATHS = Arrays.asList(
             // API
-            "/admin/concert-hall/**"
-
+            "/admin/concert-hall/**",
+            "/admin/portfolio/**"
     );
 
 }
