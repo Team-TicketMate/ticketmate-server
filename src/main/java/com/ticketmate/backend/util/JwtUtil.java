@@ -1,7 +1,7 @@
 package com.ticketmate.backend.util;
 
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
-import com.ticketmate.backend.service.member.CustomUserDetailsService;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.service.member.oauth2.CustomOAuth2UserService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -22,7 +22,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -83,39 +83,39 @@ public class JwtUtil {
     /**
      * AccessToken 생성
      *
-     * @param customUserDetails
+     * @param customOAuth2User
      * @return
      */
-    public String createAccessToken(CustomUserDetails customUserDetails) {
-        log.debug("엑세스 토큰 생성 중: 회원: {}", customUserDetails.getUsername());
-        return createToken(ACCESS_CATEGORY, customUserDetails, accessTokenExpTime);
+    public String createAccessToken(CustomOAuth2User customOAuth2User) {
+        log.debug("엑세스 토큰 생성 중: 회원: {}", customOAuth2User.getUsername());
+        return createToken(ACCESS_CATEGORY, customOAuth2User, accessTokenExpTime);
     }
 
     /**
      * RefreshToken 생성
      *
-     * @param customUserDetails
+     * @param customOAuth2User
      * @return
      */
-    public String createRefreshToken(CustomUserDetails customUserDetails) {
-        log.debug("리프래시 토큰 생성 중: 회원: {}", customUserDetails.getUsername());
-        return createToken(REFRESH_CATEGORY, customUserDetails, refreshTokenExpTime);
+    public String createRefreshToken(CustomOAuth2User customOAuth2User) {
+        log.debug("리프래시 토큰 생성 중: 회원: {}", customOAuth2User.getUsername());
+        return createToken(REFRESH_CATEGORY, customOAuth2User, refreshTokenExpTime);
     }
 
     /**
      * JWT 토큰 생성 메서드
      *
-     * @param customUserDetails 회원 상세 정보
+     * @param customOAuth2User 회원 상세 정보
      * @param expiredAt         만료 시간
      * @return 생성된 JWT 토큰
      */
-    private String createToken(String category, CustomUserDetails customUserDetails, Long expiredAt) {
+    private String createToken(String category, CustomOAuth2User customOAuth2User, Long expiredAt) {
 
         return Jwts.builder()
-                .subject(customUserDetails.getUsername())
+                .subject(customOAuth2User.getUsername())
                 .claim("category", category)
-                .claim("username", customUserDetails.getUsername())
-                .claim("role", customUserDetails.getMember().getRole())
+                .claim("username", customOAuth2User.getUsername())
+                .claim("role", customOAuth2User.getMember().getRole())
                 .issuer(issuer)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredAt))
@@ -210,7 +210,7 @@ public class JwtUtil {
         Claims claims = getClaims(token);
         String username = claims.getSubject();
         log.debug("JWT에서 인증정보 파싱: username={}", username);
-        CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        CustomOAuth2User customOAuth2User = customOAuth2UserService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
     }
 }

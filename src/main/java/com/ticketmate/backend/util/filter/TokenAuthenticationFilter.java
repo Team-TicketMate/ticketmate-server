@@ -1,7 +1,6 @@
 package com.ticketmate.backend.util.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.service.member.CustomUserDetailsService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.config.SecurityUrls;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -29,7 +28,6 @@ import java.io.IOException;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService customUserDetailsService;
     private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
