@@ -1,11 +1,11 @@
 package com.ticketmate.backend.controller.admin;
 
 import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
-import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
-import com.ticketmate.backend.service.concerthall.ConcertHallService;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.service.concert.ConcertService;
+import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,9 +31,8 @@ public class AdminController implements AdminControllerDocs {
     @PostMapping(value = "/concert-hall/save")
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveHallInfo(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @RequestBody ConcertHallInfoRequest request) {
-        request.setMember(customUserDetails.getMember());
         concertHallService.saveHallInfo(request);
         return ResponseEntity.ok().build();
     }
@@ -42,9 +41,8 @@ public class AdminController implements AdminControllerDocs {
     @PostMapping(value = "/concert/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveConcertInfo(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @ModelAttribute ConcertInfoRequest request) {
-        request.setMember(customUserDetails.getMember());
         concertService.saveConcertInfo(request);
         return ResponseEntity.ok().build();
     }

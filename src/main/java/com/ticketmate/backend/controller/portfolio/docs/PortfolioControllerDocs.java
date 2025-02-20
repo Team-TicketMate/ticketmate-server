@@ -1,6 +1,6 @@
 package com.ticketmate.backend.controller.portfolio.docs;
 
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.portfolio.request.PortfolioRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,6 @@ public interface PortfolioControllerDocs {
                     """
     )
     ResponseEntity<UUID> uploadPortfolio(
-            CustomUserDetails customUserDetails,
+            CustomOAuth2User customOAuth2User,
             PortfolioRequest request);
 }

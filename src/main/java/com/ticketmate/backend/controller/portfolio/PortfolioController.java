@@ -1,7 +1,7 @@
 package com.ticketmate.backend.controller.portfolio;
 
 import com.ticketmate.backend.controller.portfolio.docs.PortfolioControllerDocs;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.portfolio.request.PortfolioRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.portfolio.PortfolioService;
@@ -32,9 +32,9 @@ public class PortfolioController implements PortfolioControllerDocs {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<UUID> uploadPortfolio(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @ModelAttribute PortfolioRequest request) {
-        Member member = customUserDetails.getMember();
+        Member member = customOAuth2User.getMember();
         return ResponseEntity.ok(portfolioService.uploadPortfolio(request, member));
     }
 }

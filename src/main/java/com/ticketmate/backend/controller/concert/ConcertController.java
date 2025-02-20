@@ -1,7 +1,7 @@
 package com.ticketmate.backend.controller.concert;
 
 import com.ticketmate.backend.controller.concert.docs.ConcertControllerDocs;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.service.concert.ConcertService;
@@ -32,7 +32,7 @@ public class ConcertController implements ConcertControllerDocs {
     @PostMapping(value = "/filtered")
     @LogMonitoringInvocation
     public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @RequestBody ConcertFilteredRequest request) {
         return ResponseEntity.ok(concertService.filteredConcert(request));
     }

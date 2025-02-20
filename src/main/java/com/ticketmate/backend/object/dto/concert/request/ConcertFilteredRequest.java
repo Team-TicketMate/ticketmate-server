@@ -3,7 +3,6 @@ package com.ticketmate.backend.object.dto.concert.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,8 +25,6 @@ public class ConcertFilteredRequest {
         this.sortField = "created_date";
         this.sortDirection = "DESC";
     }
-
-    private Member member;
 
     @Schema(defaultValue = "tomorrow")
     private String concertName; // 콘서트 제목
@@ -77,6 +74,6 @@ public class ConcertFilteredRequest {
     private String sortField; // 정렬 조건 (생성일, 선 예매 오픈일, 티켓 오픈일, 공연시간)
 
     @Schema(defaultValue = "DESC")
-    @Pattern(regexp = "^(ASC|DESC)&", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
+    @Pattern(regexp = "^(ASC|DESC)", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
     private String sortDirection; // ASC, DESC
 }
