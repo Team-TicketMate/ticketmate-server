@@ -1,23 +1,20 @@
 package com.ticketmate.backend.util.config;
 
-import com.ticketmate.backend.repository.postgres.member.MemberRepository;
-import com.ticketmate.backend.service.member.CustomUserDetailsService;
+import com.ticketmate.backend.service.member.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.util.JwtUtil;
-import com.ticketmate.backend.util.filter.LoginFilter;
+import com.ticketmate.backend.util.filter.CustomSuccessHandler;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,10 +28,9 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService customUserDetailsService;
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final MemberRepository memberRepository;
+    private final CustomSuccessHandler customSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomClientRegistrationRepository customClientRegistrationRepository;
 
     /**
      * 허용된 CORS Origin 목록
@@ -53,37 +49,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        LoginFilter loginFilter = new LoginFilter(jwtUtil,
-                authenticationManager(authenticationConfiguration),
-                redisTemplate,
-                memberRepository);
-        loginFilter.setFilterProcessesUrl("/api/auth/sign-in");
-
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SecurityUrls.AUTH_WHITELIST.toArray(new String[0]))
                         .permitAll() // AUTH_WHITELIST에 등록된 URL은 인증 허용
                         .requestMatchers(SecurityUrls.ADMIN_PATHS.toArray(new String[0]))
                         .hasRole("ADMIN") // ADMIN_PATHS에 등록된 URL은 관리자만 접근가능
                         .anyRequest().authenticated()
                 )
+                // 로그아웃
                 .logout(logout -> logout
                         .logoutUrl("/logout") // "/logout" 경로로 접근 시 로그아웃
                         .logoutSuccessUrl("/login") // 로그아웃 성공 후 로그인 창 이동
                         .invalidateHttpSession(true)
                 )
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                // 세션 설정: STATELESS
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(
-                        new TokenAuthenticationFilter(jwtUtil, customUserDetailsService),
-                        UsernamePasswordAuthenticationFilter.class
-                )
-                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class
+                // OAuth2
+                .oauth2Login(oauth2 -> oauth2
+                        .clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository())
+                        .userInfoEndpoint(userInfoEndpointConfig ->
+                                userInfoEndpointConfig
+                                        .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler))
+                // JWT Filter
+                .addFilterAfter(
+                        new TokenAuthenticationFilter(jwtUtil),
+                        OAuth2LoginAuthenticationFilter.class
                 )
                 .build();
     }
@@ -114,13 +112,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
         return urlBasedCorsConfigurationSource;
-    }
-
-    /**
-     * 비밀번호 인코더 빈 (BCrypt)
-     */
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

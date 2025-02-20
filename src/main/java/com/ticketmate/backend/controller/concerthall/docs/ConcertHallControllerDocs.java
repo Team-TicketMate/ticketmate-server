@@ -1,6 +1,6 @@
 package com.ticketmate.backend.controller.concerthall.docs;
 
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,6 +60,6 @@ public interface ConcertHallControllerDocs {
                     """
     )
     ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
-            CustomUserDetails customUserDetails,
+            CustomOAuth2User customOAuth2User,
             ConcertHallFilteredRequest request);
 }

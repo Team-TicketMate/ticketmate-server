@@ -3,7 +3,6 @@ package com.ticketmate.backend.object.dto.concert.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -20,8 +19,6 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class ConcertInfoRequest {
-
-    private Member member;
 
     @NotBlank(message = "공연 제목을 입력하세요.")
     @Schema(defaultValue = "[Play＆Stay]TOMORROW X TOGETHER WORLD TOUR 〈ACT : PROMISE〉 - EP. 2 - IN INCHEON + Hotels")

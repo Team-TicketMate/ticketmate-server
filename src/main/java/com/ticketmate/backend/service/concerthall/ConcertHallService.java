@@ -26,7 +26,7 @@ import static com.ticketmate.backend.util.common.CommonUtil.*;
 public class ConcertHallService {
 
     private final ConcertHallRepository concertHallRepository;
-    private final EntityMapper mapper;
+    private final EntityMapper entityMapper;
 
     /**
      * 공연장 정보 저장
@@ -99,7 +99,7 @@ public class ConcertHallService {
                         pageable);
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertHallPage.map(mapper::toConcertHallFilteredResponse);
+        return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
     }
 
     /**

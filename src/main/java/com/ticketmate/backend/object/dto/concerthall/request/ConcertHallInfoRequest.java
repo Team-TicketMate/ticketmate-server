@@ -1,6 +1,5 @@
 package com.ticketmate.backend.object.dto.concerthall.request;
 
-import com.ticketmate.backend.object.postgres.Member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,8 +13,6 @@ import lombok.*;
 @Setter
 @Builder
 public class ConcertHallInfoRequest {
-
-    private Member member;
 
     @NotBlank(message = "공연장 이름을 입력하세요")
     @Schema(defaultValue = "인스파이어 아레나")

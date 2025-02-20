@@ -1,12 +1,6 @@
 package com.ticketmate.backend.service.member;
 
-import com.ticketmate.backend.object.constants.AccountStatus;
-import com.ticketmate.backend.object.constants.MemberType;
-import com.ticketmate.backend.object.constants.Role;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
-import com.ticketmate.backend.object.dto.auth.request.SignUpRequest;
-import com.ticketmate.backend.object.postgres.Member.Member;
-import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -15,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,41 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MemberService {
 
-    private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    /**
-     * 회원가입
-     *
-     * @param request username, password, nickname, birth, phone, profileUrl
-     * @return 없음
-     */
-    @Transactional
-    public void signUp(SignUpRequest request) {
-
-        // 사용자 이메일 검증 (중복 이메일 사용 불가)
-        if (memberRepository.existsByUsername(request.getUsername())) {
-            log.error("이미 가입된 이메일 주소입니다: {}", request.getUsername());
-            throw new CustomException(ErrorCode.DUPLICATE_USERNAME);
-        }
-
-        memberRepository.save(Member.builder()
-                .username(request.getUsername())
-                .password(bCryptPasswordEncoder.encode(request.getPassword()))
-                .nickname(request.getNickname())
-                .birth(request.getBirth())
-                .phone(request.getPhone())
-                .profileUrl(null)
-                .role(Role.ROLE_USER)
-                .memberType(MemberType.CLIENT)
-                .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
-                .isFirstLogin(true)
-                .lastLoginTime(null)
-                .build()
-        );
-        log.debug("회원가입 성공: username={}", request.getUsername());
-    }
 
     /**
      * 쿠키에 저장된 refreshToken을 통해 accessToken을 재발급합니다.
@@ -87,9 +46,9 @@ public class MemberService {
         isValidateRefreshToken(refreshToken);
 
         // 새로운 accessToken 발급
-        CustomUserDetails customUserDetails = (CustomUserDetails) jwtUtil
+        CustomOAuth2User customOAuth2User = (CustomOAuth2User) jwtUtil
                 .getAuthentication(refreshToken).getPrincipal();
-        String newAccessToken = jwtUtil.createAccessToken(customUserDetails);
+        String newAccessToken = jwtUtil.createAccessToken(customOAuth2User);
 
         // 헤더에 accessToken 추가
         response.setHeader("Authorization", "Bearer " + newAccessToken);

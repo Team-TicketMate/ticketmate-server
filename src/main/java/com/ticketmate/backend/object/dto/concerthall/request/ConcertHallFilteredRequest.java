@@ -1,7 +1,6 @@
 package com.ticketmate.backend.object.dto.concerthall.request;
 
 import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,8 +21,6 @@ public class ConcertHallFilteredRequest {
         this.sortField = "created_date";
         this.sortDirection = "DESC";
     }
-
-    private Member member;
 
     @Schema(defaultValue = "인스파")
     private String concertHallName; // 공연장 이름 검색어
