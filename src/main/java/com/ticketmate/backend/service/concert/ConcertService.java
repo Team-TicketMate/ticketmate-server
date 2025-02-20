@@ -31,7 +31,7 @@ public class ConcertService {
     private final ConcertRepository concertRepository;
     private final ConcertHallRepository concertHallRepository;
     private final FileService fileService;
-    private final EntityMapper mapper;
+    private final EntityMapper entityMapper;
 
     /**
      * 콘서트 정보 저장
@@ -150,6 +150,6 @@ public class ConcertService {
         );
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertPage.map(mapper::toConcertFilteredResponse);
+        return concertPage.map(entityMapper::toConcertFilteredResponse);
     }
 }

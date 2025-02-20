@@ -1,5 +1,6 @@
 package com.ticketmate.backend.repository.postgres.member;
 
+import com.ticketmate.backend.object.constants.Role;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     Boolean existsByUsername(String username);
 
     Member findByUsername(String username);
+
+    void deleteAllByRole(Role role);
 }

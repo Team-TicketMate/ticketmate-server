@@ -135,7 +135,7 @@ public class JwtUtil {
                     .verifyWith(getSignKey())
                     .build()
                     .parseSignedClaims(token);
-            log.info("JWT 토큰이 유효합니다.");
+            log.debug("JWT 토큰이 유효합니다.");
             return true;
         } catch (ExpiredJwtException e) {
             log.warn("JWT 토큰이 만료되었습니다: {}", e.getMessage());

@@ -13,12 +13,12 @@ public class SecurityUrls {
      */
     public static final List<String> AUTH_WHITELIST = Arrays.asList(
             // API
-            "/api/auth/sign-up", // 회원가입
-            "/api/auth/sign-in", // 로그인
             "/api/auth/reissue", // accessToken 재발급
             "/api/oauth2/**", // 소셜 로그인
-            "/login/**",
-            "/test",
+            "/login/**", // 기본 Spring Security OAuth2 로그인경로
+
+            // TEST
+            "/test/**", // 개발자용 테스트 api
 
             // 썸네일 파일 TODO: 추후 url 매핑 관련 규칙 수정
             "/concert/thumbnail/**", // 콘서트 썸네일 파일 경로

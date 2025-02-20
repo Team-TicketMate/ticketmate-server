@@ -1,7 +1,6 @@
 package com.ticketmate.backend.util.filter;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,10 +26,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
         // CustomOAuth2User
-        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
-        Member member = customUserDetails.getMember();
-        String accessToken = jwtUtil.createAccessToken(customUserDetails);
-        String refreshToken = jwtUtil.createRefreshToken(customUserDetails);
+        CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+        String accessToken = jwtUtil.createAccessToken(customOAuth2User);
+        String refreshToken = jwtUtil.createRefreshToken(customOAuth2User);
 
         log.debug("로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
         log.debug("accessToken = {}", accessToken);
@@ -38,7 +36,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // RefreshToken을 Redisd에 저장 (key: RT:memberId)
         redisTemplate.opsForValue().set(
-                "RT:" + customUserDetails.getMemberId(),
+                "RT:" + customOAuth2User.getMemberId(),
                 refreshToken,
                 jwtUtil.getRefreshExpirationTime(),
                 TimeUnit.MILLISECONDS
