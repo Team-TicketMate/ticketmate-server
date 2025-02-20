@@ -1,8 +1,8 @@
 package com.ticketmate.backend.controller.concert.docs;
 
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +65,6 @@ public interface ConcertControllerDocs {
                     """
     )
     ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
-            CustomUserDetails customUserDetails,
+            CustomOAuth2User customOAuth2User,
             ConcertFilteredRequest request);
 }

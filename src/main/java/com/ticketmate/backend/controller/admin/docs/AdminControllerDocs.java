@@ -1,8 +1,8 @@
 package com.ticketmate.backend.controller.admin.docs;
 
-import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
-import com.ticketmate.backend.object.dto.auth.request.CustomUserDetails;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 
@@ -27,7 +27,7 @@ public interface AdminControllerDocs {
                     """
     )
     ResponseEntity<Void> saveHallInfo(
-            CustomUserDetails customUserDetails,
+            CustomOAuth2User customOAuth2User,
             ConcertHallInfoRequest request);
 
     @Operation(
@@ -79,6 +79,6 @@ public interface AdminControllerDocs {
                     """
     )
     ResponseEntity<Void> saveConcertInfo(
-            CustomUserDetails customUserDetails,
+            CustomOAuth2User customOAuth2User,
             ConcertInfoRequest request);
 }

@@ -4,6 +4,7 @@ import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.util.common.EntityMapper;
