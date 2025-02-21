@@ -76,8 +76,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authentication = jwtUtil.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트
-                if (isAdminPageRequest && !hasAdminRole(authentication)) {
+                // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
+                if (isAdminPageRequest && !hasAdminRole(authentication) && !hasTestRole(authentication)) {
                     log.error("관리자 권한이 없습니다. 로그인페이지로 리다이렉트합니다.");
                     response.sendRedirect("/login");
                     return;
@@ -158,5 +158,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private boolean hasAdminRole(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    /**
+     * 테스트 계정 확인
+     * TODO: 추후 삭제
+     */
+    private boolean hasTestRole(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_TEST"));
     }
 }
