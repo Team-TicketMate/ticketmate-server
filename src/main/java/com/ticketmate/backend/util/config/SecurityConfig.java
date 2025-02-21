@@ -64,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(SecurityUrls.AUTH_WHITELIST.toArray(new String[0]))
                         .permitAll() // AUTH_WHITELIST에 등록된 URL은 인증 허용
                         .requestMatchers(SecurityUrls.ADMIN_PATHS.toArray(new String[0]))
-                        .hasRole("ADMIN") // ADMIN_PATHS에 등록된 URL은 관리자만 접근가능
+                        .hasAnyRole("ADMIN", "TEST") // ADMIN_PATHS에 등록된 URL은 관리자만 접근가능 TODO: 추후 테스트 계정 권한 삭젠
                         .anyRequest().authenticated()
                 )
                 // 로그아웃

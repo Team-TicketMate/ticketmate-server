@@ -28,7 +28,7 @@ import java.util.List;
                 version = "1.0v"
         ),
         servers = {
-                @Server(url = "https://ticketmate.site", description = "메인 서버"),
+                @Server(url = "https://api.ticketmate.site", description = "메인 서버"),
                 @Server(url = "https://test.ticketmate.site", description = "테스트 서버"),
                 @Server(url = "http://localhost:8080", description = "로컬 서버")
         }
@@ -59,7 +59,7 @@ public class SwaggerConfig {
                                         .url("https://test.ticketmate.site")
                                         .description("테스트 서버"),
                                 new io.swagger.v3.oas.models.servers.Server()
-                                        .url("https://ticketmate.site")
+                                        .url("https://api.ticketmate.site")
                                         .description("메인 서버")
                         )
                 );
