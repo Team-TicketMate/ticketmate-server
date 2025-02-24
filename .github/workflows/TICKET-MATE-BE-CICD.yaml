@@ -23,6 +23,12 @@ jobs:
       - name: Gradle Wrapper 실행권한 부여
         run: chmod +x gradlew
 
+      # oauth2.yml 파일을 빌드 전에 생성
+      - name: Create oauth2.yml from secret
+        run: |
+          echo "${{ secrets.OAUTH2_YML }}" > ./src/main/resources/oauth2.yml
+
+      # application-prod.yml 파일을 빌드 전에 생성
       - name: application-prod.yml 생성
         run: |
           echo "${{ secrets.APPLICATION_PROD_YML }}" > ./src/main/resources/application-prod.yml
