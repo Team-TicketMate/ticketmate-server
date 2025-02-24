@@ -65,6 +65,7 @@ Thumbs.db
 ### Develop Application Yml ###
 /src/main/resources/application-dev.yml
 /src/main/resources/application-prod.yml
+/src/main/resources/oauth2.yml
 
 ### CICD ###
 # FIXME: 초기세팅 이후 주석 해제

@@ -22,6 +22,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # oauth2.yml 파일을 빌드 전에 생성
+      - name: Create oauth2.yml from secret
+        run: |
+          echo "${{ secrets.OAUTH2_YML }}" > ./src/main/resources/oauth2.yml
+
       # application-prod.yml 파일을 빌드 전에 생성
       - name: Create application-prod.yml from secret
         run: |
