@@ -13,11 +13,11 @@ import lombok.ToString;
 public class PortfolioSearchRequest {
     @Builder.Default
     @Schema(defaultValue = "1")
-    private int page = 1; // 1페이지부터 시작
+    private int index = 1; // 1페이지부터 시작
 
     public long getOffset() {
         // page가 1보다 작으면 1로 보정
-        int currentPage = Math.max(1, page);
+        int currentPage = Math.max(1, index);
         // size는 고정 10
         return (long) (currentPage - 1) * 10;
     }

@@ -37,7 +37,7 @@ public class AdminService {
     @Transactional(readOnly = true)
     public Page<PortfolioListForAdminResponse> getPortfolioList(PortfolioSearchRequest request) {
 
-        int pageIndex = Math.max(1, request.getPage()) - 1;
+        int pageIndex = Math.max(1, request.getIndex()) - 1;
 
         Pageable pageable = PageRequest.of(pageIndex,
                 10,
