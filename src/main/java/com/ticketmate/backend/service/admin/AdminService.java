@@ -1,16 +1,25 @@
 package com.ticketmate.backend.service.admin;
 
+import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
+import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.postgres.concert.Concert;
+import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
+import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
+import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
+import com.ticketmate.backend.service.file.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,11 +33,103 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminService {
+    private final ConcertHallRepository concertHallRepository;
+    private final ConcertRepository concertRepository;
     private final PortfolioRepository portfolioRepository;
+    private final FileService fileService;
     private final EntityMapper entityMapper;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
+
+
+
+    /*
+    ======================================공연======================================
+     */
+
+    /**
+     * 콘서트 정보 저장
+     *
+     * @param request concertName 공연 제목
+     *                concertHallName 공연장 이름
+     *                concertType 공연 카테고리
+     *                ticketPreOpenDate 선구매 오픈일
+     *                ticketOpenDate 티켓 구매 오픈일
+     *                duration 공연 시간 (분)
+     *                session 공연 회차
+     *                concertThumbnailUrl 공연 썸네일
+     *                ticketReservationSite 티켓 예매처 사이트
+     */
+    @Transactional
+    public void saveConcertInfo(ConcertInfoRequest request) {
+
+        // 중복된 공연이름 검증
+        if (concertRepository.existsByConcertName(request.getConcertName())) {
+            log.error("중복된 공연 제목입니다. 요청된 공연 제목: {}", request.getConcertName());
+            throw new CustomException(ErrorCode.DUPLICATE_CONCERT_NAME);
+        }
+
+        // 공연장 검색
+        ConcertHall concertHall = concertHallRepository.findByConcertHallName(request.getConcertHallName())
+                .orElseThrow(() -> {
+                    log.error("{} 에 해당하는 공연장 정보를 찾을 수 없습니다.", request.getConcertHallName());
+                    return new CustomException(ErrorCode.CONCERT_HALL_NAME_NOT_FOUND);
+                });
+
+        // 콘서트 썸네일 저장
+        String concertThumbnailUrl = fileService
+                .saveFile(request.getConcertThumbNail());
+
+        // 콘서트 정보 저장
+        concertRepository.save(Concert.builder()
+                .concertName(request.getConcertName())
+                .concertHall(concertHall)
+                .concertType(request.getConcertType())
+                .ticketPreOpenDate(request.getTicketPreOpenDate())
+                .ticketOpenDate(request.getTicketOpenDate())
+                .duration(request.getDuration())
+                .session(request.getSession())
+                .concertThumbnailUrl(concertThumbnailUrl)
+                .ticketReservationSite(request.getTicketReservationSite())
+                .build());
+        log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    }
+
+    /*
+    ======================================공연장======================================
+     */
+
+    /**
+     * 공연장 정보 저장
+     * 관리자만 저장 가능합니다
+     */
+    @Transactional
+    public void saveHallInfo(ConcertHallInfoRequest request) {
+
+        // 중복된 공연장이름 검증
+        if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
+            log.error("중복된 공연장 이름입니다. 요청된 공연장 이름: {}", request.getConcertHallName());
+            throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
+        }
+
+        // 요청된 주소에 맞는 city할당
+        City city = determineCityFromAddress(request.getAddress());
+
+        log.debug("공연장 정보 저장: {}", request.getConcertHallName());
+        concertHallRepository.save(ConcertHall.builder()
+                .concertHallName(request.getConcertHallName())
+                .capacity(request.getCapacity())
+                .address(request.getAddress())
+                .city(city)
+                .concertHallUrl(request.getConcertHallUrl())
+                .build());
+    }
+
+    /*
+    ======================================포트폴리오======================================
+     */
 
     /**
      * 페이지당 10개씩 관리자에게 포트폴리오 리스트 데이터를 보여줍니다.
@@ -71,5 +172,22 @@ public class AdminService {
         portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
 
         return portfolioForAdminResponse;
+    }
+
+
+    /**
+     * 주소에 해당하는 city를 반환합니다.
+     *
+     * @param address 주소
+     */
+    private City determineCityFromAddress(String address) {
+        for (City city : City.values()) {
+            if (address.contains(city.getDescription())) {
+                log.debug("입력된 주소에 해당하는 city: {}", city.getDescription());
+                return city;
+            }
+        }
+        log.error("입력된 주소에 일치하는 city를 찾을 수 없습니다.");
+        throw new CustomException(ErrorCode.CITY_NOT_FOUND);
     }
 }
