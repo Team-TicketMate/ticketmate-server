@@ -1,14 +1,10 @@
 package com.ticketmate.backend.service.concerthall;
 
-import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.util.common.EntityMapper;
-import com.ticketmate.backend.util.exception.CustomException;
-import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,7 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.ticketmate.backend.util.common.CommonUtil.*;
+import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
 @Slf4j
@@ -27,32 +24,6 @@ public class ConcertHallService {
 
     private final ConcertHallRepository concertHallRepository;
     private final EntityMapper entityMapper;
-
-    /**
-     * 공연장 정보 저장
-     * 관리자만 저장 가능합니다
-     */
-    @Transactional
-    public void saveHallInfo(ConcertHallInfoRequest request) {
-
-        // 중복된 공연장이름 검증
-        if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
-            log.error("중복된 공연장 이름입니다. 요청된 공연장 이름: {}", request.getConcertHallName());
-            throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
-        }
-
-        // 요청된 주소에 맞는 city할당
-        City city = determineCityFromAddress(request.getAddress());
-
-        log.debug("공연장 정보 저장: {}", request.getConcertHallName());
-        concertHallRepository.save(ConcertHall.builder()
-                .concertHallName(request.getConcertHallName())
-                .capacity(request.getCapacity())
-                .address(request.getAddress())
-                .city(city)
-                .concertHallUrl(request.getConcertHallUrl())
-                .build());
-    }
 
     /**
      * 공연장 정보 필터링 로직
@@ -100,21 +71,5 @@ public class ConcertHallService {
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
         return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
-    }
-
-    /**
-     * 주소에 해당하는 city를 반환합니다.
-     *
-     * @param address 주소
-     */
-    private City determineCityFromAddress(String address) {
-        for (City city : City.values()) {
-            if (address.contains(city.getDescription())) {
-                log.debug("입력된 주소에 해당하는 city: {}", city.getDescription());
-                return city;
-            }
-        }
-        log.error("입력된 주소에 일치하는 city를 찾을 수 없습니다.");
-        throw new CustomException(ErrorCode.CITY_NOT_FOUND);
     }
 }
