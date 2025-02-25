@@ -118,5 +118,5 @@ public interface AdminControllerDocs {
                     """
     )
     ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
-            CustomOAuth2User customOAuth2User, UUID id);
+            CustomOAuth2User customOAuth2User, UUID portfolioId);
 }
