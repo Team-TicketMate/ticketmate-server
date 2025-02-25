@@ -1,6 +1,7 @@
 package com.ticketmate.backend.controller.admin.docs;
 
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
+import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
@@ -119,4 +120,29 @@ public interface AdminControllerDocs {
     )
     ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
             CustomOAuth2User customOAuth2User, UUID portfolioId);
+
+    @Operation(
+            summary = "요청한 포트폴리오 승인, 반려처리",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+                    
+                    ### 요청 파라미터
+                    - 변경할 포트폴리오의 고유한 id
+                    - 반려 및 승인의 Body 파라미터
+                    
+                    ### PortfolioType
+                    
+                    REVIEW_COMPLETED ("승인된 포트폴리오")
+                    
+                    COMPANION("반려된 포트폴리오")
+                                
+                    ### 유의사항
+                    - 관리자가 승인 요청이된 포트폴리오를 승인 및 반려하는 작업입니다.
+                    - 승인(REVIEW_COMPLETED)시 해당 포트폴리오의 상태가 "REVIEW_COMPLETED("승인된 포트폴리오")" 로 변경됩니다.
+                    - 반려(COMPANION)시 해당 포트폴리오의 상태가 "COMPANION("반려된 포트폴리오")" 로 변경됩니다. 
+                    """
+    )
+    ResponseEntity<UUID> reviewPortfolio(
+            CustomOAuth2User customOAuth2User, UUID portfolioId, PortfolioStatusUpdateRequest request);
 }

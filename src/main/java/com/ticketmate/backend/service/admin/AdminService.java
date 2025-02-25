@@ -1,8 +1,10 @@
 package com.ticketmate.backend.service.admin;
 
 import com.ticketmate.backend.object.constants.City;
+import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
+import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
@@ -172,6 +174,33 @@ public class AdminService {
         portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
 
         return portfolioForAdminResponse;
+    }
+
+    /**
+     * 관리자의 포트폴리오 승인 및 반려처리 로직
+     * @param portfolioId (UUID)
+     *        PortfolioType (포트폴리오 상태)
+     */
+    @Transactional
+    public UUID reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
+
+        log.debug("변경전 포트폴리오 TYPE: {}", portfolio.getPortfolioType());
+
+        // 승인
+        if (request.getPortfolioType().equals(PortfolioType.REVIEW_COMPLETED)) {
+            portfolio.setPortfolioType(PortfolioType.REVIEW_COMPLETED);
+            log.debug("승인완료: {}", portfolio.getPortfolioType());
+
+            portfolio.getMember().setMemberType(MemberType.AGENT);
+        } else {
+            // 반려
+            portfolio.setPortfolioType(PortfolioType.COMPANION);
+            log.debug("반려완료: {}", portfolio.getPortfolioType());
+        }
+
+        return portfolio.getPortfolioId();
     }
 
 

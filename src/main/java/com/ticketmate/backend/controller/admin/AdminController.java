@@ -2,6 +2,7 @@ package com.ticketmate.backend.controller.admin;
 
 import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
+import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
@@ -67,5 +68,15 @@ public class AdminController implements AdminControllerDocs {
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @PathVariable(value = "portfolio-id") UUID portfolioId) {
         return ResponseEntity.ok(adminService.getPortfolio(portfolioId));
+    }
+
+    @Override
+    @PatchMapping(value = "/portfolio/list/{portfolio-id}")
+    @LogMonitoringInvocation
+    public ResponseEntity<UUID> reviewPortfolio(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @PathVariable(value = "portfolio-id") UUID portfolioId,
+            @RequestBody @Valid PortfolioStatusUpdateRequest request) {
+        return ResponseEntity.ok(adminService.reviewPortfolioCompleted(portfolioId, request));
     }
 }
