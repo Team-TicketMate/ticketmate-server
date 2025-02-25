@@ -1,10 +1,16 @@
 package com.ticketmate.backend.controller.admin.docs;
 
+import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
 
 public interface AdminControllerDocs {
 
@@ -81,4 +87,36 @@ public interface AdminControllerDocs {
     ResponseEntity<Void> saveConcertInfo(
             CustomOAuth2User customOAuth2User,
             ConcertInfoRequest request);
+
+    @Operation(
+            summary = "의뢰인 -> 대리자로 바꾸기 위한 포트폴리오 리스트 조회",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+
+                                
+                    ### 유의사항
+                    - 페이지당 10개의 포트폴리오 리스트 데이터를 반환합니다.
+                    """
+    )
+    ResponseEntity<Page<PortfolioListForAdminResponse>> getPortfolioList(
+            CustomOAuth2User customOAuth2User,
+            PortfolioSearchRequest request);
+
+
+    @Operation(
+            summary = "의뢰인 -> 대리자로 바꾸기 위한 포트폴리오 상세 조회",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+                    
+                    ### 요청 파라미터
+                    - 포트폴리오의 고유한 id
+                                
+                    ### 유의사항
+                    - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관라지에게 필요한 데이터를 반환합니다. 
+                    """
+    )
+    ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
+            CustomOAuth2User customOAuth2User, UUID portfolioId);
 }

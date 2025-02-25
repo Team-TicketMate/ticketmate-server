@@ -22,10 +22,10 @@ public class PortfolioImg extends BasePostgresEntity {
     @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
     private UUID portfolioImgId;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String imgName;  // 포트폴리오 이미지 URL
+    @Column(name = "img_name", columnDefinition = "TEXT", length = 1024)
+    private String imgName;  // 포트폴리오 이미지 이름
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
 }
