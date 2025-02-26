@@ -41,4 +41,38 @@ public interface TestControllerDocs {
                     """
     )
     ResponseEntity<Void> deleteTestMember();
+
+    @Operation(
+            summary = "테스트 공연장 데이터 추가",
+            description = """
+                    
+                    이 API는 인증이 필요하지 않습니다.
+
+                    ### 요청 파라미터
+                    - **count** (Integer): 추가할 Mock 데이터 개수 (선택)
+
+                    ### 유의사항
+                    - 생성되는 공연장 Mock 데이터 기본값은 30개입니다
+                    - 중복 데이터 생성에 따라 사용자가 원하는 개수보다 적은 데이터가 저장될 수 있습니다
+
+                    """
+    )
+    ResponseEntity<Void> createConcertHallMockData(Integer count);
+
+    @Operation(
+            summary = "테스트 공연 데이터 추가",
+            description = """
+                    
+                    이 API는 인증이 필요하지 않습니다.
+
+                    ### 요청 파라미터
+                    - **count** (Integer): 추가할 Mock 데이터 개수 (선택)
+
+                    ### 유의사항
+                    - 생성되는 공연 Mock 데이터 기본값은 30개입니다
+                    - 중복 데이터 생성에 따라 사용자가 원하는 개수보다 적은 데이터가 저장될 수 있습니다
+
+                    """
+    )
+    ResponseEntity<Void> createConcertMockData(Integer count);
 }
