@@ -77,7 +77,7 @@ public class AdminService {
         ConcertHall concertHall = concertHallRepository.findByConcertHallName(request.getConcertHallName())
                 .orElseThrow(() -> {
                     log.error("{} 에 해당하는 공연장 정보를 찾을 수 없습니다.", request.getConcertHallName());
-                    return new CustomException(ErrorCode.CONCERT_HALL_NAME_NOT_FOUND);
+                    return new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND);
                 });
 
         // 콘서트 썸네일 저장
@@ -117,7 +117,7 @@ public class AdminService {
         }
 
         // 요청된 주소에 맞는 city할당
-        City city = determineCityFromAddress(request.getAddress());
+        City city = City.determineCityFromAddress(request.getAddress());
 
         log.debug("공연장 정보 저장: {}", request.getConcertHallName());
         concertHallRepository.save(ConcertHall.builder()
@@ -201,22 +201,5 @@ public class AdminService {
         }
 
         return portfolio.getPortfolioId();
-    }
-
-
-    /**
-     * 주소에 해당하는 city를 반환합니다.
-     *
-     * @param address 주소
-     */
-    private City determineCityFromAddress(String address) {
-        for (City city : City.values()) {
-            if (address.contains(city.getDescription())) {
-                log.debug("입력된 주소에 해당하는 city: {}", city.getDescription());
-                return city;
-            }
-        }
-        log.error("입력된 주소에 일치하는 city를 찾을 수 없습니다.");
-        throw new CustomException(ErrorCode.CITY_NOT_FOUND);
     }
 }
