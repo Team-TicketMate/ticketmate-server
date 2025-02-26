@@ -4,6 +4,7 @@ import com.ticketmate.backend.controller.test.docs.TestControllerDocs;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import com.ticketmate.backend.service.test.TestService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -35,5 +36,24 @@ public class TestController implements TestControllerDocs {
         testService.deleteTestMember();
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    @PostMapping("/concert-hall")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> createConcertHallMockData(
+            @Schema(defaultValue = "30") Integer count) {
+        testService.createConcertHallMockData(count);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping("/concert")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> createConcertMockData(
+            @Schema(defaultValue = "30") Integer count) {
+        testService.createConcertMockData(count);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

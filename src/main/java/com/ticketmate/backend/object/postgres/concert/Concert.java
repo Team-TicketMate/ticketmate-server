@@ -38,7 +38,7 @@ public class Concert extends BasePostgresEntity {
     // 공연 카테고리 (콘서트, 뮤지컬...)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    ConcertType concertType;
+    private ConcertType concertType;
 
     // 티켓 선구매 오픈일
     private LocalDateTime ticketPreOpenDate;
