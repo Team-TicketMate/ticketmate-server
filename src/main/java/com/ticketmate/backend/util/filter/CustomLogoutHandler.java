@@ -16,8 +16,6 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.concurrent.TimeUnit;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +24,8 @@ public class CustomLogoutHandler implements LogoutHandler {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
     private final MemberRepository memberRepository;
+
+    private static final String REFRESH_KEY_PREFIX = "RT:";
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -64,23 +64,14 @@ public class CustomLogoutHandler implements LogoutHandler {
                     });
 
             // 리프레시 토큰 삭제
-            redisTemplate.delete("RT:" + member.getMemberId());
+            redisTemplate.delete(REFRESH_KEY_PREFIX + member.getMemberId());
             log.debug("Redis에서 리프레시 토큰 삭제 완료: RT:{}", member.getMemberId());
         }
 
         // 4. 엑세스 토큰 블랙리스트 처리
         if (accessToken != null && jwtUtil.validateToken(accessToken)) {
-            // 엑세스 토큰 남은 시간 반환
-            Long expiration = jwtUtil.getExpiration(accessToken);
-            if (expiration > 0) {
-                redisTemplate.opsForValue().set(
-                        "BL:" + accessToken,
-                        "blacklist",
-                        expiration,
-                        TimeUnit.MILLISECONDS
-                );
-                log.debug("엑세스 토큰 블랙리스트 추가 완료: {}", accessToken);
-            }
+            jwtUtil.blacklistAccessToken(accessToken);
         }
     }
 }
+
