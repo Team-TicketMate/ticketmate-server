@@ -26,8 +26,10 @@ public class SecurityUrls {
 
             // Swagger
             "/docs/**", // Swagger UI
-            "/v3/api-docs/**" // Swagger API 문서
+            "/v3/api-docs/**", // Swagger API 문서
 
+            // FireBase 서비스워커
+            "/firebase-messaging-sw.js"
     );
 
     /**
