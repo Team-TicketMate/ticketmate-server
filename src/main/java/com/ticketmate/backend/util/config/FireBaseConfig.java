@@ -5,6 +5,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
@@ -13,12 +14,16 @@ import java.io.InputStream;
 @Configuration
 @Slf4j
 public class FireBaseConfig {
+
+    @Value("${firebase.service-account-key-path}")
+    private String firebaseKeyPath;
+
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         try {
             // resources 디렉토리에 있는 서비스 계정 키 파일 로드
             InputStream serviceAccount = getClass()
-                    .getResourceAsStream("/ticketmate-firebase-key.json");
+                    .getResourceAsStream(firebaseKeyPath);
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -30,7 +35,8 @@ public class FireBaseConfig {
                 log.debug("FireBase 설정 초기화 완료");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Firebase 초기화 중 오류가 발생했습니다: {}", e.getMessage());
+            throw e;
         }
     }
 }
