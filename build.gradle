@@ -82,6 +82,12 @@ dependencies {
 
     // DataFaker
     implementation 'net.datafaker:datafaker:2.4.2'
+
+    // FireBase
+    implementation group: 'com.google.firebase', name: 'firebase-admin', version: '9.2.0'
+
+    // Thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {
