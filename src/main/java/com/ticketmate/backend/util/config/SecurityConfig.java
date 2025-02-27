@@ -2,6 +2,7 @@ package com.ticketmate.backend.util.config;
 
 import com.ticketmate.backend.service.member.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.filter.CustomLogoutHandler;
 import com.ticketmate.backend.util.filter.CustomSuccessHandler;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final CustomSuccessHandler customSuccessHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
+    private final CustomLogoutHandler customLogoutHandler;
 
     /**
      * 허용된 CORS Origin 목록
@@ -70,6 +72,7 @@ public class SecurityConfig {
                 // 로그아웃
                 .logout(logout -> logout
                         .logoutUrl("/logout") // "/logout" 경로로 접근 시 로그아웃
+                        .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제, 블랙리스트)
                         .logoutSuccessUrl("/login") // 로그아웃 성공 후 로그인 창 이동
                         .invalidateHttpSession(true)
                 )

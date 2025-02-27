@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -49,8 +50,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // Member 확인
-        Member member = memberRepository.findByUsername(oAuth2Response.getEmail());
-        if (member == null) { // 첫 로그인한 회원인 경우
+        Optional<Member> optionalMember = memberRepository.findByUsername(oAuth2Response.getEmail());
+        Member member;
+        if (optionalMember.isEmpty()) { // 첫 로그인한 회원인 경우
             member = Member.builder()
                     .socialLoginId(oAuth2Response.getId())
                     .username(oAuth2Response.getEmail())
@@ -69,6 +71,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .lastLoginTime(LocalDateTime.now())
                     .build();
         } else { // 첫 로그인이 아닌경우
+            member = optionalMember.get();
             if (!member.getSocialPlatform().equals(socialPlatform)) { // 기존 가입된 소셜 플랫폼과 다른경우
                 log.error("기존에 가입한 소셜 로그인 플랫폼이 아닙니다. 현재 요청한 소셜 플랫폼: {}, 기존 회원가입된 소셜 플랫폼: {}",
                         socialPlatform, member.getSocialPlatform());
@@ -85,11 +88,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     // 회원 이메일을 통한 CustomOAuth2User 반환
     public CustomOAuth2User loadUserByUsername(String username) {
 
-        Member member = memberRepository.findByUsername(username);
-        if (member == null) {
-            log.error("회원을 찾을 수 없습니다. 요청 username: {}", username);
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.error("회원을 찾을 수 없습니다. 요청 username: {}", username);
+                    return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+                });
 
         return new CustomOAuth2User(member, null);
     }

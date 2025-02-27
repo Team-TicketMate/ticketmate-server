@@ -201,6 +201,23 @@ public class JwtUtil {
     }
 
     /**
+     * 토큰 만료까지 남은 시간 반환
+     */
+    public Long getExpiration(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSignKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.getExpiration().getTime() - System.currentTimeMillis();
+        } catch (Exception e) {
+            log.error("토큰 만료까지 남은 시간 추출 실패: {}", e.getMessage());
+            return 0L;
+        }
+    }
+
+    /**
      * JWT 토큰에서 Authentication 객체 생성
      *
      * @param token JWT 토큰
