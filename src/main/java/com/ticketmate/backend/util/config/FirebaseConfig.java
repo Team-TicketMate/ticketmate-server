@@ -13,7 +13,7 @@ import java.io.InputStream;
 
 @Configuration
 @Slf4j
-public class FireBaseConfig {
+public class FirebaseConfig {
 
     @Value("${firebase.service-account-key-path}")
     private String firebaseKeyPath;

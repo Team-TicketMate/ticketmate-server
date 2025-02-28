@@ -28,6 +28,10 @@ jobs:
         run: |
           echo "${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}" | sed 's/\\n/\n/g' > ./src/main/resources/ticketmate-firebase-key.json
 
+      - name: Check generated file
+        run: |
+          cat ./src/main/resources/ticketmate-firebase-key.json
+
       # firebase 서비스워커 파일을 빌드 전에 생성
       - name: Create firebase-messaging-sw.js from secret
         run: |
