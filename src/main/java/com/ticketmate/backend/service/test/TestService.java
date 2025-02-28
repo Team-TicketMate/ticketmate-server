@@ -1,14 +1,14 @@
 package com.ticketmate.backend.service.test;
 
-import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.constants.ConcertType;
-import com.ticketmate.backend.object.constants.Role;
-import com.ticketmate.backend.object.constants.TicketReservationSite;
+import com.ticketmate.backend.object.constants.*;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
+import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
+import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
@@ -28,6 +28,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import static com.ticketmate.backend.object.constants.MemberType.AGENT;
+import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
 import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
 
 @Service
@@ -43,14 +45,14 @@ public class TestService {
     private final TaskExecutor taskExecutor;
     private final ConcertRepository concertRepository;
     private final ConcertHallRepository concertHallRepository;
+    private final ApplicationFormRepository applicationFormRepository;
 
     /*
     ======================================회원======================================
      */
 
     /**
-     * 개발자용 테스트 로그인 로직
-     * DB에 테스트 유저를 만든 후, 해당 사용자의 엑세스 토큰을 발급합니다.
+     * 개발자용 회원 Mock 데이터 생성
      *
      * @param request socialPlatform 네이버/카카오 소셜 로그인 플랫폼
      *                memberType 의로인/대리인
@@ -58,14 +60,15 @@ public class TestService {
      *                isFirstLogin 첫 로그인 여부
      */
     @Transactional
-    public String testSocialLogin(LoginRequest request) {
+    public Member createMockMember(LoginRequest request) {
+
+        log.debug("테스트 Mock 회원을 생성합니다");
         LocalDate birth = koFaker.timeAndDate().birthday();
-        log.debug("Faker 생성 birth: {}", birth);
         String birthYear = Integer.toString(birth.getYear()); // YYYY
         String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
 
-        log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
-        Member testMember = Member.builder()
+
+        return Member.builder()
                 .socialLoginId(UUID.randomUUID().toString())
                 .username(enFaker.internet().emailAddress().replaceAll("[^a-zA-Z0-9@\\s]", ""))
                 .nickname(enFaker.lorem().word())
@@ -82,9 +85,24 @@ public class TestService {
                 .isFirstLogin(request.getIsFirstLogin())
                 .lastLoginTime(LocalDateTime.now())
                 .build();
-        memberRepository.save(testMember);
+    }
 
-        CustomOAuth2User customOAuth2User = new CustomOAuth2User(testMember, null);
+    /**
+     * 개발자용 테스트 로그인 로직
+     * DB에 테스트 유저를 만든 후, 해당 사용자의 엑세스 토큰을 발급합니다.
+     *
+     * @param request socialPlatform 네이버/카카오 소셜 로그인 플랫폼
+     *                memberType 의로인/대리인
+     *                accountStatus 활성화/삭제
+     *                isFirstLogin 첫 로그인 여부
+     */
+    @Transactional
+    public String testSocialLogin(LoginRequest request) {
+
+        log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
+
+        Member member = memberRepository.save(createMockMember(request));
+        CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, null);
         String accessToken = jwtUtil.createAccessToken(customOAuth2User);
 
         log.debug("테스트 로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
@@ -156,9 +174,10 @@ public class TestService {
     }
 
     /**
-     * 공연장 단일 Mock 데이터를 생성 후 반환합니다.
+     * 공연장 단일 Mock 데이터를 생성 후 반환합니다. (저장 X)
      */
-    private ConcertHall createConcertHallMockData() {
+    @Transactional
+    public ConcertHall createConcertHallMockData() {
 
         String concertHallName = koFaker.music().instrument() + " " + koFaker.book().author() + koFaker.random().nextInt(1, 1001) + "공연장";
         String address = koFaker.address().fullAddress();
@@ -230,9 +249,10 @@ public class TestService {
     }
 
     /**
-     * 공연 단일 Mock 데이터를 생성 후 반환합니다.
+     * 공연 단일 Mock 데이터를 생성 후 반환합니다. (저장 X)
      */
-    private Concert createConcertMockData(List<ConcertHall> concertHallList) {
+    @Transactional
+    public Concert createConcertMockData(List<ConcertHall> concertHallList) {
 
         // 1. 공연 이름
         String concertName = koFaker.music().genre() + " " + koFaker.team().name() + "공연";
@@ -276,5 +296,150 @@ public class TestService {
                 .concertThumbnailUrl(concertThumbnailUrl)
                 .ticketReservationSite(ticketReservationSite)
                 .build();
+    }
+
+    /*
+    ======================================신청서======================================
+     */
+
+    /**
+     * 사용자로부터 원하는 개수를 입력받아 신청서 Mock 데이터를 추가합니다
+     * 해당 메서드는 멀티 스레드를 사용하여 동작합니다
+     */
+    @Transactional
+    public void createApplicationMockData(Integer count) {
+
+        log.debug("신청서 Mock 데이터 저장을 시작합니다");
+        count = null2ZeroInt(count) == 0 ? 30 : count;
+
+        // 데이터베이스에서 대리인 목록 조회
+        List<Member> agentList = memberRepository.findAllByMemberType(AGENT)
+                .orElseThrow(() -> {
+                    log.error("데이터베이스에 저장 된 대리인이 없습니다.");
+                    return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+                });
+
+        // 데이터베이스에서 의뢰인 목록 조회
+        List<Member> clientList = memberRepository.findAllByMemberType(CLIENT)
+                .orElseThrow(() -> {
+                    log.error("데이터베이스에 저장 된 의뢰인이 없습니다.");
+                    return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+                });
+
+        // 데이터베이스에서 콘서트 목록 조회
+        List<Concert> concertList = concertRepository.findAll();
+        if (concertList.isEmpty()) {
+            log.error("저장된 공연이 없습니다. 공연 Mock 데이터를 먼저 생성하세요.");
+            throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+        }
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<ApplicationForm> applicationForms = Collections.synchronizedList(new ArrayList<>());
+
+        // 멀티스레드 처리
+        for (int i = 0; i < count; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    ApplicationForm applicationForm = createApplicationMockData(agentList, clientList, concertList);
+                    synchronized (this) {
+                        applicationForms.add(applicationForm);
+                    }
+                } catch (Exception e) {
+                    log.error("신청서 Mock 데이터 멀티스레드 저장 중 오류 발생: {}", e.getMessage());
+                }
+            }, taskExecutor);
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenRun(() -> {
+                    try {
+                        applicationFormRepository.saveAll(applicationForms);
+                        log.debug("신청서 Mock 데이터 저장 완료, 저장된 개수: {}", applicationForms.size());
+                    } catch (Exception e) {
+                        log.error("신청서 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+                    }
+                })
+                .exceptionally(throwable -> {
+                    log.error("신청서 Mock 데이터 생성 중 오류 발생: {}", throwable.getMessage());
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                });
+    }
+
+    /**
+     * 신청서 단일 Mock 데이터를 생성합니다 (저장 X)
+     *
+     * @param agentList DB에 저장된 대리인 리스트
+     * @param clientList DB에 저장된 의뢰인 리스트
+     * @param concertList DB에 저장된 콘서트 리스트
+     * @return 생성된 신청서 Mock데이터
+     */
+    private ApplicationForm createApplicationMockData(
+            List<Member> agentList, List<Member> clientList, List<Concert> concertList) {
+
+        // 1. 의뢰인 (DB에서 랜덤 선택)
+        Member client = clientList.
+                get(koFaker.random().nextInt(clientList.size()));
+
+        // 2. 대리인 (DB에서 랜덤 선택)
+        Member agent = agentList
+                .get(koFaker.random().nextInt(agentList.size()));
+
+        // 3. 콘서트 (DB에서 랜덤 선택)
+        Concert concert = concertList
+                .get(koFaker.random().nextInt(concertList.size()));
+
+        // 4. 희망구역 리스트 (0 ~ 10개 랜덤)
+        List<HopeArea> hopeAreaList = createHopeAreaList();
+
+        // 5. 신청서 상태 (랜덤)
+        ApplicationStatus applicationStatus = ApplicationStatus
+                .values()[koFaker.random().nextInt(ApplicationStatus.values().length)];
+
+        ApplicationForm applicationForm = ApplicationForm.builder()
+                .client(client)
+                .agent(agent)
+                .concert(concert)
+                .requestCount(koFaker.number().numberBetween(1, 4))
+                .hopeAreaList(new ArrayList<>())
+                .requestDetails(koFaker.lorem().paragraph(2))
+                .applicationStatus(applicationStatus)
+                .build();
+
+        hopeAreaList.forEach(applicationForm::addHopeArea);
+
+        return applicationForm;
+    }
+
+    /**
+     * 희망구역 리스트를 생성합니다 (0개 ~ 10개 랜덤)
+     */
+    private List<HopeArea> createHopeAreaList() {
+        int size = koFaker.random().nextInt(11);
+        List<HopeArea> hopeAreaList = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            HopeArea hopeArea = HopeArea.builder()
+                    .priority(i + 1)
+                    .location(createRandomLocation())
+                    .price(koFaker.number().numberBetween(1, 21) * 10000L)
+                    .build();
+            hopeAreaList.add(hopeArea);
+        }
+        return hopeAreaList;
+    }
+
+    /**
+     * A13, E9, K30 과 같은 좌석번호를 랜덤하게 생성합니다
+     * A~Z 알파벳, 1~30 정수 결합
+     */
+    private String createRandomLocation() {
+        // A~Z 알파벳 랜덤 생성
+        char randomLetter = (char) ('A' + koFaker.number().numberBetween(0, 26));
+        // 1~30 랜덤 숫자 생성
+        int randomNumber = koFaker.number().numberBetween(1, 31);
+        // 문자열 결합
+        return randomLetter + String.valueOf(randomNumber);
     }
 }

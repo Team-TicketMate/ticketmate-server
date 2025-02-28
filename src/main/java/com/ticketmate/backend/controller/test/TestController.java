@@ -55,5 +55,14 @@ public class TestController implements TestControllerDocs {
         return ResponseEntity.ok().build();
     }
 
+    @Override
+    @PostMapping("/application-form")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> createApplicationFormMockData(
+            @Schema(defaultValue = "30") Integer count) {
+        testService.createApplicationMockData(count);
+        return ResponseEntity.ok().build();
+    }
+
 
 }
