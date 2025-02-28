@@ -2,33 +2,60 @@ package com.ticketmate.backend.util.common;
 
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
+import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface EntityMapper {
-    // ConcertHall -> ConcertHallFilteredResponse
+
+    /*
+    ======================================공연장======================================
+     */
+
+    // ConcertHall -> ConcertHallFilteredResponse (엔티티 -> DTO)
     ConcertHallFilteredResponse toConcertHallFilteredResponse(ConcertHall concertHall);
 
-    // Concert -> ConcertFilteredResponse
+
+    /*
+    ======================================공연======================================
+     */
+
+    // Concert -> ConcertFilteredResponse (엔티티 -> DTO)
     @Mapping(source = "concertHall.concertHallName", target = "concertHallName")
     ConcertFilteredResponse toConcertFilteredResponse(Concert concert);
 
-    // Portfolio -> PortfolioListForAdminResponse
+
+    /*
+    ======================================포트폴리오======================================
+     */
+
+    // Portfolio -> PortfolioListForAdminResponse (엔티티 -> DTO)
     @Mapping(source = "member.memberId", target = "memberId")
     @Mapping(source = "member.nickname", target = "nickname")
     PortfolioListForAdminResponse toPortfolioListForAdminResponse(Portfolio portfolio);
 
-    // Portfolio -> PortfolioForAdminResponse
+    // Portfolio -> PortfolioForAdminResponse (엔티티 -> DTO)
     @Mapping(source = "member.memberId", target = "memberId")
     @Mapping(source = "member.nickname", target = "nickname")
     @Mapping(source = "member.phone", target = "phone")
     @Mapping(source = "member.profileUrl", target = "profileUrl")
     @Mapping(source = "member.memberType", target = "memberType")
     PortfolioForAdminResponse toPortfolioForAdminResponse(Portfolio portfolio);
+
+
+    /*
+    ======================================신청서======================================
+     */
+
+    // List<HopeAreaRequest> -> List<HopeArea> (DTO 리스트 -> 엔티티 리스트)
+    List<HopeArea> toHopeAreaList(List<HopeAreaRequest> hopeAreaRequestList);
 }
