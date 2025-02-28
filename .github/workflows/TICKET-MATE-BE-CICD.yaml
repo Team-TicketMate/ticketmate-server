@@ -26,7 +26,7 @@ jobs:
       # firebase sdk 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
       - name: Create ticketmate-firebase-key.json from secret
         run: |
-          echo "${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}" | sed 's/\\n/\n/g' > ./src/main/resources/ticketmate-firebase-key.json
+          echo "${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}" | sed 's/\\n/\/g' > ./src/main/resources/ticketmate-firebase-key.json
 
       - name: Check generated file
         run: |
