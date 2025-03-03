@@ -25,7 +25,7 @@ public class FcmService {
     public FcmTokenSaveResponse saveFcmToken(FcmTokenSaveRequest request, Member member) {
         // DTO -> 엔티티
         FcmToken fcmToken = FcmToken.builder()
-                .fcmToken(request.getFmcToken())
+                .fcmToken(request.getFcmToken())
                 .memberId(member.getMemberId())
                 .memberPlatform(request.getMemberPlatform())
                 .build();
