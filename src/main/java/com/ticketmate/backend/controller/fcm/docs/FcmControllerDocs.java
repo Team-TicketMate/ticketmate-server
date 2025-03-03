@@ -14,7 +14,7 @@ public interface FcmControllerDocs {
                     이 API는 인증이 필요합니다.
 
                     ### 요청 파라미터
-                    - **fmcToken** (String): FCM 토큰값 [필수]
+                    - **fcmToken** (String): FCM 토큰값 [필수]
                     - **memberPlatform** (String): 사용자 기기값 [필수]
                                         
                     ### MemberPlatform
