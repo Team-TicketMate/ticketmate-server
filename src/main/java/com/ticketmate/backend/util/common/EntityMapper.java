@@ -3,8 +3,11 @@ package com.ticketmate.backend.util.common;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
@@ -58,4 +61,17 @@ public interface EntityMapper {
 
     // List<HopeAreaRequest> -> List<HopeArea> (DTO 리스트 -> 엔티티 리스트)
     List<HopeArea> toHopeAreaList(List<HopeAreaRequest> hopeAreaRequestList);
+
+    // HopeArea -> HopeAreaResponse (엔티티 -> DTO)
+    HopeAreaResponse toHopeAreaResponse(HopeArea hopeArea);
+
+    // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
+    List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
+
+    // ApplicationForm -> ApplicationFormFilteredResponse (엔티티 -> DTO)
+    @Mapping(source = "client.memberId", target = "clientId")
+    @Mapping(source = "agent.memberId", target = "agentId")
+    @Mapping(source = "concert.concertId", target = "concertId")
+    @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
+    ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
 }

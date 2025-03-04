@@ -11,8 +11,6 @@ import java.util.UUID;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
 
-    Boolean existsByUsername(String username);
-
     Optional<Member> findByUsername(String username);
 
     Optional<List<Member>> findAllByMemberType(MemberType memberType);

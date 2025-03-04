@@ -1,7 +1,9 @@
 package com.ticketmate.backend.service.application;
 
 import com.ticketmate.backend.object.constants.ApplicationStatus;
+import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
@@ -14,13 +16,21 @@ import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
+import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
+import static com.ticketmate.backend.util.common.CommonUtil.enumToString;
+import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
 
 @Service
 @Slf4j
@@ -53,6 +63,12 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
         }
 
+        // 의뢰인 확인
+        if (!client.getMemberType().equals(CLIENT)) { // 해당 회원이 '의뢰인'이 아닌경우
+            log.error("요청한 사용자는 의뢰인 자격이 없습니다. {}: {}", client.getUsername(), client.getMemberType());
+            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+        }
+
         // 콘서트 확인
         Concert concert = concertRepository.findById(request.getConcertId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
@@ -77,5 +93,83 @@ public class ApplicationFormService {
 
         applicationFormRepository.save(applicationForm);
         log.debug("요청된 신청서 저장 성공. 대리인: {}, 콘서트: {}", agent.getUsername(), concert.getConcertName());
+    }
+
+    /**
+     * 신청서 필터링 조회
+     *
+     * @param request clientId 의뢰인 PK
+     *                agentId 대리인 PK
+     *                concertId 콘서트 PK
+     *                requestCount 매수
+     *                applicationStatus 신청서 상태
+     *                pageNumber 요청 페이지 번호 (기본 0)
+     *                pageSize 한 페이지 당 항목 수 (기본 30)
+     *                sortField 정렬할 필드 (기본: created_date)
+     *                sortDirection 정렬 방향 (기본: DESC)
+     */
+    @Transactional(readOnly = true)
+    public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
+
+        UUID clientId = request.getClientId();
+        UUID agentId = request.getAgentId();
+        UUID concertId = request.getConcertId();
+        String applicationStatus = enumToString(request.getApplicationStatus());
+        int requestCount = null2ZeroInt(request.getRequestCount());
+
+        // clientId가 입력된 경우 의뢰인 검증
+        if (clientId != null) {
+            Member client = memberRepository.findById(request.getClientId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_TYPE));
+            if (!client.getMemberType().equals(CLIENT)) {
+                log.error("요청된 의뢰인 MemberType에 오류가 있습니다.");
+                throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+            }
+        }
+
+        // agentId가 입력된 경우 대리인 검증
+        if (agentId != null) {
+            Member agent = memberRepository.findById(request.getAgentId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+            if (!agent.getMemberType().equals(AGENT)) {
+                log.error("요청된 대리자 MemberType에 오류가 있습니다.");
+                throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+            }
+        }
+
+        // concertId가 입력된 경우 콘서트 검증
+        if (concertId != null) {
+            concertRepository.findById(request.getConcertId())
+                    .orElseThrow(() -> {
+                        log.error("요청된 값에 해당하는 콘서트를 찾을 수 없습니다.");
+                        return new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+                    });
+        }
+
+        // 정렬 조건
+        Sort sort = Sort.by(
+                Sort.Direction.fromString(request.getSortDirection()),
+                request.getSortField()
+        );
+
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(
+                request.getPageNumber(),
+                request.getPageSize(),
+                sort
+        );
+
+        Page<ApplicationForm> applicationFormPage = applicationFormRepository
+                .filteredApplicationForm(
+                        clientId != null ? clientId.toString() : "",
+                        agentId != null ? agentId.toString() : "",
+                        concertId != null ? concertId.toString() : "",
+                        requestCount,
+                        applicationStatus,
+                        pageable
+                );
+
+        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
+        return applicationFormPage.map(entityMapper::toApplicationFormFilteredResponse);
     }
 }
