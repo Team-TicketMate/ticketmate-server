@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
+import static com.ticketmate.backend.object.constants.Role.*;
 import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
 
 @Service
@@ -67,6 +68,11 @@ public class TestService {
         String birthYear = Integer.toString(birth.getYear()); // YYYY
         String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
 
+        // 테스트 회원 ROLE 검증
+        if (request.getRole() != ROLE_TEST && request.getRole() != ROLE_TEST_ADMIN) {
+            log.error("테스트 로그인은 ROLE_TEST, ROLE_TEST_ADMIN 권한만 생성 가능합니다. 요청된 ROLE: {}", request.getRole());
+            throw new CustomException(ErrorCode.INVALID_MEMBER_ROLE_REQUEST);
+        }
 
         return Member.builder()
                 .socialLoginId(UUID.randomUUID().toString())
@@ -79,7 +85,7 @@ public class TestService {
                 .phone(koFaker.phoneNumber().cellPhone())
                 .profileUrl(koFaker.internet().image())
                 .gender(koFaker.options().option("male", "female"))
-                .role(Role.ROLE_TEST)
+                .role(request.getRole())
                 .memberType(request.getMemberType())
                 .accountStatus(request.getAccountStatus())
                 .isFirstLogin(request.getIsFirstLogin())
@@ -91,7 +97,8 @@ public class TestService {
      * 개발자용 테스트 로그인 로직
      * DB에 테스트 유저를 만든 후, 해당 사용자의 엑세스 토큰을 발급합니다.
      *
-     * @param request socialPlatform 네이버/카카오 소셜 로그인 플랫폼
+     * @param request role 권한 (ROLE_TEST / ROLE_TEST_ADMIN)
+     *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
      *                memberType 의로인/대리인
      *                accountStatus 활성화/삭제
      *                isFirstLogin 첫 로그인 여부
@@ -117,7 +124,8 @@ public class TestService {
     @Transactional
     public void deleteTestMember() {
         log.debug("데이터베이스에 저장된 테스트 유저를 모두 삭제합니다.");
-        memberRepository.deleteAllByRole(Role.ROLE_TEST);
+        memberRepository.deleteAllByRole(ROLE_TEST);
+        memberRepository.deleteAllByRole(ROLE_TEST_ADMIN);
     }
 
     /*

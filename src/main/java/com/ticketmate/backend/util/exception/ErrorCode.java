@@ -46,6 +46,8 @@ public enum ErrorCode {
 
     INVALID_MEMBER_TYPE(HttpStatus.BAD_REQUEST, "잘못된 회원 자격입니다"),
 
+    INVALID_MEMBER_ROLE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 권한 요청입니다."),
+
     // CONCERT
 
     CONCERT_NOT_FOUND(HttpStatus.BAD_REQUEST, "콘서트를 찾을 수 없습니다."),
@@ -89,7 +91,7 @@ public enum ErrorCode {
 
     HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 10개까지만 등록 가능합니다."),
 
-    PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다."),;
+    PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다.");
 
     private final HttpStatus status;
     private final String message;
