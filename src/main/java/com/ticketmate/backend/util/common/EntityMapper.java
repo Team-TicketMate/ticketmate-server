@@ -3,7 +3,7 @@ package com.ticketmate.backend.util.common;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
@@ -68,10 +68,10 @@ public interface EntityMapper {
     // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
     List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
 
-    // ApplicationForm -> ApplicationFormFilteredResponse (엔티티 -> DTO)
+    // ApplicationForm -> ApplicationFormInfoResponse (엔티티 -> DTO)
     @Mapping(source = "client.memberId", target = "clientId")
     @Mapping(source = "agent.memberId", target = "agentId")
     @Mapping(source = "concert.concertId", target = "concertId")
     @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
-    ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
+    ApplicationFormInfoResponse toApplicationFormInfoResponse(ApplicationForm applicationForm);
 }

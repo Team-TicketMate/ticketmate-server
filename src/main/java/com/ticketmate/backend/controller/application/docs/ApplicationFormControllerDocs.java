@@ -2,11 +2,13 @@ package com.ticketmate.backend.controller.application.docs;
 
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
 
 public interface ApplicationFormControllerDocs {
 
@@ -73,7 +75,23 @@ public interface ApplicationFormControllerDocs {
                     - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
                     """
     )
-    ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
+    ResponseEntity<Page<ApplicationFormInfoResponse>> filteredApplicationForm(
             CustomOAuth2User customOAuth2User,
             ApplicationFormFilteredRequest request);
+
+    @Operation(
+            summary = "대리 티켓팅 신청서 상세 조회",
+            description = """
+
+                    이 API는 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
+
+                    ### 유의사항
+                    """
+    )
+    ResponseEntity<ApplicationFormInfoResponse> applicationFormInfo(
+            CustomOAuth2User customOAuth2User,
+            UUID applicationFormId);
 }

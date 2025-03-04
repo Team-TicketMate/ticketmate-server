@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class ApplicationFormFilteredResponse {
+public class ApplicationFormInfoResponse {
 
     private UUID clientId; // 의뢰인 PK
 
