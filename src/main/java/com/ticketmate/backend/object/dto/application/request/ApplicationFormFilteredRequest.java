@@ -16,6 +16,14 @@ import java.util.UUID;
 @Builder
 public class ApplicationFormFilteredRequest {
 
+    // 기본값 할당 (1페이지 30개, 최신순)
+    public ApplicationFormFilteredRequest() {
+        this.pageNumber = 0;
+        this.pageSize = 30;
+        this.sortField = "created_date";
+        this.sortDirection = "DESC";
+    }
+
     private UUID clientId; // 의뢰인 PK
 
     private UUID agentId; // 대리인 PK
