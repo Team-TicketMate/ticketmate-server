@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class FcmService {
     private final FcmTokenRepository fcmTokenRepository;
-    private final EntityMapper mapper;
+    private final EntityMapper entityMapper;
 
     /**
      * RedisHash에 FCM 토큰이 저장되는 로직입니다.
@@ -37,6 +37,6 @@ public class FcmService {
         log.debug("사용자 ID : {}", fcmToken.getMemberId());
         log.debug("사용자 기기 : {}", fcmToken.getMemberPlatform());
 
-        return mapper.toFcmTokenSaveResponse(fcmToken);
+        return entityMapper.toFcmTokenSaveResponse(fcmToken);
     }
 }
