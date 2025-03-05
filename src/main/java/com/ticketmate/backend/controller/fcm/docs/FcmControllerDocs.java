@@ -26,7 +26,7 @@ public interface FcmControllerDocs {
                         
                     ### 반환값                                        
                        - tokenId [String] (서버에 저장된 fcm 엔티티의 PK값)
-                       - fmcToken [String] (반환할 fcm 토큰값)
+                       - fcmToken [String] (반환할 fcm 토큰값)
                        - memberId [String] (사용자 PK)
                        - memberPlatform [String] (로그인한 사용자 기기종류)
                                         
