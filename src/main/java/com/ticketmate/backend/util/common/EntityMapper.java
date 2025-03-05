@@ -9,9 +9,11 @@ import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredRespons
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
+import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
+import com.ticketmate.backend.object.redis.FcmToken;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -53,7 +55,7 @@ public interface EntityMapper {
     @Mapping(source = "member.profileUrl", target = "profileUrl")
     @Mapping(source = "member.memberType", target = "memberType")
     PortfolioForAdminResponse toPortfolioForAdminResponse(Portfolio portfolio);
-
+  
 
     /*
     ======================================신청서======================================
@@ -74,4 +76,13 @@ public interface EntityMapper {
     @Mapping(source = "concert.concertId", target = "concertId")
     @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
     ApplicationFormInfoResponse toApplicationFormInfoResponse(ApplicationForm applicationForm);
+  
+  
+    /*
+    ======================================FCM======================================
+     */
+  
+  
+    // FcmToken -> FcmTokenSaveResponse
+    FcmTokenSaveResponse toFcmTokenSaveResponse(FcmToken fcmToken);
 }
