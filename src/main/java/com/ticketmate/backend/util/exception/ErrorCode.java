@@ -77,7 +77,12 @@ public enum ErrorCode {
 
     PORTFOLIO_IMG_BLACK(HttpStatus.BAD_REQUEST, "자신을 소개할 수 있는 포트폴리오 이미지를 첨부해주세요."),
 
-    PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다.");
+    PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다."),
+
+    // Redis Lock
+    LOCK_ACQUISITION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득에 실패했습니다."),
+
+    LOCK_ACQUISITION_INTERRUPT(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득 중 인터럽트가 발생했습니다.");
 
     private final HttpStatus status;
     private final String message;
