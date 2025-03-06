@@ -1,6 +1,8 @@
 package com.ticketmate.backend.controller.auth;
 
 import com.ticketmate.backend.controller.auth.docs.AuthControllerDocs;
+import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.member.MemberService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,8 +29,11 @@ public class AuthController implements AuthControllerDocs {
     @Override
     @PostMapping(value = "/reissue")
     @LogMonitoringInvocation
-    public ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response) {
-        memberService.reissue(request, response);
+    public ResponseEntity<Void> reissue(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Member member = customOAuth2User.getMember();
+        memberService.reissue(request, response, member);
         return ResponseEntity.ok().build();
     }
 }
