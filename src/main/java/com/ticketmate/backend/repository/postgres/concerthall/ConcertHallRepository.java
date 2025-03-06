@@ -26,7 +26,7 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
             countQuery = """
                     select count(*)
                     from concert_hall
-                    where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName), '%'))
+                    where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
                     and ((:maxCapacity = 0 or :minCapacity = 0) or capacity between :minCapacity and :maxCapacity)
                     and (trim(:city) = '' or :city = city)
                     """,
