@@ -49,10 +49,10 @@ public class ConcertHallFilteredRequest {
     private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
-    @Pattern(regexp = "^(created_date|capacity)")
+    @Pattern(regexp = "^(created_date|capacity)$")
     private String sortField; // 정렬 조건 (생성일, 수용인원)
 
     @Schema(defaultValue = "DESC")
-    @Pattern(regexp = "^(ASC|DESC)", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
+    @Pattern(regexp = "^(ASC|DESC)$", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
     private String sortDirection; // ASC, DESC
 }
