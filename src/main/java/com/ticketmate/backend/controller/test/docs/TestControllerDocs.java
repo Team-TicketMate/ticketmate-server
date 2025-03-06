@@ -13,6 +13,7 @@ public interface TestControllerDocs {
                     이 API는 인증이 필요하지 않습니다.
 
                     ### 요청 파라미터
+                    - **role** (String): 회원 권한 [필수]
                     - **socialPlatform** (String): 소셜 플랫폼 [필수]
                     - **memberType** (String): 의뢰인/대리자 (기본: 의뢰인)
                     - **accountStatus** (String): 활성화/삭제 (기본: 활성화)
@@ -21,6 +22,7 @@ public interface TestControllerDocs {
                     ### 유의사항
                     - 개발자의 편의를 위한 소셜 로그인 회원가입/로그인 메서드입니다
                     - 스웨거에서 테스트 용도로만 사용해야하며, 엑세스 토큰만 제공됩니다.
+                    - `ROLE_TEST`, `ROLE_TEST_ADMIN`만 선택 가능합니다
 
                     """
     )
@@ -75,4 +77,21 @@ public interface TestControllerDocs {
                     """
     )
     ResponseEntity<Void> createConcertMockData(Integer count);
+
+    @Operation(
+            summary = "테스트 신청서 데이터 추가",
+            description = """
+                    
+                    이 API는 인증이 필요하지 않습니다.
+
+                    ### 요청 파라미터
+                    - **count** (Integer): 추가할 Mock 데이터 개수 (선택)
+
+                    ### 유의사항
+                    - 생성되는 신청서 Mock 데이터 기본값은 30개입니다
+                    - 중복 데이터 생성에 따라 사용자가 원하는 개수보다 적은 데이터가 저장될 수 있습니다
+
+                    """
+    )
+    ResponseEntity<Void> createApplicationFormMockData(Integer count);
 }

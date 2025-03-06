@@ -40,4 +40,14 @@ public class CommonUtil {
         }
         return val;
     }
+
+    /**
+     * Enum 값을 String 으로 변환
+     *
+     * @param enumValue 변환한 Enum 값
+     * @return Enum의 name() 또는 빈 문자열
+     */
+    public static String enumToString(Enum<?> enumValue) {
+        return enumValue != null ? enumValue.name() : "";
+    }
 }

@@ -2,6 +2,7 @@ package com.ticketmate.backend.object.dto.test.request;
 
 import com.ticketmate.backend.object.constants.AccountStatus;
 import com.ticketmate.backend.object.constants.MemberType;
+import com.ticketmate.backend.object.constants.Role;
 import com.ticketmate.backend.object.constants.SocialPlatform;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -12,6 +13,10 @@ import lombok.*;
 @Setter
 @Builder
 public class LoginRequest {
+
+    @Schema(defaultValue = "ROLE_TEST")
+    private Role role;
+
     @Schema(defaultValue = "NAVER")
     private SocialPlatform socialPlatform;
 
