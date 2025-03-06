@@ -25,6 +25,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    private static final String REFRESH_PREFIX = "RT:";
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
@@ -39,7 +41,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // RefreshToken을 Redisd에 저장 (key: RT:memberId)
         redisTemplate.opsForValue().set(
-                "RT:" + customOAuth2User.getMemberId(),
+                REFRESH_PREFIX + customOAuth2User.getMemberId(),
                 refreshToken,
                 jwtUtil.getRefreshExpirationTime(),
                 TimeUnit.MILLISECONDS
