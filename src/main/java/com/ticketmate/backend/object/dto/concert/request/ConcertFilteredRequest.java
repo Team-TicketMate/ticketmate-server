@@ -70,10 +70,10 @@ public class ConcertFilteredRequest {
     private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
-    @Pattern(regexp = "^(created_date|ticket_pre_open_date|ticket_open_date|duration)")
+    @Pattern(regexp = "^(created_date|ticket_pre_open_date|ticket_open_date|duration)$")
     private String sortField; // 정렬 조건 (생성일, 선 예매 오픈일, 티켓 오픈일, 공연시간)
 
     @Schema(defaultValue = "DESC")
-    @Pattern(regexp = "^(ASC|DESC)", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
+    @Pattern(regexp = "^(ASC|DESC)$", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
     private String sortDirection; // ASC, DESC
 }
