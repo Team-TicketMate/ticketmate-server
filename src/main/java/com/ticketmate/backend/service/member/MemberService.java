@@ -1,6 +1,7 @@
 package com.ticketmate.backend.service.member;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -9,8 +10,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -18,12 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String REFRESH_PREFIX = "RT:";
 
     /**
-     * 쿠키에 저장된 refreshToken을 통해 accessToken을 재발급합니다.
+     * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
      */
     @Transactional
-    public void reissue(HttpServletRequest request, HttpServletResponse response) {
+    public void reissue(HttpServletRequest request, HttpServletResponse response, Member member) {
 
         log.debug("accessToken이 만료되어 재발급을 진행합니다.");
         String refreshToken = null;
@@ -45,14 +52,40 @@ public class MemberService {
         // 해당 refreshToken이 유효한지 검증
         isValidateRefreshToken(refreshToken);
 
-        // 새로운 accessToken 발급
+        // 새로운 accessToken, refreshToken 발급
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) jwtUtil
                 .getAuthentication(refreshToken).getPrincipal();
         String newAccessToken = jwtUtil.createAccessToken(customOAuth2User);
+        String newRefreshToken = jwtUtil.createRefreshToken(customOAuth2User);
+
+        // 기존 refreshToken 삭제
+        if (redisTemplate.delete(REFRESH_PREFIX + member.getMemberId())) {
+            log.debug("기존 리프레시 토큰 삭제: {}", member.getMemberId());
+        } else {
+            log.warn("리프레시 토큰 삭제에 실패했습니다: {}", member.getMemberId());
+        }
 
         // 헤더에 accessToken 추가
         response.setHeader("Authorization", "Bearer " + newAccessToken);
         log.debug("accessToken 재발급 성공");
+
+        // refreshToken 저장
+        // RefreshToken을 Redisd에 저장 (key: RT:memberId)
+        redisTemplate.opsForValue().set(
+                REFRESH_PREFIX + customOAuth2User.getMemberId(),
+                newRefreshToken,
+                jwtUtil.getRefreshExpirationTime(),
+                TimeUnit.MILLISECONDS
+        );
+        log.debug("refreshToken 재발급 및 저장 성공");
+
+        // 쿠키에 refreshToken 추가
+        Cookie cookie = new Cookie("refreshToken", newRefreshToken);
+        cookie.setHttpOnly(true); // HttpOnly 설정
+        cookie.setSecure(true); // FIXME: HTTPS 환경에서는 secure 속성 true로 설정 (현재는 HTTP)
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
+        response.addCookie(cookie);
     }
 
     /**
