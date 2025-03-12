@@ -13,9 +13,12 @@ import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
+import com.ticketmate.backend.object.redis.FcmToken;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
+import com.ticketmate.backend.repository.redis.FcmTokenRepository;
+import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -42,9 +45,10 @@ public class AdminService {
     private final PortfolioRepository portfolioRepository;
     private final FileService fileService;
     private final EntityMapper entityMapper;
+    private final FcmTokenRepository fcmTokenRepository;
+    private final FcmService fcmService;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
-
 
 
     /*
@@ -163,6 +167,13 @@ public class AdminService {
         // 검토중으로 update
         portfolio.setPortfolioType(PortfolioType.REVIEWING);
 
+        UUID memberId = portfolio.getMember().getMemberId();
+        List<FcmToken> memberTokenList = fcmTokenRepository.findAllByMemberId(memberId);
+        log.debug("token정보 : {}", memberTokenList.get(0).getTokenId());
+
+        String notificationMessage = reviewingNotificationMessage(portfolio);
+        fcmService.sendNotification(memberId, notificationMessage);
+
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
         List<PortfolioImg> imgList = portfolio.getImgList();
@@ -188,18 +199,47 @@ public class AdminService {
 
         log.debug("변경전 포트폴리오 TYPE: {}", portfolio.getPortfolioType());
 
+        UUID memberId = portfolio.getMember().getMemberId();
+
         // 승인
         if (request.getPortfolioType().equals(PortfolioType.REVIEW_COMPLETED)) {
             portfolio.setPortfolioType(PortfolioType.REVIEW_COMPLETED);
             log.debug("승인완료: {}", portfolio.getPortfolioType());
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
+
+            String notificationMessage = reviewCompletedNotificationMessage(portfolio);
+            fcmService.sendNotification(memberId, notificationMessage);
         } else {
             // 반려
             portfolio.setPortfolioType(PortfolioType.COMPANION);
             log.debug("반려완료: {}", portfolio.getPortfolioType());
+
+            String notificationMessage = companionNotificationMessage(portfolio);
+            fcmService.sendNotification(memberId, notificationMessage);
         }
 
         return portfolio.getPortfolioId();
+    }
+
+    /**
+     * 검토중일때 전송될 알림입니다.
+     */
+    private String reviewingNotificationMessage(Portfolio portfolio) {
+        return "관리자가 " + portfolio.getMember().getNickname() + " 님의 포트폴리오를 검토중입니다.";
+    }
+    /**
+     * 승인시 전송될 알림입니다.
+     */
+
+    private String reviewCompletedNotificationMessage(Portfolio portfolio) {
+        return portfolio.getMember().getNickname() + " 님의 포트폴리오가 관리자에 의해 승인처리 되었습니다.";
+    }
+    /**
+     * 반려시 전송될 알림입니다.
+     */
+
+    private String companionNotificationMessage(Portfolio portfolio) {
+        return portfolio.getMember().getNickname() + " 님의 포트폴리오가 관리자에 의해 반려처리 되었습니다.";
     }
 }
