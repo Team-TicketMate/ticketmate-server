@@ -9,6 +9,7 @@ import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminRespons
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
@@ -170,8 +171,10 @@ public class AdminService {
 
         UUID memberId = portfolio.getMember().getMemberId();
 
-        String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.REVIEWING, portfolio);
-        fcmService.sendNotification(memberId, notificationMessage);
+        NotificationPayloadRequest payload = notificationUtil
+                .portfolioNotification(PortfolioType.REVIEWING, portfolio);
+
+        fcmService.sendNotification(memberId, payload);
 
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
@@ -185,7 +188,6 @@ public class AdminService {
 
         return portfolioForAdminResponse;
     }
-
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
      * @param portfolioId (UUID)
@@ -207,15 +209,19 @@ public class AdminService {
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
 
-            String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
-            fcmService.sendNotification(memberId, notificationMessage);
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
         } else {
             // 반려
             portfolio.setPortfolioType(PortfolioType.COMPANION);
             log.debug("반려완료: {}", portfolio.getPortfolioType());
 
-            String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.COMPANION, portfolio);
-            fcmService.sendNotification(memberId, notificationMessage);
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.COMPANION, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
         }
 
         return portfolio.getPortfolioId();
