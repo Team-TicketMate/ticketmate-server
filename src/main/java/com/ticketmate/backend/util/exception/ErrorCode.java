@@ -85,7 +85,7 @@ public enum ErrorCode {
 
     PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다."),
 
-    // Redis Lock
+    // REDIS_LOCK
     LOCK_ACQUISITION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득에 실패했습니다."),
 
     LOCK_ACQUISITION_INTERRUPT(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득 중 인터럽트가 발생했습니다."),
@@ -96,7 +96,11 @@ public enum ErrorCode {
 
     HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 10개까지만 등록 가능합니다."),
 
-    PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다.");
+    PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다."),
+
+    // NOTIFICATION
+
+    FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;
