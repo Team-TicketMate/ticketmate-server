@@ -6,6 +6,7 @@ import com.google.firebase.messaging.WebpushConfig;
 import com.google.firebase.messaging.WebpushNotification;
 import com.ticketmate.backend.object.dto.fcm.request.FcmTokenSaveRequest;
 import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
+import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.redis.FcmToken;
 import com.ticketmate.backend.repository.redis.FcmTokenRepository;
@@ -52,9 +53,9 @@ public class FcmService {
     /**
      *
      * @param memberId (알림을 보낼 회원의 PK)
-     * @param notificationMessage (전송할 알림의 내용)
+     * @param payload (전송할 알림 정보를 담은 DTO)
      */
-    public void sendNotification(UUID memberId, String notificationMessage) {
+    public void sendNotification(UUID memberId, NotificationPayloadRequest payload) {
         List<FcmToken> memberTokenList = fcmTokenRepository.findAllByMemberId(memberId);
 
         if (memberTokenList.isEmpty()) {  // 토큰이 없을 경우 검증
@@ -63,17 +64,17 @@ public class FcmService {
 
         if (memberTokenList.size() > 1) {  // 사용자의 기기가 1개 이상일 경우 (동시접속)
             for (FcmToken fcmToken : memberTokenList) {
-                sendWebNotification(fcmToken, notificationMessage);
+                sendWebNotification(fcmToken, payload);
                 log.debug("다중 기기 알림전송 완료");
                 log.debug("전송된 기기 : {}", fcmToken.getMemberPlatform());
-                log.debug("알림 내용 : {}", notificationMessage);
+                log.debug("알림 내용 : {}", payload);
             }
         } else {  // 사용자의 기기가 1개일경우
             FcmToken fcmToken = memberTokenList.get(0);
-            sendWebNotification(fcmToken, notificationMessage);
+            sendWebNotification(fcmToken, payload);
             log.debug("단일기기 알림전송 완료");
             log.debug("전송된 기기 : {}", fcmToken.getMemberPlatform());
-            log.debug("알림 내용 : {}", notificationMessage);
+            log.debug("알림 내용 : {}", payload);
 
         }
     }
@@ -82,12 +83,12 @@ public class FcmService {
      * 실질적인 알림전송 로직
      */
     @Transactional
-    public void sendWebNotification(FcmToken fcmToken, String bodyMessage) {
+    public void sendWebNotification(FcmToken fcmToken, NotificationPayloadRequest payload) {
         try {
             // WebpushNotification 생성 (알림 제목, 본문, 아이콘 URL 등 설정)
             WebpushNotification webpushNotification = WebpushNotification.builder()
-                    .setTitle("notification")
-                    .setBody(bodyMessage)
+                    .setTitle(payload.getTitle())
+                    .setBody(payload.getBody())
 //                    .setIcon("") 추후 저희 어플리케이션 아이콘이 있다면 추가하면 됩니다.
                     .build();
 
