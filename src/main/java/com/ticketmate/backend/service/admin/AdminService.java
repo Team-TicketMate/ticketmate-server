@@ -22,6 +22,7 @@ import com.ticketmate.backend.service.file.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
+import com.ticketmate.backend.util.notification.NotificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class AdminService {
     private final EntityMapper entityMapper;
     private final FcmTokenRepository fcmTokenRepository;
     private final FcmService fcmService;
+    private final NotificationUtil notificationUtil;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
 
@@ -168,7 +170,7 @@ public class AdminService {
 
         UUID memberId = portfolio.getMember().getMemberId();
 
-        String notificationMessage = reviewingNotificationMessage(portfolio);
+        String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.REVIEWING, portfolio);
         fcmService.sendNotification(memberId, notificationMessage);
 
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
@@ -205,38 +207,17 @@ public class AdminService {
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
 
-            String notificationMessage = reviewCompletedNotificationMessage(portfolio);
+            String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
             fcmService.sendNotification(memberId, notificationMessage);
         } else {
             // 반려
             portfolio.setPortfolioType(PortfolioType.COMPANION);
             log.debug("반려완료: {}", portfolio.getPortfolioType());
 
-            String notificationMessage = companionNotificationMessage(portfolio);
+            String notificationMessage = notificationUtil.portfolioNotification(PortfolioType.COMPANION, portfolio);
             fcmService.sendNotification(memberId, notificationMessage);
         }
 
         return portfolio.getPortfolioId();
-    }
-
-    /**
-     * 검토중일때 전송될 알림입니다.
-     */
-    private String reviewingNotificationMessage(Portfolio portfolio) {
-        return "관리자가 " + portfolio.getMember().getNickname() + " 님의 포트폴리오를 검토중입니다.";
-    }
-    /**
-     * 승인시 전송될 알림입니다.
-     */
-
-    private String reviewCompletedNotificationMessage(Portfolio portfolio) {
-        return portfolio.getMember().getNickname() + " 님의 포트폴리오가 관리자에 의해 승인처리 되었습니다.";
-    }
-    /**
-     * 반려시 전송될 알림입니다.
-     */
-
-    private String companionNotificationMessage(Portfolio portfolio) {
-        return portfolio.getMember().getNickname() + " 님의 포트폴리오가 관리자에 의해 반려처리 되었습니다.";
     }
 }
