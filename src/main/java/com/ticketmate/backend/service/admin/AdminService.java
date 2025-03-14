@@ -13,7 +13,6 @@ import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
-import com.ticketmate.backend.object.redis.FcmToken;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
@@ -168,8 +167,6 @@ public class AdminService {
         portfolio.setPortfolioType(PortfolioType.REVIEWING);
 
         UUID memberId = portfolio.getMember().getMemberId();
-        List<FcmToken> memberTokenList = fcmTokenRepository.findAllByMemberId(memberId);
-        log.debug("token정보 : {}", memberTokenList.get(0).getTokenId());
 
         String notificationMessage = reviewingNotificationMessage(portfolio);
         fcmService.sendNotification(memberId, notificationMessage);
