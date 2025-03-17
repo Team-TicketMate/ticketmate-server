@@ -9,6 +9,7 @@ import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminRespons
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
@@ -16,10 +17,13 @@ import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
+import com.ticketmate.backend.repository.redis.FcmTokenRepository;
+import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
+import com.ticketmate.backend.util.notification.NotificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,9 +46,11 @@ public class AdminService {
     private final PortfolioRepository portfolioRepository;
     private final FileService fileService;
     private final EntityMapper entityMapper;
+    private final FcmTokenRepository fcmTokenRepository;
+    private final FcmService fcmService;
+    private final NotificationUtil notificationUtil;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
-
 
 
     /*
@@ -163,6 +169,13 @@ public class AdminService {
         // 검토중으로 update
         portfolio.setPortfolioType(PortfolioType.REVIEWING);
 
+        UUID memberId = portfolio.getMember().getMemberId();
+
+        NotificationPayloadRequest payload = notificationUtil
+                .portfolioNotification(PortfolioType.REVIEWING, portfolio);
+
+        fcmService.sendNotification(memberId, payload);
+
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
         List<PortfolioImg> imgList = portfolio.getImgList();
@@ -175,7 +188,6 @@ public class AdminService {
 
         return portfolioForAdminResponse;
     }
-
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
      * @param portfolioId (UUID)
@@ -188,16 +200,28 @@ public class AdminService {
 
         log.debug("변경전 포트폴리오 TYPE: {}", portfolio.getPortfolioType());
 
+        UUID memberId = portfolio.getMember().getMemberId();
+
         // 승인
         if (request.getPortfolioType().equals(PortfolioType.REVIEW_COMPLETED)) {
             portfolio.setPortfolioType(PortfolioType.REVIEW_COMPLETED);
             log.debug("승인완료: {}", portfolio.getPortfolioType());
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
+
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
         } else {
             // 반려
             portfolio.setPortfolioType(PortfolioType.COMPANION);
             log.debug("반려완료: {}", portfolio.getPortfolioType());
+
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.COMPANION, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
         }
 
         return portfolio.getPortfolioId();

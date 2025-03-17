@@ -4,6 +4,7 @@ import com.ticketmate.backend.object.constants.MemberPlatform;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class FcmToken {
     @Id
     private String tokenId; // 회원 PK + "-" + MemberPlatform 형태
     private String fcmToken;  // FCM 토큰
+    @Indexed
     private UUID memberId;  // 사용자의 PK
     private MemberPlatform memberPlatform;  // 토큰을 받은 사용자의 기기종류
 
