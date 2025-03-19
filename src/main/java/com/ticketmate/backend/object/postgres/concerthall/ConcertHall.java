@@ -20,24 +20,17 @@ import java.util.UUID;
 public class ConcertHall extends BasePostgresEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(nullable = false, updatable = false)
     private UUID concertHallId;
 
-    // 공연장 이름
-    @Column(nullable = false, unique = true)
-    private String concertHallName;
+    @Column(nullable = false)
+    private String concertHallName; // 공연장 명
 
-    // 수용인원
-    private int capacity;
+    private String address; // 주소
 
-    // 주소
-    private String address;
-
-    // city
     @Enumerated(EnumType.STRING)
-    private City city;
+    private City city; // 지역
 
-    // 홈페이지 url
-    private String concertHallUrl;
+    private String webSiteUrl; // 사이트 URL
 }
