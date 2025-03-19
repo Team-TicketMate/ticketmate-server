@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,13 +34,13 @@ public class AdminController implements AdminControllerDocs {
     private final AdminService adminService;
 
     @Override
-    @PostMapping(value = "/concert-hall/save")
+    @PostMapping(value = "/concert-hall")
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveHallInfo(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @RequestBody ConcertHallInfoRequest request) {
         adminService.saveHallInfo(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override

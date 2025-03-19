@@ -23,14 +23,13 @@ public interface AdminControllerDocs {
 
                     ### 요청 파라미터
                     - **concertHallName** (String): 공연장 명 (중복 불가) [필수]
-                    - **capacity** (Integer): 수용인원 [필수]
-                    - **address** (String): 공연장 주소 [필수]
-                    - **concertHallUrl** (String): 공연장 웹사이트 URL [필수]
+                    - **address** (String): 공연장 주소 [선택]
+                    - **webSiteUrl** (String): 공연장 웹사이트 URL [선택]
                                 
                     ### 유의사항
                     - `concertHallName`은 고유해야 합니다.
-                    - `concertHallUrl`은 'http://' 또는 'https://' 로 시작하는 문자열이어야 합니다
-
+                    - `webSiteUrl`은 'http://' 또는 'https://' 로 시작하는 문자열이어야 합니다
+                    - 공연장 등록이 정상적으로 진행된 경우 `201 CREATED` 를 반환합니다
                     """
     )
     ResponseEntity<Void> saveHallInfo(

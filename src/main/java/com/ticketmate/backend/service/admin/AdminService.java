@@ -37,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ticketmate.backend.util.common.CommonUtil.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -63,9 +65,6 @@ public class AdminService {
      * @param request concertName 공연 제목
      *                concertHallName 공연장 이름
      *                concertType 공연 카테고리
-     *                ticketPreOpenDate 선구매 오픈일
-     *                ticketOpenDate 티켓 구매 오픈일
-     *                duration 공연 시간 (분)
      *                session 공연 회차
      *                concertThumbnailUrl 공연 썸네일
      *                ticketReservationSite 티켓 예매처 사이트
@@ -112,6 +111,10 @@ public class AdminService {
     /**
      * 공연장 정보 저장
      * 관리자만 저장 가능합니다
+     *
+     * @param request concertHallName 공연장 명
+     *                address 주소
+     *                webSiteUrl 웹사이트 URL
      */
     @Transactional
     public void saveHallInfo(ConcertHallInfoRequest request) {
@@ -122,16 +125,18 @@ public class AdminService {
             throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
         }
 
-        // 요청된 주소에 맞는 city할당
-        City city = City.determineCityFromAddress(request.getAddress());
+        City city = null;
+        // 요청된 주소에 맞는 지역코드 할당
+        if (!nvl(request.getAddress(), "").isEmpty()) {
+            city = City.fromAddress(request.getAddress());
+        }
 
         log.debug("공연장 정보 저장: {}", request.getConcertHallName());
         concertHallRepository.save(ConcertHall.builder()
                 .concertHallName(request.getConcertHallName())
-                .capacity(request.getCapacity())
                 .address(request.getAddress())
                 .city(city)
-                .concertHallUrl(request.getConcertHallUrl())
+                .webSiteUrl(request.getWebSiteUrl())
                 .build());
     }
 
@@ -188,6 +193,7 @@ public class AdminService {
 
         return portfolioForAdminResponse;
     }
+
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
      * @param portfolioId (UUID)
