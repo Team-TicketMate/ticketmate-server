@@ -8,13 +8,18 @@ import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequ
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.concert.request.TicketOpenDateRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
+import com.ticketmate.backend.object.postgres.concert.ConcertDate;
+import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
+import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
+import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.repository.redis.FcmTokenRepository;
@@ -33,11 +38,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.View;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static com.ticketmate.backend.util.common.CommonUtil.*;
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
 @RequiredArgsConstructor
@@ -45,12 +52,15 @@ import static com.ticketmate.backend.util.common.CommonUtil.*;
 public class AdminService {
     private final ConcertHallRepository concertHallRepository;
     private final ConcertRepository concertRepository;
+    private final ConcertDateRepository concertDateRepository;
+    private final TicketOpenDateRepository ticketOpenDateRepository;
     private final PortfolioRepository portfolioRepository;
     private final FileService fileService;
     private final EntityMapper entityMapper;
     private final FcmTokenRepository fcmTokenRepository;
     private final FcmService fcmService;
     private final NotificationUtil notificationUtil;
+    private final View error;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
 
@@ -63,45 +73,94 @@ public class AdminService {
      * 콘서트 정보 저장
      *
      * @param request concertName 공연 제목
-     *                concertHallName 공연장 이름
+     *                concertHallId 공연장 PK
      *                concertType 공연 카테고리
-     *                session 공연 회차
-     *                concertThumbnailUrl 공연 썸네일
+     *                concertThumbNail 공연 썸네일 이미지
+     *                seatingChart 좌석 배치도 이미지
      *                ticketReservationSite 티켓 예매처 사이트
+     *                concertDateRequests 공연 날짜 DTO List
+     *                ticketOpenDateRequests 티켓 오픈일 DTO List
      */
     @Transactional
     public void saveConcertInfo(ConcertInfoRequest request) {
 
-        // 중복된 공연이름 검증
+        // 1. 중복된 공연이름 검증
         if (concertRepository.existsByConcertName(request.getConcertName())) {
             log.error("중복된 공연 제목입니다. 요청된 공연 제목: {}", request.getConcertName());
             throw new CustomException(ErrorCode.DUPLICATE_CONCERT_NAME);
         }
 
-        // 공연장 검색
-        ConcertHall concertHall = concertHallRepository.findByConcertHallName(request.getConcertHallName())
-                .orElseThrow(() -> {
-                    log.error("{} 에 해당하는 공연장 정보를 찾을 수 없습니다.", request.getConcertHallName());
-                    return new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND);
-                });
+        // 2. 공연장 검색 (요청된 공연장 PK가 null이 아닌 경우)
+        ConcertHall concertHall = null;
+        if (request.getConcertHallId() != null) {
+            concertHall = concertHallRepository.findById(request.getConcertHallId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+        }
 
-        // 콘서트 썸네일 저장
+        // 3. 콘서트 썸네일 저장
         String concertThumbnailUrl = fileService
                 .saveFile(request.getConcertThumbNail());
 
-        // 콘서트 정보 저장
-        concertRepository.save(Concert.builder()
+        // 4. 좌석 배치도 저장
+        String seatingChartUrl = null;
+        if (request.getSeatingChart() != null) {
+            seatingChartUrl = fileService.saveFile(request.getSeatingChart());
+        }
+
+        // 5. 공연 정보 저장
+        Concert concert = Concert.builder()
                 .concertName(request.getConcertName())
-                .concertHall(concertHall)
+                .concerthall(concertHall)
                 .concertType(request.getConcertType())
-                .ticketPreOpenDate(request.getTicketPreOpenDate())
-                .ticketOpenDate(request.getTicketOpenDate())
-                .duration(request.getDuration())
-                .session(request.getSession())
                 .concertThumbnailUrl(concertThumbnailUrl)
+                .seatingChartUrl(seatingChartUrl)
                 .ticketReservationSite(request.getTicketReservationSite())
-                .build());
+                .build();
+        concertRepository.save(concert);
+
+        // 6. 공연 날짜 저장
+        if (!request.getConcertDateRequests().isEmpty()) {
+            List<ConcertDate> concertDates = request.getConcertDateRequests().stream()
+                    .map(dateRequest -> ConcertDate.builder()
+                            .concert(concert)
+                            .concertDate(dateRequest.getConcertDate())
+                            .session(dateRequest.getSession())
+                            .build()
+                    )
+                    .collect(Collectors.toList());
+            concertDateRepository.saveAll(concertDates);
+        }
+
+        // 7. 티켓 오픈일 검증 및 저장
+        if (!request.getTicketOpenDateRequests().isEmpty()) { // 티켓 오픈일이 입력된 경우
+            // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
+            validateTicketOpenDates(request.getTicketOpenDateRequests());
+            List<TicketOpenDate> ticketOpenDates = request.getTicketOpenDateRequests().stream()
+                    .map(ticketOpenDateRequest -> TicketOpenDate.builder()
+                            .concert(concert)
+                            .ticketOpenDate(ticketOpenDateRequest.getTicketOpenDate())
+                            .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
+                            .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
+                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .build())
+                    .collect(Collectors.toList());
+            ticketOpenDateRepository.saveAll(ticketOpenDates);
+        }
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    }
+
+    /**
+     * 티켓 오픈일 검증
+     */
+    private void validateTicketOpenDates(List<TicketOpenDateRequest> ticketOpenDateRequests) {
+
+        // 일반 예매 필수 검증
+        boolean hasGeneralOpen = ticketOpenDateRequests.stream()
+                .anyMatch(date -> !date.getIsPreOpen());
+        if (!hasGeneralOpen) {
+            log.error("일반 예매 날짜는 필수로 포함되어야합니다");
+            throw new CustomException(ErrorCode.GENERAL_TICKET_OPEN_DATE_REQUIRED);
+        }
     }
 
     /*
@@ -164,6 +223,7 @@ public class AdminService {
 
     /**
      * 포트폴리오 상세조회 로직
+     *
      * @param portfolioId (UUID)
      */
     @Transactional
@@ -196,8 +256,9 @@ public class AdminService {
 
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
+     *
      * @param portfolioId (UUID)
-     *        PortfolioType (포트폴리오 상태)
+     *                    PortfolioType (포트폴리오 상태)
      */
     @Transactional
     public UUID reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
