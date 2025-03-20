@@ -44,15 +44,24 @@ public interface AdminControllerDocs {
 
                     ### 요청 파라미터
                     - **concertName** (String): 공연 제목 (중복 불가) [필수]
-                    - **concertHallName** (String): 공연장 명 [필수]
+                    - **concertHallId** (UUID): 공연장 PK [선택]
                     - **concertType** (Enum): 공연 카테고리 [필수]
-                    - **ticketPreOpenDate** (LocalDateTime): 선구매 오픈일 [선택]
-                    - **ticketOpenDate** (LocalDateTime): 티켓 구매 오픈일 [필수]
-                    - **duration** (Integer): 공연 시간 (분 단위) [필수]
-                    - **session** (Integer): 공연 회차 [필수]
-                    - **concertThumbNailUrl** (String): 콘서트 썸네일 URL [필수]
-                    - **ticketReservationSite** (enum): 예매 사이트 [필수]
+                    - **concertThumbNail** (MultipartFile): 콘서트 썸네일 파일 [필수]
+                    - **seatingChart** (MultipartFile): 좌석 배치도 파일 [선택]
+                    - **ticketReservationSite** (enum): 예매 사이트 [선택]
+                    - **concertDateRequests** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [선택]
+                    - **ticketOpenDateRequests** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
                                         
+                    ### ConcertDateRequest
+                    - **concertDate** (LocalDateTime): 공연 일자 [필수]
+                    - **session** (Integer): 공연 회차 [필수]
+                    
+                    ### TicketOpenDateRequest
+                    - **ticketOpenDate** (LocalDateTime): 티켓 오픈일 [선택]
+                    - **requestMaxCount** (Integer): 최대 예매 개수 [선택]
+                    - **isBankTransfer** (Boolean): 무통장 입금 여부 [선택]
+                    - **isPreOpen** (Boolean): 선예매, 일반예매 여부 [필수]
+                    
                     ### TicketReservationSite
                     INTERPARK_TICKET ("인터파크 티켓")
                                     
@@ -61,6 +70,10 @@ public interface AdminControllerDocs {
                     TICKET_LINK ("티켓 링크")
                                     
                     MELON_TICKET ("멜론 티켓")
+                    
+                    COUPANG_PLAY ("쿠팡 플레이")
+                    
+                    ETC ("기타")
                                         
                     ### ConcertType
                     CONCERT ("콘서트")
@@ -80,7 +93,7 @@ public interface AdminControllerDocs {
                     ### 유의사항
                     - `concertName`은 고유해야 합니다.
                     - 단일 회차 공연의 경우 "1"을 입력하면 됩니다.
-                    - 선예매 오픈일, 티켓 오픈일은 LocalDateTime으로 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 입력해야합니다
+                    - 티켓 오픈일은 LocalDateTime으로 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 입력해야합니다
 
                     """
     )

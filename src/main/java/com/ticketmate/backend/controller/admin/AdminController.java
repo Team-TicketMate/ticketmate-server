@@ -44,7 +44,7 @@ public class AdminController implements AdminControllerDocs {
     }
 
     @Override
-    @PostMapping(value = "/concert/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/concert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveConcertInfo(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
