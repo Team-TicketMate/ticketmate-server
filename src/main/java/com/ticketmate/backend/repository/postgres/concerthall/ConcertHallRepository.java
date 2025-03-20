@@ -1,5 +1,6 @@
 package com.ticketmate.backend.repository.postgres.concerthall;
 
+import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,22 +21,18 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
             select *
             from concert_hall
             where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-            and ((:maxCapacity = 0 or :minCapacity = 0) or capacity between :minCapacity and :maxCapacity)
-            and (trim(:city) = '' or :city = city)
+            and (:city = '' or :city = city)
             """,
             countQuery = """
                     select count(*)
                     from concert_hall
                     where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-                    and ((:maxCapacity = 0 or :minCapacity = 0) or capacity between :minCapacity and :maxCapacity)
                     and (trim(:city) = '' or :city = city)
                     """,
             nativeQuery = true)
     Page<ConcertHall> filteredConcertHall(
             @Param("concertHallName") String concertHallName,
-            @Param("maxCapacity") int maxCapacity,
-            @Param("minCapacity") int minCapacity,
-            @Param("city") String city,
+            @Param("city") City city,
             Pageable pageable
     );
 

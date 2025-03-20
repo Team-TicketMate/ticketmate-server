@@ -13,6 +13,14 @@ import lombok.*;
 @Builder
 public class ConcertHallFilteredRequest {
 
+    // 기본값 할당 (1페이지 30개, 최신순)
+    public ConcertHallFilteredRequest() {
+        this.pageNumber = 0;
+        this.pageSize = 30;
+        this.sortField = "created_date";
+        this.sortDirection = "DESC";
+    }
+
     @Schema(defaultValue = "장충")
     private String concertHallName; // 공연장 명 (검색어)
 

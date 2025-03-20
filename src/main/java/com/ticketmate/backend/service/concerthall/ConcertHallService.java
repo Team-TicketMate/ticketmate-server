@@ -3,9 +3,12 @@ package com.ticketmate.backend.service.concerthall;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.util.common.EntityMapper;
+import com.ticketmate.backend.util.exception.CustomException;
+import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
@@ -67,5 +72,17 @@ public class ConcertHallService {
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
         return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
+    }
+
+    /**
+     * 공연장 정보 상세조회
+     */
+    @Transactional(readOnly = true)
+    public ConcertHallInfoResponse getConcertHallInfo(UUID concertHallId) {
+
+        ConcertHall concertHall = concertHallRepository.findById(concertHallId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+
+        return entityMapper.toConcertHallInfoResponse(concertHall);
     }
 }

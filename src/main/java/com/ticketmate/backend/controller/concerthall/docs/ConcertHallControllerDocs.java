@@ -3,9 +3,12 @@ package com.ticketmate.backend.controller.concerthall.docs;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+
+import java.util.UUID;
 
 public interface ConcertHallControllerDocs {
 
@@ -59,4 +62,21 @@ public interface ConcertHallControllerDocs {
     ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
             CustomOAuth2User customOAuth2User,
             ConcertHallFilteredRequest request);
+
+    @Operation(
+            summary = "공연장 정보 상세조회",
+            description = """
+                                        
+                    이 API는 인증이 필요합니다.
+
+                    ### 요청 파라미터
+                    - **concertHallId** (UUID): 공연장 PK [필수]
+                                
+                    ### 유의사항
+
+                    """
+    )
+    ResponseEntity<ConcertHallInfoResponse> getConcertHallInfo(
+            CustomOAuth2User customOAuth2User,
+            UUID concertHallId);
 }
