@@ -32,7 +32,7 @@ public class Concert extends BasePostgresEntity {
 
     // 공연장
     @ManyToOne(fetch = FetchType.LAZY)
-    private ConcertHall concerthall;
+    private ConcertHall concertHall;
 
     // 공연 카테고리 (콘서트, 뮤지컬...)
     @Enumerated(EnumType.STRING)
