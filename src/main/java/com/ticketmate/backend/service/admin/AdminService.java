@@ -110,7 +110,7 @@ public class AdminService {
         // 5. 공연 정보 저장
         Concert concert = Concert.builder()
                 .concertName(request.getConcertName())
-                .concerthall(concertHall)
+                .concertHall(concertHall)
                 .concertType(request.getConcertType())
                 .concertThumbnailUrl(concertThumbnailUrl)
                 .seatingChartUrl(seatingChartUrl)
