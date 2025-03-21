@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.ticketmate.backend.util.common.CommonUtil.enumToString;
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
@@ -48,11 +49,11 @@ public class ConcertHallService {
 
         // String, Integer 값 검증
         String concertHallName = nvl(request.getConcertHallName(), "");
-        City city = null;
+        String city = "";
 
         // 지역 코드에 해당하는 City 반환
         if (request.getCityCode() != null) {
-            city = City.fromCityCode(request.getCityCode());
+            city = enumToString(City.fromCityCode(request.getCityCode()));
         }
 
         // 정렬 조건

@@ -5,12 +5,11 @@ import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminRes
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
-import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
+import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
-import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
-import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.redis.FcmToken;
@@ -29,14 +28,16 @@ public interface EntityMapper {
     // ConcertHall -> ConcertHallFilteredResponse (엔티티 -> DTO)
     ConcertHallFilteredResponse toConcertHallFilteredResponse(ConcertHall concertHall);
 
+    // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
+    ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
+
 
     /*
     ======================================공연======================================
      */
 
     // Concert -> ConcertFilteredResponse (엔티티 -> DTO)
-    @Mapping(source = "concertHall.concertHallName", target = "concertHallName")
-    ConcertFilteredResponse toConcertFilteredResponse(Concert concert);
+
 
 
     /*

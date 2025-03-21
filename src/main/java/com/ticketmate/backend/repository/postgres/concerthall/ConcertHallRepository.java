@@ -1,6 +1,5 @@
 package com.ticketmate.backend.repository.postgres.concerthall;
 
-import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,20 +18,20 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
 
     @Query(value = """
             select *
-            from concert_hall
-            where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-            and (:city = '' or :city = city)
+            from ticket_mate.public.concert_hall ch
+            where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
+            and (:city = '' or :city = ch.city)
             """,
             countQuery = """
                     select count(*)
-                    from concert_hall
-                    where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-                    and (trim(:city) = '' or :city = city)
+                    from ticket_mate.public.concert_hall ch
+                    where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
+                    and (:city = '' or :city = ch.city)
                     """,
             nativeQuery = true)
     Page<ConcertHall> filteredConcertHall(
             @Param("concertHallName") String concertHallName,
-            @Param("city") City city,
+            @Param("city") String city,
             Pageable pageable
     );
 
