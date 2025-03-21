@@ -30,7 +30,7 @@ public class ConcertHallController implements ConcertHallControllerDocs {
     private final ConcertHallService concertHallService;
 
     @Override
-    @GetMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
