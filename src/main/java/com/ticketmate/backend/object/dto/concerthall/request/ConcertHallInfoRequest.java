@@ -19,7 +19,7 @@ public class ConcertHallInfoRequest {
     @Schema(defaultValue = "서울특별시 중구 동호로 241 (장충동2가)")
     private String address;
 
-    @Pattern(regexp = "^(https|http)", message = "웹사이트 URL 형식이 올바르지 않습니다.")
+    @Pattern(regexp = "^(https://|http://).*$", message = "웹사이트 URL 형식이 올바르지 않습니다.")
     @Schema(defaultValue = "https://www.sisul.or.kr/open_content/jangchung/")
     private String webSiteUrl;
 }

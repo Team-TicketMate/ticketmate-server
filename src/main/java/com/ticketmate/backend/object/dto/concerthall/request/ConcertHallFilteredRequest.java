@@ -38,7 +38,7 @@ public class ConcertHallFilteredRequest {
     private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
-    @Pattern(regexp = "^(created_date)$")
+    @Pattern(regexp = "^(created_date)$", message = "sortType에는 지정된 값을 입력해야합니다")
     private String sortField; // 정렬 조건 (생성일, 선 예매 오픈일, 티켓 오픈일, 공연시간)
 
     @Schema(defaultValue = "DESC")
