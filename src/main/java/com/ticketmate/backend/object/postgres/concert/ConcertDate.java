@@ -30,7 +30,7 @@ public class ConcertDate extends BasePostgresEntity {
 
     @Column(nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime concertDate; // 공연 일자
+    private LocalDateTime performanceDate; // 공연 일자
 
     @Column(nullable = false)
     @Builder.Default
