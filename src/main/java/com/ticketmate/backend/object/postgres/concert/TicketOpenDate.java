@@ -27,7 +27,7 @@ public class TicketOpenDate extends BasePostgresEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Concert concert;
 
-    private LocalDateTime ticketOpenDate; // 티켓 오픈일
+    private LocalDateTime openDate; // 티켓 오픈일
 
     private Integer requestMaxCount; // 최대 예매 매수
 
