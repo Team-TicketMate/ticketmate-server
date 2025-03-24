@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,7 @@ public class ConcertHallController implements ConcertHallControllerDocs {
     private final ConcertHallService concertHallService;
 
     @Override
-    @GetMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping("")
     @LogMonitoringInvocation
     public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
