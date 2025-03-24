@@ -326,7 +326,7 @@ public class TestService {
 
             concertDateList.add(ConcertDate.builder()
                     .concert(concert)
-                    .concertDate(concertDate)
+                    .performanceDate(concertDate)
                     .session(i + 1)
                     .build()
             );
@@ -348,7 +348,7 @@ public class TestService {
             LocalDateTime preOpenDate = baseDate.plusDays(koFaker.number().numberBetween(0, 5));
             TicketOpenDate preOpen = TicketOpenDate.builder()
                     .concert(concert)
-                    .ticketOpenDate(preOpenDate)
+                    .openDate(preOpenDate)
                     .requestMaxCount(koFaker.number().numberBetween(1, 6))
                     .isBankTransfer(koFaker.random().nextBoolean())
                     .isPreOpen(true)
@@ -360,7 +360,7 @@ public class TestService {
         LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
         TicketOpenDate generalOpen = TicketOpenDate.builder()
                 .concert(concert)
-                .ticketOpenDate(generalOpenDate)
+                .openDate(generalOpenDate)
                 .requestMaxCount(koFaker.number().numberBetween(1, 6))
                 .isBankTransfer(koFaker.random().nextBoolean())
                 .isPreOpen(false)
