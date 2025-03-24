@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TicketOpenDateRequest {
 
-    private LocalDateTime ticketOpenDate; // 티켓 오픈일
+    private LocalDateTime openDate; // 티켓 오픈일
 
     @Min(value = 1, message = "최대 예매 매수는 1 이상이여야 합니다")
     @Max(value = Integer.MAX_VALUE, message = "최대 예매 매수는 정수 최대 범위를 넘을 수 없습니다.")
