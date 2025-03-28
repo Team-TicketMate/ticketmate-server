@@ -29,8 +29,4 @@ public abstract class BasePostgresEntity {
     @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updatedDate;
-
-    // 삭제여부
-    @Builder.Default
-    private boolean isDeleted = false;
 }

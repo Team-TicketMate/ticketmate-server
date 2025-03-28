@@ -1,9 +1,7 @@
 package com.ticketmate.backend.object.dto.concerthall.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -14,21 +12,14 @@ import lombok.*;
 @Builder
 public class ConcertHallInfoRequest {
 
-    @NotBlank(message = "공연장 이름을 입력하세요")
-    @Schema(defaultValue = "인스파이어 아레나")
+    @NotBlank(message = "공연장 명을 입력해주세요")
+    @Schema(defaultValue = "장충체육관")
     private String concertHallName;
 
-    @NotNull(message = "수용인원을 입력하세요")
-    @Min(value = 1, message = "수용인원은 1명 이상이여야 합니다")
-    @Schema(defaultValue = "15000")
-    private Integer capacity;
-
-    @NotBlank(message = "공연장 주소를 입력하세요")
-    @Schema(defaultValue = "인천광역시 중구 공항문화로 127 인스파이어 아레나 (운서동 2955-74)")
+    @Schema(defaultValue = "서울특별시 중구 동호로 241 (장충동2가)")
     private String address;
 
-    @NotBlank(message = "공연장 웹사이트 URL을 입력하세요")
-    @Schema(defaultValue = "https://www.inspirekorea.com/ko/entertainment/inspire-arena/inspire-arena")
-    @Pattern(regexp = "^(http://|https://).*", message = "웹사이트 URL 형식은 'http://' 또는 'https://' 로 시작해야합니다")
-    private String concertHallUrl;
+    @Pattern(regexp = "^(https://|http://).*$", message = "웹사이트 URL 형식이 올바르지 않습니다.")
+    @Schema(defaultValue = "https://www.sisul.or.kr/open_content/jangchung/")
+    private String webSiteUrl;
 }
