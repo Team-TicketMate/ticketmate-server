@@ -9,16 +9,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
-public class CustomOAuth2User implements OAuth2User {
+public class CustomOAuth2User implements OAuth2User, Principal {
 
     private final Member member;
     private final Map<String, Object> attributes;
+
+    // JWT 액세스 토큰의 만료 시각 (채팅에서 사용할 기능입니다.)
+    private LocalDateTime expiresAt = null;
 
     @Override
     public Map<String, Object> getAttributes() {
@@ -64,5 +70,9 @@ public class CustomOAuth2User implements OAuth2User {
 
     public String getMemberId() {
         return member.getMemberId().toString(); // 회원의 memberId (UUID)를 string 으로 반환
+    }
+
+    public void confirmExpire(long expiresAtMillis) {
+        this.expiresAt = LocalDateTime.now().plus(expiresAtMillis, ChronoUnit.MILLIS);
     }
 }
