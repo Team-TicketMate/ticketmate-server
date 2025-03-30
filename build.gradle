@@ -93,6 +93,16 @@ dependencies {
 
     // Redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // RabbitMQ
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+
+    // Reactor Netty
+    implementation 'org.springframework.boot:spring-boot-starter-reactor-netty:3.0.0'
 }
 
 tasks.named('test') {
