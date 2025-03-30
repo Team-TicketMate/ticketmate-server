@@ -12,7 +12,11 @@ public enum TicketReservationSite {
 
     TICKET_LINK("티켓 링크"),
 
-    MELON_TICKET("멜론 티켓");
+    MELON_TICKET("멜론 티켓"),
+
+    COUPANG_PLAY("쿠팡 플레이"),
+
+    ETC("기타");
 
     private final String description;
 }

@@ -56,6 +56,8 @@ public enum ErrorCode {
 
     INVALID_RANGE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 범위가 입력되었습니다."),
 
+    GENERAL_TICKET_OPEN_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "티켓 일반 예매 오픈일은 필수로 포함되어야 합니다."),
+
     // CONCERT_HALL
 
     CONCERT_HALL_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 공연장 정보를 찾을 수 없습니다."),
@@ -75,7 +77,6 @@ public enum ErrorCode {
     INVALID_INPUT_IMG(HttpStatus.BAD_REQUEST, "파일의 이름이 잘못되었습니다."),
 
     INVALID_IMG_FORMAT(HttpStatus.BAD_REQUEST, "이미지의 확장자가 잘못되었습니다. 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다"),
-
 
     // PORTFOLIO
 

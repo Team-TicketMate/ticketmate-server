@@ -18,23 +18,19 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
 
     @Query(value = """
             select *
-            from concert_hall
-            where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-            and ((:maxCapacity = 0 or :minCapacity = 0) or capacity between :minCapacity and :maxCapacity)
-            and (trim(:city) = '' or :city = city)
+            from ticket_mate.public.concert_hall ch
+            where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
+            and (:city = '' or :city = ch.city)
             """,
             countQuery = """
                     select count(*)
-                    from concert_hall
-                    where (trim(:concertHallName) = '' or lower(concert_hall_name) like lower(concat('%', :concertHallName, '%')))
-                    and ((:maxCapacity = 0 or :minCapacity = 0) or capacity between :minCapacity and :maxCapacity)
-                    and (trim(:city) = '' or :city = city)
+                    from ticket_mate.public.concert_hall ch
+                    where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
+                    and (:city = '' or :city = ch.city)
                     """,
             nativeQuery = true)
     Page<ConcertHall> filteredConcertHall(
             @Param("concertHallName") String concertHallName,
-            @Param("maxCapacity") int maxCapacity,
-            @Param("minCapacity") int minCapacity,
             @Param("city") String city,
             Pageable pageable
     );
