@@ -29,7 +29,16 @@ public class SecurityUrls {
             "/v3/api-docs/**", // Swagger API 문서
 
             // FireBase 서비스워커
-            "/firebase-messaging-sw.js"
+            "/firebase-messaging-sw.js",
+
+            // fmc test용 정적리소스
+            "/notification.html",
+
+            // WebSocket 관련 Url (StompChannelInterceptor 내부에서 검증)
+            "/chat/**",
+
+            // 채팅 test용 정적 리소스
+            "/chat-jwt.html"
     );
 
     /**
