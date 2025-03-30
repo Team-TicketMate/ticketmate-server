@@ -4,20 +4,30 @@ import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import com.ticketmate.backend.util.exception.ErrorResponse;
 import com.ticketmate.backend.util.exception.ValidErrorResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+    private final SimpMessagingTemplate template;
+    private static final String ERROR_DESTINATION = "/queue/errors";
 
     /**
      * 1) Validation 예외 처리
@@ -60,7 +70,25 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 3) 그 외 예외 처리
+     * 3) WebSocket 통신 중 발생한 예외(비즈니스 로직)처리
+     * StompExceptionInterceptor 내부에서 처리를 하지 못하는 상활일 때의 예외를 핸들링합니다.
+     */
+    @MessageExceptionHandler(CustomException.class)
+    public void handleRuntimeException(Principal principal, CustomException e, @Payload Message<byte[]> message, StompHeaderAccessor accessor) {
+        log.error("WebSocket 통신 중 CustomException 발생: {}", e.getMessage());
+
+        ErrorCode errorCode = e.getErrorCode();
+
+        ErrorResponse response = ErrorResponse.builder()
+                .errorCode(errorCode)
+                .errorMessage(errorCode.getMessage())
+                .build();
+
+        template.convertAndSendToUser(principal.getName(), ERROR_DESTINATION, response);
+    }
+
+    /**
+     * 4) 그 외 예외 처리
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
