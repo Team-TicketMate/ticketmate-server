@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +30,7 @@ class TicketServiceTest {
     private static final int CONCURRENT_COUNT = 100;
 
     // 테스트마다 새 티켓을 1000장으로 초기화
-    private Long TICKET_ID;
+    private UUID TICKET_ID;
 
     @BeforeEach
     public void beforeEach() {
@@ -39,7 +40,7 @@ class TicketServiceTest {
         System.out.println("1000개의 티켓 생성");
         Ticket ticket = new Ticket(1000L);
         Ticket saved = ticketRepository.saveAndFlush(ticket);
-        TICKET_ID = saved.getId();
+        TICKET_ID = saved.getTicketId();
     }
     @AfterEach
     public void afterEach() {
