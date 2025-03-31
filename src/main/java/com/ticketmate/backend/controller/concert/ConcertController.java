@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,11 +26,11 @@ public class ConcertController implements ConcertControllerDocs {
     private final ConcertService concertService;
 
     @Override
-    @PostMapping(value = "/filtered")
+    @GetMapping(value = "")
     @LogMonitoringInvocation
     public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @Valid @RequestBody ConcertFilteredRequest request) {
+            @Valid @ModelAttribute ConcertFilteredRequest request) {
         return ResponseEntity.ok(concertService.filteredConcert(request));
     }
 }

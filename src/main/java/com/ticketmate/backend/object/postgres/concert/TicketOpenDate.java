@@ -1,12 +1,12 @@
-package com.ticketmate.backend.object.postgres.concerthall;
+package com.ticketmate.backend.object.postgres.concert;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,20 +17,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class ConcertHall extends BasePostgresEntity {
+public class TicketOpenDate extends BasePostgresEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
-    private UUID concertHallId;
+    private UUID ticketOpenDateId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Concert concert;
+
+    private LocalDateTime openDate; // 티켓 오픈일
+
+    private Integer requestMaxCount; // 최대 예매 매수
+
+    private Boolean isBankTransfer; // 무통장 입금 여부
 
     @Column(nullable = false)
-    private String concertHallName; // 공연장 명
-
-    private String address; // 주소
-
-    @Enumerated(EnumType.STRING)
-    private City city; // 지역
-
-    private String webSiteUrl; // 사이트 URL
+    private Boolean isPreOpen; // 선예매, 일반예매 여부
 }

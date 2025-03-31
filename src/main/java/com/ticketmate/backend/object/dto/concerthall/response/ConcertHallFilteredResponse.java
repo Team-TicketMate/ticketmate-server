@@ -1,7 +1,8 @@
 package com.ticketmate.backend.object.dto.concerthall.response;
 
-import com.ticketmate.backend.object.constants.City;
 import lombok.*;
+
+import java.util.UUID;
 
 @ToString
 @AllArgsConstructor
@@ -11,13 +12,6 @@ import lombok.*;
 @Builder
 public class ConcertHallFilteredResponse {
 
+    private UUID concertHallId;
     private String concertHallName;
-
-    private int capacity;
-
-    private String address;
-
-    private City city;
-
-    private String concertHallUrl;
 }
