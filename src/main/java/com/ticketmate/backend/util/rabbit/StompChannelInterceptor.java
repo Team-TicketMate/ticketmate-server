@@ -105,6 +105,14 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         }
     }
 
+    /**
+     *
+     * @param accessor
+     * 클라이언트가 채팅 서버에 대한 구독 요청시 기존의 /exchange/chat.exchange/ 경로로 구독하는 것이 아닌 /sub/ 경로로 구독하게 하는 로직입니다.
+     * 즉, 클라이언트측에서 /sub/chat.room.1 경로로 구독 요청이 들어온다면 서버에서 내부적으로 /exchange/chat.exchange/ 의 경로로 바꿔쳐 메시지 브로커에 등록합니다.
+     * 이는 RabbitMQ에 완전히 종속되있는 상태를 벗어나 추후 다른 MQ 브로커를 사용할 때의 편의성을 높여줍니다.
+     * (사실 RabbitMQ만 사용할거면 해도 그만 안해도 그만압니다.)
+     */
     private void handleSubscribe(StompHeaderAccessor accessor) {
         String destination = accessor.getDestination();
         log.debug("INBOUND SUBSCRIBE - 원래 구독 주소: {}", destination);
@@ -115,6 +123,12 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         }
     }
 
+    /**
+     *
+     * @param accessor
+     * 위의 handleSubscribe 같은 느낌입니다.
+     * 위는 INBOUND 아래는 OUTBOUND인정도만 다릅니다.
+     */
     private void handleMessage(StompHeaderAccessor accessor) {
         String destination = accessor.getDestination();
         log.debug("OUTBOUND MESSAGE - 원래 발행 주소: {}", destination);
