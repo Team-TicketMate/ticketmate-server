@@ -28,8 +28,8 @@ import java.util.UUID;
 public class ApplicationForm extends BasePostgresEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID applicationFormId;
 
     @ManyToOne(fetch = FetchType.LAZY)

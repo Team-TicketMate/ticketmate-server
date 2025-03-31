@@ -21,8 +21,8 @@ import java.util.UUID;
 public class Member extends BasePostgresEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID memberId;
 
     // 소셜 로그인 시 발급되는 ID

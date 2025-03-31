@@ -22,8 +22,8 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Portfolio extends BasePostgresEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "portfolio_id", columnDefinition = "uuid DEFAULT uuid_generate_v4()", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID portfolioId;
 
     private String portfolioDescription;  // 자기소개
