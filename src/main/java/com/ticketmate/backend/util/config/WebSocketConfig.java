@@ -29,6 +29,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${rabbitmq.password}")
     private String password;
 
+    @Value("${rabbitmq.stomp-port}")
+    private int stompPort;
+
     private final StompChannelInterceptor channelInterceptor;
     private final StompExceptionHandler stompExceptionHandler;
 
@@ -36,7 +39,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         TcpClient tcpClient = TcpClient.create()
                 .host(host)
-                .port(61613);
+                .port(stompPort);
 
         ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(tcpClient, new StompReactorNettyCodec());
 
@@ -45,7 +48,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAutoStartup(true)
                 .setTcpClient(client)  // RabbitMQ와 연결할 클라이언트
                 .setRelayHost(host)  // // RabbitMQ 서버 주소
-                .setRelayPort(61613)  // RabbitMQ 포트(5672), STOMP(61613)
+                .setRelayPort(stompPort)  // RabbitMQ 포트(5672), STOMP(61613)
                 .setClientLogin(username)  // 계정
                 .setClientPasscode(password);  // 비빌번호
 
