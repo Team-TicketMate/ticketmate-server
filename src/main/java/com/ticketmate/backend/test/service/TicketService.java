@@ -6,6 +6,8 @@ import com.ticketmate.backend.util.redisson.RedisLockManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class TicketService {
@@ -19,7 +21,7 @@ public class TicketService {
     private final RedisLockManager redisLockManager;
 
     // 동시성 제어 없음
-    public void ticketing(Long ticketId, Long amount) {
+    public void ticketing(UUID ticketId, Long amount) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("티켓이 존재하지 않습니다."));
         ticket.decrease(amount);
@@ -27,7 +29,7 @@ public class TicketService {
     }
 
     // Redisson 기반 분산 락 사용
-    public void redissonTicketing(Long ticketId, Long amount) {
+    public void redissonTicketing(UUID ticketId, Long amount) {
         String lockKey = "ticket:" + ticketId;
 
         // 대기시간을 너무 짧게하면 tryLock 내부에서 false가 반환되어 예외가 터져 해당 스레드 로직은 작업진행이 불가능합니다.
