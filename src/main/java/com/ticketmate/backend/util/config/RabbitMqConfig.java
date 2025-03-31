@@ -32,6 +32,9 @@ public class RabbitMqConfig {
     @Value("${rabbitmq.password}")
     private String password;
 
+    @Value("${rabbitmq.port}")
+    private int port;
+
     // chat.queue 라는 Queue 생성
     @Bean
     public Queue queue() {
@@ -69,7 +72,7 @@ public class RabbitMqConfig {
         factory.setVirtualHost(virtualHost);
         factory.setUsername(username);
         factory.setPassword(password);
-        factory.setPort(5672);
+        factory.setPort(port);
         return factory;
     }
 
