@@ -13,6 +13,7 @@ public class SecurityUrls {
      */
     public static final List<String> AUTH_WHITELIST = Arrays.asList(
             // API
+            "/", // 홈
             "/api/auth/reissue", // accessToken 재발급
             "/api/oauth2/**", // 소셜 로그인
             "/login/**", // 기본 Spring Security OAuth2 로그인경로
