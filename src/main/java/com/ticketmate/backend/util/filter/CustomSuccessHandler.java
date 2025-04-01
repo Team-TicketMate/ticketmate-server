@@ -69,6 +69,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         cookie.setHttpOnly(true); // HttpOnly 설정
         cookie.setSecure(true); // FIXME: HTTPS 환경에서는 secure 속성 true로 설정 (현재는 HTTP)
         cookie.setPath("/");
+        cookie.setAttribute("SameSite", "None"); // 크로스 사이트 허용
         cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
         response.addCookie(cookie);
 
