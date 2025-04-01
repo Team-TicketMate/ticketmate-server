@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -26,6 +27,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String REFRESH_PREFIX = "RT:";
+
+    @Value("${spring.security.app.redirect-uri.dev}")
+    private String devRedirectUri;
+
+    @Value("${spring.security.app.redirect-uri.prod}")
+    private String prodRedirectUri;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -47,6 +54,16 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
+        // 로그인 쿼리 파라미터 Redirect URI 확인
+        String redirectUri = request.getParameter("redirectUri");
+        if (redirectUri == null) {
+            log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
+            redirectUri = prodRedirectUri;
+        }
+        // Redirect URI에 accessToken 추가
+        redirectUri += "?accessToken=" + accessToken;
+        log.debug("리다이렉트 URL: {}", redirectUri);
+
         // 쿠키에 refreshToken 추가
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true); // HttpOnly 설정
@@ -59,7 +76,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         try {
             log.debug("로그인 성공, 메인페이지로 리다이렉트 됩니다");
             if (!response.isCommitted()) {
-                response.sendRedirect("https://ticketmate-client.vercel.app?accessToken=" + accessToken);
+                response.sendRedirect(redirectUri);
             }
         } catch (IOException e) {
             log.error("로그인 성공 후 리다이렉트 과정에서 문제가 발생했습니다. {}", e.getMessage());
