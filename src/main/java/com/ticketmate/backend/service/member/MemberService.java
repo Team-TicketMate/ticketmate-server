@@ -36,6 +36,10 @@ public class MemberService {
 
         // 쿠키에서 리프레시 토큰 추출
         Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            log.error("쿠키가 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
+        }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("refresh")) {
                 refreshToken = cookie.getValue();
