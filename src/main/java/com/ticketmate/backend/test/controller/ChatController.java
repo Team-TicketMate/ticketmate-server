@@ -3,8 +3,6 @@ package com.ticketmate.backend.test.controller;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.test.dto.request.ChatMessageRequest;
 import com.ticketmate.backend.test.service.ChatService;
-import com.ticketmate.backend.util.exception.CustomException;
-import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -28,7 +26,7 @@ public class ChatController {
         log.debug("채팅 메시지 : 채팅방: {}, 내용={}", roomId, request.getContent());
         log.debug("현재 채팅하는 사용자 정보 : {}", nickname);
 
-//        chatService.sendMessage(request);
-        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);  // 커스텀 에러 전역처리 테스팅을 위한 예외입니다.
+        chatService.sendMessage(request);
+//        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);  // 커스텀 에러 전역처리 테스팅을 위한 예외입니다.
     }
 }
