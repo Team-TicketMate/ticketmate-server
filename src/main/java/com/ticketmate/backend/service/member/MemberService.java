@@ -1,7 +1,6 @@
 package com.ticketmate.backend.service.member;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -30,7 +29,7 @@ public class MemberService {
      * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
      */
     @Transactional
-    public void reissue(HttpServletRequest request, HttpServletResponse response, Member member) {
+    public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
         log.debug("accessToken이 만료되어 재발급을 진행합니다.");
         String refreshToken = null;
@@ -59,10 +58,10 @@ public class MemberService {
         String newRefreshToken = jwtUtil.createRefreshToken(customOAuth2User);
 
         // 기존 refreshToken 삭제
-        if (redisTemplate.delete(REFRESH_PREFIX + member.getMemberId())) {
-            log.debug("기존 리프레시 토큰 삭제: {}", member.getMemberId());
+        if (redisTemplate.delete(REFRESH_PREFIX + customOAuth2User.getMemberId())) {
+            log.debug("기존 리프레시 토큰 삭제: {}", customOAuth2User.getMemberId());
         } else {
-            log.warn("리프레시 토큰 삭제에 실패했습니다: {}", member.getMemberId());
+            log.warn("리프레시 토큰 삭제에 실패했습니다: {}", customOAuth2User.getMemberId());
         }
 
         // 헤더에 accessToken 추가
