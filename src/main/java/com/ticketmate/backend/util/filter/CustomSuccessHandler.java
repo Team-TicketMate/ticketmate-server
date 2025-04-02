@@ -60,16 +60,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
             redirectUri = prodRedirectUri;
         }
-        // Redirect URI에 accessToken 추가
-        redirectUri += "?accessToken=" + accessToken;
-        log.debug("리다이렉트 URL: {}", redirectUri);
+        response.addHeader("Authorization", "Bearer " + accessToken);
 
         // 쿠키에 refreshToken 추가
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true); // HttpOnly 설정
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setAttribute("SameSite", "None"); // 크로스 사이트 허용
         cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
         response.addCookie(cookie);
 
