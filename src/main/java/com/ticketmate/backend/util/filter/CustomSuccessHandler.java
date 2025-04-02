@@ -58,7 +58,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String redirectUri = request.getParameter("redirectUri");
         if (redirectUri == null) {
             log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
-            redirectUri = devRedirectUri;
+            redirectUri = "https://localhost:3001";
         }
         // Redirect URI에 accessToken 추가
         redirectUri += "?accessToken=" + accessToken;
