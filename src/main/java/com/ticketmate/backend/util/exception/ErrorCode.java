@@ -34,6 +34,8 @@ public enum ErrorCode {
 
     TOKEN_BLACKLISTED(HttpStatus.UNAUTHORIZED, "블랙리스트처리된 토큰이 요청되었습나다."),
 
+    COOKIES_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠키가 존재하지 않습니다."),
+
     // OAUTH2
 
     INVALID_SOCIAL_PLATFORM(HttpStatus.BAD_REQUEST, "잘못된 소셜 플랫폼이 요청되었습니다."),
@@ -101,7 +103,8 @@ public enum ErrorCode {
 
     // NOTIFICATION
 
-    FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다.");
+    FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다."),
+    ;
 
     private final HttpStatus status;
     private final String message;
