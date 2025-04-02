@@ -32,8 +32,7 @@ public class AuthController implements AuthControllerDocs {
     public ResponseEntity<Void> reissue(HttpServletRequest request,
                                         HttpServletResponse response,
                                         @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        Member member = customOAuth2User.getMember();
-        memberService.reissue(request, response, member);
+        memberService.reissue(request, response);
         return ResponseEntity.ok().build();
     }
 }
