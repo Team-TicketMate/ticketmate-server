@@ -67,7 +67,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         cookie.setHttpOnly(true); // HttpOnly 설정
         cookie.setSecure(true);
         cookie.setPath("/");
-        cookie.setDomain(".ticketmate.site");
+        cookie.setDomain("ticketmate.site");
         cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
         response.addCookie(cookie);
 
