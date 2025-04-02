@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<button id="logoutButton" style="display: none;">Logout</button>
+
+<div id="loginSection">
+    <button id="loginButton">Login</button>
+    <div id="loginError" style="color: red;"></div>
+</div>
+<div id="chatSection" style="display: none;">
+    <input type="text" id="roomId" placeholder="Room ID">
+    <input type="text" id="message" placeholder="Type a message...">
+    <button id="sendButton">Send</button>
+    <div id="messages"></div>
+</div>
+
+<script>
+    const API_URL = 'https://api.ticketmate.site';
+    let stompClient = null;
+
+    // Token Management
+    const TokenManager = {
+        setAccessToken: (token) => sessionStorage.setItem('accessToken', token),
+        getAccessToken: () => sessionStorage.getItem('accessToken'),
+        clearTokens: () => {
+            sessionStorage.removeItem('accessToken');
+            document.cookie = 'refreshToken=; Max-Age=0; path=/; secure; samesite=none';
+        }
+    };
+
+    // API Request Wrapper
+    async function apiRequest(url, options = {}) {
+        const accessToken = TokenManager.getAccessToken();
+        if (accessToken) {
+            options.headers = {
+                ...options.headers,
+                'Authorization': "Bearer " + accessToken
+            };
+        }
+
+        try {
+            const response = await fetch(url, options);
+            if (response.status === 401) {
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    return apiRequest(url, options);
+                } else {
+                    throw new Error('Authentication failed');
+                }
+            }
+            return response;
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    // Token Refresh
+    async function refreshToken() {
+        try {
+            const response = await fetch(`${API_URL}/api/auth/reissue`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                console.log("[Refresh Token] : " + response.headers.get('Authorization'));
+
+                TokenManager.setAccessToken(response.headers.get('Authorization'));
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            return false;
+        }
+    }
+
+    // Login Function
+    async function login() {
+        // 필요한 로그인 파라미터를 FormData에 담습니다.
+        const formData = new FormData();
+        // 기본값으로 설정된 값들 (원하는 경우 입력폼으로 대체 가능)
+        formData.append('role', 'ROLE_TEST');
+        formData.append('socialPlatform', 'NAVER');
+        formData.append('memberType', 'CLIENT');
+        formData.append('accountStatus', 'ACTIVE_ACCOUNT');
+        formData.append('isFirstLogin', 'false');
+
+        try {
+            const response = await fetch(`${API_URL}/test/login`, {
+                method: 'POST',
+                credentials: 'include', // 쿠키 등 필요 시 포함
+                body: formData
+            });
+
+            if (response.ok) {
+                // 응답 본문에서 액세스 토큰을 읽어옵니다.
+                const token = await response.text();
+                console.log("login success, AT:", token);
+                TokenManager.setAccessToken(token);
+
+                showChatSection();
+                await connectWebSocket();
+            } else {
+                document.getElementById('loginError').textContent = 'Login failed';
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            document.getElementById('loginError').textContent = 'Login failed';
+        }
+    }
+
+    // Logout Function
+    async function logout() {
+        try {
+            await fetch(`${API_URL}/api/auth/logout`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': TokenManager.getAccessToken()
+                },
+                credentials: 'include'
+            });
+            TokenManager.clearTokens();
+            showLoginSection();
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    }
+
+    // WebSocket Connection
+    async function connectWebSocket() {
+        try {
+            const url = await getSocketServerUrl();
+            console.log("Connecting to:", url);
+
+            const socket = new SockJS(url, null, { transports: ["websocket"] });
+            console.log(socket);
+
+            stompClient = Stomp.over(socket);
+
+            stompClient.debug = function(str) {
+                console.log(str);
+            };
+
+            const headers = {
+                Authorization: "Bearer "+ TokenManager.getAccessToken()
+            };
+            stompClient.connect(headers, onConnected, onError);
+        } catch (error) {
+            console.error('WebSocket connection error:', error);
+            showLoginSection();
+        }
+    }
+
+    // getSocketServerUrl: 이제 단순히 URL을 반환
+    async function getSocketServerUrl() {
+        return `${API_URL}/chat`;
+    }
+
+    function onConnected(frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/sub/chat.room.1', onMessageReceived, {'auto-delete':true, 'durable':false, 'exclusive':false});
+        stompClient.subscribe('/user/queue/errors', onErrorReceived) ;
+
+    }
+    function onErrorReceived(message) {
+        const error = JSON.parse(message.body);
+        console.log('Received error:', error);
+    }
+
+    function onError(error) {
+        console.error('WebSocket error:', error);
+        if (error.headers && error.headers.message === 'Unauthorized') {
+            refreshToken().then(success => {
+                if (success) {
+                    connectWebSocket();
+                } else {
+                    showLoginSection();
+                }
+            });
+        }
+    }
+
+    function onMessageReceived(message) {
+        console.log('Received: ' + message);
+        showMessage(JSON.parse(message.body).content);
+    }
+
+    function sendMessage() {
+        const roomId = document.getElementById('roomId').value;
+        const content = document.getElementById('message').value;
+        stompClient.send("/pub/chat.message." + roomId, {'Authorization': TokenManager.getAccessToken()}, JSON.stringify({
+            'roomId': roomId,
+            'content': content
+        }));
+    }
+
+    function showMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.appendChild(document.createTextNode(message));
+        document.getElementById('messages').appendChild(messageElement);
+    }
+
+    function showLoginSection() {
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('chatSection').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'none';
+    }
+
+    function showChatSection() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('chatSection').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'block';
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loginButton').addEventListener('click', login);
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
+        document.getElementById('logoutButton').addEventListener('click', logout);
+    });
+</script>
+</body>
+</html>
