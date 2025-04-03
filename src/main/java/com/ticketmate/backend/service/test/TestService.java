@@ -304,6 +304,7 @@ public class TestService {
                 .concertHall(concertHall)
                 .concertType(concertType)
                 .concertThumbnailUrl(concertThumbnailUrl)
+                .seatingChartUrl(seatingChartUrl)
                 .ticketReservationSite(ticketReservationSite)
                 .build();
     }
