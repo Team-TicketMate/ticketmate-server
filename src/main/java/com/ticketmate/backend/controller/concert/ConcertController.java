@@ -4,6 +4,7 @@ import com.ticketmate.backend.controller.concert.docs.ConcertControllerDocs;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
+import com.ticketmate.backend.object.dto.concert.response.ConcertInfoResponse;
 import com.ticketmate.backend.service.concert.ConcertService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,5 +35,14 @@ public class ConcertController implements ConcertControllerDocs {
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @ModelAttribute ConcertFilteredRequest request) {
         return ResponseEntity.ok(concertService.filteredConcert(request));
+    }
+
+    @Override
+    @GetMapping(value = "{concertId}")
+    @LogMonitoringInvocation
+    public ResponseEntity<ConcertInfoResponse> getConcertInfo(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @PathVariable("concertId") UUID concertId) {
+        return ResponseEntity.ok(concertService.getConcertInfo(concertId));
     }
 }

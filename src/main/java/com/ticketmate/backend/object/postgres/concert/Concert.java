@@ -39,7 +39,7 @@ public class Concert extends BasePostgresEntity {
     @Column(nullable = false)
     private ConcertType concertType;
 
-    // 콘서트 썸네일 이미지 url
+    // 공연 썸네일 이미지 url
     private String concertThumbnailUrl;
 
     // 좌석 배치도 이미지 url
