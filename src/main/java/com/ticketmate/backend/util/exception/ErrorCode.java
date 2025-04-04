@@ -60,6 +60,12 @@ public enum ErrorCode {
 
     GENERAL_TICKET_OPEN_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "티켓 일반 예매 오픈일은 필수로 포함되어야 합니다."),
 
+    CONCERT_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "공연 날짜 정보를 찾을 수 없습니다."),
+
+    TICKET_OPEN_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈일을 찾을 수 없습니다."),
+
+    TICKET_REQUEST_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "티켓 예매 요청 매수가 잘못되었습니다."),
+
     // CONCERT_HALL
 
     CONCERT_HALL_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 공연장 정보를 찾을 수 없습니다."),
@@ -100,6 +106,8 @@ public enum ErrorCode {
     HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 10개까지만 등록 가능합니다."),
 
     PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다."),
+
+    DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.BAD_REQUEST, "중복된 신청서 요청입니다."),
 
     // NOTIFICATION
 
