@@ -1,6 +1,5 @@
-package com.ticketmate.backend.util.notification;
+package com.ticketmate.backend.object.constants;
 
-import com.ticketmate.backend.object.constants.PortfolioType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
