@@ -8,8 +8,12 @@ import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
+import com.ticketmate.backend.object.postgres.concert.ConcertDate;
+import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
+import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
+import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -40,17 +44,20 @@ public class ApplicationFormService {
     private final ApplicationFormRepository applicationFormRepository;
     private final MemberRepository memberRepository;
     private final ConcertRepository concertRepository;
+    private final ConcertDateRepository concertDateRepository;
+    private final TicketOpenDateRepository ticketOpenDateRepository;
     private final EntityMapper entityMapper;
 
     /**
      * 대리자를 지정하여 공연 신청 폼을 작성합니다
      *
-     * @param request 대리인PK agentId
-     *                콘서트PK concertId
-     *                요청매수 requestCount
-     *                희망구역 hopeAreas
-     *                요청사항 requestDetails
-     *                신청상태 applicationStatus
+     * @param request agentId 대리인PK
+     *                concertId 콘서트PK
+     *                performanceDate 공연일자
+     *                requestCount 요청매수
+     *                hopeAreas 희망구역
+     *                requestDetails 요청사항
+     *                isPreOpen 선예매 여부
      */
     @Transactional
     public void createApplicationForm(ApplicationFormRequest request, Member client) {
@@ -69,9 +76,36 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
         }
 
-        // 콘서트 확인
+        // Concert 확인
         Concert concert = concertRepository.findById(request.getConcertId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+
+        // 이미 의뢰인이 대리자에게 해당 공연으로 신청서를 보냈는지 확인
+        if (applicationFormRepository.existsByClient_MemberIdAndAgent_MemberIdAndConcert_ConcertId(
+                client.getMemberId(), agent.getMemberId(), concert.getConcertId())) {
+            log.error("의뢰인: {} 이 대리인: {} 에게 이미 공연: {} 에 대해 신청서를 작성했습니다. 중복 작성은 불가능합니다.",
+                    client.getMemberId(), agent.getMemberId(), concert.getConcertName());
+            throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
+        }
+
+        // 공연PK + 공연일자로 ConcertDate엔티티 조회
+        ConcertDate concertDate = concertDateRepository
+                .findByConcert_ConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate());
+
+        // TicketOpenDate 확인
+        TicketOpenDate ticketOpenDate = ticketOpenDateRepository
+                .findByConcert_ConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
+                .orElseThrow(() -> {
+                    log.error("공연: {} 에 해당하는 선예매/일반예매 정보를 찾을 수 없습니다.", concert.getConcertName());
+                    return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+                });
+
+        // 요청 매수 확인
+        if (request.getRequestCount() < 1 || request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
+            log.error("요청 매수는 최소 1장 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
+                    ticketOpenDate.getRequestMaxCount(), request.getRequestCount());
+            throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
+        }
 
         // 희망구역 DTO List -> 엔티티 List 변환
         List<HopeArea> hopeAreaList = entityMapper
@@ -82,6 +116,7 @@ public class ApplicationFormService {
                 .client(client)
                 .agent(agent)
                 .concert(concert)
+                .concertDate(concertDate)
                 .requestCount(request.getRequestCount())
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(request.getRequestDetails())
@@ -175,6 +210,7 @@ public class ApplicationFormService {
 
     /**
      * 대리 티켓팅 신청서 상세 조회
+     *
      * @param applicationFormId 신청서 PK
      * @return 신청서 정보
      */

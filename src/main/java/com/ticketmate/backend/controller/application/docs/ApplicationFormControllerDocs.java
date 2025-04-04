@@ -41,38 +41,38 @@ public interface ApplicationFormControllerDocs {
                     이 API는 인증이 필요합니다
 
                     ### 요청 파라미터
-                    - **clientId** (UUID): 의뢰인 PK [선택]
-                    - **agentId** (UUID): 대리인 PK [선택]
-                    - **concertId** (UUID): 콘서트 PK [선택]
-                    - **requestCount** (Integer): 매수 [선택]
-                    - **applicationStatus** (enum): 신청서 상태 [선택]
-                    - **pageNumber** (Integer): 요청 페이지 번호 [선택]
-                    - **pageSize** (Integer): 한 페이지 당 항목 수 [선택]
-                    - **sortField** (String): 정렬할 필드 [선택]
-                    - **sortDirection** (String): 정렬 방향 [선택]
-                    
+                    - **agentId** (UUID): 대리인 PK [필수]
+                    - **concertId** (UUID): 콘서트 PK [필수]
+                    - **performanceDate** (LocalDateTime): 공연 일자 [필수]
+                    - **requestCount** (Integer): 요청한 티켓 수 [필수]
+                    - **hopeAreaList** (List<HopeAreaRequest>): 희망 구역 리스트 [선택]
+                    - **requestDetails** (String): 요청 사항 [선택]
+                    - **isPreOpen** (Boolean): 선예매 여부 [필수]
+    
                     ### 사용 방법
-                    `필터링 파라미터`
-                    - clientId: 해당 의뢰인이 작성한 신청서를 반환합니다
-                    - agentId: 해당 대리인에게 요청된 신청서를 반환합니다
-                    - concertId: 해당 콘서트에 작성된 신청서를 반환합니다
-                    - requestCount: 특정 매수를 요청한 신청서를 반환합니다 (ex. 티켓 3장을 요청한 신청서만 반환)
-                    - applicationStatus: 특정 신청 상태의 신청서를 반환합니다
-                    
-                    `정렬 조건`
-                    - sortField: created_date(기본값), request_count
-                    - sortDirection: ASC, DESC(기본값)
-
-                    `ApplicationStatus`
-                    
-                    PENDING("대기")
-                    APPROVED("승인")
-                    REJECTED("거절")
-                    EXPIRED("만료")
-
+                    `요청 사항`
+                    - agentId: 대리인으로 지정된 회원의 ID를 입력합니다.
+                    - concertId: 신청할 콘서트의 ID를 입력합니다.
+                    - performanceDate: 신청할 공연의 일시를 입력합니다.
+                    - requestCount: 요청할 티켓 수를 입력합니다. (최소 1, 최대 공연 티켓 수 제한)
+                    - hopeAreaList: 티켓을 원하는 구역을 지정할 수 있습니다.
+                    - requestDetails: 추가적인 요청 사항을 입력할 수 있습니다.
+                    - isPreOpen: 선예매 여부를 설정합니다. (`true`일 경우 선예매, `false`일 경우 일반 예매)
+    
                     ### 유의사항
-                    - clientId, agentId, concertId, requestCount, applicationStatus 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-                    - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
+                    - 대리인(`agentId`)과 의뢰인(`clientId`)은 반드시 올바른 회원 유형이어야 합니다.
+                    - 요청된 티켓 수(`requestCount`)는 공연의 티켓 예매 가능 범위 내여야 합니다.
+                    - 중복된 신청서는 허용되지 않으며, 이미 대리인에게 신청서를 제출한 경우 오류가 발생합니다.
+                    - 희망 구역은 선택 사항으로, 제공된 공연 구역에 맞춰 유효한 구역을 선택해야 합니다.
+                    - 선예매와 일반 예매 구분은 `isPreOpen`으로 결정됩니다.
+    
+                    `TicketOpenDate`
+                    - 선예매(`isPreOpen=true`)일 경우, 해당 공연의 선예매 정보가 있어야 합니다.
+                    - 일반 예매(`isPreOpen=false`)일 경우, 일반 예매 정보가 있어야 합니다.
+    
+                    ### 주의사항
+                    - 대리인이 아닌 회원이 대리인으로 지정되면 `INVALID_MEMBER_TYPE` 오류가 발생합니다.
+                    - 이미 신청서를 제출한 경우, `DUPLICATE_APPLICATION_FROM_REQUEST` 오류가 발생합니다.
                     """
     )
     ResponseEntity<Page<ApplicationFormInfoResponse>> filteredApplicationForm(

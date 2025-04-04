@@ -38,4 +38,7 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
             @Param("applicationStatus") String applicationStatus,
             Pageable pageable
     );
+
+    // 이미 의뢰인이 대리인에게 해당 공연 신청서를 보냈는지 검증
+    boolean existsByClient_MemberIdAndAgent_MemberIdAndConcert_ConcertId(UUID clientId, UUID agentId, UUID concertId);
 }
