@@ -38,11 +38,11 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     }
 
     @Override
-    @PostMapping("/filtered")
+    @GetMapping("")
     @LogMonitoringInvocation
     public ResponseEntity<Page<ApplicationFormInfoResponse>> filteredApplicationForm(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @RequestBody ApplicationFormFilteredRequest request) {
+            @ModelAttribute ApplicationFormFilteredRequest request) {
         return ResponseEntity.ok(applicationFormService.filteredApplicationForm(request));
     }
 

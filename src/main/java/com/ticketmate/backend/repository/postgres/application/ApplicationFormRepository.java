@@ -23,9 +23,9 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
             countQuery = """
                     select count(*)
                     from application_form af
-                    where (:clientId = '' or CAST(af.client_member_id AS TEXT) = :clientId)
-                    and (:agentId = '' or CAST(af.agent_member_id AS TEXT) = :agentId)
-                    and (:concertId = '' or CAST(af.concert_concert_id AS TEXT) = :concertId)
+                    where (:clientId is null or af.client_member_id = :clientId)
+                    and (:agentId is null or af.agent_member_id = :agentId)
+                    and (:concertId is null or af.concert_concert_id = :concertId)
                     and (:requestCount = 0 or af.request_count = :requestCount)
                     and (:applicationStatus = '' or af.application_status = :applicationStatus)
                     """,
