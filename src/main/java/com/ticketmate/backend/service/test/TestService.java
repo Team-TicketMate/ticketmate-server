@@ -150,6 +150,7 @@ public class TestService {
     public void createConcertHallMockData(Integer count) {
 
         log.debug("공연장 Mock 데이터 저장을 시작합니다");
+        long startMs = System.currentTimeMillis();
         count = null2ZeroInt(count) == 0 ? 30 : count; // 기본 30개 데이터 추가
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -180,7 +181,9 @@ public class TestService {
                     try {
                         // 공연장 Mock데이터 저장
                         concertHallRepository.saveAll(concertHalls);
+                        long endMs = System.currentTimeMillis();
                         log.debug("공연장 Mock 데이터 저장 완료, 저장된 개수: {}", concertHalls.size());
+                        log.debug("공연장 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
                     } catch (Exception e) {
                         log.error("공연장 데이터 저장 중 오류: {}", e.getMessage());
                     }
@@ -222,6 +225,7 @@ public class TestService {
     public void createConcertMockData(Integer count) {
 
         log.debug("공연 Mock 데이터 저장을 시작합니다.");
+        long startMs = System.currentTimeMillis();
         count = null2ZeroInt(count) == 0 ? 30 : count;
 
         // 데이터베이스에서 공연장 목록 조회
@@ -268,7 +272,9 @@ public class TestService {
                 .thenRun(() -> {
                     try {
                         concertRepository.saveAll(concertList);
+                        long endMs = System.currentTimeMillis();
                         log.debug("공연 Mock 데이터 저장 완료, 저장된 개수: {}", concertList.size());
+                        log.debug("공연 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
                     } catch (Exception e) {
                         log.error("공연 데이터 저장 중 오류 발생: {}", e.getMessage());
                         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
@@ -451,8 +457,8 @@ public class TestService {
     /**
      * 신청서 단일 Mock 데이터를 생성합니다 (저장 X)
      *
-     * @param agentList DB에 저장된 대리인 리스트
-     * @param clientList DB에 저장된 의뢰인 리스트
+     * @param agentList   DB에 저장된 대리인 리스트
+     * @param clientList  DB에 저장된 의뢰인 리스트
      * @param concertList DB에 저장된 콘서트 리스트
      * @return 생성된 신청서 Mock데이터
      */
