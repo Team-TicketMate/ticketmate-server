@@ -1,5 +1,6 @@
 package com.ticketmate.backend.util.notification;
 
+import com.ticketmate.backend.object.constants.NotificationType;
 import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
