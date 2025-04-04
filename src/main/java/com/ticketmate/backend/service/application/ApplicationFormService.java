@@ -48,7 +48,7 @@ public class ApplicationFormService {
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final EntityMapper entityMapper;
 
-    private static final int MIN_REQUSEST_COUNT = 1;
+    private static final int MIN_REQUEST_COUNT = 1;
 
     /**
      * 대리자를 지정하여 공연 신청 폼을 작성합니다
@@ -100,18 +100,27 @@ public class ApplicationFormService {
                 });
 
         // TicketOpenDate 확인
-        TicketOpenDate ticketOpenDate = ticketOpenDateRepository
-                .findByConcert_ConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
-                .orElseThrow(() -> {
-                    log.error("공연: {} 에 해당하는 선예매/일반예매 정보를 찾을 수 없습니다.", concert.getConcertName());
-                    return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
-                });
+        TicketOpenDate ticketOpenDate = null;
+        if (request.getIsPreOpen() != null) { // 선예매/일반예매 오픈일이 존재하는 경우
+            log.debug("공연: {} 에 대해 선예매/일반예매 정보가 존재합니다.", concert.getConcertName());
+            ticketOpenDate = ticketOpenDateRepository
+                    .findByConcert_ConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
+                    .orElseThrow(() -> {
+                        log.error("공연: {} 에 해당하는 선예매/일반예매 정보를 찾을 수 없습니다.", concert.getConcertName());
+                        return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+                    });
+        } else { // 선예매/일반예매 오픈일이 존재하지 않는 경우
+            log.debug("공연: {} 에 대해 선예매/일반예매 정보가 존재하지 않습니다.", concert.getConcertName());
+        }
 
         // 요청 매수 확인
-        if (request.getRequestCount() < MIN_REQUSEST_COUNT || request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
-            log.error("요청 매수는 최소 1장 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
-                    ticketOpenDate.getRequestMaxCount(), request.getRequestCount());
-            throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
+        if (ticketOpenDate != null) {
+            if (request.getRequestCount() < MIN_REQUEST_COUNT ||
+                    request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
+                log.error("요청 매수는 최소 1장 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
+                        ticketOpenDate.getRequestMaxCount(), request.getRequestCount());
+                throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
+            }
         }
 
         // 희망구역 DTO List -> 엔티티 List 변환
