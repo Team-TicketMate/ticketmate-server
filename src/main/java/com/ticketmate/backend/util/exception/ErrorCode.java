@@ -60,6 +60,8 @@ public enum ErrorCode {
 
     GENERAL_TICKET_OPEN_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "티켓 일반 예매 오픈일은 필수로 포함되어야 합니다."),
 
+    CONCERT_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "공연 날짜 정보를 찾을 수 없습니다."),
+
     TICKET_OPEN_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈일을 찾을 수 없습니다."),
 
     TICKET_REQUEST_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "티켓 예매 요청 매수가 잘못되었습니다."),

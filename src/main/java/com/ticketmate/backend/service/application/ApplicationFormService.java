@@ -48,6 +48,8 @@ public class ApplicationFormService {
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final EntityMapper entityMapper;
 
+    private static final int MIN_REQUSEST_COUNT = 1;
+
     /**
      * 대리자를 지정하여 공연 신청 폼을 작성합니다
      *
@@ -90,7 +92,12 @@ public class ApplicationFormService {
 
         // 공연PK + 공연일자로 ConcertDate엔티티 조회
         ConcertDate concertDate = concertDateRepository
-                .findByConcert_ConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate());
+                .findByConcert_ConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate())
+                .orElseThrow(() -> {
+                    log.error("공연: {} 공연일자: {} 에 해당하는 ConcertDate를 찾을 수 없습니다.",
+                            concert.getConcertName(), request.getPerformanceDate());
+                    return new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
+                });
 
         // TicketOpenDate 확인
         TicketOpenDate ticketOpenDate = ticketOpenDateRepository
@@ -101,7 +108,7 @@ public class ApplicationFormService {
                 });
 
         // 요청 매수 확인
-        if (request.getRequestCount() < 1 || request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
+        if (request.getRequestCount() < MIN_REQUSEST_COUNT || request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
             log.error("요청 매수는 최소 1장 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
                     ticketOpenDate.getRequestMaxCount(), request.getRequestCount());
             throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
