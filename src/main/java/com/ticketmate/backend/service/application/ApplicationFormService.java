@@ -161,9 +161,9 @@ public class ApplicationFormService {
 
         Page<ApplicationForm> applicationFormPage = applicationFormRepository
                 .filteredApplicationForm(
-                        clientId != null ? clientId.toString() : "",
-                        agentId != null ? agentId.toString() : "",
-                        concertId != null ? concertId.toString() : "",
+                        clientId,
+                        agentId,
+                        concertId,
                         requestCount,
                         applicationStatus,
                         pageable
