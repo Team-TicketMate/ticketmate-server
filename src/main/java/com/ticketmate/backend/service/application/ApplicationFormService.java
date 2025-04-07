@@ -3,7 +3,7 @@ package com.ticketmate.backend.service.application;
 import com.ticketmate.backend.object.constants.ApplicationStatus;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
@@ -160,7 +160,7 @@ public class ApplicationFormService {
      *                sortDirection 정렬 방향 (기본: DESC)
      */
     @Transactional(readOnly = true)
-    public Page<ApplicationFormInfoResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
+    public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
 
         UUID clientId = request.getClientId();
         UUID agentId = request.getAgentId();
@@ -221,7 +221,7 @@ public class ApplicationFormService {
                 );
 
         // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return applicationFormPage.map(entityMapper::toApplicationFormInfoResponse);
+        return applicationFormPage.map(entityMapper::toApplicationFormFilteredResponse);
     }
 
     /**
@@ -231,7 +231,7 @@ public class ApplicationFormService {
      * @return 신청서 정보
      */
     @Transactional(readOnly = true)
-    public ApplicationFormInfoResponse getApplicationFormInfo(UUID applicationFormId) {
+    public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
 
         // 데이터베이스 조회
         ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
@@ -240,6 +240,6 @@ public class ApplicationFormService {
                     return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
                 });
 
-        return entityMapper.toApplicationFormInfoResponse(applicationForm);
+        return entityMapper.toApplicationFormFilteredResponse(applicationForm);
     }
 }

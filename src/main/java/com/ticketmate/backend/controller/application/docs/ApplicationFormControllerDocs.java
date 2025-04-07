@@ -2,7 +2,7 @@ package com.ticketmate.backend.controller.application.docs;
 
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
@@ -75,7 +75,7 @@ public interface ApplicationFormControllerDocs {
                     - 이미 신청서를 제출한 경우, `DUPLICATE_APPLICATION_FROM_REQUEST` 오류가 발생합니다.
                     """
     )
-    ResponseEntity<Page<ApplicationFormInfoResponse>> filteredApplicationForm(
+    ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
             CustomOAuth2User customOAuth2User,
             ApplicationFormFilteredRequest request);
 
@@ -91,7 +91,7 @@ public interface ApplicationFormControllerDocs {
                     ### 유의사항
                     """
     )
-    ResponseEntity<ApplicationFormInfoResponse> applicationFormInfo(
+    ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
             CustomOAuth2User customOAuth2User,
             UUID applicationFormId);
 }

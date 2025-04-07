@@ -3,7 +3,7 @@ package com.ticketmate.backend.controller.application;
 import com.ticketmate.backend.controller.application.docs.ApplicationFormControllerDocs;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormInfoResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.service.application.ApplicationFormService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
@@ -40,7 +40,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     @Override
     @GetMapping("")
     @LogMonitoringInvocation
-    public ResponseEntity<Page<ApplicationFormInfoResponse>> filteredApplicationForm(
+    public ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @ModelAttribute ApplicationFormFilteredRequest request) {
         return ResponseEntity.ok(applicationFormService.filteredApplicationForm(request));
@@ -49,7 +49,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     @Override
     @GetMapping("/{applicationFormId}")
     @LogMonitoringInvocation
-    public ResponseEntity<ApplicationFormInfoResponse> applicationFormInfo(
+    public ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @PathVariable UUID applicationFormId) {
         return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));
