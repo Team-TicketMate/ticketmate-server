@@ -22,28 +22,6 @@ public interface ApplicationFormControllerDocs {
                     ### 요청 파라미터
                     - **agentId** (UUID): 대리인 PK [필수]
                     - **concertId** (UUID): 콘서트 PK [필수]
-                    - **requestCount** (Integer): 티켓 요청 매수 [필수] (default: 1)
-                    - **hopeAreas** (Map<String, String>): 희망구역
-                    - **requestDetails** (String): 요청사항
-
-                    ### 유의사항
-                    - 티켓 요청 매수는 1 이상의 정수를 입력해주세요
-                    - 희망구역은 최대 10개까지 등록 가능합니다
-                    """
-    )
-    ResponseEntity<Void> saveApplicationForm(
-            CustomOAuth2User customOAuth2User,
-            ApplicationFormRequest request);
-
-    @Operation(
-            summary = "대리 티켓팅 신청서 필터링 조회",
-            description = """
-
-                    이 API는 인증이 필요합니다
-
-                    ### 요청 파라미터
-                    - **agentId** (UUID): 대리인 PK [필수]
-                    - **concertId** (UUID): 콘서트 PK [필수]
                     - **performanceDate** (LocalDateTime): 공연 일자 [필수]
                     - **requestCount** (Integer): 요청한 티켓 수 [필수]
                     - **hopeAreaList** (List<HopeAreaRequest>): 희망 구역 리스트 [선택]
@@ -74,6 +52,53 @@ public interface ApplicationFormControllerDocs {
                     ### 주의사항
                     - 대리인이 아닌 회원이 대리인으로 지정되면 `INVALID_MEMBER_TYPE` 오류가 발생합니다.
                     - 이미 신청서를 제출한 경우, `DUPLICATE_APPLICATION_FROM_REQUEST` 오류가 발생합니다.
+                    """
+    )
+    ResponseEntity<Void> saveApplicationForm(
+            CustomOAuth2User customOAuth2User,
+            ApplicationFormRequest request);
+
+    @Operation(
+            summary = "대리 티켓팅 신청서 필터링 조회",
+            description = """
+
+                    이 API는 인증이 필요합니다.
+
+                    ### 요청 파라미터
+                    - **clientId** (UUID): 의뢰인 PK [선택]
+                    - **agentId** (UUID): 대리인 PK [선택]
+                    - **concertId** (UUID): 공연 PK [선택]
+                    - **requestCount** (Integer): 매수 [선택]
+                    - **applicationStatus** (Enum): 신청서 상태 [선택]
+                    - **pageNumber** (Integer): 요청 페이지 번호 [선택]
+                    - **pageSize** (Integer): 한 페이지 당 항목 수 [선택]
+                    - **sortField** (String): 정렬할 필드 [선택]
+                    - **sortDirection** (String): 정렬 방향 [선택]
+
+                    ### 사용 방법
+                    `필터링 파라미터`
+                    - clientId: 의뢰인이 작성한 신청서를 반환합니다
+                    - agentId: 대리인이 받은 신청서를 반환합니다
+                    - concertId: 특정 공연에 작성된 신청서를 반환합니다
+                    - requestCount: 요청 매수에 따른 신청서를 반환합니다
+                    - applicationStatus: 신청서 상태에 따른 신청서를 반환합니다
+
+                    `정렬 조건`
+                    - sortField: created_date(기본값), request_count
+                    - sortDirection: DESC(기본값), ASC
+
+                    `ApplicationStatus`
+                    PENDING("대기")
+                
+                    APPROVED("승인")
+                
+                    REJECTED("거절")
+                
+                    EXPIRED("만료")
+
+                    ### 유의사항
+                    - clientId, agentId, concertId, requestCount, applicationStatus 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
+                    - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다.
                     """
     )
     ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(

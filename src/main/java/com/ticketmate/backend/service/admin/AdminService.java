@@ -5,10 +5,12 @@ import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concert.request.TicketOpenDateRequest;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
@@ -22,6 +24,7 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
+import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
@@ -49,6 +52,8 @@ import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminService {
+
+    private final ConcertHallService concertHallService;
     private final ConcertHallRepository concertHallRepository;
     private final ConcertRepository concertRepository;
     private final ConcertDateRepository concertDateRepository;
@@ -145,6 +150,28 @@ public class AdminService {
             ticketOpenDateRepository.saveAll(ticketOpenDates);
         }
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    }
+
+    /**
+     * 공연장 정보 필터링 로직
+     *
+     * 필터링 조건: 공연장 이름 (검색어), 도시
+     * 정렬 조건: created_date
+     *
+     * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
+     *                cityCode 지역 코드 (null 인 경우 필터링 제외)
+     *                pageNumber 요청 페이지 번호 (기본 0)
+     *                pageSize 한 페이지 당 항목 수 (기본 30)
+     *                sortField 정렬할 필드 (기본: created_date)
+     *                sortDirection 정렬 방향 (기본: DESC)
+     */
+    @Transactional(readOnly = true)
+    public Page<ConcertHallFilteredAdminResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
+
+        Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
+
+        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
+        return concertHallPage.map(entityMapper::toConcertHallFilteredAdminResponse);
     }
 
     /**
