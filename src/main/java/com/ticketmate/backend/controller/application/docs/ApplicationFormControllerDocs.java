@@ -4,6 +4,7 @@ import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilt
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.dto.expressions.request.ExpressionsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -94,4 +95,36 @@ public interface ApplicationFormControllerDocs {
     ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
             CustomOAuth2User customOAuth2User,
             UUID applicationFormId);
+
+    @Operation(
+            summary = "대리 티켓팅 신청서 거절",
+            description = """
+
+                    이 API는 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
+                    - **applicationRejectedType** (String): 거절사유 [필수]
+                    - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모                  
+                    
+                    ### ApplicationRejectedType
+                    
+                    FEE_NOT_MATCHING_MARKET_PRICE("수고비가 시세에 맞지 않음")
+                    
+                    RESERVATION_CLOSED("예약 마감")
+                    
+                    SCHEDULE_UNAVAILABLE("티켓팅 일정이 안됨")
+                    
+                    OTHER("기타")
+
+                    ### 유의사항
+                    - 해당 API는 대리인만 사용 가능합니다.
+                    - 거절사유가 OTHER('기타') 일 시 otherMemo는 2자 이상이여야 합니다.
+                    - 거절 사유가 OTHER이 아닐 시에는 otherMemo는 공백처리해서 주시면 됩니다. 
+                                            
+                    """
+    )
+    void reject(
+            CustomOAuth2User customOAuth2User,
+            UUID applicationFormId, ExpressionsRequest request);
 }
