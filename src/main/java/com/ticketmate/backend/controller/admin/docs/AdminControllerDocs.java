@@ -2,10 +2,12 @@ package com.ticketmate.backend.controller.admin.docs;
 
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import java.util.UUID;
 
 public interface AdminControllerDocs {
+
+    /*
+    ======================================공연장======================================
+     */
 
     @Operation(
             summary = "공연장 정보 저장",
@@ -35,6 +41,61 @@ public interface AdminControllerDocs {
     ResponseEntity<Void> saveHallInfo(
             CustomOAuth2User customOAuth2User,
             ConcertHallInfoRequest request);
+
+    @Operation(
+            summary = "공연장 정보 필터링",
+            description = """
+                                        
+                    이 API는 인증이 필요합니다.
+
+                    ### 요청 파라미터
+                    - **concertHallName** (String): 공연장 이름 검색어 [선택]
+                    - **cityCode** (Integer): 지역 코드 [선택]
+                    - **pageNumber** (Integer): 요청 페이지 번호 [선택]
+                    - **pageSize** (Integer): 한 페이지 당 항목 수 [선택]
+                    - **sortField** (String): 정렬할 필드 [선택]
+                    - **sortDirection** (String): 정렬 방향 [선택]
+                    
+                    ### 사용 방법
+                    `필터링 파라미터`
+                    - concertHallName: 검색어가 포함된 공연장을 반환합니다
+                    - cityCode: 지역 코드에 해당하는 공연장을 반환합니다
+                    
+                    `정렬 조건`
+                    - sortField: created_date(기본값)
+                    - sortDirection: ASC, DESC(기본값)
+                    
+                    `City`
+                    SEOUL 11
+                    BUSAN 26
+                    DAEGU 27
+                    INCHEON 28
+                    GWANGJU 29
+                    DAEJEON 30 
+                    ULSAN 31
+                    SEJONG 36
+                    GYEONGGI 41
+                    GANGWON 42
+                    CHUNGCHEONG_BUK 43
+                    CHUNGCHEONG_NAM 44
+                    JEOLLA_BUK 45
+                    JEOLLA_NAM 46
+                    GYEONGSANG_BUK 47
+                    GYEONGSANG_NAM 48
+                    JEJU 50
+                                
+                    ### 유의사항
+                    - concertHallName, cityCode 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
+                    - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
+                    """
+    )
+    ResponseEntity<Page<ConcertHallFilteredAdminResponse>> filteredConcertHall(
+            CustomOAuth2User customOAuth2User,
+            ConcertHallFilteredRequest request);
+
+    /*
+    ======================================공연======================================
+     */
 
     @Operation(
             summary = "공연 정보 저장",
@@ -100,6 +161,10 @@ public interface AdminControllerDocs {
     ResponseEntity<Void> saveConcertInfo(
             CustomOAuth2User customOAuth2User,
             ConcertInfoRequest request);
+
+    /*
+    ======================================포트폴리오======================================
+     */
 
     @Operation(
             summary = "의뢰인 -> 대리자로 바꾸기 위한 포트폴리오 리스트 조회",

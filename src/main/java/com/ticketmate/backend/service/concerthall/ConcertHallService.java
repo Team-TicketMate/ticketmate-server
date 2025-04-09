@@ -47,6 +47,14 @@ public class ConcertHallService {
     @Transactional(readOnly = true)
     public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
 
+        Page<ConcertHall> concertHallPage = getConcertHallPage(request);
+
+        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
+        return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
+    }
+
+    public Page<ConcertHall> getConcertHallPage(ConcertHallFilteredRequest request) {
+
         // String, Integer 값 검증
         String concertHallName = nvl(request.getConcertHallName(), "");
         String city = "";
@@ -68,11 +76,8 @@ public class ConcertHallService {
                 sort
         );
 
-        Page<ConcertHall> concertHallPage = concertHallRepository
+        return concertHallRepository
                 .filteredConcertHall(concertHallName, city, pageable);
-
-        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
     }
 
     /**

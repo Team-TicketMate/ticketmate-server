@@ -3,10 +3,12 @@ package com.ticketmate.backend.controller.admin;
 import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.service.admin.AdminService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
@@ -33,6 +35,10 @@ public class AdminController implements AdminControllerDocs {
 
     private final AdminService adminService;
 
+    /*
+    ======================================공연장======================================
+     */
+
     @Override
     @PostMapping(value = "/concert-hall")
     @LogMonitoringInvocation
@@ -44,6 +50,19 @@ public class AdminController implements AdminControllerDocs {
     }
 
     @Override
+    @GetMapping(value = "/concert-hall")
+    @LogMonitoringInvocation
+    public ResponseEntity<Page<ConcertHallFilteredAdminResponse>> filteredConcertHall(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @Valid ConcertHallFilteredRequest request) {
+        return ResponseEntity.ok(adminService.filteredConcertHall(request));
+    }
+
+    /*
+    ======================================공연======================================
+     */
+
+    @Override
     @PostMapping(value = "/concert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
     public ResponseEntity<Void> saveConcertInfo(
@@ -52,6 +71,10 @@ public class AdminController implements AdminControllerDocs {
         adminService.saveConcertInfo(request);
         return ResponseEntity.ok().build();
     }
+
+    /*
+    ======================================포트폴리오======================================
+     */
 
     @Override
     @GetMapping(value = "/portfolio/list")
