@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.object.constants.ConcertType;
@@ -34,7 +35,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
      *
      * @param concertName           공연 이름 (검색어)
      * @param concertHallName       공연장 이름 (검색어)
-     * @param concertType           공연 타입
+     * @param concertType           공연 카테고리
      * @param ticketReservationSite 예매처
      * @return concertFilteredResponse
      */
@@ -63,28 +64,54 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                 .select(Projections.constructor(ConcertFilteredResponse.class,
                         concert.concertId,
                         concert.concertName,
+                        concertHall.concertHallName,
+                        concert.concertType,
+                        concert.ticketReservationSite,
+                        // 선예매 오픈일
                         new CaseBuilder()
                                 .when(ticketOpenDate.isPreOpen.eq(true))
                                 .then(ticketOpenDate.openDate)
                                 .otherwise((LocalDateTime) null)
-                                .min()
                                 .as("ticketPreOpenDate"),
+                        // 선예매 무통장 여부
+                        new CaseBuilder()
+                                .when(ticketOpenDate.isPreOpen.eq(true))
+                                .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
+                                .otherwise((Boolean) null)
+                                .as("preOpenBankTransfer"),
+                        // 일반 예매 오픈일
                         new CaseBuilder()
                                 .when(ticketOpenDate.isPreOpen.eq(false))
                                 .then(ticketOpenDate.openDate)
                                 .otherwise((LocalDateTime) null)
-                                .min()
                                 .as("ticketGeneralOpenDate"),
+                        // 일반 예매 무통장 여부
+                        new CaseBuilder()
+                                .when(ticketOpenDate.isPreOpen.eq(false))
+                                .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
+                                .otherwise((Boolean) null)
+                                .as("generalOpenBankTransfer"),
                         concertDate.performanceDate.min().as("startDate"), // 공연 시작일
                         concertDate.performanceDate.max().as("endDate"), // 공연 종료일
-                        concert.concertThumbnailUrl
+                        concert.concertThumbnailUrl,
+                        concert.seatingChartUrl
                 ))
                 .from(concert)
                 .leftJoin(concert.concertHall, concertHall)
                 .leftJoin(concertDate).on(concert.concertId.eq(concertDate.concert.concertId))
                 .leftJoin(ticketOpenDate).on(concert.concertId.eq(ticketOpenDate.concert.concertId))
                 .where(whereClause)
-                .groupBy(concert.concertId, concert.concertName, concert.concertThumbnailUrl, concert.createdDate);
+                .groupBy(concert.concertId,
+                        concert.concertName,
+                        concertHall.concertHallName,
+                        concert.concertType,
+                        concert.ticketReservationSite,
+                        ticketOpenDate.openDate,
+                        ticketOpenDate.isPreOpen,
+                        ticketOpenDate.isBankTransfer,
+                        concert.concertThumbnailUrl,
+                        concert.seatingChartUrl,
+                        concert.createdDate);
 
 
         // 정렬 적용

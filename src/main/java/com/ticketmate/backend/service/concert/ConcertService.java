@@ -116,9 +116,9 @@ public class ConcertService {
 
         // 1-1. 비동기적으로 관련 데이터 멀티스레드 조회
         CompletableFuture<List<ConcertDate>> concertDateListFuture = CompletableFuture
-                .supplyAsync(() -> concertDateRepository.findAllByConcert_ConcertId(concert.getConcertId()));
+                .supplyAsync(() -> concertDateRepository.findAllByConcertConcertId(concert.getConcertId()));
         CompletableFuture<List<TicketOpenDate>> ticketOpenDateListFuture = CompletableFuture
-                .supplyAsync(() -> ticketOpenDateRepository.findAllByConcert_ConcertId(concert.getConcertId()));
+                .supplyAsync(() -> ticketOpenDateRepository.findAllByConcertConcertId(concert.getConcertId()));
 
         // 1-2. 데이터 조회 완료 대기
         List<ConcertDate> concertDateList;

@@ -92,7 +92,7 @@ public class ApplicationFormService {
 
         // 공연PK + 공연일자로 ConcertDate엔티티 조회
         ConcertDate concertDate = concertDateRepository
-                .findByConcert_ConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate())
+                .findByConcertConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate())
                 .orElseThrow(() -> {
                     log.error("공연: {} 공연일자: {} 에 해당하는 ConcertDate를 찾을 수 없습니다.",
                             concert.getConcertName(), request.getPerformanceDate());
@@ -104,7 +104,7 @@ public class ApplicationFormService {
         if (request.getIsPreOpen() != null) { // 선예매/일반예매 오픈일이 존재하는 경우
             log.debug("공연: {} 에 대해 선예매/일반예매 정보가 존재합니다.", concert.getConcertName());
             ticketOpenDate = ticketOpenDateRepository
-                    .findByConcert_ConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
+                    .findByConcertConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
                     .orElseThrow(() -> {
                         log.error("공연: {} 에 해당하는 선예매/일반예매 정보를 찾을 수 없습니다.", concert.getConcertName());
                         return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
