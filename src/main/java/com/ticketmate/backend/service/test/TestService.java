@@ -475,11 +475,11 @@ public class TestService {
         Concert concert = concertList.get(koFaker.random().nextInt(concertList.size()));
 
         // 4. 공연일자 (ConcertDate) 생성
-        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcert_ConcertId(concert.getConcertId());
+        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
         ConcertDate concertDate = concertDateList.get(koFaker.random().nextInt(concertDateList.size()));
 
         // 5. 티켓 오픈일 (TicketOpenDate) 생성
-        List<TicketOpenDate> ticketOpenDateList = ticketOpenDateRepository.findAllByConcert_ConcertId(concert.getConcertId());
+        List<TicketOpenDate> ticketOpenDateList = ticketOpenDateRepository.findAllByConcertConcertId(concert.getConcertId());
         TicketOpenDate ticketOpenDate = ticketOpenDateList.get(koFaker.random().nextInt(ticketOpenDateList.size()));
 
         // 6. 희망구역 리스트 (0 ~ 10개 랜덤)
