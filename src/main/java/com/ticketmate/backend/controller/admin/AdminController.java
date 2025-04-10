@@ -7,10 +7,13 @@ import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdmin
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.service.admin.AdminService;
+import com.ticketmate.backend.service.concert.ConcertService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,6 +37,7 @@ import java.util.UUID;
 public class AdminController implements AdminControllerDocs {
 
     private final AdminService adminService;
+    private final ConcertService concertService;
 
     /*
     ======================================공연장======================================
@@ -70,6 +74,15 @@ public class AdminController implements AdminControllerDocs {
             @Valid @ModelAttribute ConcertInfoRequest request) {
         adminService.saveConcertInfo(request);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @GetMapping(value = "/concert")
+    @LogMonitoringInvocation
+    public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @Valid ConcertFilteredRequest request) {
+        return ResponseEntity.ok(concertService.filteredConcert(request));
     }
 
     /*
