@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface TicketOpenDateRepository extends JpaRepository<TicketOpenDate, UUID> {
 
-    List<TicketOpenDate> findAllByConcert_ConcertId(UUID concertId);
+    List<TicketOpenDate> findAllByConcertConcertId(UUID concertId);
 
-    Optional<TicketOpenDate> findByConcert_ConcertIdAndIsPreOpen(UUID concertId, Boolean isPreOpen);
+    Optional<TicketOpenDate> findByConcertConcertIdAndIsPreOpen(UUID concertId, Boolean isPreOpen);
 }
