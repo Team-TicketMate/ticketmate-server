@@ -24,7 +24,6 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
-import com.ticketmate.backend.repository.redis.FcmTokenRepository;
 import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
@@ -62,7 +61,6 @@ public class AdminService {
     private final PortfolioRepository portfolioRepository;
     private final FileService fileService;
     private final EntityMapper entityMapper;
-    private final FcmTokenRepository fcmTokenRepository;
     private final FcmService fcmService;
     private final NotificationUtil notificationUtil;
     private final View error;
