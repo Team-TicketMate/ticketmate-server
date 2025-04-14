@@ -1,6 +1,6 @@
 package com.ticketmate.backend.object.constants.notification;
 
-import com.ticketmate.backend.object.constants.ApplicationRejectedType;
+import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRejectNotificationType implements DomainNotificationType {
+public enum ApplicationFormRejectNotificationType implements DomainNotificationType {
      /*
    ======================================신청폼 반려======================================
     */
@@ -27,19 +27,19 @@ public enum ApplicationRejectNotificationType implements DomainNotificationType 
     /**
      * (1) ApplicationRejectedType → ExpressionsNotificationType 매핑용 Map
      */
-    private static final Map<ApplicationRejectedType, ApplicationRejectNotificationType> MAPPING = new HashMap<>();
+    private static final Map<ApplicationFormRejectedType, ApplicationFormRejectNotificationType> MAPPING = new HashMap<>();
 
     static {
-        MAPPING.put(ApplicationRejectedType.FEE_NOT_MATCHING_MARKET_PRICE, FEE_NOT_MATCHING_MARKET_PRICE);
-        MAPPING.put(ApplicationRejectedType.RESERVATION_CLOSED, RESERVATION_CLOSED);
-        MAPPING.put(ApplicationRejectedType.SCHEDULE_UNAVAILABLE, SCHEDULE_UNAVAILABLE);
-        MAPPING.put(ApplicationRejectedType.OTHER, OTHER);
+        MAPPING.put(ApplicationFormRejectedType.FEE_NOT_MATCHING_MARKET_PRICE, FEE_NOT_MATCHING_MARKET_PRICE);
+        MAPPING.put(ApplicationFormRejectedType.RESERVATION_CLOSED, RESERVATION_CLOSED);
+        MAPPING.put(ApplicationFormRejectedType.SCHEDULE_UNAVAILABLE, SCHEDULE_UNAVAILABLE);
+        MAPPING.put(ApplicationFormRejectedType.OTHER, OTHER);
     }
 
     /**
      * (2) 정적 메서드로 매핑된 ExpressionsNotificationType 얻기
      */
-    public static ApplicationRejectNotificationType from(ApplicationRejectedType rejectedType) {
+    public static ApplicationFormRejectNotificationType from(ApplicationFormRejectedType rejectedType) {
         return MAPPING.get(rejectedType);
     }
 }

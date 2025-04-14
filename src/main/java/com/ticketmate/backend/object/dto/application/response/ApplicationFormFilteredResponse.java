@@ -1,6 +1,6 @@
 package com.ticketmate.backend.object.dto.application.response;
 
-import com.ticketmate.backend.object.constants.ApplicationStatus;
+import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import lombok.*;
 
 import java.util.List;
@@ -28,5 +28,5 @@ public class ApplicationFormFilteredResponse {
 
     private String requestDetails; // 요청사항
 
-    private ApplicationStatus applicationStatus; // 신청서 상태
+    private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 }

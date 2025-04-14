@@ -1,6 +1,6 @@
 package com.ticketmate.backend.service.test;
 
-import com.ticketmate.backend.object.constants.ApplicationStatus;
+import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
@@ -486,8 +486,8 @@ public class TestService {
         List<HopeArea> hopeAreaList = createHopeAreaList();
 
         // 7. 신청서 상태 (랜덤)
-        ApplicationStatus applicationStatus = ApplicationStatus
-                .values()[koFaker.random().nextInt(ApplicationStatus.values().length)];
+        ApplicationFormStatus applicationFormStatus = ApplicationFormStatus
+                .values()[koFaker.random().nextInt(ApplicationFormStatus.values().length)];
 
         ApplicationForm applicationForm = ApplicationForm.builder()
                 .client(client)
@@ -497,7 +497,7 @@ public class TestService {
                 .requestCount(koFaker.number().numberBetween(1, ticketOpenDate.getRequestMaxCount() + 1))
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(koFaker.lorem().paragraph(2))
-                .applicationStatus(applicationStatus)
+                .applicationFormStatus(applicationFormStatus)
                 .build();
 
         hopeAreaList.forEach(applicationForm::addHopeArea);

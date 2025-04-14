@@ -1,7 +1,7 @@
 package com.ticketmate.backend.object.postgres.application;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.object.constants.ApplicationRejectedType;
+import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +24,7 @@ public class RejectionReason extends BasePostgresEntity {
     private UUID rejectionReasonId;
 
     @Enumerated(EnumType.STRING)
-    private ApplicationRejectedType applicationRejectedType;
+    private ApplicationFormRejectedType applicationFormRejectedType;
 
     private String otherMemo; // 'applicationRejectedType' 이 '기타'일시 대리자가 작성 할 메모
 

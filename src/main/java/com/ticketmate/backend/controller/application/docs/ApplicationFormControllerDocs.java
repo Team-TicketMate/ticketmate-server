@@ -4,7 +4,7 @@ import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilt
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.dto.expressions.request.ExpressionsRequest;
+import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -104,7 +104,7 @@ public interface ApplicationFormControllerDocs {
 
                     ### 요청 파라미터
                     - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
-                    - **applicationRejectedType** (String): 거절사유 [필수]
+                    - **applicationFormRejectedType** (String): 거절사유 [필수]
                     - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모                  
                     
                     ### ApplicationRejectedType
@@ -126,5 +126,5 @@ public interface ApplicationFormControllerDocs {
     )
     void reject(
             CustomOAuth2User customOAuth2User,
-            UUID applicationFormId, ExpressionsRequest request);
+            UUID applicationFormId, ApplicationFormRejectRequest request);
 }

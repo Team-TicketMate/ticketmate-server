@@ -5,7 +5,7 @@ import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilt
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.dto.expressions.request.ExpressionsRequest;
+import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.application.ApplicationFormService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
@@ -62,7 +62,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     @LogMonitoringInvocation
     public void reject(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                        @PathVariable(value = "application-form-id") UUID applicationFormId,
-                       @RequestBody ExpressionsRequest request) {
+                       @RequestBody ApplicationFormRejectRequest request) {
         Member member = customOAuth2User.getMember();
         applicationFormService.reject(applicationFormId, member, request);
     }

@@ -1,8 +1,8 @@
 package com.ticketmate.backend.util.notification;
 
-import com.ticketmate.backend.object.constants.ApplicationRejectedType;
+import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.constants.PortfolioType;
-import com.ticketmate.backend.object.constants.notification.ApplicationRejectNotificationType;
+import com.ticketmate.backend.object.constants.notification.ApplicationFormRejectNotificationType;
 import com.ticketmate.backend.object.constants.notification.PortfolioNotificationType;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
@@ -48,13 +48,13 @@ public class NotificationUtil {
     /**
      * 신청폼 반려에 대해 알림내용을 만들어주는 메서드입니다.
      */
-    public NotificationPayloadRequest rejectNotification(ApplicationRejectedType applicationRejectedType, Member agent, String memo) {
-        if (applicationRejectedType == null) {
+    public NotificationPayloadRequest rejectNotification(ApplicationFormRejectedType applicationFormRejectedType, Member agent, String memo) {
+        if (applicationFormRejectedType == null) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
         // 매핑 정보에 따라 NotificationType 구하기
-        ApplicationRejectNotificationType type = ApplicationRejectNotificationType.from(applicationRejectedType);
+        ApplicationFormRejectNotificationType type = ApplicationFormRejectNotificationType.from(applicationFormRejectedType);
         if (type == null) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ApplicationRejectedType {
+public enum ApplicationFormRejectedType {
     FEE_NOT_MATCHING_MARKET_PRICE("수고비가 시세에 맞지 않음"),
 
     RESERVATION_CLOSED("예약 마감"),
