@@ -1,6 +1,6 @@
 package com.ticketmate.backend.object.dto.application.request;
 
-import com.ticketmate.backend.object.constants.ApplicationStatus;
+import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,7 +34,7 @@ public class ApplicationFormFilteredRequest {
     private Integer requestCount; // 매수
 
     @Schema(defaultValue = "PENDING")
-    private ApplicationStatus applicationStatus; // 신청서 상태
+    private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 
     @Schema(defaultValue = "0")
     @Min(value = 0, message = "페이지 번호 인덱스에 음수는 입력될 수 없습니다.")

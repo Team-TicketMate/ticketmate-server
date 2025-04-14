@@ -1,12 +1,17 @@
 package com.ticketmate.backend.service.application;
 
-import com.ticketmate.backend.object.constants.ApplicationStatus;
+import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
+import com.ticketmate.backend.object.constants.ApplicationFormStatus;
+import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
+import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
+import com.ticketmate.backend.object.postgres.application.RejectionReason;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
@@ -14,10 +19,13 @@ import com.ticketmate.backend.repository.postgres.application.ApplicationFormRep
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
+import com.ticketmate.backend.repository.postgres.application.expressions.RejectionReasonRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
+import com.ticketmate.backend.util.notification.NotificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,8 +48,10 @@ import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
 @Slf4j
 @RequiredArgsConstructor
 public class ApplicationFormService {
-
+    private final RejectionReasonRepository rejectionReasonRepository;
     private final ApplicationFormRepository applicationFormRepository;
+    private final NotificationUtil notificationUtil;
+    private final FcmService fcmService;
     private final MemberRepository memberRepository;
     private final ConcertRepository concertRepository;
     private final ConcertDateRepository concertDateRepository;
@@ -136,7 +146,7 @@ public class ApplicationFormService {
                 .requestCount(request.getRequestCount())
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(request.getRequestDetails())
-                .applicationStatus(ApplicationStatus.PENDING) // 신청서는 기본 '대기'상태
+                .applicationFormStatus(ApplicationFormStatus.PENDING) // 신청서는 기본 '대기'상태
                 .build();
 
         // HopeArea 추가 및 양방향 관계 설정
@@ -165,7 +175,7 @@ public class ApplicationFormService {
         UUID clientId = request.getClientId();
         UUID agentId = request.getAgentId();
         UUID concertId = request.getConcertId();
-        String applicationStatus = enumToString(request.getApplicationStatus());
+        String applicationStatus = enumToString(request.getApplicationFormStatus());
         int requestCount = null2ZeroInt(request.getRequestCount());
 
         // clientId가 입력된 경우 의뢰인 검증
@@ -241,5 +251,64 @@ public class ApplicationFormService {
                 });
 
         return entityMapper.toApplicationFormFilteredResponse(applicationForm);
+    }
+
+    /**
+     * 대리 티켓팅 신청서 거절
+     *
+     * @param applicationFormId 신청서 PK
+     * @param agent 신청서 확인한 대리인
+     * @param request   applicationRejectedType 거절 사유
+     *                  otherMemo 거절 메모 (거절 사유가 '기타' 일 때)
+     */
+    @Transactional
+    public void reject(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
+        // 현재 회원이 '대리인'인가
+        if (!agent.getMemberType().equals(MemberType.AGENT)) {
+            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+        }
+
+        // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
+        if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
+                && request.getOtherMemo().length() < 2) {
+            throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
+        }
+
+        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId).orElseThrow(
+                () -> {
+                    log.error("신청폼 조회에 실패했습니다.");
+                    throw new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+                }
+        );
+
+        // 메모 default 세팅 or '기타' 사유의 메모 세팅
+        String memo = request.getApplicationFormRejectedType() == ApplicationFormRejectedType.OTHER
+                ? request.getOtherMemo() : "none";
+
+        // 이미 거절당했던 신청 폼인지 확인 후 거절사유 객체 세팅
+        RejectionReason rejectionReason = rejectionReasonRepository.findByApplicationForm(applicationForm)
+                .orElseGet(() -> {
+                    log.debug("기존 거절사유에 대한 도메인이 없습니다.");
+                    return RejectionReason.builder()
+                            .applicationForm(applicationForm)
+                            .build();
+                });
+
+
+        applicationForm.setApplicationFormStatus(ApplicationFormStatus.REJECTED);
+        log.debug("신청서 상태 거절변경 완료");
+
+        // 거절사유, 메모 세팅
+        rejectionReason.setApplicationFormRejectedType(request.getApplicationFormRejectedType());
+        rejectionReason.setOtherMemo(memo);
+
+        // 새로운 객체 저장 or Update
+        rejectionReasonRepository.save(rejectionReason);
+
+        // 알림 전송용 payload, 회원객체 세팅
+        NotificationPayloadRequest payloadRequest = notificationUtil.rejectNotification(request.getApplicationFormRejectedType(), agent, memo);
+        Member client = applicationForm.getClient();
+
+        fcmService.sendNotification(client.getMemberId(), payloadRequest);
     }
 }
