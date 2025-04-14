@@ -28,7 +28,7 @@ public class ApplicationFormFilteredRequest {
 
     private UUID agentId; // 대리인 PK
 
-    private UUID concertId; // 콘서트 PK
+    private UUID concertId; // 공연 PK
 
     @Schema(defaultValue = "1")
     private Integer requestCount; // 매수
