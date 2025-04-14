@@ -18,7 +18,7 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
             and (:agentId is null or af.agent_member_id = :agentId)
             and (:concertId is null or af.concert_concert_id = :concertId)
             and (:requestCount = 0 or af.request_count = :requestCount)
-            and (:applicationStatus = '' or af.application_status = :applicationStatus)
+            and (:applicationFormStatus = '' or af.application_status = :applicationFormStatus)
             """,
             countQuery = """
                     select count(*)
@@ -27,7 +27,7 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
                     and (:agentId is null or af.agent_member_id = :agentId)
                     and (:concertId is null or af.concert_concert_id = :concertId)
                     and (:requestCount = 0 or af.request_count = :requestCount)
-                    and (:applicationStatus = '' or af.application_status = :applicationStatus)
+                    and (:applicationFormStatus = '' or af.application_status = :applicationFormStatus)
                     """,
             nativeQuery = true)
     Page<ApplicationForm> filteredApplicationForm(
@@ -35,7 +35,7 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
             @Param("agentId") UUID agentId,
             @Param("concertId") UUID concertId,
             @Param("requestCount") Integer requestCount,
-            @Param("applicationStatus") String applicationStatus,
+            @Param("applicationFormStatus") String applicationFormStatus,
             Pageable pageable
     );
 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8" />
+    <title>FCM Test</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-messaging-compat.js"></script>
+</head>
+<body>
+<h1>Firebase Web SDK Test</h1>
+
+<button id="getTokenBtn">토큰 발급받기</button>
+
+
+<!-- Thymeleaf JS 치환 -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var firebaseConfig = {
+        apiKey: "AIzaSyCKlGh__FG-2pje_U8NJ-2o5cFz52FJ8gQ",
+        authDomain: "ticketmate-bafbb.firebaseapp.com",
+        projectId: "ticketmate-bafbb",
+        storageBucket: "ticketmate-bafbb.firebasestorage.app",
+        messagingSenderId: "6603871566",
+        appId: "1:6603871566:web:07a3600333e48fb3d87a1f",
+        measurementId: "G-XLH4GH51JR"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    messaging.onMessage((payload) => {
+        console.log('포그라운드 메시지:', payload);
+
+        // 1) Notification 권한 확인(보통 getToken() 단계에서 이미 물어봤겠지만 재확인)
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                // 2) 실제 알림 표시
+                const { title, body } = payload.notification;
+                new Notification(title, {
+                    body: body
+                    // icon, image 등 더 넣고 싶으면 여기서 추가
+                });
+            }else {
+                console.log("안됨")
+            }
+        });
+    });
+
+    document.getElementById('getTokenBtn').addEventListener('click', function() {
+        messaging.getToken({
+            vapidKey: 'BMK1nFFvOB8fycauFJb9uq6tsNVDxPP_kkKwgrqhsAZTR3GZB4ZGv1Y7GCRPcWq-zWfLQ_TJ_VXPKgor7WyHG-g'
+        })
+            .then((token) => {
+                if (token) {
+                    console.log("FCM Token:", token);
+                } else {
+                    console.log("토큰이 없습니다. 알림 권한 설정을 확인하세요.");
+                }
+            })
+            .catch((err) => {
+                console.error("FCM 토큰 가져오기 에러:", err);
+            });
+    });
+
+    // Service Worker 등록
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker 등록 성공:', registration);
+            })
+            .catch((error) => {
+                console.log('Service Worker 등록 실패:', error);
+            });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

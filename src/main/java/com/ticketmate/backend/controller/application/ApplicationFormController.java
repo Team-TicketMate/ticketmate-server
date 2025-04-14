@@ -5,6 +5,8 @@ import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilt
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.application.ApplicationFormService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,5 +55,15 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @PathVariable UUID applicationFormId) {
         return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));
+    }
+
+    @Override
+    @PutMapping("/expressions/{application-form-id}/reject")
+    @LogMonitoringInvocation
+    public void reject(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+                       @PathVariable(value = "application-form-id") UUID applicationFormId,
+                       @RequestBody ApplicationFormRejectRequest request) {
+        Member member = customOAuth2User.getMember();
+        applicationFormService.reject(applicationFormId, member, request);
     }
 }
