@@ -18,13 +18,13 @@ public interface ConcertHallRepository extends JpaRepository<ConcertHall, UUID> 
 
     @Query(value = """
             select *
-            from ticket_mate.public.concert_hall ch
+            from concert_hall ch
             where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
             and (:city = '' or :city = ch.city)
             """,
             countQuery = """
                     select count(*)
-                    from ticket_mate.public.concert_hall ch
+                    from concert_hall ch
                     where (trim(:concertHallName) = '' or lower(ch.concert_hall_name) like lower(concat('%', :concertHallName, '%')))
                     and (:city = '' or :city = ch.city)
                     """,
