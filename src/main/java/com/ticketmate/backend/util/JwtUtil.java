@@ -205,6 +205,15 @@ public class JwtUtil {
     }
 
     /**
+     * 엑세스 토큰 만료 시간 반환
+     *
+     * @return 엑세스 토큰 만료 시간 (밀리초 단위)
+     */
+    public long getAccessExpirationTime() {
+        return accessTokenExpTime;
+    }
+
+    /**
      * 리프레시 토큰 만료 시간 반환
      *
      * @return 리프레시 토큰 만료 시간 (밀리초 단위)

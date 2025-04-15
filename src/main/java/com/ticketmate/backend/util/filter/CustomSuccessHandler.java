@@ -2,9 +2,9 @@ package com.ticketmate.backend.util.filter;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.common.CookieUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CookieUtil cookieUtil;
 
     private static final String REFRESH_PREFIX = "RT:";
 
@@ -60,16 +61,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
             redirectUri = prodRedirectUri;
         }
-        response.addHeader("Authorization", "Bearer " + accessToken);
 
-        // 쿠키에 refreshToken 추가
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true); // HttpOnly 설정
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setDomain("ticketmate.site");
-        cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
-        response.addCookie(cookie);
+        // 쿠키에 accessToken, refreshToken 추가
+        response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
+        response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
 
         // 로그인 성공 후 메인 페이지로 리다이렉트
         try {

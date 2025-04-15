@@ -2,6 +2,7 @@ package com.ticketmate.backend.service.member;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.common.CookieUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.servlet.http.Cookie;
@@ -22,6 +23,7 @@ public class MemberService {
 
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CookieUtil cookieUtil;
 
     private static final String REFRESH_PREFIX = "RT:";
 
@@ -68,10 +70,6 @@ public class MemberService {
             log.warn("리프레시 토큰 삭제에 실패했습니다: {}", customOAuth2User.getMemberId());
         }
 
-        // 헤더에 accessToken 추가
-        response.setHeader("Authorization", "Bearer " + newAccessToken);
-        log.debug("accessToken 재발급 성공");
-
         // refreshToken 저장
         // RefreshToken을 Redisd에 저장 (key: RT:memberId)
         redisTemplate.opsForValue().set(
@@ -83,12 +81,8 @@ public class MemberService {
         log.debug("refreshToken 재발급 및 저장 성공");
 
         // 쿠키에 refreshToken 추가
-        Cookie cookie = new Cookie("refreshToken", newRefreshToken);
-        cookie.setHttpOnly(true); // HttpOnly 설정
-        cookie.setSecure(true); // FIXME: HTTPS 환경에서는 secure 속성 true로 설정 (현재는 HTTP)
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (jwtUtil.getRefreshExpirationTime() / 1000)); // 쿠키 maxAge는 초 단위 이므로, 밀리초를 1000으로 나눔
-        response.addCookie(cookie);
+        response.addCookie(cookieUtil.createCookie("accessToken", newAccessToken));
+        response.addCookie(cookieUtil.createCookie("refreshToken", newRefreshToken));
     }
 
     /**
