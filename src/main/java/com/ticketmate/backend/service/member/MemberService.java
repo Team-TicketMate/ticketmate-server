@@ -41,7 +41,7 @@ public class MemberService {
             throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
         }
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
+            if (cookie.getName().equals("refreshToken")) {
                 refreshToken = cookie.getValue();
                 break;
             }
