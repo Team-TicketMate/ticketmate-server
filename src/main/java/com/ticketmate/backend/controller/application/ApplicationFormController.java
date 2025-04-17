@@ -66,4 +66,13 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
         Member member = customOAuth2User.getMember();
         applicationFormService.reject(applicationFormId, member, request);
     }
+
+    @Override
+    @PutMapping("/expressions/{application-form-id}/approve")
+    @LogMonitoringInvocation
+    public ResponseEntity<String> approve(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+                       @PathVariable(value = "application-form-id") UUID applicationFormId) {
+        Member member = customOAuth2User.getMember();
+        return ResponseEntity.ok(applicationFormService.approve(applicationFormId, member));
+    }
 }
