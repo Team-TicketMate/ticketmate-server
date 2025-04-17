@@ -37,6 +37,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -331,26 +332,16 @@ public class ApplicationFormService {
 
         Member client = applicationForm.getClient();
 
-        // 승인하는 대리인이 의뢰인이 신청한 대리인이 정말 맞는지
-        if (!applicationForm.getAgent().getMemberId().equals(agent.getMemberId())) {
-            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-        }
-
-        // 신청서는 현재 "대기" 상태의 신청서만 승인 받을 수 있습니다.
-        if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.PENDING)) {
-            throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
-        }
-
         /**
          * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 신청 자체가 불가합니다.
          * 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
          */
         List<ApplicationForm> applicationFormList = applicationFormRepository
-                .findAllByConcert_ConcertIdAndClient_MemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
+                .findAllByConcertAndClient(applicationForm.getConcert(), client);
 
         for (ApplicationForm form : applicationFormList) {
             if (form.getApplicationFormStatus().equals(ApplicationFormStatus.APPROVED)) {
-                throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
+                throw new CustomException(ErrorCode.ALREADY_APPROVE_APPLICATION_FROM);
             }
         }
 
@@ -368,6 +359,7 @@ public class ApplicationFormService {
                 .map(room -> {
                     log.debug("기존 채팅방 존재");
                     room.setApplicationFormId(applicationFormId);
+                    room.setUpdatedDate(LocalDateTime.now());
                     return room;
                 })
                 // 없다면 새로운 채팅방을 생성합니다.
