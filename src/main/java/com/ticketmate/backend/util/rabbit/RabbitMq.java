@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.mongo.rabbitmq;
+package com.ticketmate.backend.util.rabbit;
 
 public class RabbitMq {
     /**
