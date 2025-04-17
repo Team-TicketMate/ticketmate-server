@@ -128,7 +128,7 @@ public interface ApplicationFormControllerDocs {
                     이 API는 인증이 필요합니다
 
                     ### 요청 파라미터
-                    - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
+                    - **applicationFormId** (UUID): 거절할 신청서 PK [필수]
                     - **applicationFormRejectedType** (String): 거절사유 [필수]
                     - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모                  
                     
@@ -152,4 +152,24 @@ public interface ApplicationFormControllerDocs {
     void reject(
             CustomOAuth2User customOAuth2User,
             UUID applicationFormId, ApplicationFormRejectRequest request);
+
+    @Operation(
+            summary = "대리 티켓팅 신청서 수락",
+            description = """
+
+                    이 API는 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **applicationFormId** (UUID): 수락할 신청서 PK [필수]
+                    
+                    ### 유의사항
+                    - 해당 API는 대리인만 사용 가능합니다.
+                    - 해당 API 호출 시 의뢰인에게 수락됐다는 알림이 발송됩니다.
+                    - 해당 API 호출 시 의뢰인과 대리자에 관한 1:1 채팅방이 생성됩니다.
+                    - 콘서트에 대한 신청폼이 이미 수락상태인경우 대리자는 수락이 불가합니다.
+                    - 이미 채팅방이 존재한다면 채팅방의 신청폼에 대한 정보만 수정합니다.
+                    """
+    )
+    ResponseEntity<String> approve(
+            CustomOAuth2User customOAuth2User, UUID applicationFormId);
 }
