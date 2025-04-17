@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.ticketmate.backend.object.mongo.rabbitmq.RabbitMq.CHAT_EXCHANGE_NAME;
-import static com.ticketmate.backend.object.mongo.rabbitmq.RabbitMq.CHAT_QUEUE_NAME;
+import static com.ticketmate.backend.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
+import static com.ticketmate.backend.util.rabbit.RabbitMq.CHAT_QUEUE_NAME;
 import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
 
 @Configuration
