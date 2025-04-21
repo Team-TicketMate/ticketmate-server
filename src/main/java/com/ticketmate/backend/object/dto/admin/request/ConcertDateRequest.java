@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.dto.concert.request;
+package com.ticketmate.backend.object.dto.admin.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.dto.concert.request;
+package com.ticketmate.backend.object.dto.admin.request;
 
 import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;

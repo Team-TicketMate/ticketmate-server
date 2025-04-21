@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.dto.concerthall.request;
+package com.ticketmate.backend.object.dto.admin.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

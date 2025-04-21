@@ -9,10 +9,10 @@ import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequ
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
-import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
-import com.ticketmate.backend.object.dto.concert.request.TicketOpenDateRequest;
+import com.ticketmate.backend.object.dto.admin.request.ConcertInfoRequest;
+import com.ticketmate.backend.object.dto.admin.request.TicketOpenDateRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
