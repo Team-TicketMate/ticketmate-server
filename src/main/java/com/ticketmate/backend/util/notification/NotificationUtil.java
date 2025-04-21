@@ -2,6 +2,7 @@ package com.ticketmate.backend.util.notification;
 
 import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.constants.PortfolioType;
+import com.ticketmate.backend.object.constants.notification.ApplicationFormApproveNotification;
 import com.ticketmate.backend.object.constants.notification.ApplicationFormRejectNotificationType;
 import com.ticketmate.backend.object.constants.notification.PortfolioNotificationType;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
@@ -80,6 +81,23 @@ public class NotificationUtil {
         return NotificationPayloadRequest.builder()
                 .body(type.getMessageBody())
                 .title(title)
+                .build();
+    }
+    /**
+     * 신청폼 수락에 대해 알림내용을 만들어주는 메서드입니다.
+     */
+    public NotificationPayloadRequest approveNotification(Member agent) {
+        ApplicationFormApproveNotification type = ApplicationFormApproveNotification.APPROVE;
+
+        // 알림 메시지 생성
+        Map<String, String> placeHolder = new HashMap<>();
+        String nickname = agent.getNickname();
+        placeHolder.put(PLACE_HOLDER_NICK_NAME_KEY, nickname);
+        String body = type.formatMessage(placeHolder);
+
+        return NotificationPayloadRequest.builder()
+                .body(body)
+                .title(type.getTitle())
                 .build();
     }
 }
