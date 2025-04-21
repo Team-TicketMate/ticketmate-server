@@ -109,9 +109,9 @@ public enum ErrorCode {
 
     DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.BAD_REQUEST, "중복된 신청서 요청입니다."),
 
-    ALREADY_APPROVED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 다른 사람에게 수락된 신청서입니다."),
+    ALREADY_APPROVED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 수락된 신청서입니다."),
 
-    INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "잘못된 신청서 상태입니다."),
+    INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
 
     // NOTIFICATION
 
