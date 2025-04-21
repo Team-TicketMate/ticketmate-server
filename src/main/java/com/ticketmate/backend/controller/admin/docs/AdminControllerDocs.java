@@ -1,5 +1,6 @@
 package com.ticketmate.backend.controller.admin.docs;
 
+import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoEditRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
@@ -94,6 +95,27 @@ public interface AdminControllerDocs {
     ResponseEntity<Page<ConcertHallFilteredAdminResponse>> filteredConcertHall(
             CustomOAuth2User customOAuth2User,
             ConcertHallFilteredRequest request);
+
+    @Operation(
+            summary = "공연장 정보 수정",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **concertHallName** (String): 공연장 명 (중복 불가) [선택]
+                    - **address** (String): 공연장 주소 [선택]
+                    - **webSiteUrl** (String): 공연장 웹사이트 URL [선택]
+                                
+                    ### 유의사항
+                    - 공연장 명, 주소, 웹사이트 URL 중 수정이 필요한 정보만 입력하면 됩니다 
+                    - `concertHallName`은 고유해야 합니다.
+                    - `webSiteUrl`은 'http://' 또는 'https://' 로 시작하는 문자열이어야 합니다
+                    """
+    )
+    ResponseEntity<Void> editConcertHallInfo(
+            UUID concertHallId,
+            ConcertHallInfoEditRequest request);
 
     /*
     ======================================공연======================================

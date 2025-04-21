@@ -1,6 +1,7 @@
 package com.ticketmate.backend.controller.admin;
 
 import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
+import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoEditRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
@@ -60,6 +61,16 @@ public class AdminController implements AdminControllerDocs {
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid ConcertHallFilteredRequest request) {
         return ResponseEntity.ok(adminService.filteredConcertHall(request));
+    }
+
+    @Override
+    @PatchMapping(value = "/concert-hall/{concert-hall-id}")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> editConcertHallInfo(
+            @PathVariable("concert-hall-id") UUID concertHallId,
+            @RequestBody ConcertHallInfoEditRequest request) {
+        adminService.editConcertHallInfo(concertHallId, request);
+        return ResponseEntity.ok().build();
     }
 
     /*

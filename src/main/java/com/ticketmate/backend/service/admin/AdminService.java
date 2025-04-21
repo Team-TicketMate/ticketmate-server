@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.admin;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
+import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoEditRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
 import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
@@ -153,28 +154,6 @@ public class AdminService {
     }
 
     /**
-     * 공연장 정보 필터링 로직
-     *
-     * 필터링 조건: 공연장 이름 (검색어), 도시
-     * 정렬 조건: created_date
-     *
-     * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
-     *                cityCode 지역 코드 (null 인 경우 필터링 제외)
-     *                pageNumber 요청 페이지 번호 (기본 0)
-     *                pageSize 한 페이지 당 항목 수 (기본 30)
-     *                sortField 정렬할 필드 (기본: created_date)
-     *                sortDirection 정렬 방향 (기본: DESC)
-     */
-    @Transactional(readOnly = true)
-    public Page<ConcertHallFilteredAdminResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
-
-        Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
-
-        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-        return concertHallPage.map(entityMapper::toConcertHallFilteredAdminResponse);
-    }
-
-    /**
      * 티켓 오픈일 검증
      */
     private void validateTicketOpenDates(List<TicketOpenDateRequest> ticketOpenDateRequests) {
@@ -222,6 +201,60 @@ public class AdminService {
                 .city(city)
                 .webSiteUrl(request.getWebSiteUrl())
                 .build());
+    }
+
+    /**
+     * 공연장 정보 필터링 로직
+     *
+     * 필터링 조건: 공연장 이름 (검색어), 도시
+     * 정렬 조건: created_date
+     *
+     * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
+     *                cityCode 지역 코드 (null 인 경우 필터링 제외)
+     *                pageNumber 요청 페이지 번호 (기본 0)
+     *                pageSize 한 페이지 당 항목 수 (기본 30)
+     *                sortField 정렬할 필드 (기본: created_date)
+     *                sortDirection 정렬 방향 (기본: DESC)
+     */
+    @Transactional(readOnly = true)
+    public Page<ConcertHallFilteredAdminResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
+
+        Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
+
+        // 엔티티를 DTO로 변환하여 Page 객체로 매핑
+        return concertHallPage.map(entityMapper::toConcertHallFilteredAdminResponse);
+    }
+
+    /**
+     * 공연장 정보 수정
+     * @param request concertHallId 공연장 PK
+     *                concertHallName 공연장 명
+     *                address 주소
+     *                webSiteUrl 사이트 URL
+     */
+    @Transactional
+    public void editConcertHallInfo(UUID concertHallId, ConcertHallInfoEditRequest request) {
+        ConcertHall concertHall = concertHallRepository.findById(concertHallId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+
+        // 정보 업데이트
+        if (!nvl(request.getConcertHallName(), "").isEmpty()) {
+            log.debug("새로운 공연장 명: {}", request.getConcertHallName());
+            concertHall.setConcertHallName(request.getConcertHallName());
+        }
+        if (!nvl(request.getAddress(), "").isEmpty()) {
+            log.debug("새로운 주소: {}", request.getAddress());
+            concertHall.setAddress(request.getAddress()); // 주소 업데이트
+
+            City city = City.fromAddress(request.getAddress());
+            concertHall.setCity(city); // 지역 코드 업데이트
+        }
+        if (!nvl(request.getWebSiteUrl(), "").isEmpty()) {
+            log.debug("새로운 웹사이트 URL: {}", request.getWebSiteUrl());
+            concertHall.setWebSiteUrl(request.getWebSiteUrl());
+        }
+
+        concertHallRepository.save(concertHall);
     }
 
     /*
