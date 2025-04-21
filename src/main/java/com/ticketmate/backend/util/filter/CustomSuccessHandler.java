@@ -59,7 +59,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // 로그인 쿼리 파라미터 Redirect URI 확인
         String redirectUri = (String) request.getSession().getAttribute("redirectUri");
-        if (nvl("redirectUri", "").isEmpty()) {
+        if (nvl(redirectUri, "").isEmpty()) {
             log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
             redirectUri = prodRedirectUri;
         }
