@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ApplicationFormRepository extends JpaRepository<ApplicationForm, UUID> {
@@ -41,4 +42,6 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
 
     // 이미 의뢰인이 대리인에게 해당 공연 신청서를 보냈는지 검증
     boolean existsByClient_MemberIdAndAgent_MemberIdAndConcert_ConcertId(UUID clientId, UUID agentId, UUID concertId);
+
+    List<ApplicationForm> findAllByConcert_ConcertIdAndClient_MemberId(UUID concertId, UUID clientId);
 }
