@@ -25,7 +25,7 @@ public class RedirectUriFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String redirectUri = request.getParameter("redirectUri");
 
-        if (!nvl(redirectUri, "").isEmpty()) {
+        if (nvl(redirectUri, "").isEmpty()) {
             log.debug("리다이랙트 URL이 지정되지 않아 기본경로로 설정합니다: {}", prodRedirectUri);
             request.getSession().setAttribute("redirectUri", prodRedirectUri);
         } else {
