@@ -109,7 +109,9 @@ public enum ErrorCode {
 
     DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.BAD_REQUEST, "중복된 신청서 요청입니다."),
 
-    ALREADY_APPROVE_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 다른 사람에게 수락된 신청폼입니다."),
+    ALREADY_APPROVED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 다른 사람에게 수락된 신청서입니다."),
+
+    INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "잘못된 신청서 상태입니다."),
 
     // NOTIFICATION
 
@@ -121,7 +123,7 @@ public enum ErrorCode {
 
     // CHAT
 
-    DUPLICATE_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 존재하는 채팅방입니다."),
+    CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾지 못했습니다."),
     ;
 
     private final HttpStatus status;
