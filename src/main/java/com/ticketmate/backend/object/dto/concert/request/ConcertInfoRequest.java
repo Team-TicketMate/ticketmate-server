@@ -37,7 +37,7 @@ public class ConcertInfoRequest {
     @Schema(defaultValue = "INTERPARK_TICKET")
     private TicketReservationSite ticketReservationSite; // 예매 사이트
 
-    private List<ConcertDateRequest> concertDateRequests; // 공연 날짜 DTO
+    private List<ConcertDateRequest> concertDateRequestList; // 공연 날짜 DTO
 
-    private List<TicketOpenDateRequest> ticketOpenDateRequests; // 티켓 오픈일 DTO
+    private List<TicketOpenDateRequest> ticketOpenDateRequestList; // 티켓 오픈일 DTO
 }

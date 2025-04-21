@@ -123,8 +123,8 @@ public class AdminService {
         concertRepository.save(concert);
 
         // 6. 공연 날짜 저장
-        if (!request.getConcertDateRequests().isEmpty()) {
-            List<ConcertDate> concertDates = request.getConcertDateRequests().stream()
+        if (!request.getConcertDateRequestList().isEmpty()) {
+            List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
                     .map(dateRequest -> ConcertDate.builder()
                             .concert(concert)
                             .performanceDate(dateRequest.getPerformanceDate())
@@ -132,14 +132,14 @@ public class AdminService {
                             .build()
                     )
                     .collect(Collectors.toList());
-            concertDateRepository.saveAll(concertDates);
+            concertDateRepository.saveAll(concertDateList);
         }
 
         // 7. 티켓 오픈일 검증 및 저장
-        if (!request.getTicketOpenDateRequests().isEmpty()) { // 티켓 오픈일이 입력된 경우
+        if (!request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
             // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
-            validateTicketOpenDates(request.getTicketOpenDateRequests());
-            List<TicketOpenDate> ticketOpenDates = request.getTicketOpenDateRequests().stream()
+            validateTicketOpenDates(request.getTicketOpenDateRequestList());
+            List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
                     .map(ticketOpenDateRequest -> TicketOpenDate.builder()
                             .concert(concert)
                             .openDate(ticketOpenDateRequest.getOpenDate())
@@ -148,7 +148,7 @@ public class AdminService {
                             .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
                             .build())
                     .collect(Collectors.toList());
-            ticketOpenDateRepository.saveAll(ticketOpenDates);
+            ticketOpenDateRepository.saveAll(ticketOpenDateList);
         }
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
     }
