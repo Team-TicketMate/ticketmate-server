@@ -4,6 +4,7 @@ import com.ticketmate.backend.service.member.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.filter.CustomLogoutHandler;
 import com.ticketmate.backend.util.filter.CustomSuccessHandler;
+import com.ticketmate.backend.util.filter.RedirectUriFilter;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -96,6 +97,8 @@ public class SecurityConfig {
                         new TokenAuthenticationFilter(jwtUtil),
                         OAuth2LoginAuthenticationFilter.class
                 )
+                // Redirect Filter
+                .addFilterBefore(new RedirectUriFilter(), OAuth2LoginAuthenticationFilter.class)
                 .build();
     }
 

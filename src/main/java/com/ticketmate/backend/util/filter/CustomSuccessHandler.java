@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -56,11 +58,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         );
 
         // 로그인 쿼리 파라미터 Redirect URI 확인
-        String redirectUri = request.getParameter("redirectUri");
-        if (redirectUri == null) {
+        String redirectUri = (String) request.getSession().getAttribute("redirectUri");
+        if (nvl("redirectUri", "").isEmpty()) {
             log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
             redirectUri = prodRedirectUri;
         }
+        log.debug("로그인 리다이랙트 경로: {}", redirectUri);
 
         // 쿠키에 accessToken, refreshToken 추가
         response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
