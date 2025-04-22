@@ -14,4 +14,6 @@ public interface ConcertDateRepository extends JpaRepository<ConcertDate, UUID> 
 
     // 공연PK + 공연일자로 조회
     Optional<ConcertDate> findByConcertConcertIdAndPerformanceDate(UUID concertId, LocalDateTime performanceDate);
+
+    void deleteAllByConcertConcertId(UUID concertId);
 }

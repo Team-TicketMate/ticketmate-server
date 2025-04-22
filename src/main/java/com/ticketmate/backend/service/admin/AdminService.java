@@ -3,16 +3,11 @@ package com.ticketmate.backend.service.admin;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
-import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoEditRequest;
-import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
-import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
-import com.ticketmate.backend.object.dto.admin.request.ConcertInfoRequest;
-import com.ticketmate.backend.object.dto.admin.request.TicketOpenDateRequest;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
@@ -89,10 +84,7 @@ public class AdminService {
     public void saveConcertInfo(ConcertInfoRequest request) {
 
         // 1. 중복된 공연이름 검증
-        if (concertRepository.existsByConcertName(request.getConcertName())) {
-            log.error("중복된 공연 제목입니다. 요청된 공연 제목: {}", request.getConcertName());
-            throw new CustomException(ErrorCode.DUPLICATE_CONCERT_NAME);
-        }
+        validateConcertName(request.getConcertName());
 
         // 2. 공연장 검색 (요청된 공연장 PK가 null이 아닌 경우)
         ConcertHall concertHall = null;
@@ -102,8 +94,7 @@ public class AdminService {
         }
 
         // 3. 콘서트 썸네일 저장
-        String concertThumbnailUrl = fileService
-                .saveFile(request.getConcertThumbNail());
+        String concertThumbnailUrl = fileService.saveFile(request.getConcertThumbNail());
 
         // 4. 좌석 배치도 저장
         String seatingChartUrl = null;
@@ -138,7 +129,7 @@ public class AdminService {
         // 7. 티켓 오픈일 검증 및 저장
         if (!request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
             // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
-            validateTicketOpenDates(request.getTicketOpenDateRequestList());
+            validateTicketOpenDateList(request.getTicketOpenDateRequestList());
             List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
                     .map(ticketOpenDateRequest -> TicketOpenDate.builder()
                             .concert(concert)
@@ -154,12 +145,124 @@ public class AdminService {
     }
 
     /**
-     * 티켓 오픈일 검증
+     * 공연 정보 수정
+     *
+     * @param concertId 공연 PK
+     * @param request   concertName 공연명
+     *                  concertHallId 공연장 PK
+     *                  concertType 공연 카테고리
+     *                  concertThumbNail 공연 썸네일
+     *                  seatingChart 좌석 배치도
+     *                  ticketReservationSite 예매 사이트
+     *                  concertDateEditRequestList 공연 날짜 DTO List
+     *                  ticketOpenDateEditRequestList 티켓 오픈일 DTO List
      */
-    private void validateTicketOpenDates(List<TicketOpenDateRequest> ticketOpenDateRequests) {
+    @Transactional
+    public void editConcertInfo(UUID concertId, ConcertInfoEditRequest request) {
+        // 공연 조회
+        Concert concert = concertRepository.findById(concertId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+
+        // 공연명 업데이트
+        if (!nvl(request.getConcertName(), "").isEmpty()) {
+            // 공연명 중복 검증
+            validateConcertName(request.getConcertName());
+            log.debug("공연명 업데이트: {}", request.getConcertName());
+            concert.setConcertName(request.getConcertName());
+        }
+
+        // 공연장 업데이트
+        if (request.getConcertHallId() != null) {
+            ConcertHall concertHall = concertHallRepository.findById(request.getConcertHallId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+            log.debug("공연장 업데이트: {}", concertHall.getConcertHallName());
+            concert.setConcertHall(concertHall);
+        }
+
+        // 공연 카테고리 업데이트
+        if (request.getConcertType() != null) {
+            log.debug("공연 카테고리 업데이트: {}", request.getConcertType());
+            concert.setConcertType(request.getConcertType());
+        }
+
+        // 공연 썸네일 이미지 업데이트
+        if (request.getConcertThumbNail() != null && !request.getConcertThumbNail().isEmpty()) {
+            String newThumbnailUrl = fileService.saveFile(request.getConcertThumbNail());
+            log.debug("공연 썸네일 이미지 업데이트: {}", newThumbnailUrl);
+            concert.setConcertThumbnailUrl(newThumbnailUrl);
+        }
+
+        // 좌석 배치도 업데이트
+        if (request.getSeatingChart() != null && !request.getSeatingChart().isEmpty()) {
+            String newSeatingChartUrl = fileService.saveFile(request.getSeatingChart());
+            log.debug("좌석 배치도 이미지 업데이트: {}", newSeatingChartUrl);
+            concert.setSeatingChartUrl(newSeatingChartUrl);
+        }
+
+        // 예매 사이트 업데이트
+        if (request.getTicketReservationSite() != null) {
+            log.debug("공연 예매 사이트 업데이트: {}", request.getTicketReservationSite());
+            concert.setTicketReservationSite(request.getTicketReservationSite());
+        }
+
+        // 공연 날짜 업데이트 (기존 데이터 삭제 후 새 데이터 추가)
+        List<ConcertDateEditRequest> concertDateEditRequestList = request.getConcertDateEditRequestList();
+        if (concertDateEditRequestList != null && !concertDateEditRequestList.isEmpty()) {
+            // 기존 공연 날짜 삭제
+            log.debug("기존 공연 날짜를 모두 삭제합니다");
+            concertDateRepository.deleteAllByConcertConcertId(concertId);
+
+            // 새 공연 날짜 추가
+            log.debug("새로운 공연 날짜를 추가합니다.");
+            List<ConcertDate> concertDateList = concertDateEditRequestList.stream()
+                    .map(concertDateEditRequest -> ConcertDate.builder()
+                            .concert(concert)
+                            .performanceDate(concertDateEditRequest.getPerformanceDate())
+                            .session(concertDateEditRequest.getSession())
+                            .build())
+                    .collect(Collectors.toList());
+            concertDateRepository.saveAll(concertDateList);
+        }
+
+        // 티켓 오픈일 업데이트 (기존 데이터 삭제 후 새 데이터 추가)
+        List<TicketOpenDateEditRequest> ticketOpenDateEditRequestList = request.getTicketOpenDateEditRequestList();
+        if (ticketOpenDateEditRequestList != null && !ticketOpenDateEditRequestList.isEmpty()) {
+            // 기존 티켓 오픈일 삭제
+            log.debug("기존 티켓 오픈일 정보를 모두 삭제합니다.");
+            ticketOpenDateRepository.deleteAllByConcertConcertId(concertId);
+
+            // 새 티켓 오픈일 추가
+            log.debug("새로운 티켓 오픈일 정보를 추가합니다.");
+            List<TicketOpenDate> ticketOpenDateList = ticketOpenDateEditRequestList.stream()
+                    .map(ticketOpenDateEditRequest -> TicketOpenDate.builder()
+                            .concert(concert)
+                            .openDate(ticketOpenDateEditRequest.getOpenDate())
+                            .requestMaxCount(ticketOpenDateEditRequest.getRequestMaxCount())
+                            .isBankTransfer(ticketOpenDateEditRequest.getIsBankTransfer())
+                            .isPreOpen(ticketOpenDateEditRequest.getIsPreOpen())
+                            .build())
+                    .collect(Collectors.toList());
+            ticketOpenDateRepository.saveAll(ticketOpenDateList);
+        }
+
+        // 공연 정보 저장
+        concertRepository.save(concert);
+        log.debug("공연 정보 수정 성공: concertId={}, concertName={}", concert.getConcertId(), concert.getConcertName());
+    }
+
+    // 중복된 공연명 검증
+    private void validateConcertName(String concertName) {
+        if (concertRepository.existsByConcertName(concertName)) {
+            log.error("중복된 공연 제목입니다. 요청된 공연 제목: {}", concertName);
+            throw new CustomException(ErrorCode.DUPLICATE_CONCERT_NAME);
+        }
+    }
+
+    // 티켓 오픈일 검증
+    private void validateTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList) {
 
         // 일반 예매 필수 검증
-        boolean hasGeneralOpen = ticketOpenDateRequests.stream()
+        boolean hasGeneralOpen = ticketOpenDateRequestList.stream()
                 .anyMatch(date -> !date.getIsPreOpen());
         if (!hasGeneralOpen) {
             log.error("일반 예매 날짜는 필수로 포함되어야합니다");
@@ -205,7 +308,7 @@ public class AdminService {
 
     /**
      * 공연장 정보 필터링 로직
-     *
+     * <p>
      * 필터링 조건: 공연장 이름 (검색어), 도시
      * 정렬 조건: created_date
      *
@@ -227,6 +330,7 @@ public class AdminService {
 
     /**
      * 공연장 정보 수정
+     *
      * @param request concertHallId 공연장 PK
      *                concertHallName 공연장 명
      *                address 주소
