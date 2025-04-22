@@ -51,11 +51,12 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
 
         String redirectUri = request.getParameter("redirectUri");
         if (nvl(redirectUri, "").isEmpty()) {
-            log.warn("리다이랙트 URL이 없습니다.");
+            log.debug("리다이랙트 URL이 없습니다.");
             return authorizationRequest;
         }
 
         // state에 redirectUri를 Base64로 인코딩하여 추가
+        log.debug("리다이랙트 URL이 존재합니다. Base64 인코딩을 진행합니다.");
         Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
         String originalState = authorizationRequest.getState();
         String stateData = originalState + "::" + redirectUri;
