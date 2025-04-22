@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,9 +56,13 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
             return authorizationRequest;
         }
 
-        log.debug("리다이랙트 URL이 존재합니다. redirectUri: {}", redirectUri);
+        // state에 redirectUri를 Base64로 인코딩하여 추가
+        log.debug("리다이랙트 URL이 존재합니다: {}. Base64 인코딩을 진행합니다.", redirectUri);
         Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
-        additionalParameters.put("redirectUri", redirectUri);
+        String originalState = authorizationRequest.getState();
+        String stateData = originalState + "::" + redirectUri;
+        String encodedState = Base64.getUrlEncoder().withoutPadding().encodeToString(stateData.getBytes());
+        additionalParameters.put("state", encodedState);
 
         return OAuth2AuthorizationRequest.from(authorizationRequest)
                 .additionalParameters(additionalParameters)

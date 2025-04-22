@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
@@ -57,13 +58,29 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // redirectUri 추출
-        String redirectUri = request.getParameter("redirectUri");
-        if (nvl(redirectUri, "").isEmpty()) { // 리다이랙트 파라미터가 지정되지 않은경우
-            log.debug("리다이랙트 Uri가 요청되지 않았습니다. 기본 경로로 지정합니다.");
-            redirectUri = prodRedirectUri;
+        // state 파라미터에서 redirectUri 추출
+        String redirectUri = prodRedirectUri; // 기본값
+        String state = request.getParameter("state");
+        if (!nvl(state, "").isEmpty()) {
+            log.debug("state 파라미터 수신: {}", state);
+            try {
+                String decodedState = new String(Base64.getUrlDecoder().decode(state));
+                if (decodedState.contains("::")) {
+                    String[] stateParts = decodedState.split("::");
+                    if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
+                        redirectUri = stateParts[1];
+                        log.debug("state에서 추출한 redirectUri: {}", redirectUri);
+                    } else {
+                        log.debug("state에 redirectUri가 포함되지 않음. 기본 redirectUri 사용: {}", redirectUri);
+                    }
+                } else {
+                    log.debug("state에 구분자(::)가 없음. 기본 redirectUri 사용: {}", redirectUri);
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("state 디코딩 실패, 기본 redirectUri 사용: {}. 오류: {}", redirectUri, e.getMessage());
+            }
         } else {
-            log.debug("리다이랙트 Uri가 요청되었습니다: {}", redirectUri);
+            log.debug("state 파라미터가 없으므로 기본 redirectUri 사용: {}", redirectUri);
         }
 
         // 쿠키에 accessToken, refreshToken 추가
