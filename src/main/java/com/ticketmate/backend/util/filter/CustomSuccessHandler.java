@@ -63,6 +63,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String state = request.getParameter("state");
         if (!nvl(state, "").isEmpty()) {
             log.debug("state가 존재합니다. 디코딩을 진행합니다.");
+            log.debug("state: {}", state);
             try {
                 String decodedState = new String(Base64.getDecoder().decode(state));
                 String[] stateParts = decodedState.split("::");
