@@ -66,10 +66,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             log.debug("state: {}", state);
             try {
                 String decodedState = new String(Base64.getDecoder().decode(state));
-                String[] stateParts = decodedState.split("::");
-                if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
-                    redirectUri = stateParts[1];
-                    log.debug("state에서 추출한 redirectUri: {}", redirectUri);
+                // redirectUri가 포함된 경우에만 처리
+                if (decodedState.contains("::")) {
+                    String[] stateParts = decodedState.split("::");
+                    if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
+                        redirectUri = stateParts[1];
+                        log.debug("state에서 추출한 redirectUri: {}", redirectUri);
+                    }
                 }
             } catch (Exception e) {
                 log.error("state 파싱 중 오류 발생: {}", e.getMessage());
