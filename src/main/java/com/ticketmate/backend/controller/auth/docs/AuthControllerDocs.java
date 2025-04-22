@@ -5,9 +5,33 @@ import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthControllerDocs {
+
+    @Operation(
+            summary = "소셜 로그인",
+            description = """
+
+                    이 API는 인증이 필요하지 않습니다.
+
+                    ### 요청 파라미터
+                    - **provider**: 소셜 로그인 플랫폼
+                    - **redirectUri**: RefreshToken이 포함된 HTTP-Only 쿠키
+
+                    ### 반환값
+                    **없음**
+
+                    ### 유의사항
+
+                    **응답 코드:**
+
+                    **추가 설명:**
+
+                    """
+    )
+    ResponseEntity<Void> login(String provider, String redirectUri, HttpSession session, HttpServletResponse response);
 
     @Operation(
             summary = "accessToken 재발급 요청",

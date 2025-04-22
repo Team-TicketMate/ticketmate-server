@@ -2,22 +2,20 @@ package com.ticketmate.backend.controller.auth;
 
 import com.ticketmate.backend.controller.auth.docs.AuthControllerDocs;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.postgres.Member.Member;
+import com.ticketmate.backend.service.auth.AuthService;
 import com.ticketmate.backend.service.member.MemberService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/auth")
 @Tag(
         name = "인증 관련 API",
         description = "회원 인증 관련 API 제공"
@@ -25,9 +23,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements AuthControllerDocs {
 
     private final MemberService memberService;
+    private final AuthService authService;
 
     @Override
-    @PostMapping(value = "/reissue")
+    @GetMapping(value = "/oauth2/authorization/{provider}")
+    public ResponseEntity<Void> login(
+            @PathVariable("provider") String provider,
+            @RequestParam("redirectUri") String redirectUri,
+            HttpSession session,
+            HttpServletResponse response) {
+        authService.handleOAuth2Login(provider, redirectUri, session, response);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping(value = "/api/auth/reissue")
     @LogMonitoringInvocation
     public ResponseEntity<Void> reissue(HttpServletRequest request,
                                         HttpServletResponse response,

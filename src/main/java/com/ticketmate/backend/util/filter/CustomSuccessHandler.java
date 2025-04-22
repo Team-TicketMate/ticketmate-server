@@ -1,22 +1,22 @@
 package com.ticketmate.backend.util.filter;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.service.auth.AuthService;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.common.CookieUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
@@ -26,17 +26,12 @@ import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private final AuthService authService;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
     private final CookieUtil cookieUtil;
 
     private static final String REFRESH_PREFIX = "RT:";
-
-    @Value("${spring.security.app.redirect-uri.dev}")
-    private String devRedirectUri;
-
-    @Value("${spring.security.app.redirect-uri.prod}")
-    private String prodRedirectUri;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -58,30 +53,25 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // state 파라미터에서 redirectUri 추출
-        String redirectUri = prodRedirectUri; // 기본값
-        String state = request.getParameter("state");
-        if (!nvl(state, "").isEmpty()) {
-            log.debug("state 파라미터 수신: {}", state);
-            try {
-                String decodedState = new String(Base64.getUrlDecoder().decode(state));
-                if (decodedState.contains("::")) {
-                    String[] stateParts = decodedState.split("::");
-                    if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
-                        redirectUri = stateParts[1];
-                        log.debug("state에서 추출한 redirectUri: {}", redirectUri);
-                    } else {
-                        log.debug("state에 redirectUri가 포함되지 않음. 기본 redirectUri 사용: {}", redirectUri);
-                    }
-                } else {
-                    log.debug("state에 구분자(::)가 없음. 기본 redirectUri 사용: {}", redirectUri);
-                }
-            } catch (IllegalArgumentException e) {
-                log.warn("state 디코딩 실패, 기본 redirectUri 사용: {}. 오류: {}", redirectUri, e.getMessage());
-            }
-        } else {
-            log.debug("state 파라미터가 없으므로 기본 redirectUri 사용: {}", redirectUri);
+        HttpSession session = request.getSession();
+        String redirectUriKey = (String) session.getAttribute("redirectUriKey");
+        log.debug("세션에서 리다이렉트 KEY를 추출합니다: {}", redirectUriKey);
+
+        if (nvl(redirectUriKey, "").isEmpty()) {
+            log.error("세션에 저장된 리다이렉트 키가 없습니다.");
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+
+        // Redis에서 redirectUri 조회
+        String redirectUri = authService.getAndDeleteRedirectUri(redirectUriKey);
+        if (nvl(redirectUri, "").isEmpty()) {
+            log.error("redirectUri가 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+        log.debug("요청된 redirectUri: {}", redirectUri);
+
+        // 세션에서 키 제거
+        session.removeAttribute("redirectUriKey");
 
         // 쿠키에 accessToken, refreshToken 추가
         response.addCookie(cookieUtil.createCookie("accessToken", accessToken));

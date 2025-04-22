@@ -24,7 +24,6 @@ public class SecurityUrls {
             // 썸네일 파일 TODO: 추후 url 매핑 관련 규칙 수정
             "/concert/thumbnail/**", // 콘서트 썸네일 파일 경로
 
-
             // Swagger
             "/docs/**", // Swagger UI
             "/v3/api-docs/**", // Swagger API 문서
@@ -50,5 +49,4 @@ public class SecurityUrls {
             "/admin/concert-hall/**",
             "/admin/portfolio/**"
     );
-
 }
