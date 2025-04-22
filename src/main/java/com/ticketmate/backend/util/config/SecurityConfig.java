@@ -44,7 +44,7 @@ public class SecurityConfig {
             "https://ticketmate-client.vercel.app", // 프론트 배포
 
             "https://www.ticketmate.site", // 프론트 배포
-            "https://dev.ticketmate.site/", // 프론트 test
+            "https://dev.ticketmate.site", // 프론트 test
 
             // API
             "https://api.ticketmate.site", // 메인 API 서버

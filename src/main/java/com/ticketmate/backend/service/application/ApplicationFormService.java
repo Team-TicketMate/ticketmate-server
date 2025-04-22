@@ -8,6 +8,7 @@ import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequ
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
+import com.ticketmate.backend.object.mongo.chat.ChatRoom;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
@@ -15,11 +16,12 @@ import com.ticketmate.backend.object.postgres.application.RejectionReason;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
+import com.ticketmate.backend.repository.mongo.ChatRoomRepository;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
+import com.ticketmate.backend.repository.postgres.application.expressions.RejectionReasonRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
-import com.ticketmate.backend.repository.postgres.application.expressions.RejectionReasonRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.util.common.EntityMapper;
@@ -57,6 +59,7 @@ public class ApplicationFormService {
     private final ConcertDateRepository concertDateRepository;
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final EntityMapper entityMapper;
+    private final ChatRoomRepository chatRoomRepository;
 
     private static final int MIN_REQUEST_COUNT = 1;
 
@@ -296,7 +299,7 @@ public class ApplicationFormService {
 
 
         applicationForm.setApplicationFormStatus(ApplicationFormStatus.REJECTED);
-        log.debug("신청서 상태 거절변경 완료");
+        log.debug("신청서 상태 거절변경 : {}", applicationForm.getApplicationFormStatus());
 
         // 거절사유, 메모 세팅
         rejectionReason.setApplicationFormRejectedType(request.getApplicationFormRejectedType());
@@ -310,5 +313,78 @@ public class ApplicationFormService {
         Member client = applicationForm.getClient();
 
         fcmService.sendNotification(client.getMemberId(), payloadRequest);
+    }
+
+    @Transactional
+    public String approve(UUID applicationFormId, Member agent) {
+        // 현재 회원이 '대리인'인가
+        if (!agent.getMemberType().equals(MemberType.AGENT)) {
+            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+        }
+
+        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId).orElseThrow(
+                () -> {
+                    log.error("신청폼 조회에 실패했습니다.");
+                    throw new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+                }
+        );
+
+        Member client = applicationForm.getClient();
+
+        // 승인하는 대리인이 의뢰인이 신청한 대리인이 정말 맞는지
+        if (!applicationForm.getAgent().getMemberId().equals(agent.getMemberId())) {
+            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+        }
+
+        // 신청서는 현재 "대기" 상태의 신청서만 승인 받을 수 있습니다.
+        if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.PENDING)) {
+            throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+        }
+
+        /**
+         * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 신청 자체가 불가합니다.
+         * 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
+         */
+        List<ApplicationForm> applicationFormList = applicationFormRepository
+                .findAllByConcert_ConcertIdAndClient_MemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
+
+        for (ApplicationForm form : applicationFormList) {
+            if (form.getApplicationFormStatus().equals(ApplicationFormStatus.APPROVED)) {
+                throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
+            }
+        }
+
+        // 신청서 상태 승인 변경
+        applicationForm.setApplicationFormStatus(ApplicationFormStatus.APPROVED);
+        log.debug("신청서 상태 승인변경 : {}", applicationForm.getApplicationFormStatus());
+
+        /*
+         * 채팅방이 이미 존재한다면 해당 채팅방이 갖고있는 신청폼 정보만 바꿔줍니다.
+         */
+        // 이미 똑같은 대리인, 의뢰인의 채팅방이 존재하는지
+        ChatRoom chatRoom = chatRoomRepository
+                .findByAgentMemberIdAndClientMemberId(agent.getMemberId(), client.getMemberId())
+                // 이미 존재한다면 기존 신청폼의 정보만 바꿉니다.
+                .map(room -> {
+                    log.debug("기존 채팅방 존재");
+                    room.setApplicationFormId(applicationFormId);
+                    return room;
+                })
+                // 없다면 새로운 채팅방을 생성합니다.
+                .orElseGet(() ->
+                        ChatRoom.builder()
+                                .agentMemberId(agent.getMemberId())
+                                .clientMemberId(client.getMemberId())
+                                .applicationFormId(applicationFormId)
+                                .build()
+                );
+
+        chatRoomRepository.save(chatRoom);
+
+        // 알림전송
+        NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
+        fcmService.sendNotification(client.getMemberId(), payloadRequest);
+
+        return chatRoom.getRoomId();
     }
 }

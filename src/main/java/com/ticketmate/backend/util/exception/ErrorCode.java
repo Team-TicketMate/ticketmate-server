@@ -40,6 +40,8 @@ public enum ErrorCode {
 
     INVALID_SOCIAL_PLATFORM(HttpStatus.BAD_REQUEST, "잘못된 소셜 플랫폼이 요청되었습니다."),
 
+    INVALID_REDIRECT_URI(HttpStatus.BAD_REQUEST, "유효하지 않은 리다이렉트 URI가 요청되었습니다."),
+
     // MEMBER
 
     DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 가입된 이메일입니다"),
@@ -109,6 +111,10 @@ public enum ErrorCode {
 
     DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.BAD_REQUEST, "중복된 신청서 요청입니다."),
 
+    ALREADY_APPROVED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 수락된 신청서입니다."),
+
+    INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
+
     // NOTIFICATION
 
     FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다."),
@@ -116,6 +122,10 @@ public enum ErrorCode {
     // EXPRESSIONS
 
     INVALID_MEMO_REQUEST(HttpStatus.BAD_REQUEST, "기타 거절사유의 메모는 2글자 이상이여야합니다."),
+
+    // CHAT
+
+    CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾지 못했습니다."),
     ;
 
     private final HttpStatus status;

@@ -55,13 +55,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // 로그인 쿼리 파라미터 Redirect URI 확인
-        String redirectUri = request.getParameter("redirectUri");
-        if (redirectUri == null) {
-            log.debug("로그인 시 요청된 Redirect URI가 없으므로 기본 경로로 설정합니다.");
-            redirectUri = prodRedirectUri;
-        }
-
         // 쿠키에 accessToken, refreshToken 추가
         response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
         response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
@@ -70,7 +63,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         try {
             log.debug("로그인 성공, 메인페이지로 리다이렉트 됩니다");
             if (!response.isCommitted()) {
-                response.sendRedirect(redirectUri);
+                response.sendRedirect(prodRedirectUri); // FIXME: 추후 리다이렉트 동적으로 받는 로직 작성
             }
         } catch (IOException e) {
             log.error("로그인 성공 후 리다이렉트 과정에서 문제가 발생했습니다. {}", e.getMessage());
