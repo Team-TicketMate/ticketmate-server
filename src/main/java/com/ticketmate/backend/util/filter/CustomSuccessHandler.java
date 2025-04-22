@@ -9,13 +9,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
+
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Component
 @Slf4j
@@ -27,6 +31,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final CookieUtil cookieUtil;
 
     private static final String REFRESH_PREFIX = "RT:";
+
+    @Value("${spring.security.app.redirect-uri.dev}")
+    private String devRedirectUri;
+
+    @Value("${spring.security.app.redirect-uri.prod}")
+    private String prodRedirectUri;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -48,9 +58,24 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // 로그인 쿼리 파라미터 Redirect URI 확인
-        String redirectUri = (String) request.getSession().getAttribute("redirectUri");
-        log.debug("로그인 리다이랙트 경로: {}", redirectUri);
+        // state 파라미터에서 redirectUri 추출
+        String redirectUri = prodRedirectUri; // 기본값
+        String state = request.getParameter("state");
+        if (!nvl(state, "").isEmpty()) {
+            log.debug("state가 존재합니다. 디코딩을 진행합니다.");
+            try {
+                String decodedState = new String(Base64.getDecoder().decode(state));
+                String[] stateParts = decodedState.split("::");
+                if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
+                    redirectUri = stateParts[1];
+                    log.debug("state에서 추출한 redirectUri: {}", redirectUri);
+                }
+            } catch (Exception e) {
+                log.error("state 파싱 중 오류 발생: {}", e.getMessage());
+            }
+        } else {
+            log.debug("state 파라미터가 없으므로 기본 redirectUri 사용: {}", redirectUri);
+        }
 
         // 쿠키에 accessToken, refreshToken 추가
         response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
