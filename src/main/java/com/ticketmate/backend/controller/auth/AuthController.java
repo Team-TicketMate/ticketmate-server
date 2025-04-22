@@ -26,18 +26,6 @@ public class AuthController implements AuthControllerDocs {
     private final AuthService authService;
 
     @Override
-    @GetMapping(value = "/oauth2/authorization/{provider}")
-    @LogMonitoringInvocation
-    public ResponseEntity<Void> login(
-            @PathVariable("provider") String provider,
-            @RequestParam("redirectUri") String redirectUri,
-            HttpSession session,
-            HttpServletResponse response) {
-        authService.handleOAuth2Login(provider, redirectUri, session, response);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
     @PostMapping(value = "/api/auth/reissue")
     @LogMonitoringInvocation
     public ResponseEntity<Void> reissue(HttpServletRequest request,
