@@ -1,18 +1,14 @@
 package com.ticketmate.backend.controller.admin;
 
 import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
-import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoEditRequest;
-import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
-import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
-import com.ticketmate.backend.object.dto.admin.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.object.dto.admin.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.service.admin.AdminService;
 import com.ticketmate.backend.service.concert.ConcertService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
@@ -68,7 +64,7 @@ public class AdminController implements AdminControllerDocs {
     @LogMonitoringInvocation
     public ResponseEntity<Void> editConcertHallInfo(
             @PathVariable("concert-hall-id") UUID concertHallId,
-            @RequestBody ConcertHallInfoEditRequest request) {
+            @Valid @RequestBody ConcertHallInfoEditRequest request) {
         adminService.editConcertHallInfo(concertHallId, request);
         return ResponseEntity.ok().build();
     }
@@ -94,6 +90,16 @@ public class AdminController implements AdminControllerDocs {
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid ConcertFilteredRequest request) {
         return ResponseEntity.ok(concertService.filteredConcert(request));
+    }
+
+    @Override
+    @PatchMapping(value = "/concert/{concert-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> editConcertInfo(
+            @PathVariable("concert-id") UUID concertId,
+            @Valid @ModelAttribute ConcertInfoEditRequest request) {
+        adminService.editConcertInfo(concertId, request);
+        return ResponseEntity.ok().build();
     }
 
     /*
