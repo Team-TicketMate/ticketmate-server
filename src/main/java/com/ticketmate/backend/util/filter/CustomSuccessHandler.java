@@ -16,7 +16,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
@@ -58,27 +57,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // state 파라미터에서 redirectUri 추출
-        String redirectUri = prodRedirectUri; // 기본값
-        String state = request.getParameter("state");
-        if (!nvl(state, "").isEmpty()) {
-            log.debug("state가 존재합니다. 디코딩을 진행합니다.");
-            log.debug("state: {}", state);
-            try {
-                String decodedState = new String(Base64.getDecoder().decode(state));
-                // redirectUri가 포함된 경우에만 처리
-                if (decodedState.contains("::")) {
-                    String[] stateParts = decodedState.split("::");
-                    if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
-                        redirectUri = stateParts[1];
-                        log.debug("state에서 추출한 redirectUri: {}", redirectUri);
-                    }
-                }
-            } catch (Exception e) {
-                log.error("state 파싱 중 오류 발생: {}", e.getMessage());
-            }
+        // redirectUri 추출
+        String redirectUri = request.getParameter("redirectUri");
+        if (nvl(redirectUri, "").isEmpty()) { // 리다이랙트 파라미터가 지정되지 않은경우
+            log.debug("리다이랙트 Uri가 요청되지 않았습니다. 기본 경로로 지정합니다.");
+            redirectUri = prodRedirectUri;
         } else {
-            log.debug("state 파라미터가 없으므로 기본 redirectUri 사용: {}", redirectUri);
+            log.debug("리다이랙트 Uri가 요청되었습니다: {}", redirectUri);
         }
 
         // 쿠키에 accessToken, refreshToken 추가
