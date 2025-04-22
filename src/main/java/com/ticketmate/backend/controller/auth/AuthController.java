@@ -27,6 +27,7 @@ public class AuthController implements AuthControllerDocs {
 
     @Override
     @GetMapping(value = "/oauth2/authorization/{provider}")
+    @LogMonitoringInvocation
     public ResponseEntity<Void> login(
             @PathVariable("provider") String provider,
             @RequestParam("redirectUri") String redirectUri,
