@@ -1,9 +1,6 @@
 package com.ticketmate.backend.util.oauth2;
 
 import com.ticketmate.backend.service.auth.AuthService;
-import com.ticketmate.backend.util.common.CommonUtil;
-import com.ticketmate.backend.util.exception.CustomException;
-import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +10,7 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
-import static com.ticketmate.backend.util.common.CommonUtil.*;
+import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Component
 @Slf4j
@@ -66,7 +63,8 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
     private boolean isValidRedirectUri(String redirectUri) {
         if (redirectUri.equals(devRedirectUri) || redirectUri.equals(prodRedirectUri)) {
             log.error("요청된 redirectUri가 유효하지 않습니다.");
-            throw new CustomException(ErrorCode.INVALID_REDIRECT_URI);
+            return false;
         }
+        return true;
     }
 }
