@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,19 +48,15 @@ public class CustomOAuth2AuthorizationRequestResolver implements OAuth2Authoriza
             return null;
         }
 
-        String redirectUri = request.getParameter("redirectUri");
+//        String redirectUri = request.getParameter("redirectUri");
+        String redirectUri = "https://www.naver.com";
         if (nvl(redirectUri, "").isEmpty()) {
             log.debug("리다이랙트 URL이 없습니다.");
             return authorizationRequest;
         }
 
-        // state에 redirectUri를 Base64로 인코딩하여 추가
-        log.debug("리다이랙트 URL이 존재합니다. Base64 인코딩을 진행합니다.");
+        log.debug("리다이랙트 URL이 존재합니다. redirectUri: {}", redirectUri);
         Map<String, Object> additionalParameters = new HashMap<>(authorizationRequest.getAdditionalParameters());
-        String originalState = authorizationRequest.getState();
-        String stateData = originalState + "::" + redirectUri;
-        String encodedState = Base64.getEncoder().encodeToString(stateData.getBytes());
-        additionalParameters.put("state", encodedState);
         additionalParameters.put("redirectUri", redirectUri);
 
         return OAuth2AuthorizationRequest.from(authorizationRequest)
