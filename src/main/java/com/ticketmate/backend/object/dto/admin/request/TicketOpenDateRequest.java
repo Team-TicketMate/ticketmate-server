@@ -26,7 +26,7 @@ public class TicketOpenDateRequest {
 
     private Boolean isBankTransfer; // 무통장 입금 여부
 
-    @NotNull(message = "선예매 여부를 선택하세요")
+    @NotNull(message = "선예매 여부를 선택하세요. 일반예매 정보는 필수로 포함되어야합니다.")
     @Schema(defaultValue = "false")
     private Boolean isPreOpen; // 선예매, 일반예매 여부
 }

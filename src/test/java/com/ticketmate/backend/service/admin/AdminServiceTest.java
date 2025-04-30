@@ -1,6 +1,6 @@
 package com.ticketmate.backend.service.admin;
 
-import com.ticketmate.backend.object.dto.admin.request.ConcertDateEditRequest;
+import com.ticketmate.backend.object.dto.admin.request.ConcertDateRequest;
 import com.ticketmate.backend.object.dto.admin.request.ConcertInfoEditRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ class AdminServiceTest {
 
     ConcertInfoEditRequest concertInfoEditRequest = new ConcertInfoEditRequest();
 
-    List<ConcertDateEditRequest> concertDateEditRequestList = new ArrayList<>();
+    List<ConcertDateRequest> concertDateRequestList = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -35,14 +35,14 @@ class AdminServiceTest {
 
         // 공연날짜 3개 저장
         for (int i = 0; i < 3; i++) {
-            ConcertDateEditRequest concertDateEditRequest = ConcertDateEditRequest.builder()
+            ConcertDateRequest concertDateRequest = ConcertDateRequest.builder()
                     .performanceDate(rootDate.plusDays(i))
                     .session(i + 1) // 1회차, 2회차, 3회차
                     .build();
-            concertDateEditRequestList.add(concertDateEditRequest);
+            concertDateRequestList.add(concertDateRequest);
         }
-        concertInfoEditRequest.setConcertDateEditRequestList(concertDateEditRequestList);
-        log.debug("공연 정보 DTO 저장 성공: {}", concertDateEditRequestList.size());
+        concertInfoEditRequest.setConcertDateRequestList(concertDateRequestList);
+        log.debug("공연 정보 DTO 저장 성공: {}", concertDateRequestList.size());
     }
 
     @Test

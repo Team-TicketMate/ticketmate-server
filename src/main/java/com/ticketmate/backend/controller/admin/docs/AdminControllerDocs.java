@@ -246,7 +246,7 @@ public interface AdminControllerDocs {
                     - **concertHallId** (UUID): 공연장 PK [선택]
                     - **concertType** (String): 공연 카테고리 [선택]
                     - **concertThumbNail** (MultipartFile): 공연 썸네일 이미지 [선택]
-                    - **seatingChart** (MultipartFile): 죄석배치도 이미지 [선택]
+                    - **seatingChart** (MultipartFile): 좌석 배치도 이미지 [선택]
                     - **ticketReservationSite** (String): 예매 사이트 [선택]
                     - **concertDateEditRequestList** (List\\<ConcertDateEditRequest\\>): 공연 날짜 DTO [선택]
                     - **ticketOpenDateRequests** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
