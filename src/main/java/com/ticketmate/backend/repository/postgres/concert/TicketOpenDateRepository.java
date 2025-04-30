@@ -12,4 +12,6 @@ public interface TicketOpenDateRepository extends JpaRepository<TicketOpenDate, 
     List<TicketOpenDate> findAllByConcertConcertId(UUID concertId);
 
     Optional<TicketOpenDate> findByConcertConcertIdAndIsPreOpen(UUID concertId, Boolean isPreOpen);
+
+    void deleteAllByConcertConcertId(UUID concertId);
 }

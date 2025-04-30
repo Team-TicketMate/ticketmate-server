@@ -1,16 +1,13 @@
 package com.ticketmate.backend.controller.admin.docs;
 
-import com.ticketmate.backend.object.dto.admin.request.PortfolioSearchRequest;
-import com.ticketmate.backend.object.dto.admin.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
-import com.ticketmate.backend.object.dto.concert.request.ConcertInfoRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallInfoRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -95,6 +92,27 @@ public interface AdminControllerDocs {
             CustomOAuth2User customOAuth2User,
             ConcertHallFilteredRequest request);
 
+    @Operation(
+            summary = "공연장 정보 수정",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **concertHallName** (String): 공연장 명 (중복 불가) [선택]
+                    - **address** (String): 공연장 주소 [선택]
+                    - **webSiteUrl** (String): 공연장 웹사이트 URL [선택]
+                                
+                    ### 유의사항
+                    - 공연장 명, 주소, 웹사이트 URL 중 수정이 필요한 정보만 입력하면 됩니다 
+                    - `concertHallName`은 고유해야 합니다.
+                    - `webSiteUrl`은 'http://' 또는 'https://' 로 시작하는 문자열이어야 합니다
+                    """
+    )
+    ResponseEntity<Void> editConcertHallInfo(
+            UUID concertHallId,
+            ConcertHallInfoEditRequest request);
+
     /*
     ======================================공연======================================
      */
@@ -112,15 +130,15 @@ public interface AdminControllerDocs {
                     - **concertThumbNail** (MultipartFile): 콘서트 썸네일 파일 [필수]
                     - **seatingChart** (MultipartFile): 좌석 배치도 파일 [선택]
                     - **ticketReservationSite** (enum): 예매 사이트 [선택]
-                    - **concertDateRequests** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [선택]
-                    - **ticketOpenDateRequests** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
+                    - **concertDateRequestList** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [선택]
+                    - **ticketOpenDateRequestList** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
                                         
                     ### ConcertDateRequest
-                    - **concertDate** (LocalDateTime): 공연 일자 [필수]
+                    - **performanceDate** (LocalDateTime): 공연 일자 [필수]
                     - **session** (Integer): 공연 회차 [필수]
                     
                     ### TicketOpenDateRequest
-                    - **ticketOpenDate** (LocalDateTime): 티켓 오픈일 [선택]
+                    - **openDate** (LocalDateTime): 티켓 오픈일 [선택]
                     - **requestMaxCount** (Integer): 최대 예매 개수 [선택]
                     - **isBankTransfer** (Boolean): 무통장 입금 여부 [선택]
                     - **isPreOpen** (Boolean): 선예매, 일반예매 여부 [필수]
@@ -216,6 +234,41 @@ public interface AdminControllerDocs {
     ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
             CustomOAuth2User customOAuth2User,
             ConcertFilteredRequest request);
+
+    @Operation(
+            summary = "공연 정보 수정",
+            description = """
+                                        
+                    이 API는 관리자 인증이 필요합니다
+
+                    ### 요청 파라미터
+                    - **concertName** (String): 공연 명 (중복 불가) [선택]
+                    - **concertHallId** (UUID): 공연장 PK [선택]
+                    - **concertType** (String): 공연 카테고리 [선택]
+                    - **concertThumbNail** (MultipartFile): 공연 썸네일 이미지 [선택]
+                    - **seatingChart** (MultipartFile): 좌석 배치도 이미지 [선택]
+                    - **ticketReservationSite** (String): 예매 사이트 [선택]
+                    - **concertDateEditRequestList** (List\\<ConcertDateEditRequest\\>): 공연 날짜 DTO [선택]
+                    - **ticketOpenDateRequests** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
+                    
+                    ### ConcertDateEditRequest
+                    - **performanceDate** (LocalDateTime): 공연 일자
+                    - **session** (Integer): 공연 회차
+                    
+                    ### TicketOpenDateEditRequest
+                    - **openDate** (LocalDateTime): 티켓 오픈일
+                    - **requestMaxCount** (Integer): 최대 예매 개수
+                    - **isBankTransfer** (Boolean): 무통장 입금 여부
+                    - **isPreOpen** (Boolean): 선예매, 일반예매 여부
+                                
+                    ### 유의사항
+                    - 수정이 필요한 정보만 입력하면 됩니다
+                    - 공연날짜, 티켓 오픈일은 수정 시 기존 저장 된 데이터가 모두 삭제됩니다
+                    """
+    )
+    ResponseEntity<Void> editConcertInfo(
+            UUID concertId,
+            ConcertInfoEditRequest request);
 
     /*
     ======================================포트폴리오======================================

@@ -1,7 +1,6 @@
-package com.ticketmate.backend.object.dto.concerthall.request;
+package com.ticketmate.backend.object.dto.admin.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -10,9 +9,8 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class ConcertHallInfoRequest {
+public class ConcertHallInfoEditRequest {
 
-    @NotBlank(message = "공연장 명을 입력해주세요")
     @Schema(defaultValue = "장충체육관")
     private String concertHallName;
 
