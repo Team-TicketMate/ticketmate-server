@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TicketOpenDateEditRequest {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime openDate; // 티켓 오픈일
 
     @Min(value = 1, message = "최대 예매 매수는 1 이상이어야 합니다")

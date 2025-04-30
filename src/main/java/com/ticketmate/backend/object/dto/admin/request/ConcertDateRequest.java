@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class ConcertDateRequest {
 
     @NotNull(message = "공연일자를 입력해주세요")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(defaultValue = "2025-02-11T20:00")
     private LocalDateTime performanceDate;
 

@@ -1,5 +1,6 @@
 package com.ticketmate.backend.object.dto.admin.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TicketOpenDateRequest {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime openDate; // 티켓 오픈일
 
     @Min(value = 1, message = "최대 예매 매수는 1 이상이여야 합니다")
