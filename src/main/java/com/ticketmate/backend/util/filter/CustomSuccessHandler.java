@@ -16,10 +16,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
-
-import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Component
 @Slf4j
@@ -58,25 +55,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 TimeUnit.MILLISECONDS
         );
 
-        // state 파라미터에서 redirectUri 추출
-        String redirectUri = prodRedirectUri; // 기본값
-        String state = request.getParameter("state");
-        if (!nvl(state, "").isEmpty()) {
-            log.debug("state가 존재합니다. 디코딩을 진행합니다.");
-            try {
-                String decodedState = new String(Base64.getDecoder().decode(state));
-                String[] stateParts = decodedState.split("::");
-                if (stateParts.length > 1 && !stateParts[1].isEmpty()) {
-                    redirectUri = stateParts[1];
-                    log.debug("state에서 추출한 redirectUri: {}", redirectUri);
-                }
-            } catch (Exception e) {
-                log.error("state 파싱 중 오류 발생: {}", e.getMessage());
-            }
-        } else {
-            log.debug("state 파라미터가 없으므로 기본 redirectUri 사용: {}", redirectUri);
-        }
-
         // 쿠키에 accessToken, refreshToken 추가
         response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
         response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
@@ -85,7 +63,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         try {
             log.debug("로그인 성공, 메인페이지로 리다이렉트 됩니다");
             if (!response.isCommitted()) {
-                response.sendRedirect(redirectUri);
+                response.sendRedirect(prodRedirectUri); // FIXME: 추후 리다이렉트 동적으로 받는 로직 작성
             }
         } catch (IOException e) {
             log.error("로그인 성공 후 리다이렉트 과정에서 문제가 발생했습니다. {}", e.getMessage());

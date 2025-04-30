@@ -29,23 +29,23 @@ public class FileService {
     /**
      * 파일 리스트 저장
      *
-     * @param multipartFiles
+     * @param multipartFileList
      * @return 저장된 파일 URL List
      */
-    public List<String> saveFiles(List<MultipartFile> multipartFiles) {
-        List<String> fileUrls = new ArrayList<>();
+    public List<String> saveFiles(List<MultipartFile> multipartFileList) {
+        List<String> fileUrlList = new ArrayList<>();
 
-        multipartFiles.forEach(multipartFile ->
-                fileUrls.add(saveFile(multipartFile)));
+        multipartFileList.forEach(multipartFile ->
+                fileUrlList.add(saveFile(multipartFile)));
 
-        return fileUrls;
+        return fileUrlList;
     }
 
     /**
      * 단일 파일 저장
      *
      * @param multipartFile
-     * @return 저장된 파일 URL List
+     * @return 저장된 파일 URL
      */
     public String saveFile(MultipartFile multipartFile) {
 

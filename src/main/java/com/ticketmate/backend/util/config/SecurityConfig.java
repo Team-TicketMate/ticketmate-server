@@ -5,7 +5,6 @@ import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.filter.CustomLogoutHandler;
 import com.ticketmate.backend.util.filter.CustomSuccessHandler;
 import com.ticketmate.backend.util.filter.TokenAuthenticationFilter;
-import com.ticketmate.backend.util.oauth2.CustomOAuth2AuthorizationRequestResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,6 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomClientRegistrationRepository customClientRegistrationRepository;
     private final CustomLogoutHandler customLogoutHandler;
-    private final CustomOAuth2AuthorizationRequestResolver customOAuth2AuthorizationRequestResolver;
 
     /**
      * 허용된 CORS Origin 목록
@@ -46,7 +44,7 @@ public class SecurityConfig {
             "https://ticketmate-client.vercel.app", // 프론트 배포
 
             "https://www.ticketmate.site", // 프론트 배포
-            "https://dev.ticketmate.site/", // 프론트 test
+            "https://dev.ticketmate.site", // 프론트 test
 
             // API
             "https://api.ticketmate.site", // 메인 API 서버
@@ -88,9 +86,6 @@ public class SecurityConfig {
                 )
                 // OAuth2
                 .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(auth -> auth
-                                .authorizationRequestResolver(customOAuth2AuthorizationRequestResolver)
-                        )
                         .clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository())
                         .userInfoEndpoint(userInfoEndpointConfig ->
                                 userInfoEndpointConfig
