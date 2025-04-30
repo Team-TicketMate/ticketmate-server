@@ -114,7 +114,7 @@ public class AdminService {
         concertRepository.save(concert);
 
         // 6. 공연 날짜 저장
-        if (!request.getConcertDateRequestList().isEmpty()) {
+        if (request.getConcertDateRequestList() != null && !request.getConcertDateRequestList().isEmpty()) {
             List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
                     .map(dateRequest -> ConcertDate.builder()
                             .concert(concert)
@@ -127,7 +127,7 @@ public class AdminService {
         }
 
         // 7. 티켓 오픈일 검증 및 저장
-        if (!request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
+        if (request.getTicketOpenDateRequestList() != null && !request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
             // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
             validateTicketOpenDateList(request.getTicketOpenDateRequestList());
             List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
