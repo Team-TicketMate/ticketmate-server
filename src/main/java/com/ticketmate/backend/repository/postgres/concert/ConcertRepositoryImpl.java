@@ -5,6 +5,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.ComparableExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.object.constants.ConcertType;
@@ -68,29 +69,39 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         concert.concertType,
                         concert.ticketReservationSite,
                         // 선예매 오픈일
-                        new CaseBuilder()
-                                .when(ticketOpenDate.isPreOpen.eq(true))
-                                .then(ticketOpenDate.openDate)
-                                .otherwise((LocalDateTime) null)
-                                .as("ticketPreOpenDate"),
+                        Expressions.dateTimeTemplate(
+                                LocalDateTime.class,
+                                "min({0})",
+                                new CaseBuilder()
+                                        .when(ticketOpenDate.isPreOpen.eq(true))
+                                        .then(ticketOpenDate.openDate)
+                                        .otherwise((LocalDateTime) null)
+                        ).as("ticketPreOpenDate"),
                         // 선예매 무통장 여부
-                        new CaseBuilder()
-                                .when(ticketOpenDate.isPreOpen.eq(true))
-                                .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
-                                .otherwise((Boolean) null)
-                                .as("preOpenBankTransfer"),
+                        Expressions.booleanTemplate(
+                                "bool_or({0})",
+                                new CaseBuilder()
+                                        .when(ticketOpenDate.isPreOpen.eq(true))
+                                        .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
+                                        .otherwise((Boolean) null)
+                        ).as("preOpenBankTransfer"),
                         // 일반 예매 오픈일
-                        new CaseBuilder()
-                                .when(ticketOpenDate.isPreOpen.eq(false))
-                                .then(ticketOpenDate.openDate)
-                                .otherwise((LocalDateTime) null)
-                                .as("ticketGeneralOpenDate"),
+                        Expressions.dateTimeTemplate(
+                                LocalDateTime.class,
+                                "min({0})",
+                                new CaseBuilder()
+                                        .when(ticketOpenDate.isPreOpen.eq(false))
+                                        .then(ticketOpenDate.openDate)
+                                        .otherwise((LocalDateTime) null)
+                        ).as("ticketGeneralOpenDate"),
                         // 일반 예매 무통장 여부
-                        new CaseBuilder()
-                                .when(ticketOpenDate.isPreOpen.eq(false))
-                                .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
-                                .otherwise((Boolean) null)
-                                .as("generalOpenBankTransfer"),
+                        Expressions.booleanTemplate(
+                                "bool_or({0})",
+                                new CaseBuilder()
+                                        .when(ticketOpenDate.isPreOpen.eq(false))
+                                        .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
+                                        .otherwise((Boolean) null)
+                        ).as("generalOpenBankTransfer"),
                         concertDate.performanceDate.min().as("startDate"), // 공연 시작일
                         concertDate.performanceDate.max().as("endDate"), // 공연 종료일
                         concert.concertThumbnailUrl,
@@ -106,12 +117,9 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         concertHall.concertHallName,
                         concert.concertType,
                         concert.ticketReservationSite,
-                        ticketOpenDate.openDate,
-                        ticketOpenDate.isPreOpen,
-                        ticketOpenDate.isBankTransfer,
                         concert.concertThumbnailUrl,
-                        concert.seatingChartUrl,
-                        concert.createdDate);
+                        concert.seatingChartUrl
+                );
 
 
         // 정렬 적용
