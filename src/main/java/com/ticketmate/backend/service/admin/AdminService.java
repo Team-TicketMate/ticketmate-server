@@ -154,8 +154,8 @@ public class AdminService {
      *                  concertThumbNail 공연 썸네일
      *                  seatingChart 좌석 배치도
      *                  ticketReservationSite 예매 사이트
-     *                  concertDateEditRequestList 공연 날짜 DTO List
-     *                  ticketOpenDateEditRequestList 티켓 오픈일 DTO List
+     *                  concertDateRequestList 공연 날짜 DTO List
+     *                  ticketOpenDateRequestList 티켓 오픈일 DTO List
      */
     @Transactional
     public void editConcertInfo(UUID concertId, ConcertInfoEditRequest request) {
@@ -206,40 +206,41 @@ public class AdminService {
         }
 
         // 공연 날짜 업데이트 (기존 데이터 삭제 후 새 데이터 추가)
-        List<ConcertDateEditRequest> concertDateEditRequestList = request.getConcertDateEditRequestList();
-        if (concertDateEditRequestList != null && !concertDateEditRequestList.isEmpty()) {
+        List<ConcertDateRequest> concertDateRequestList = request.getConcertDateRequestList();
+        if (concertDateRequestList != null && !concertDateRequestList.isEmpty()) {
             // 기존 공연 날짜 삭제
             log.debug("기존 공연 날짜를 모두 삭제합니다");
             concertDateRepository.deleteAllByConcertConcertId(concertId);
 
             // 새 공연 날짜 추가
             log.debug("새로운 공연 날짜를 추가합니다.");
-            List<ConcertDate> concertDateList = concertDateEditRequestList.stream()
-                    .map(concertDateEditRequest -> ConcertDate.builder()
+            List<ConcertDate> concertDateList = concertDateRequestList.stream()
+                    .map(concertDateRequest -> ConcertDate.builder()
                             .concert(concert)
-                            .performanceDate(concertDateEditRequest.getPerformanceDate())
-                            .session(concertDateEditRequest.getSession())
+                            .performanceDate(concertDateRequest.getPerformanceDate())
+                            .session(concertDateRequest.getSession())
                             .build())
                     .collect(Collectors.toList());
             concertDateRepository.saveAll(concertDateList);
         }
 
         // 티켓 오픈일 업데이트 (기존 데이터 삭제 후 새 데이터 추가)
-        List<TicketOpenDateEditRequest> ticketOpenDateEditRequestList = request.getTicketOpenDateEditRequestList();
-        if (ticketOpenDateEditRequestList != null && !ticketOpenDateEditRequestList.isEmpty()) {
+        List<TicketOpenDateRequest> ticketOpenDateRequestList = request.getTicketOpenDateRequestList();
+        if (ticketOpenDateRequestList != null && !ticketOpenDateRequestList.isEmpty()) {
             // 기존 티켓 오픈일 삭제
             log.debug("기존 티켓 오픈일 정보를 모두 삭제합니다.");
             ticketOpenDateRepository.deleteAllByConcertConcertId(concertId);
 
             // 새 티켓 오픈일 추가
             log.debug("새로운 티켓 오픈일 정보를 추가합니다.");
-            List<TicketOpenDate> ticketOpenDateList = ticketOpenDateEditRequestList.stream()
-                    .map(ticketOpenDateEditRequest -> TicketOpenDate.builder()
+            validateTicketOpenDateList(ticketOpenDateRequestList);
+            List<TicketOpenDate> ticketOpenDateList = ticketOpenDateRequestList.stream()
+                    .map(ticketOpenDateRequest -> TicketOpenDate.builder()
                             .concert(concert)
-                            .openDate(ticketOpenDateEditRequest.getOpenDate())
-                            .requestMaxCount(ticketOpenDateEditRequest.getRequestMaxCount())
-                            .isBankTransfer(ticketOpenDateEditRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateEditRequest.getIsPreOpen())
+                            .openDate(ticketOpenDateRequest.getOpenDate())
+                            .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
+                            .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
+                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
