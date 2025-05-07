@@ -5,6 +5,7 @@ import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
+import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -44,6 +45,9 @@ public class ApplicationForm extends BasePostgresEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ConcertDate concertDate; // 공연일자
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private TicketOpenDate ticketOpenDate; // 티켓 예매일
 
     @Column(nullable = false)
     @Builder.Default

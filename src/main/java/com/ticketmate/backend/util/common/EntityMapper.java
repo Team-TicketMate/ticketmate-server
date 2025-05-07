@@ -79,6 +79,9 @@ public interface EntityMapper {
     @Mapping(source = "agent.memberId", target = "agentId")
     @Mapping(source = "concert.concertId", target = "concertId")
     @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
+    @Mapping(source = "concertDate.performanceDate", target = "performanceDate")
+    @Mapping(source = "ticketOpenDate.openDate", target = "openDate")
+    @Mapping(source = "ticketOpenDate.isPreOpen", target = "isPreOpen")
     ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
   
   
