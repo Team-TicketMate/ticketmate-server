@@ -494,6 +494,7 @@ public class TestService {
                 .agent(agent)
                 .concert(concert)
                 .concertDate(concertDate)
+                .ticketOpenDate(ticketOpenDate)
                 .requestCount(koFaker.number().numberBetween(1, ticketOpenDate.getRequestMaxCount() + 1))
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(koFaker.lorem().paragraph(2))
