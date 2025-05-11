@@ -3,6 +3,7 @@ package com.ticketmate.backend.object.dto.application.response;
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,12 @@ public class ApplicationFormFilteredResponse {
     private UUID agentId; // 대리인 PK
 
     private UUID concertId; // 콘서트 PK
+
+    private LocalDateTime performanceDate; // 공연 일자
+
+    private LocalDateTime openDate; // 티켓 오픈일
+
+    private Boolean isPreOpen; // 선예매 여부
 
     private Integer requestCount; // 매수
 
