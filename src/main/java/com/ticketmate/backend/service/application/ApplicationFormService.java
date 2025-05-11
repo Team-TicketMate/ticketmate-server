@@ -115,7 +115,7 @@ public class ApplicationFormService {
         // TicketOpenDate 확인
         TicketOpenDate ticketOpenDate = null;
         if (request.getIsPreOpen() != null) { // 선예매/일반예매 오픈일이 존재하는 경우
-            log.debug("공연: {} 에 대해 선예매/일반예매 정보가 존재합니다.", concert.getConcertName());
+            log.debug("공연: {} 에 대한 신청서 요청에 선예매/일반예매 정보가 존재합니다.", concert.getConcertName());
             ticketOpenDate = ticketOpenDateRepository
                     .findByConcertConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
                     .orElseThrow(() -> {
@@ -146,6 +146,7 @@ public class ApplicationFormService {
                 .agent(agent)
                 .concert(concert)
                 .concertDate(concertDate)
+                .ticketOpenDate(ticketOpenDate)
                 .requestCount(request.getRequestCount())
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(request.getRequestDetails())
