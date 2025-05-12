@@ -37,6 +37,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -369,14 +370,20 @@ public class ApplicationFormService {
                 .map(room -> {
                     log.debug("기존 채팅방 존재");
                     room.setApplicationFormId(applicationFormId);
+                    room.setPreOpen(applicationForm.getTicketOpenDate().getIsPreOpen());
+                    room.setLastMessageTime(LocalDateTime.now());  // 가장 최신 시간으로 업데이트
                     return room;
                 })
                 // 없다면 새로운 채팅방을 생성합니다.
                 .orElseGet(() ->
                         ChatRoom.builder()
                                 .agentMemberId(agent.getMemberId())
+                                .agentMemberNickname(agent.getNickname())
+                                .clientMemberNickname(client.getNickname())
                                 .clientMemberId(client.getMemberId())
                                 .applicationFormId(applicationFormId)
+                                .preOpen(applicationForm.getTicketOpenDate().getIsPreOpen())
+                                .lastMessageTime(LocalDateTime.now())
                                 .build()
                 );
 

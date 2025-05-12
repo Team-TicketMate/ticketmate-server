@@ -126,6 +126,10 @@ public enum ErrorCode {
     // CHAT
 
     CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾지 못했습니다."),
+
+    INVALID_CHAT_MESSAGE_ID(HttpStatus.BAD_REQUEST, "채팅방을 찾지 못했습니다."),
+
+    MESSAGE_NOT_FOUND(HttpStatus.BAD_REQUEST, "메시지를 찾지 못했습니다."),
     ;
 
     private final HttpStatus status;
