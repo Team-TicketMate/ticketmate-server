@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.admin;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
@@ -136,7 +137,7 @@ public class AdminService {
                             .openDate(ticketOpenDateRequest.getOpenDate())
                             .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
                             .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
@@ -240,7 +241,7 @@ public class AdminService {
                             .openDate(ticketOpenDateRequest.getOpenDate())
                             .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
                             .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
@@ -264,7 +265,8 @@ public class AdminService {
 
         // 일반 예매 필수 검증
         boolean hasGeneralOpen = ticketOpenDateRequestList.stream()
-                .anyMatch(date -> !date.getIsPreOpen());
+                .anyMatch(request ->
+                        request.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN));
         if (!hasGeneralOpen) {
             log.error("일반 예매 날짜는 필수로 포함되어야합니다");
             throw new CustomException(ErrorCode.GENERAL_TICKET_OPEN_DATE_REQUIRED);
