@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.application;
 import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import com.ticketmate.backend.object.constants.MemberType;
+import com.ticketmate.backend.object.dto.application.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
@@ -347,7 +348,7 @@ public class ApplicationFormService {
          * 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
          */
         List<ApplicationForm> applicationFormList = applicationFormRepository
-                .findAllByConcert_ConcertIdAndClient_MemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
+                .findAllByConcertConcertIdAndClientMemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
 
         for (ApplicationForm form : applicationFormList) {
             if (form.getApplicationFormStatus().equals(ApplicationFormStatus.APPROVED)) {
@@ -387,5 +388,22 @@ public class ApplicationFormService {
         fcmService.sendNotification(client.getMemberId(), payloadRequest);
 
         return chatRoom.getRoomId();
+    }
+
+    /**
+     * 특정 의뢰인이 이미 해당 공연, 해당 대리인, 일반/선 예매로 신청서를 작성했는지 여부를 반환합니다
+     * @param client 의뢰인 객체
+     * @param request 대리인 PK, 공연 PK, 예매 타입
+     * @return 중복된 신청서라면 true 반환
+     */
+    @Transactional(readOnly = true)
+    public Boolean isDuplicateApplicationForm(Member client, ApplicationFormDuplicateRequest request) {
+        return applicationFormRepository
+                .existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
+                        client.getMemberId(),
+                        request.getAgentId(),
+                        request.getConcertId(),
+                        request.getTicketOpenType()
+                );
     }
 }
