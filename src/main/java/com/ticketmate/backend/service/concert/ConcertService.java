@@ -1,6 +1,7 @@
 package com.ticketmate.backend.service.concert;
 
 import com.ticketmate.backend.object.constants.ConcertType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
@@ -12,7 +13,6 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
-import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,6 @@ public class ConcertService {
     private final ConcertDateRepository concertDateRepository;
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final ConcertRepositoryImpl concertRepositoryImpl;
-    private final EntityMapper entityMapper;
 
     /**
      * 공연 필터링 조회 로직
@@ -146,7 +145,8 @@ public class ConcertService {
 
         // 3. 사전/일반 예매 정보 추출
         TicketOpenDate preOpen = ticketOpenDateList.stream()
-                .filter(TicketOpenDate::getIsPreOpen)
+                .filter(ticketOpenDate ->
+                        ticketOpenDate.getTicketOpenType().equals(TicketOpenType.PRE_OPEN))
                 .findFirst()
                 .orElse(null);
         LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
@@ -154,7 +154,8 @@ public class ConcertService {
         Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
 
         TicketOpenDate generalOpen = ticketOpenDateList.stream()
-                .filter(ticket -> !ticket.getIsPreOpen())
+                .filter(ticketOpenDate ->
+                        ticketOpenDate.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN))
                 .findFirst()
                 .orElse(null);
         LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
