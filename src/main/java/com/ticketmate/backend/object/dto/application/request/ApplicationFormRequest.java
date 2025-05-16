@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.dto.application.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -42,7 +43,6 @@ public class ApplicationFormRequest {
     @Schema(defaultValue = "꼭 잡아주세요...!!")
     private String requestDetails; // 요청사항
 
-    @NotNull(message = "선예매 여부를 입력해주세요")
-    @Schema(defaultValue = "false")
-    private Boolean isPreOpen; // 선예매 여부
+    @NotNull(message = "선예매/일반예매 타입을 입력해주세요")
+    private TicketOpenType ticketOpenType; // 선예매 여부
 }

@@ -73,7 +73,7 @@ public class ApplicationFormService {
      *                requestCount 요청매수
      *                hopeAreas 희망구역
      *                requestDetails 요청사항
-     *                isPreOpen 선예매 여부
+     *                ticketOpenType 선예매/일반예매 타입
      */
     @Transactional
     public void createApplicationForm(ApplicationFormRequest request, Member client) {
@@ -97,10 +97,10 @@ public class ApplicationFormService {
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
         // 이미 의뢰인이 대리자에게 해당 공연으로 신청서를 보냈는지 확인
-        if (applicationFormRepository.existsByClient_MemberIdAndAgent_MemberIdAndConcert_ConcertId(
-                client.getMemberId(), agent.getMemberId(), concert.getConcertId())) {
-            log.error("의뢰인: {} 이 대리인: {} 에게 이미 공연: {} 에 대해 신청서를 작성했습니다. 중복 작성은 불가능합니다.",
-                    client.getMemberId(), agent.getMemberId(), concert.getConcertName());
+        if (applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
+                client.getMemberId(), agent.getMemberId(), concert.getConcertId(), request.getTicketOpenType())) {
+            log.error("의뢰인: {} 이 대리인: {} 에게 이미 공연: {} 에 대해 예매 타입: {} 신청서를 작성했습니다. 중복 작성은 불가능합니다.",
+                    client.getMemberId(), agent.getMemberId(), concert.getConcertName(), request.getTicketOpenType().getDescription());
             throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
         }
 
@@ -114,17 +114,18 @@ public class ApplicationFormService {
                 });
 
         // TicketOpenDate 확인
-        TicketOpenDate ticketOpenDate = null;
-        if (request.getIsPreOpen() != null) { // 선예매/일반예매 오픈일이 존재하는 경우
-            log.debug("공연: {} 에 대한 신청서 요청에 선예매/일반예매 정보가 존재합니다.", concert.getConcertName());
+        TicketOpenDate ticketOpenDate;
+        if (request.getTicketOpenType() != null) { // 선예매/일반예매 오픈일이 존재하는 경우
+            log.debug("공연: {} 에 대해 {} 신청 요청입니다", concert.getConcertName(), request.getTicketOpenType().getDescription());
             ticketOpenDate = ticketOpenDateRepository
-                    .findByConcertConcertIdAndIsPreOpen(concert.getConcertId(), request.getIsPreOpen())
+                    .findByConcertConcertIdAndTicketOpenType(concert.getConcertId(), request.getTicketOpenType())
                     .orElseThrow(() -> {
-                        log.error("공연: {} 에 해당하는 선예매/일반예매 정보를 찾을 수 없습니다.", concert.getConcertName());
+                        log.error("공연: {} 에 해당하는 {} 정보를 찾을 수 없습니다.", concert.getConcertName(), request.getTicketOpenType().getDescription());
                         return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
                     });
         } else { // 선예매/일반예매 오픈일이 존재하지 않는 경우
-            log.debug("공연: {} 에 대해 선예매/일반예매 정보가 존재하지 않습니다.", concert.getConcertName());
+            log.error("공연: {} 에 대해 선예매/일반예매 정보가 존재하지 않습니다. 선예매/일반예매 정보는 필수 입력입니다.", concert.getConcertName());
+            throw new CustomException(ErrorCode.TICKET_OPEN_TYPE_NOT_FOUND);
         }
 
         // 요청 매수 확인
