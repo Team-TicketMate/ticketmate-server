@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.dto.application.response;
 
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class ApplicationFormFilteredResponse {
 
     private LocalDateTime openDate; // 티켓 오픈일
 
-    private Boolean isPreOpen; // 선예매 여부
+    private TicketOpenType ticketOpenType; // 선예매/일반예매 타입
 
     private Integer requestCount; // 매수
 
