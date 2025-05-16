@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -144,20 +145,34 @@ public class ConcertService {
 
 
         // 3. 사전/일반 예매 정보 추출
-        TicketOpenDate preOpen = ticketOpenDateList.stream()
-                .filter(ticketOpenDate ->
-                        ticketOpenDate.getTicketOpenType().equals(TicketOpenType.PRE_OPEN))
-                .findFirst()
-                .orElse(null);
+        List<TicketOpenDate> preOpenDateList = new ArrayList<>();
+        List<TicketOpenDate> generalOpenDateList = new ArrayList<>();
+        for (TicketOpenDate openDate : ticketOpenDateList) {
+            if (openDate.getTicketOpenType().equals(TicketOpenType.PRE_OPEN)) {
+                preOpenDateList.add(openDate);
+            } else if (openDate.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN)) {
+                generalOpenDateList.add(openDate);
+            } else {
+                log.error("TicketOpen 객체 내부 TicketOpenType이 없는 데이터가 존재합니다.");
+                throw new CustomException(ErrorCode.TICKET_OPEN_TYPE_NOT_FOUND);
+            }
+        }
+        if (preOpenDateList.size() > 1) {
+            log.error("선예매 오픈일이 여러 개 등록되어있습니다. 등록된 선예매 정보 개수: {}개", preOpenDateList.size());
+            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
+        } else if (generalOpenDateList.size() > 1) {
+            log.error("일반 예매 오픈일이 여러 개 등록되어있습니다. 등록된 일반예매 정보 개수: {}개", generalOpenDateList.size());
+            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
+        } else if (preOpenDateList.isEmpty() && generalOpenDateList.isEmpty()) {
+            log.error("선예매/일반예매 오픈일 데이터를 찾을 수 없습니다.");
+            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+        }
+        TicketOpenDate preOpen = preOpenDateList.get(0);
         LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
         Integer preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
         Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
 
-        TicketOpenDate generalOpen = ticketOpenDateList.stream()
-                .filter(ticketOpenDate ->
-                        ticketOpenDate.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN))
-                .findFirst()
-                .orElse(null);
+        TicketOpenDate generalOpen = generalOpenDateList.get(0);
         LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
         Integer generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
         Boolean generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
