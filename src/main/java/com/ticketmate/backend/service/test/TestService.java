@@ -1,9 +1,6 @@
 package com.ticketmate.backend.service.test;
 
-import com.ticketmate.backend.object.constants.ApplicationFormStatus;
-import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.constants.ConcertType;
-import com.ticketmate.backend.object.constants.TicketReservationSite;
+import com.ticketmate.backend.object.constants.*;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
@@ -363,21 +360,35 @@ public class TestService {
                     .openDate(preOpenDate)
                     .requestMaxCount(koFaker.number().numberBetween(1, 6))
                     .isBankTransfer(koFaker.random().nextBoolean())
-                    .isPreOpen(true)
+                    .ticketOpenType(TicketOpenType.PRE_OPEN)
                     .build();
             ticketOpenDateList.add(preOpen);
         }
 
-        // 2. 일반 예매 오픈일 (필수)
-        LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
-        TicketOpenDate generalOpen = TicketOpenDate.builder()
-                .concert(concert)
-                .openDate(generalOpenDate)
-                .requestMaxCount(koFaker.number().numberBetween(1, 6))
-                .isBankTransfer(koFaker.random().nextBoolean())
-                .isPreOpen(false)
-                .build();
-        ticketOpenDateList.add(generalOpen);
+        // 2. 일반 예매 오픈일 (선예매 오픈일이 없다면 필수 생성 / 선예매 오픈일이 있다면 50% 확률로 생성)
+        if (ticketOpenDateList.isEmpty()) { // 선예매 오픈일이 없는 경우 -> 일반예매 필수 생성
+            LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
+            TicketOpenDate generalOpen = TicketOpenDate.builder()
+                    .concert(concert)
+                    .openDate(generalOpenDate)
+                    .requestMaxCount(koFaker.number().numberBetween(1, 6))
+                    .isBankTransfer(koFaker.random().nextBoolean())
+                    .ticketOpenType(TicketOpenType.GENERAL_OPEN)
+                    .build();
+            ticketOpenDateList.add(generalOpen);
+        } else { // 선예매 오픈일이 있는 경우 -> 일반예매 50% 확률로 생성
+            if (koFaker.random().nextBoolean()) {
+                LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
+                TicketOpenDate generalOpen = TicketOpenDate.builder()
+                        .concert(concert)
+                        .openDate(generalOpenDate)
+                        .requestMaxCount(koFaker.number().numberBetween(1, 6))
+                        .isBankTransfer(koFaker.random().nextBoolean())
+                        .ticketOpenType(TicketOpenType.GENERAL_OPEN)
+                        .build();
+                ticketOpenDateList.add(generalOpen);
+            }
+        }
 
         return ticketOpenDateList;
     }
@@ -489,6 +500,10 @@ public class TestService {
         ApplicationFormStatus applicationFormStatus = ApplicationFormStatus
                 .values()[koFaker.random().nextInt(ApplicationFormStatus.values().length)];
 
+        // 8. 선예매/일반예매 (랜덤)
+        TicketOpenType ticketOpenType = TicketOpenType
+                .values()[koFaker.random().nextInt(TicketOpenType.values().length)];
+
         ApplicationForm applicationForm = ApplicationForm.builder()
                 .client(client)
                 .agent(agent)
@@ -499,6 +514,7 @@ public class TestService {
                 .hopeAreaList(new ArrayList<>())
                 .requestDetails(koFaker.lorem().paragraph(2))
                 .applicationFormStatus(applicationFormStatus)
+                .ticketOpenType(ticketOpenType)
                 .build();
 
         hopeAreaList.forEach(applicationForm::addHopeArea);

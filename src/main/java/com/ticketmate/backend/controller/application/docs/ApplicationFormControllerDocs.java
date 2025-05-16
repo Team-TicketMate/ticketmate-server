@@ -27,7 +27,7 @@ public interface ApplicationFormControllerDocs {
                     - **requestCount** (Integer): 요청한 티켓 수 [필수]
                     - **hopeAreaList** (List<HopeAreaRequest>): 희망 구역 리스트 [선택]
                     - **requestDetails** (String): 요청 사항 [선택]
-                    - **isPreOpen** (Boolean): 선예매 여부 [필수]
+                    - **ticketOpenType** (Enum): 선예매/일반예매 타입 [필수]
                     
                     ### 사용 방법
                     `요청 사항`
@@ -37,18 +37,18 @@ public interface ApplicationFormControllerDocs {
                     - requestCount: 요청할 티켓 수를 입력합니다. (최소 1, 최대 공연 티켓 수 제한)
                     - hopeAreaList: 티켓을 원하는 구역을 지정할 수 있습니다.
                     - requestDetails: 추가적인 요청 사항을 입력할 수 있습니다.
-                    - isPreOpen: 선예매 여부를 설정합니다. (`true`일 경우 선예매, `false`일 경우 일반 예매)
+                    - ticketOpenType: 선예매/일반예매 타입을 설정합니다.
                     
                     ### 유의사항
                     - 대리인(`agentId`)과 의뢰인(`clientId`)은 반드시 올바른 회원 유형이어야 합니다.
                     - 요청된 티켓 수(`requestCount`)는 공연의 티켓 예매 가능 범위 내여야 합니다.
                     - 중복된 신청서는 허용되지 않으며, 이미 대리인에게 신청서를 제출한 경우 오류가 발생합니다.
                     - 희망 구역은 선택 사항으로, 제공된 공연 구역에 맞춰 유효한 구역을 선택해야 합니다.
-                    - 선예매와 일반 예매 구분은 `isPreOpen`으로 결정됩니다.
+                    - 선예매와 일반 예매 구분은 `ticketOpenType`으로 결정됩니다.
                     
                     `TicketOpenDate`
-                    - 선예매(`isPreOpen=true`)일 경우, 해당 공연의 선예매 정보가 있어야 합니다.
-                    - 일반 예매(`isPreOpen=false`)일 경우, 일반 예매 정보가 있어야 합니다.
+                    - 선예매(`ticketOpenType=PRE_OPEN`)일 경우, 해당 공연의 선예매 정보가 있어야 합니다.
+                    - 일반 예매(`ticketOpenType=GENERAL_OPEN`)일 경우, 일반 예매 정보가 있어야 합니다.
                     
                     ### 주의사항
                     - 대리인이 아닌 회원이 대리인으로 지정되면 `INVALID_MEMBER_TYPE` 오류가 발생합니다.
@@ -131,7 +131,7 @@ public interface ApplicationFormControllerDocs {
                     ### 요청 파라미터
                     - **applicationFormId** (UUID): 거절할 신청서 PK [필수]
                     - **applicationFormRejectedType** (String): 거절사유 [필수]
-                    - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모                  
+                    - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모
                     
                     ### ApplicationRejectedType
                     
