@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.object.constants.ConcertType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.postgres.concert.QConcert;
@@ -73,7 +74,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                                 LocalDateTime.class,
                                 "min({0})",
                                 new CaseBuilder()
-                                        .when(ticketOpenDate.isPreOpen.eq(true))
+                                        .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
                                         .then(ticketOpenDate.openDate)
                                         .otherwise((LocalDateTime) null)
                         ).as("ticketPreOpenDate"),
@@ -81,7 +82,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         Expressions.booleanTemplate(
                                 "bool_or({0})",
                                 new CaseBuilder()
-                                        .when(ticketOpenDate.isPreOpen.eq(true))
+                                        .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
                                         .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
                                         .otherwise((Boolean) null)
                         ).as("preOpenBankTransfer"),
@@ -90,7 +91,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                                 LocalDateTime.class,
                                 "min({0})",
                                 new CaseBuilder()
-                                        .when(ticketOpenDate.isPreOpen.eq(false))
+                                        .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
                                         .then(ticketOpenDate.openDate)
                                         .otherwise((LocalDateTime) null)
                         ).as("ticketGeneralOpenDate"),
@@ -98,7 +99,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         Expressions.booleanTemplate(
                                 "bool_or({0})",
                                 new CaseBuilder()
-                                        .when(ticketOpenDate.isPreOpen.eq(false))
+                                        .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
                                         .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
                                         .otherwise((Boolean) null)
                         ).as("generalOpenBankTransfer"),

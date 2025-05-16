@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.admin;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
@@ -128,7 +129,7 @@ public class AdminService {
 
         // 7. 티켓 오픈일 검증 및 저장
         if (request.getTicketOpenDateRequestList() != null && !request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
-            // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
+            // 티켓 오픈일 요청에 선예매/일반예매 데이터가 최소 한개 이상 존재하는지 검증
             validateTicketOpenDateList(request.getTicketOpenDateRequestList());
             List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
                     .map(ticketOpenDateRequest -> TicketOpenDate.builder()
@@ -136,7 +137,7 @@ public class AdminService {
                             .openDate(ticketOpenDateRequest.getOpenDate())
                             .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
                             .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
@@ -240,7 +241,7 @@ public class AdminService {
                             .openDate(ticketOpenDateRequest.getOpenDate())
                             .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
                             .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
@@ -262,12 +263,32 @@ public class AdminService {
     // 티켓 오픈일 검증
     private void validateTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList) {
 
-        // 일반 예매 필수 검증
-        boolean hasGeneralOpen = ticketOpenDateRequestList.stream()
-                .anyMatch(date -> !date.getIsPreOpen());
-        if (!hasGeneralOpen) {
-            log.error("일반 예매 날짜는 필수로 포함되어야합니다");
-            throw new CustomException(ErrorCode.GENERAL_TICKET_OPEN_DATE_REQUIRED);
+        // 일반 예매, 선 예매는 각각 최대 한개씩 존재 가능
+        int preOpenRequestCount = ticketOpenDateRequestList.stream()
+                .filter(ticketOpenDateRequest ->
+                        ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.PRE_OPEN))
+                .toList()
+                .size();
+        if (preOpenRequestCount > 1) {
+            log.error("선예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 선예매 데이터 개수: {}개", preOpenRequestCount);
+            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
+        }
+
+        int generalOpenRequestCount = ticketOpenDateRequestList.stream()
+                .filter(ticketOpenDateRequest ->
+                        ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN))
+                .toList()
+                .size();
+        if (generalOpenRequestCount > 1) {
+            log.error("일반 예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 일반예매 데이터 개수: {}개", generalOpenRequestCount);
+            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
+        }
+
+        // 일반 예매 필수 검증 - 2025.05.16. 삭제
+        // 선예매 or 일반예매 단일 존재가능. 단, 둘다 존재하지 않는 경우는 예외처리
+        if (preOpenRequestCount == 0 && generalOpenRequestCount == 0) {
+            log.error("선예매/일반예매 오픈일 데이터가 요청되지 않았습니다. 둘 중 하나의 데이터는 필수로 입력해야합니다.");
+            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_REQUIRED);
         }
     }
 

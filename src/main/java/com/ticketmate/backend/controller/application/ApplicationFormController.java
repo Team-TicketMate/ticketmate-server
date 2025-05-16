@@ -1,6 +1,7 @@
 package com.ticketmate.backend.controller.application;
 
 import com.ticketmate.backend.controller.application.docs.ApplicationFormControllerDocs;
+import com.ticketmate.backend.object.dto.application.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
@@ -10,6 +11,7 @@ import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.application.ApplicationFormService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -74,5 +76,15 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
                        @PathVariable(value = "application-form-id") UUID applicationFormId) {
         Member member = customOAuth2User.getMember();
         return ResponseEntity.ok(applicationFormService.approve(applicationFormId, member));
+    }
+
+    @Override
+    @GetMapping("/duplicate")
+    @LogMonitoringInvocation
+    public ResponseEntity<Boolean> isDuplicateApplicationForm(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @Valid @ModelAttribute ApplicationFormDuplicateRequest request) {
+        Member client = customOAuth2User.getMember();
+        return ResponseEntity.ok(applicationFormService.isDuplicateApplicationForm(client, request));
     }
 }

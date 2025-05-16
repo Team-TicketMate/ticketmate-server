@@ -1,6 +1,7 @@
 package com.ticketmate.backend.service.concert;
 
 import com.ticketmate.backend.object.constants.ConcertType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
@@ -12,7 +13,6 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
-import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -42,7 +43,6 @@ public class ConcertService {
     private final ConcertDateRepository concertDateRepository;
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final ConcertRepositoryImpl concertRepositoryImpl;
-    private final EntityMapper entityMapper;
 
     /**
      * 공연 필터링 조회 로직
@@ -145,22 +145,48 @@ public class ConcertService {
 
 
         // 3. 사전/일반 예매 정보 추출
-        TicketOpenDate preOpen = ticketOpenDateList.stream()
-                .filter(TicketOpenDate::getIsPreOpen)
-                .findFirst()
-                .orElse(null);
-        LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
-        Integer preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
-        Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
+        List<TicketOpenDate> preOpenDateList = new ArrayList<>();
+        List<TicketOpenDate> generalOpenDateList = new ArrayList<>();
+        for (TicketOpenDate openDate : ticketOpenDateList) {
+            if (openDate.getTicketOpenType().equals(TicketOpenType.PRE_OPEN)) {
+                preOpenDateList.add(openDate);
+            } else if (openDate.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN)) {
+                generalOpenDateList.add(openDate);
+            } else {
+                log.error("TicketOpen 객체 내부 TicketOpenType이 없는 데이터가 존재합니다.");
+                throw new CustomException(ErrorCode.TICKET_OPEN_TYPE_NOT_FOUND);
+            }
+        }
+        if (preOpenDateList.size() > 1) {
+            log.error("선예매 오픈일이 여러 개 등록되어있습니다. 등록된 선예매 정보 개수: {}개", preOpenDateList.size());
+            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
+        } else if (generalOpenDateList.size() > 1) {
+            log.error("일반 예매 오픈일이 여러 개 등록되어있습니다. 등록된 일반예매 정보 개수: {}개", generalOpenDateList.size());
+            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
+        } else if (preOpenDateList.isEmpty() && generalOpenDateList.isEmpty()) {
+            log.error("선예매/일반예매 오픈일 데이터를 찾을 수 없습니다.");
+            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+        }
 
-        TicketOpenDate generalOpen = ticketOpenDateList.stream()
-                .filter(ticket -> !ticket.getIsPreOpen())
-                .findFirst()
-                .orElse(null);
-        LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
-        Integer generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
-        Boolean generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
+        LocalDateTime preOpenDate = null;
+        Integer preOpenRequestMaxCount = null;
+        Boolean preOpenIsBankTransfer = null;
+        if (!preOpenDateList.isEmpty()){
+            TicketOpenDate preOpen = preOpenDateList.get(0);
+            preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
+            preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
+            preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
+        }
 
+        LocalDateTime generalOpenDate = null;
+        Integer generalOpenRequestMaxCount = null;
+        Boolean generalOpenIsBankTransfer = null;
+        if (!generalOpenDateList.isEmpty()) {
+            TicketOpenDate generalOpen = generalOpenDateList.get(0);
+            generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
+            generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
+            generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
+        }
 
         // 4. 반환값
         return ConcertInfoResponse.builder()

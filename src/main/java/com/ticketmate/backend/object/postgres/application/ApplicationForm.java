@@ -2,6 +2,7 @@ package com.ticketmate.backend.object.postgres.application;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
@@ -63,6 +64,9 @@ public class ApplicationForm extends BasePostgresEntity {
     @Column(nullable = false)
     private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketOpenType ticketOpenType; // 선예매, 일반예매 구분
 
     private static final int HOPE_AREAS_MAX_SIZE = 10;
 
