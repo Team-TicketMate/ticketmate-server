@@ -167,16 +167,26 @@ public class ConcertService {
             log.error("선예매/일반예매 오픈일 데이터를 찾을 수 없습니다.");
             throw new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
         }
-        TicketOpenDate preOpen = preOpenDateList.get(0);
-        LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
-        Integer preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
-        Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
 
-        TicketOpenDate generalOpen = generalOpenDateList.get(0);
-        LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
-        Integer generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
-        Boolean generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
+        LocalDateTime preOpenDate = null;
+        Integer preOpenRequestMaxCount = null;
+        Boolean preOpenIsBankTransfer = null;
+        if (!preOpenDateList.isEmpty()){
+            TicketOpenDate preOpen = preOpenDateList.get(0);
+            preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
+            preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
+            preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
+        }
 
+        LocalDateTime generalOpenDate = null;
+        Integer generalOpenRequestMaxCount = null;
+        Boolean generalOpenIsBankTransfer = null;
+        if (!generalOpenDateList.isEmpty()) {
+            TicketOpenDate generalOpen = generalOpenDateList.get(0);
+            generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
+            generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
+            generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
+        }
 
         // 4. 반환값
         return ConcertInfoResponse.builder()
