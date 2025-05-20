@@ -3,15 +3,14 @@ package com.ticketmate.backend.service.application;
 import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import com.ticketmate.backend.object.constants.MemberType;
-import com.ticketmate.backend.object.dto.application.request.ApplicationFormDuplicateRequest;
-import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
-import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
+import com.ticketmate.backend.object.dto.application.request.*;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.mongo.chat.ChatRoom;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.application.RejectionReason;
 import com.ticketmate.backend.object.postgres.concert.Concert;
@@ -25,6 +24,7 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.service.fcm.FcmService;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -66,6 +66,8 @@ public class ApplicationFormService {
 
     /**
      * 대리자를 지정하여 공연 신청 폼을 작성합니다
+     * 선예매/일반예매가 다른 경우 각각 다른 공연으로 간주합니다
+     * 하나의 신청서에는 여러개의 공연일자(회차)를 포함할 수 있습니다
      *
      * @param request agentId 대리인PK
      *                concertId 콘서트PK
@@ -96,7 +98,7 @@ public class ApplicationFormService {
         Concert concert = concertRepository.findById(request.getConcertId())
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
-        // 이미 의뢰인이 대리자에게 해당 공연으로 신청서를 보냈는지 확인
+        // 이미 의뢰인이 대리자에게 해당 공연(선예매/일반예매 구분)으로 신청서를 보냈는지 확인
         if (applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
                 client.getMemberId(), agent.getMemberId(), concert.getConcertId(), request.getTicketOpenType())) {
             log.error("의뢰인: {} 이 대리인: {} 에게 이미 공연: {} 에 대해 예매 타입: {} 신청서를 작성했습니다. 중복 작성은 불가능합니다.",
@@ -104,14 +106,11 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
         }
 
-        // 공연PK + 공연일자로 ConcertDate엔티티 조회
-        ConcertDate concertDate = concertDateRepository
-                .findByConcertConcertIdAndPerformanceDate(concert.getConcertId(), request.getPerformanceDate())
-                .orElseThrow(() -> {
-                    log.error("공연: {} 공연일자: {} 에 해당하는 ConcertDate를 찾을 수 없습니다.",
-                            concert.getConcertName(), request.getPerformanceDate());
-                    return new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
-                });
+        // 신청서에 공연일자가 포함되었는지 검증
+        if (CommonUtil.nullOrEmpty(request.getApplicationFormDetailRequestList())) {
+            log.error("신청서에는 최소 1개 이상의 공연일자가 포함되어야 합니다.");
+            throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_REQUIRED);
+        }
 
         // TicketOpenDate 확인
         TicketOpenDate ticketOpenDate;
@@ -128,35 +127,64 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.TICKET_OPEN_TYPE_NOT_FOUND);
         }
 
-        // 요청 매수 확인
-        if (ticketOpenDate != null) {
-            if (request.getRequestCount() < MIN_REQUEST_COUNT ||
-                    request.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
-                log.error("요청 매수는 최소 1장 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
-                        ticketOpenDate.getRequestMaxCount(), request.getRequestCount());
-                throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
-            }
-        }
-
-        // 희망구역 DTO List -> 엔티티 List 변환
-        List<HopeArea> hopeAreaList = entityMapper
-                .toHopeAreaList(request.getHopeAreaList());
-
         // ApplicationForm 생성 (hopeAreaList는 빈 상태로 초기화)
         ApplicationForm applicationForm = ApplicationForm.builder()
                 .client(client)
                 .agent(agent)
                 .concert(concert)
-                .concertDate(concertDate)
                 .ticketOpenDate(ticketOpenDate)
-                .requestCount(request.getRequestCount())
-                .hopeAreaList(new ArrayList<>())
-                .requestDetails(request.getRequestDetails())
                 .applicationFormStatus(ApplicationFormStatus.PENDING) // 신청서는 기본 '대기'상태
+                .ticketOpenType(request.getTicketOpenType())
                 .build();
 
-        // HopeArea 추가 및 양방향 관계 설정
-        hopeAreaList.forEach(applicationForm::addHopeArea);
+        // 전체 요청 매수 계산을 위한 변수
+        int totalRequestCount = 0;
+
+        // 각 공연일자 요청 처리
+        for (ApplicationFormDetailRequest detailRequest : request.getApplicationFormDetailRequestList()) {
+            // 요청 매수 검증
+            if (detailRequest.getRequestCount() < MIN_REQUEST_COUNT ||
+                    detailRequest.getRequestCount() > ticketOpenDate.getRequestMaxCount()) {
+                log.error("요청 매수는 최소 1장, 최대 {}장 까지 가능합니다. 요청된 예매 매수: {}", ticketOpenDate.getRequestMaxCount(), detailRequest.getRequestCount());
+                throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
+            }
+            // 공연일자 조회
+            ConcertDate concertDate = concertDateRepository
+                    .findByConcertConcertIdAndPerformanceDate(concert.getConcertId(), detailRequest.getPerformanceDate())
+                    .orElseThrow(() -> {
+                        log.error("공연: {} 공연일자: {} 에 해당하는 ConcertDate를 찾을 수 없습니다.",
+                                concert.getConcertName(), detailRequest.getPerformanceDate());
+                        return new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
+                    });
+
+            // ApplicationFormDetail 생성
+            ApplicationFormDetail applicationFormDetail = ApplicationFormDetail.builder()
+                    .concertDate(concertDate)
+                    .requestCount(detailRequest.getRequestCount())
+                    .requirement(detailRequest.getRequestDetails())
+                    .hopeAreaList(new ArrayList<>())
+                    .build();
+
+            // 신청서 세부사항 희망구역 설정
+            List<HopeArea> hopeAreaList = new ArrayList<>();
+            for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
+                HopeArea hopeArea = HopeArea.builder()
+                        .priority(hopeAreaRequest.getPriority())
+                        .location(hopeAreaRequest.getLocation())
+                        .price(hopeAreaRequest.getPrice())
+                        .build();
+                applicationFormDetail.addHopeArea(hopeArea);
+            }
+
+            // ApplicationForm에 ApplicationFormDetail 추가
+            applicationForm.addApplicationFormDetail(applicationFormDetail);
+
+            // 전체 요청 매수 계산
+            totalRequestCount += detailRequest.getRequestCount();
+        }
+
+        // 전체 요청 매수 설정
+        applicationForm.setTotalRequestCount(totalRequestCount);
 
         applicationFormRepository.save(applicationForm);
         log.debug("요청된 신청서 저장 성공. 대리인: {}, 콘서트: {}", agent.getUsername(), concert.getConcertName());

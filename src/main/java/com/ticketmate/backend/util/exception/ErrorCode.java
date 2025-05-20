@@ -103,6 +103,7 @@ public enum ErrorCode {
     PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다."),
 
     // REDIS_LOCK
+
     LOCK_ACQUISITION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득에 실패했습니다."),
 
     LOCK_ACQUISITION_INTERRUPT(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득 중 인터럽트가 발생했습니다."),
@@ -120,6 +121,8 @@ public enum ErrorCode {
     ALREADY_APPROVED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 수락된 신청서입니다."),
 
     INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
+
+    APPLICATION_FORM_DETAIL_REQUIRED(HttpStatus.BAD_REQUEST, "신청서에는 최소 1개 이상의 공연일자가 포함되어야합니다."),
 
     // NOTIFICATION
 

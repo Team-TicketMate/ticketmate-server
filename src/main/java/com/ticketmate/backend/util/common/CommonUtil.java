@@ -2,6 +2,8 @@ package com.ticketmate.backend.util.common;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 /**
  * 공통 메서드
  */
@@ -39,6 +41,16 @@ public class CommonUtil {
             return 0;
         }
         return val;
+    }
+
+    /**
+     * 리스트가 null이거나 비어있는지 여부를 반환
+     *
+     * @param list 검증할 list
+     * @return 리스트가 null이거나 비어있으면 true, 그 외에는 false
+     */
+    public static boolean nullOrEmpty(List<?> list) {
+        return list == null || list.isEmpty();
     }
 
     /**
