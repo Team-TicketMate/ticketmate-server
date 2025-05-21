@@ -43,7 +43,7 @@ public class ApplicationFormDetail extends BasePostgresEntity {
     @Column(columnDefinition = "TEXT")
     private String requirement; // 요청 사항
 
-    @OneToMany(mappedBy = "applicationFormDatail", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "applicationFormDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HopeArea> hopeAreaList = new ArrayList<>();
 
     private static final int HOPE_AREA_MAX_SIZE = 10;

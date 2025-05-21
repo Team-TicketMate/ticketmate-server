@@ -30,9 +30,6 @@ public class ApplicationFormFilteredRequest {
 
     private UUID concertId; // 공연 PK
 
-    @Schema(defaultValue = "1")
-    private Integer requestCount; // 매수
-
     @Schema(defaultValue = "PENDING")
     private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 

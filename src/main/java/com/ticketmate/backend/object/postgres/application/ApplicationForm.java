@@ -49,7 +49,7 @@ public class ApplicationForm extends BasePostgresEntity {
 
     @Column(nullable = false)
     @Builder.Default
-    private Integer totalRequestCount = 0; // 전체 요청 매수 (모든 공연일차 총 매수)
+    private Integer totalRequestCount = 0; // 전체 요청 매수 (모든 공연일자 총 매수)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
