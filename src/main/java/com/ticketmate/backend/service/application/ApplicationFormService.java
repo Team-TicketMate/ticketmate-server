@@ -38,14 +38,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
 import static com.ticketmate.backend.util.common.CommonUtil.enumToString;
-import static com.ticketmate.backend.util.common.CommonUtil.null2ZeroInt;
 
 @Service
 @Slf4j
@@ -162,11 +160,9 @@ public class ApplicationFormService {
                     .concertDate(concertDate)
                     .requestCount(detailRequest.getRequestCount())
                     .requirement(detailRequest.getRequestDetails())
-                    .hopeAreaList(new ArrayList<>())
                     .build();
 
             // 신청서 세부사항 희망구역 설정
-            List<HopeArea> hopeAreaList = new ArrayList<>();
             for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
                 HopeArea hopeArea = HopeArea.builder()
                         .priority(hopeAreaRequest.getPriority())
@@ -196,7 +192,6 @@ public class ApplicationFormService {
      * @param request clientId 의뢰인 PK
      *                agentId 대리인 PK
      *                concertId 콘서트 PK
-     *                requestCount 매수
      *                applicationStatus 신청서 상태
      *                pageNumber 요청 페이지 번호 (기본 0)
      *                pageSize 한 페이지 당 항목 수 (기본 30)
@@ -210,7 +205,6 @@ public class ApplicationFormService {
         UUID agentId = request.getAgentId();
         UUID concertId = request.getConcertId();
         String applicationStatus = enumToString(request.getApplicationFormStatus());
-        int requestCount = null2ZeroInt(request.getRequestCount());
 
         // clientId가 입력된 경우 의뢰인 검증
         if (clientId != null) {
@@ -259,7 +253,6 @@ public class ApplicationFormService {
                         clientId,
                         agentId,
                         concertId,
-                        requestCount,
                         applicationStatus,
                         pageable
                 );
@@ -277,8 +270,8 @@ public class ApplicationFormService {
     @Transactional(readOnly = true)
     public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
 
-        // 데이터베이스 조회
-        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
+        // 데이터베이스 조회 (fetch join 방식)
+        ApplicationForm applicationForm = applicationFormRepository.findWithDetailByApplicationFormId(applicationFormId)
                 .orElseThrow(() -> {
                     log.error("대리 티켓팅 신청서를 찾을 수 없습니다.");
                     return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);

@@ -5,6 +5,7 @@ import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
@@ -17,6 +18,7 @@ import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateReposito
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
@@ -473,34 +476,26 @@ public class TestService {
      * @param concertList DB에 저장된 콘서트 리스트
      * @return 생성된 신청서 Mock데이터
      */
-    private ApplicationForm createApplicationMockData(
-            List<Member> agentList, List<Member> clientList, List<Concert> concertList) {
+    private ApplicationForm createApplicationMockData(List<Member> agentList, List<Member> clientList, List<Concert> concertList) {
 
-        // 1. 의뢰인 (DB에서 랜덤 선택)
+        // 의뢰인 (DB에서 랜덤 선택)
         Member client = clientList.get(koFaker.random().nextInt(clientList.size()));
 
-        // 2. 대리인 (DB에서 랜덤 선택)
+        // 대리인 (DB에서 랜덤 선택)
         Member agent = agentList.get(koFaker.random().nextInt(agentList.size()));
 
-        // 3. 콘서트 (DB에서 랜덤 선택)
+        // 콘서트 (DB에서 랜덤 선택)
         Concert concert = concertList.get(koFaker.random().nextInt(concertList.size()));
 
-        // 4. 공연일자 (ConcertDate) 생성
-        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
-        ConcertDate concertDate = concertDateList.get(koFaker.random().nextInt(concertDateList.size()));
-
-        // 5. 티켓 오픈일 (TicketOpenDate) 생성
+        // 티켓 오픈일 (TicketOpenDate) 생성
         List<TicketOpenDate> ticketOpenDateList = ticketOpenDateRepository.findAllByConcertConcertId(concert.getConcertId());
         TicketOpenDate ticketOpenDate = ticketOpenDateList.get(koFaker.random().nextInt(ticketOpenDateList.size()));
 
-        // 6. 희망구역 리스트 (0 ~ 10개 랜덤)
-        List<HopeArea> hopeAreaList = createHopeAreaList();
-
-        // 7. 신청서 상태 (랜덤)
+        // 신청서 상태 (랜덤)
         ApplicationFormStatus applicationFormStatus = ApplicationFormStatus
                 .values()[koFaker.random().nextInt(ApplicationFormStatus.values().length)];
 
-        // 8. 선예매/일반예매 (랜덤)
+        // 선예매/일반예매 (랜덤)
         TicketOpenType ticketOpenType = TicketOpenType
                 .values()[koFaker.random().nextInt(TicketOpenType.values().length)];
 
@@ -508,18 +503,65 @@ public class TestService {
                 .client(client)
                 .agent(agent)
                 .concert(concert)
-                .concertDate(concertDate)
                 .ticketOpenDate(ticketOpenDate)
-                .requestCount(koFaker.number().numberBetween(1, ticketOpenDate.getRequestMaxCount() + 1))
-                .hopeAreaList(new ArrayList<>())
-                .requestDetails(koFaker.lorem().paragraph(2))
                 .applicationFormStatus(applicationFormStatus)
                 .ticketOpenType(ticketOpenType)
                 .build();
 
-        hopeAreaList.forEach(applicationForm::addHopeArea);
+        // 신청서 세부사항 추가
+        AtomicReference<Integer> totalRequestCount = new AtomicReference<>(0);
+        createApplicationFormDetailList(applicationForm, concert, ticketOpenType)
+                .forEach(applicationFormDetail -> {
+                    applicationForm.addApplicationFormDetail(applicationFormDetail); // 양방향 연관관계
+                    totalRequestCount.updateAndGet(v -> v + applicationFormDetail.getRequestCount());
+                });
+        applicationForm.setTotalRequestCount(totalRequestCount.get());
 
         return applicationForm;
+    }
+
+    /**
+     * 신청서 세부사항 Mock 데이터를 생성합니다
+     */
+    private List<ApplicationFormDetail> createApplicationFormDetailList(ApplicationForm applicationForm, Concert concert, TicketOpenType ticketOpenType) {
+        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
+        int size = koFaker.random().nextInt(1, concertDateList.size() + 1);
+        List<ApplicationFormDetail> applicationFormDetailList = new ArrayList<>();
+        if (CommonUtil.nullOrEmpty(concertDateList)) {
+            log.error("신청서 세부사항 Mock 데이터 생성 중 공연: {}에 해당하는 공연 날짜가 존재하지 않습니다.", concert.getConcertName());
+            throw new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
+        }
+
+        // 선예매/일반예매 예매일 조회
+        TicketOpenDate ticketOpenDate = ticketOpenDateRepository
+                .findByConcertConcertIdAndTicketOpenType(concert.getConcertId(), ticketOpenType)
+                .orElseThrow(() -> {
+                    log.error("신청서 세부사항 Mock 데이터 생성 중 공연: {}, 예매타입: {}에 해당하는 TicketOpenDate 정보가 존재하지 않습니다.", concert.getConcertName(), ticketOpenType.getDescription());
+                    return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+                });
+
+        // 공연일자를 랜덤하게 섞기
+        Collections.shuffle(concertDateList);
+        int totalRequestCount = 0;
+
+        for (int i = 0; i < size; i++) {
+            // 세부 요청별 요청 매수 (1 ~ Max장)
+            int requestCount = koFaker.random().nextInt(1, ticketOpenDate.getRequestMaxCount());
+            totalRequestCount += requestCount;
+
+            // ApplicationFormDetail 생성
+            ApplicationFormDetail applicationFormDetail = ApplicationFormDetail.builder()
+                    .concertDate(concertDateList.get(i))
+                    .requestCount(requestCount)
+                    .requirement(koFaker.lorem().sentence(5, 10))
+                    .build();
+
+            // 희망구역 추가 (양방향 관계 설정)
+            createHopeAreaList().forEach(applicationFormDetail::addHopeArea);
+            applicationFormDetailList.add(applicationFormDetail);
+        }
+
+        return applicationFormDetailList;
     }
 
     /**

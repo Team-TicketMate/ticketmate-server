@@ -5,11 +5,12 @@ import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminRespons
 import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
-import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
@@ -69,19 +70,27 @@ public interface EntityMapper {
     List<HopeArea> toHopeAreaList(List<HopeAreaRequest> hopeAreaRequestList);
 
     // HopeArea -> HopeAreaResponse (엔티티 -> DTO)
-    HopeAreaResponse toHopeAreaResponse(HopeArea hopeArea);
+    ApplicationFormDetailResponse toHopeAreaResponse(HopeArea hopeArea);
 
     // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
-    List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
+    List<ApplicationFormDetailResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
+
+    // ApplicationFormDetail -> ApplicationFormDetailResponse (엔티티 -> DTO)
+    @Mapping(source = "concertDate.performanceDate", target = "performanceDate")
+    @Mapping(source = "concertDate.session", target = "session")
+    @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
+    ApplicationFormDetailResponse toApplicationFormDetailResponse(ApplicationFormDetail applicationFormDetail);
+
+    // List<ApplicationFormDetail> -> List<ApplicationFormDetailResponse> (엔티티 리스트 -> DTO 리스트)
+    List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList);
 
     // ApplicationForm -> ApplicationFormFilteredResponse (엔티티 -> DTO)
     @Mapping(source = "client.memberId", target = "clientId")
     @Mapping(source = "agent.memberId", target = "agentId")
     @Mapping(source = "concert.concertId", target = "concertId")
-    @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
-    @Mapping(source = "concertDate.performanceDate", target = "performanceDate")
     @Mapping(source = "ticketOpenDate.openDate", target = "openDate")
-    @Mapping(source = "ticketOpenDate.ticketOpenType", target = "ticketOpenType")
+    @Mapping(source = "applicationFormDetailList", target = "applicationFormDetailResponseList")
+    @Mapping(source = "totalRequestCount", target = "totalRequestCount")
     ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
   
   
