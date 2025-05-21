@@ -13,6 +13,7 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -145,48 +143,49 @@ public class ConcertService {
 
 
         // 3. 사전/일반 예매 정보 추출
-        List<TicketOpenDate> preOpenDateList = new ArrayList<>();
-        List<TicketOpenDate> generalOpenDateList = new ArrayList<>();
-        for (TicketOpenDate openDate : ticketOpenDateList) {
-            if (openDate.getTicketOpenType().equals(TicketOpenType.PRE_OPEN)) {
-                preOpenDateList.add(openDate);
-            } else if (openDate.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN)) {
-                generalOpenDateList.add(openDate);
-            } else {
-                log.error("TicketOpen 객체 내부 TicketOpenType이 없는 데이터가 존재합니다.");
+        // Enum 키를 위한 EnumMap 사용
+        Map<TicketOpenType, List<TicketOpenDate>> openDateListByType = new EnumMap<>(TicketOpenType.class);
+
+        // 티켓 오픈일 분류
+        for (TicketOpenDate date : ticketOpenDateList) {
+            TicketOpenType type = date.getTicketOpenType();
+            // TicketOpenType 검증
+            if (type != TicketOpenType.PRE_OPEN && type != TicketOpenType.GENERAL_OPEN) {
+                log.error("TicketOpenDate 객체 내부에 잘못된 TicketOpenType이 존재합니다: {}", type);
                 throw new CustomException(ErrorCode.TICKET_OPEN_TYPE_NOT_FOUND);
             }
+            openDateListByType.computeIfAbsent(type, ticketOpenType -> new ArrayList<>()).add(date);
         }
-        if (preOpenDateList.size() > 1) {
-            log.error("선예매 오픈일이 여러 개 등록되어있습니다. 등록된 선예매 정보 개수: {}개", preOpenDateList.size());
-            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
-        } else if (generalOpenDateList.size() > 1) {
-            log.error("일반 예매 오픈일이 여러 개 등록되어있습니다. 등록된 일반예매 정보 개수: {}개", generalOpenDateList.size());
-            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
-        } else if (preOpenDateList.isEmpty() && generalOpenDateList.isEmpty()) {
-            log.error("선예매/일반예매 오픈일 데이터를 찾을 수 없습니다.");
+
+        // 검증을 위한 리스트 추출
+        List<TicketOpenDate> preOpenDateList = openDateListByType.getOrDefault(TicketOpenType.PRE_OPEN, Collections.emptyList());
+        List<TicketOpenDate> generalOpenDateList = openDateListByType.getOrDefault(TicketOpenType.GENERAL_OPEN, Collections.emptyList());
+
+        // 검증
+        if (CommonUtil.nullOrEmpty(preOpenDateList) && CommonUtil.nullOrEmpty(generalOpenDateList)) {
+            log.error("선예매/일반예매 오픈일 데이터가 모두 비어있습니다.");
             throw new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
         }
 
-        LocalDateTime preOpenDate = null;
-        Integer preOpenRequestMaxCount = null;
-        Boolean preOpenIsBankTransfer = null;
-        if (!preOpenDateList.isEmpty()){
-            TicketOpenDate preOpen = preOpenDateList.get(0);
-            preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
-            preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
-            preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
+        if (preOpenDateList.size() > 1) {
+            log.error("선예매 오픈일이 여러 개 등록되어있습니다. 등록된 선예매 오픈일 정보 개수: {}개", preOpenDateList.size());
+            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
+        }
+        if (generalOpenDateList.size() > 1) {
+            log.error("일반예매 오픈일이 여러 개 등록되어있습니다. 등록된 일반예매 오픈일 정보 개수: {}개", generalOpenDateList.size());
+            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
         }
 
-        LocalDateTime generalOpenDate = null;
-        Integer generalOpenRequestMaxCount = null;
-        Boolean generalOpenIsBankTransfer = null;
-        if (!generalOpenDateList.isEmpty()) {
-            TicketOpenDate generalOpen = generalOpenDateList.get(0);
-            generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
-            generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
-            generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
-        }
+        // 검증된 리스트에서 첫 번째 항목만 사용하므로 간결하게 처리
+        TicketOpenDate preOpen = preOpenDateList.isEmpty() ? null : preOpenDateList.get(0);
+        LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
+        Integer preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
+        Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
+
+        TicketOpenDate generalOpen = generalOpenDateList.isEmpty() ? null : generalOpenDateList.get(0);
+        LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
+        Integer generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
+        Boolean generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
 
         // 4. 반환값
         return ConcertInfoResponse.builder()

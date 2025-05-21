@@ -6,6 +6,7 @@ import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminRes
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
+import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
@@ -70,10 +71,10 @@ public interface EntityMapper {
     List<HopeArea> toHopeAreaList(List<HopeAreaRequest> hopeAreaRequestList);
 
     // HopeArea -> HopeAreaResponse (엔티티 -> DTO)
-    ApplicationFormDetailResponse toHopeAreaResponse(HopeArea hopeArea);
+    HopeAreaResponse toHopeAreaResponse(HopeArea hopeArea);
 
     // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
-    List<ApplicationFormDetailResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
+    List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
 
     // ApplicationFormDetail -> ApplicationFormDetailResponse (엔티티 -> DTO)
     @Mapping(source = "concertDate.performanceDate", target = "performanceDate")
