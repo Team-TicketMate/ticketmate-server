@@ -113,33 +113,29 @@ public class AdminService {
         concertRepository.save(concert);
 
         // 6. 공연 날짜 저장
-        if (request.getConcertDateRequestList() != null && !request.getConcertDateRequestList().isEmpty()) {
-            List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
-                    .map(dateRequest -> ConcertDate.builder()
-                            .concert(concert)
-                            .performanceDate(dateRequest.getPerformanceDate())
-                            .session(dateRequest.getSession())
-                            .build()
-                    )
-                    .collect(Collectors.toList());
-            concertDateRepository.saveAll(concertDateList);
-        }
+        List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
+                .map(dateRequest -> ConcertDate.builder()
+                        .concert(concert)
+                        .performanceDate(dateRequest.getPerformanceDate())
+                        .session(dateRequest.getSession())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        concertDateRepository.saveAll(concertDateList);
 
         // 7. 티켓 오픈일 검증 및 저장
-        if (request.getTicketOpenDateRequestList() != null && !request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
-            // 티켓 오픈일 요청에 선예매/일반예매 데이터가 최소 한개 이상 존재하는지 검증
-            validateTicketOpenDateList(request.getTicketOpenDateRequestList());
-            List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
-                    .map(ticketOpenDateRequest -> TicketOpenDate.builder()
-                            .concert(concert)
-                            .openDate(ticketOpenDateRequest.getOpenDate())
-                            .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
-                            .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
-                            .build())
-                    .collect(Collectors.toList());
-            ticketOpenDateRepository.saveAll(ticketOpenDateList);
-        }
+        // 티켓 오픈일 요청에 선예매/일반예매 데이터가 최소 한개 이상 존재하는지 검증
+        validateTicketOpenDateList(request.getTicketOpenDateRequestList());
+        List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
+                .map(ticketOpenDateRequest -> TicketOpenDate.builder()
+                        .concert(concert)
+                        .openDate(ticketOpenDateRequest.getOpenDate())
+                        .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
+                        .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
+                        .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
+                        .build())
+                .collect(Collectors.toList());
+        ticketOpenDateRepository.saveAll(ticketOpenDateList);
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
     }
 

@@ -130,7 +130,7 @@ public interface AdminControllerDocs {
                     - **concertThumbNail** (MultipartFile): 콘서트 썸네일 파일 [필수]
                     - **seatingChart** (MultipartFile): 좌석 배치도 파일 [선택]
                     - **ticketReservationSite** (enum): 예매 사이트 [선택]
-                    - **concertDateRequestList** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [선택]
+                    - **concertDateRequestList** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [필수]
                     - **ticketOpenDateRequestList** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [필수]
 
                     ### ConcertDateRequest
@@ -182,7 +182,7 @@ public interface AdminControllerDocs {
                     - 티켓 오픈일은 LocalDateTime으로 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 입력해야합니다
                     - 선예매/일반예매는 각각 최대 1개까지만 등록가능합니다
                     - 선예매/일반예매 데이터가 둘다 없는 경우 오류가 발생합니다
-                    - 선예매만 존재하는 경우, 일반예매만 존재하는 경우 모두 등록 가능합니다
+                    - `선예매만 존재하는 경우`, `일반예매만 존재하는 경우`, `선예매 일반예매 모두 존재하는경우` 등록 가능합니다
                     """
     )
     ResponseEntity<Void> saveConcertInfo(
