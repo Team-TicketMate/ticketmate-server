@@ -79,11 +79,11 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     }
 
     @Override
-    @GetMapping("/duplicate")
+    @PostMapping("/duplicate")
     @LogMonitoringInvocation
     public ResponseEntity<Boolean> isDuplicateApplicationForm(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @Valid @ModelAttribute ApplicationFormDuplicateRequest request) {
+            @Valid @RequestBody ApplicationFormDuplicateRequest request) {
         Member client = customOAuth2User.getMember();
         return ResponseEntity.ok(applicationFormService.isDuplicateApplicationForm(client, request));
     }
