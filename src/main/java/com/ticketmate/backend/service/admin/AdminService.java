@@ -37,7 +37,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.View;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +59,6 @@ public class AdminService {
     private final EntityMapper entityMapper;
     private final FcmService fcmService;
     private final NotificationUtil notificationUtil;
-    private final View error;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
 
@@ -264,21 +262,19 @@ public class AdminService {
     private void validateTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList) {
 
         // 일반 예매, 선 예매는 각각 최대 한개씩 존재 가능
-        int preOpenRequestCount = ticketOpenDateRequestList.stream()
+        long preOpenRequestCount = ticketOpenDateRequestList.stream()
                 .filter(ticketOpenDateRequest ->
                         ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.PRE_OPEN))
-                .toList()
-                .size();
+                .count();
         if (preOpenRequestCount > 1) {
             log.error("선예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 선예매 데이터 개수: {}개", preOpenRequestCount);
             throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
         }
 
-        int generalOpenRequestCount = ticketOpenDateRequestList.stream()
+        long generalOpenRequestCount = ticketOpenDateRequestList.stream()
                 .filter(ticketOpenDateRequest ->
                         ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN))
-                .toList()
-                .size();
+                .count();
         if (generalOpenRequestCount > 1) {
             log.error("일반 예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 일반예매 데이터 개수: {}개", generalOpenRequestCount);
             throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
