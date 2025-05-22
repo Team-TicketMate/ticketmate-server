@@ -70,7 +70,7 @@ public enum ErrorCode {
 
     TICKET_OPEN_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈일을 찾을 수 없습니다."),
 
-    TICKET_OPEN_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈 타입을 찾을 수 없습니다."),
+    TICKET_OPEN_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "티켓 오픈 타입을 찾을 수 없습니다."),
 
     TICKET_REQUEST_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "티켓 예매 요청 매수가 잘못되었습니다."),
 
