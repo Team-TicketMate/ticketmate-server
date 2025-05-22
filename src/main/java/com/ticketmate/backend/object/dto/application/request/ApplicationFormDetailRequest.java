@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class ApplicationFormDetailRequest {
     @Schema(defaultValue = "1")
     private Integer requestCount; // 요청매수
 
+    @Size(max = 10, message = "희망 구역은 최대 10개까지 등록 가능합니다.")
     private List<HopeAreaRequest> hopeAreaList = new ArrayList<>(); // 희망구역 리스트
 
     @Schema(defaultValue = "꼭 잡아주세요...!!")
