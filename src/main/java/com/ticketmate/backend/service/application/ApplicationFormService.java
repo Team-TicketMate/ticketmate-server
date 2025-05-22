@@ -135,9 +135,6 @@ public class ApplicationFormService {
                 .ticketOpenType(request.getTicketOpenType())
                 .build();
 
-        // 전체 요청 매수 계산을 위한 변수
-        int totalRequestCount = 0;
-
         // 각 공연일자 요청 처리
         for (ApplicationFormDetailRequest detailRequest : request.getApplicationFormDetailRequestList()) {
             // 요청 매수 검증
@@ -176,13 +173,7 @@ public class ApplicationFormService {
 
             // ApplicationForm에 ApplicationFormDetail 추가
             applicationForm.addApplicationFormDetail(applicationFormDetail);
-
-            // 전체 요청 매수 계산
-            totalRequestCount += detailRequest.getRequestCount();
         }
-
-        // 전체 요청 매수 설정
-        applicationForm.setTotalRequestCount(totalRequestCount);
 
         applicationFormRepository.save(applicationForm);
         log.debug("요청된 신청서 저장 성공. 대리인: {}, 콘서트: {}", agent.getUsername(), concert.getConcertName());

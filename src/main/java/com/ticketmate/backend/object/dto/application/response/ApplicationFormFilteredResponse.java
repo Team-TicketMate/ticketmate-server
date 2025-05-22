@@ -28,8 +28,6 @@ public class ApplicationFormFilteredResponse {
 
     private List<ApplicationFormDetailResponse> applicationFormDetailResponseList; // 신청서 세부사항 리스트
 
-    private Integer totalRequestCount; // 전체 요청 매수
-
     private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 
     private TicketOpenType ticketOpenType; // 선예매/일반예매 타입

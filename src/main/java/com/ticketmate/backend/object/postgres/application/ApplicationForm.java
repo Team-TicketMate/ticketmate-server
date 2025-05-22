@@ -7,6 +7,8 @@ import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
+import com.ticketmate.backend.util.exception.CustomException;
+import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -47,10 +49,6 @@ public class ApplicationForm extends BasePostgresEntity {
     @OneToMany(mappedBy = "applicationForm", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ApplicationFormDetail> applicationFormDetailList = new ArrayList<>();
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer totalRequestCount = 0; // 전체 요청 매수 (모든 공연일자 총 매수)
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationFormStatus applicationFormStatus; // 신청서 상태
@@ -61,6 +59,10 @@ public class ApplicationForm extends BasePostgresEntity {
 
     // 신청서 세부사항 추가 메서드
     public void addApplicationFormDetail(ApplicationFormDetail applicationFormDetail) {
+        if (applicationFormDetail == null) {
+            log.error("신청서 세부사항 데이터가 null 입니다.");
+            throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_NOT_FOUND);
+        }
         applicationFormDetailList.add(applicationFormDetail);
         applicationFormDetail.setApplicationForm(this);
     }

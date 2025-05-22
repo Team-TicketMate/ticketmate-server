@@ -100,7 +100,6 @@ public interface EntityMapper {
     @Mapping(source = "concert.concertId", target = "concertId")
     @Mapping(source = "ticketOpenDate.openDate", target = "openDate")
     @Mapping(source = "applicationFormDetailList", target = "applicationFormDetailResponseList")
-    @Mapping(source = "totalRequestCount", target = "totalRequestCount")
     ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
   
   

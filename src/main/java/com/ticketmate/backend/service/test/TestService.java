@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
@@ -509,13 +508,9 @@ public class TestService {
                 .build();
 
         // 신청서 세부사항 추가
-        AtomicReference<Integer> totalRequestCount = new AtomicReference<>(0);
+        // 양방향 연관관계
         createApplicationFormDetailList(concert, ticketOpenType)
-                .forEach(applicationFormDetail -> {
-                    applicationForm.addApplicationFormDetail(applicationFormDetail); // 양방향 연관관계
-                    totalRequestCount.updateAndGet(v -> v + applicationFormDetail.getRequestCount());
-                });
-        applicationForm.setTotalRequestCount(totalRequestCount.get());
+                .forEach(applicationForm::addApplicationFormDetail);
 
         return applicationForm;
     }
