@@ -7,12 +7,16 @@ import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
+import com.ticketmate.backend.object.dto.concert.response.ConcertDateInfoResponse;
+import com.ticketmate.backend.object.dto.concert.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
+import com.ticketmate.backend.object.postgres.concert.ConcertDate;
+import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.object.redis.FcmToken;
@@ -43,6 +47,11 @@ public interface EntityMapper {
 
     // Concert -> ConcertFilteredResponse (엔티티 -> DTO)
 
+    // List<ConcertDate> -> List<ConcertDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
+    List<ConcertDateInfoResponse> toConcertDateInfoResponseList(List<ConcertDate> concertDateList);
+
+    // List<TicketOpenDate> -> List<TicketOpenDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
+    List<TicketOpenDateInfoResponse> toTicketOpenDateInfoResponseList(List<TicketOpenDate> ticketOpenDateList);
 
 
     /*

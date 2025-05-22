@@ -4,8 +4,10 @@ import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
+import com.ticketmate.backend.object.dto.concert.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertInfoResponse;
+import com.ticketmate.backend.object.dto.concert.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
@@ -14,6 +16,7 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.util.common.CommonUtil;
+import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +43,7 @@ public class ConcertService {
     private final ConcertDateRepository concertDateRepository;
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final ConcertRepositoryImpl concertRepositoryImpl;
+    private final EntityMapper entityMapper;
 
     /**
      * 공연 필터링 조회 로직
@@ -90,7 +93,7 @@ public class ConcertService {
     @Transactional(readOnly = true)
     public ConcertInfoResponse getConcertInfo(UUID concertId) {
 
-        // 1. DB에서 공연정보, 공연일자, 티켓오픈일 조회
+        // DB에서 공연정보, 공연일자, 티켓오픈일 조회
         Concert concert = concertRepository.findById(concertId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
@@ -112,13 +115,13 @@ public class ConcertService {
             seatingChartUrl = concert.getSeatingChartUrl();
         }
 
-        // 1-1. 비동기적으로 관련 데이터 멀티스레드 조회
+        // 비동기적으로 관련 데이터 멀티스레드 조회
         CompletableFuture<List<ConcertDate>> concertDateListFuture = CompletableFuture
                 .supplyAsync(() -> concertDateRepository.findAllByConcertConcertId(concert.getConcertId()));
         CompletableFuture<List<TicketOpenDate>> ticketOpenDateListFuture = CompletableFuture
                 .supplyAsync(() -> ticketOpenDateRepository.findAllByConcertConcertId(concert.getConcertId()));
 
-        // 1-2. 데이터 조회 완료 대기
+        // 데이터 조회 완료 대기
         List<ConcertDate> concertDateList;
         List<TicketOpenDate> ticketOpenDateList;
         try {
@@ -129,20 +132,34 @@ public class ConcertService {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
-        // 2. 공연 시작일/종료일 계산
-        LocalDateTime startDate = concertDateList.stream()
-                .map(ConcertDate::getPerformanceDate)
-                .filter(Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
-        LocalDateTime endDate = concertDateList.stream()
-                .map(ConcertDate::getPerformanceDate)
-                .filter(Objects::nonNull)
-                .max(LocalDateTime::compareTo)
-                .orElse(null);
+        // 공연날짜 DTO List 생성
+        List<ConcertDateInfoResponse> concertDateInfoResponseList = entityMapper.toConcertDateInfoResponseList(concertDateList);
 
+        // 티켓 오픈일 검증
+        validateTicketOpenDateList(ticketOpenDateList);
 
-        // 3. 사전/일반 예매 정보 추출
+        // 티켓 오픈일 DTO List 생성
+        List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = entityMapper.toTicketOpenDateInfoResponseList(ticketOpenDateList);
+
+        // 4. 반환값
+        return ConcertInfoResponse.builder()
+                .concertName(concert.getConcertName())
+                .concertHallName(concertHallName)
+                .concertThumbnailUrl(concert.getConcertThumbnailUrl())
+                .seatingChartUrl(seatingChartUrl)
+                .concertType(concert.getConcertType())
+                .concertDateInfoResponseList(concertDateInfoResponseList)
+                .ticketOpenDateInfoResponses(ticketOpenDateInfoResponseList)
+                .ticketReservationSite(ticketReservationSite)
+                .build();
+    }
+
+    /**
+     * 티켓 오픈일 검증
+     * 1. 선예매/일반예매 모두 없는경우
+     * 2. 선예매/일반예매가 각각 한개를 초과하여 등록된 경우
+     */
+    private void validateTicketOpenDateList(List<TicketOpenDate> ticketOpenDateList) {
         // Enum 키를 위한 EnumMap 사용
         Map<TicketOpenType, List<TicketOpenDate>> openDateListByType = new EnumMap<>(TicketOpenType.class);
 
@@ -175,34 +192,5 @@ public class ConcertService {
             log.error("일반예매 오픈일이 여러 개 등록되어있습니다. 등록된 일반예매 오픈일 정보 개수: {}개", generalOpenDateList.size());
             throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
         }
-
-        // 검증된 리스트에서 첫 번째 항목만 사용하므로 간결하게 처리
-        TicketOpenDate preOpen = preOpenDateList.isEmpty() ? null : preOpenDateList.get(0);
-        LocalDateTime preOpenDate = preOpen != null ? preOpen.getOpenDate() : null;
-        Integer preOpenRequestMaxCount = preOpen != null ? preOpen.getRequestMaxCount() : null;
-        Boolean preOpenIsBankTransfer = preOpen != null ? preOpen.getIsBankTransfer() : null;
-
-        TicketOpenDate generalOpen = generalOpenDateList.isEmpty() ? null : generalOpenDateList.get(0);
-        LocalDateTime generalOpenDate = generalOpen != null ? generalOpen.getOpenDate() : null;
-        Integer generalOpenRequestMaxCount = generalOpen != null ? generalOpen.getRequestMaxCount() : null;
-        Boolean generalOpenIsBankTransfer = generalOpen != null ? generalOpen.getIsBankTransfer() : null;
-
-        // 4. 반환값
-        return ConcertInfoResponse.builder()
-                .concertName(concert.getConcertName())
-                .concertHallName(concertHallName)
-                .concertThumbnailUrl(concert.getConcertThumbnailUrl())
-                .seatingChartUrl(seatingChartUrl)
-                .concertType(concert.getConcertType())
-                .startDate(startDate)
-                .endDate(endDate)
-                .preOpenDate(preOpenDate)
-                .preOpenRequestMaxCount(preOpenRequestMaxCount)
-                .preOpenIsBankTransfer(preOpenIsBankTransfer)
-                .generalOpenDate(generalOpenDate)
-                .generalOpenRequestMaxCount(generalOpenRequestMaxCount)
-                .generalOpenIsBankTransfer(generalOpenIsBankTransfer)
-                .ticketReservationSite(ticketReservationSite)
-                .build();
     }
 }
