@@ -546,7 +546,7 @@ public class TestService {
 
         for (int i = 0; i < size; i++) {
             // 세부 요청별 요청 매수 (1 ~ Max장)
-            int requestCount = koFaker.random().nextInt(1, ticketOpenDate.getRequestMaxCount());
+            int requestCount = koFaker.random().nextInt(1, ticketOpenDate.getRequestMaxCount() + 1);
 
             // ApplicationFormDetail 생성
             ApplicationFormDetail applicationFormDetail = ApplicationFormDetail.builder()
