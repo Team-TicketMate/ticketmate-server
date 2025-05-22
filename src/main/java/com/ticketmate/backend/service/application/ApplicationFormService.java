@@ -163,13 +163,15 @@ public class ApplicationFormService {
                     .build();
 
             // 신청서 세부사항 희망구역 설정
-            for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
-                HopeArea hopeArea = HopeArea.builder()
-                        .priority(hopeAreaRequest.getPriority())
-                        .location(hopeAreaRequest.getLocation())
-                        .price(hopeAreaRequest.getPrice())
-                        .build();
-                applicationFormDetail.addHopeArea(hopeArea);
+            if (!CommonUtil.nullOrEmpty(detailRequest.getHopeAreaList())) {
+                for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
+                    HopeArea hopeArea = HopeArea.builder()
+                            .priority(hopeAreaRequest.getPriority())
+                            .location(hopeAreaRequest.getLocation())
+                            .price(hopeAreaRequest.getPrice())
+                            .build();
+                    applicationFormDetail.addHopeArea(hopeArea);
+                }
             }
 
             // ApplicationForm에 ApplicationFormDetail 추가
