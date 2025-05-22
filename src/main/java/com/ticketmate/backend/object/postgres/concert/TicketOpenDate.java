@@ -1,6 +1,7 @@
 package com.ticketmate.backend.object.postgres.concert;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,6 +34,7 @@ public class TicketOpenDate extends BasePostgresEntity {
 
     private Boolean isBankTransfer; // 무통장 입금 여부
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Boolean isPreOpen; // 선예매, 일반예매 여부
+    private TicketOpenType ticketOpenType; // 선예매, 일반예매 여부
 }

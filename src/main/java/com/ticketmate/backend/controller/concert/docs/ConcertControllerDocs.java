@@ -68,34 +68,35 @@ public interface ConcertControllerDocs {
     @Operation(
             summary = "공연 정보 상세조회",
             description = """
-
+                    이 API는 특정 공연 ID를 통해 공연의 상세 정보를 조회합니다.
+                    인증이 필요합니다.
+            
                     ### 요청 파라미터
-                    - **concertId** (UUID): 공연 PK [필수]
-    
+                    - **concertId** (UUID): 조회할 공연의 고유 ID (PathVariable)
+            
                     ### 응답 데이터
-                    - **concertName** (String): 공연명
-                    - **concertHallName** (String): 공연장 이름 (없을 경우 null)
-                    - **concertThumbnailUrl** (String): 공연 썸네일 이미지 URL
-                    - **seatingChartUrl** (String): 좌석 배치도 URL (없을 경우 null)
-                    - **concertType** (String): 공연 카테고리 (없을 경우 null)
-                    - **startDate** (LocalDateTime): 공연 시작 일자 (가장 빠른 공연 날짜)
-                    - **endDate** (LocalDateTime): 공연 종료 일자 (가장 늦은 공연 날짜)
-                    - **preOpenDate** (LocalDateTime): 선예매 오픈일 (없을 경우 null)
-                    - **preOpenRequestMaxCount** (Integer): 선예매 최대 예매 매수 (없을 경우 null)
-                    - **preOpenIsBankTransfer** (Boolean): 선예매 무통장 입금 가능 여부 (없을 경우 null)
-                    - **generalOpenDate** (LocalDateTime): 일반 예매 오픈일 (없을 경우 null)
-                    - **generalOpenRequestMaxCount** (Integer): 일반 예매 최대 예매 매수 (없을 경우 null)
-                    - **generalOpenIsBankTransfer** (Boolean): 일반 예매 무통장 입금 가능 여부 (없을 경우 null)
-                    - **ticketReservationSite** (String): 예매처 (없을 경우 null)
-    
-                    ### 사용 방법
-                    - concertId를 통해 특정 공연의 상세 정보를 조회합니다.
-                    - 공연 날짜는 여러 개일 수 있으며, startDate는 가장 빠른 날짜, endDate는 가장 늦은 날짜를 반환합니다.
-                    - 선예매와 일반 예매 정보는 각각 최대 1개만 존재하며, 해당 정보가 없으면 관련 필드가 모두 null로 반환됩니다.
-    
-                    ### 유의사항
-                    - concertId가 유효하지 않으면 CONCERT_NOT_FOUND 에러가 발생합니다.
-                    - 선예매 정보가 존재하면 일반 예매 정보도 반드시 존재합니다. 일반 예매만 단독으로 존재할 수 있습니다.
+                    - **concertId** (UUID): 공연 ID
+                    - **concertName** (String): 공연 이름
+                    - **concertHallName** (String): 공연장 이름
+                    - **concertType** (String): 공연 유형 (예: CONCERT, MUSICAL 등)
+                    - **concertDates** (List): 공연 날짜 리스트
+                        - **startDateTime** (String): 공연 시작 시간 (yyyy-MM-dd HH:mm:ss)
+                        - **endDateTime** (String): 공연 종료 시간 (yyyy-MM-dd HH:mm:ss)
+                    - **ticketOpenDates** (List): 예매 오픈 날짜 리스트
+                        - **ticketOpenDatetime** (String): 예매 오픈 시간
+                        - **ticketReservationSite** (String): 예매처 (예: INTERPARK_TICKET 등)
+            
+                    ### 사용 방법 & 유의 사항
+                    - 이 API는 로그인된 사용자만 호출할 수 있습니다.
+                    - 공연 ID는 UUID 형식이어야 하며, 올바르지 않으면 오류가 발생합니다.
+                    - 반환되는 날짜 및 시간 정보는 모두 ISO 8601 형식의 문자열입니다.
+                    - 공연에 따라 `ticketOpenDates` 또는 `concertDates` 정보가 없을 수 있습니다.
+            
+                    ### 예외 처리
+                    - **404 NOT_FOUND**: 해당 공연 ID에 대한 공연 정보가 존재하지 않을 경우
+                        - message: "존재하지 않는 공연입니다."
+                    - **400 BAD_REQUEST**: UUID 형식이 아닌 concertId를 요청 시
+                        - message: "잘못된 요청입니다."
                     """
     )
     ResponseEntity<ConcertInfoResponse> getConcertInfo(

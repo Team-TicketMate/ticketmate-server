@@ -120,7 +120,7 @@ public interface AdminControllerDocs {
     @Operation(
             summary = "공연 정보 저장",
             description = """
-                                        
+
                     이 API는 관리자 인증이 필요합니다
 
                     ### 요청 파라미터
@@ -130,52 +130,59 @@ public interface AdminControllerDocs {
                     - **concertThumbNail** (MultipartFile): 콘서트 썸네일 파일 [필수]
                     - **seatingChart** (MultipartFile): 좌석 배치도 파일 [선택]
                     - **ticketReservationSite** (enum): 예매 사이트 [선택]
-                    - **concertDateRequestList** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [선택]
-                    - **ticketOpenDateRequestList** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [선택]
-                                        
+                    - **concertDateRequestList** (List\\<ConcertDateRequest\\>): 공연 날짜 DTO [필수]
+                    - **ticketOpenDateRequestList** (List\\<TicketOpenDateRequest\\>): 티켓 오픈일 DTO [필수]
+
                     ### ConcertDateRequest
                     - **performanceDate** (LocalDateTime): 공연 일자 [필수]
                     - **session** (Integer): 공연 회차 [필수]
-                    
+
                     ### TicketOpenDateRequest
                     - **openDate** (LocalDateTime): 티켓 오픈일 [선택]
                     - **requestMaxCount** (Integer): 최대 예매 개수 [선택]
                     - **isBankTransfer** (Boolean): 무통장 입금 여부 [선택]
-                    - **isPreOpen** (Boolean): 선예매, 일반예매 여부 [필수]
+                    - **ticketOpenType** (Enum): 선예매/일반예매 타입 [필수]
                     
                     ### TicketReservationSite
                     INTERPARK_TICKET ("인터파크 티켓")
-                                    
+
                     YES24_TICKET ("예스24 티켓")
-                                    
+
                     TICKET_LINK ("티켓 링크")
-                                    
+
                     MELON_TICKET ("멜론 티켓")
-                    
+
                     COUPANG_PLAY ("쿠팡 플레이")
-                    
+
                     ETC ("기타")
-                                        
+
                     ### ConcertType
                     CONCERT ("콘서트")
-                                    
+
                     MUSICAL ("뮤지컬")
-                                    
+
                     SPORTS ("스포츠")
-                                    
+
                     CLASSIC ("클래식")
-                                    
+
                     EXHIBITIONS ("전시")
-                                    
+
                     OPERA ("오페라")
 
                     ETC ("기타")
-                                
+
+                    ### TicketOpenType
+                    PRE_OPEN ("선예매")
+                    
+                    GENERAL_OPEN("일반예매")
+                    
                     ### 유의사항
                     - `concertName`은 고유해야 합니다.
                     - 단일 회차 공연의 경우 "1"을 입력하면 됩니다.
                     - 티켓 오픈일은 LocalDateTime으로 "yyyy-MM-dd'T'HH:mm:ss" 형식으로 입력해야합니다
-
+                    - 선예매/일반예매는 각각 최대 1개까지만 등록가능합니다
+                    - 선예매/일반예매 데이터가 둘다 없는 경우 오류가 발생합니다
+                    - `선예매만 존재하는 경우`, `일반예매만 존재하는 경우`, `선예매 일반예매 모두 존재하는경우` 등록 가능합니다
                     """
     )
     ResponseEntity<Void> saveConcertInfo(
@@ -259,11 +266,11 @@ public interface AdminControllerDocs {
                     - **openDate** (LocalDateTime): 티켓 오픈일
                     - **requestMaxCount** (Integer): 최대 예매 개수
                     - **isBankTransfer** (Boolean): 무통장 입금 여부
-                    - **isPreOpen** (Boolean): 선예매, 일반예매 여부
-                                
+                    - **ticketOpenType** (Enum): 선예매, 일반예매 타입
+
                     ### 유의사항
                     - 수정이 필요한 정보만 입력하면 됩니다
-                    - 공연날짜, 티켓 오픈일은 수정 시 기존 저장 된 데이터가 모두 삭제됩니다
+                    - 공연날짜, 티켓 오픈일은 수정 시 기존 저장 된 데이터가 모두 삭제되고, 요청한 데이터로 등록됩니다.
                     """
     )
     ResponseEntity<Void> editConcertInfo(
