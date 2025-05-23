@@ -38,7 +38,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
@@ -108,6 +111,23 @@ public class ApplicationFormService {
         if (CommonUtil.nullOrEmpty(request.getApplicationFormDetailRequestList())) {
             log.error("신청서에는 최소 1개 이상의 공연일자가 포함되어야 합니다.");
             throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_REQUIRED);
+        }
+
+        // 공연일자 중복 검사
+        Set<LocalDateTime> performanceDateSet = new HashSet<>();
+
+        // 각 상세 요청의 performanceDate 검증
+        for (ApplicationFormDetailRequest detailRequest : request.getApplicationFormDetailRequestList()) {
+            // null 검사
+            if (detailRequest.getPerformanceDate() == null) {
+                log.error("요청된 신청서 상세 데이터의 공연일자가 null 입니다.");
+                throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+            }
+            // 중복 검사
+            if (!performanceDateSet.add(detailRequest.getPerformanceDate())) {
+                log.error("중복된 공연일자가 존재합니다: {}", detailRequest.getPerformanceDate());
+                throw new CustomException(ErrorCode.DUPLICATE_CONCERT_DATE);
+            }
         }
 
         // TicketOpenDate 확인
@@ -277,9 +297,9 @@ public class ApplicationFormService {
      * 대리 티켓팅 신청서 거절
      *
      * @param applicationFormId 신청서 PK
-     * @param agent 신청서 확인한 대리인
-     * @param request   applicationRejectedType 거절 사유
-     *                  otherMemo 거절 메모 (거절 사유가 '기타' 일 때)
+     * @param agent             신청서 확인한 대리인
+     * @param request           applicationRejectedType 거절 사유
+     *                          otherMemo 거절 메모 (거절 사유가 '기타' 일 때)
      */
     @Transactional
     public void reject(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
@@ -339,12 +359,12 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
         }
 
-        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId).orElseThrow(
-                () -> {
-                    log.error("신청폼 조회에 실패했습니다.");
-                    throw new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
-                }
-        );
+        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
+                .orElseThrow(() -> {
+                            log.error("신청폼 조회에 실패했습니다.");
+                            return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+                        }
+                );
 
         Member client = applicationForm.getClient();
 
@@ -407,7 +427,8 @@ public class ApplicationFormService {
 
     /**
      * 특정 의뢰인이 이미 해당 공연, 해당 대리인, 일반/선 예매로 신청서를 작성했는지 여부를 반환합니다
-     * @param client 의뢰인 객체
+     *
+     * @param client  의뢰인 객체
      * @param request 대리인 PK, 공연 PK, 예매 타입
      * @return 중복된 신청서라면 true 반환
      */

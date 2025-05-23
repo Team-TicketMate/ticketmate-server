@@ -68,6 +68,10 @@ public enum ErrorCode {
 
     CONCERT_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "공연 날짜 정보를 찾을 수 없습니다."),
 
+    INVALID_CONCERT_DATE(HttpStatus.BAD_REQUEST, "잘못된 공연일자입니다."),
+
+    DUPLICATE_CONCERT_DATE(HttpStatus.BAD_REQUEST, "중복된 공연일자입니다."),
+
     TICKET_OPEN_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈일을 찾을 수 없습니다."),
 
     TICKET_OPEN_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "티켓 오픈 타입을 찾을 수 없습니다."),
