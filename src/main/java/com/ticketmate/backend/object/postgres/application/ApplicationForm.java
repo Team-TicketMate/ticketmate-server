@@ -63,6 +63,10 @@ public class ApplicationForm extends BasePostgresEntity {
             log.error("신청서 세부사항 데이터가 null 입니다.");
             throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_NOT_FOUND);
         }
+        if (applicationFormDetailList.contains(applicationFormDetail)) {
+            log.error("이미 존재하는 신청서 세부사항입니다.");
+            throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FORM_DETAIL);
+        }
         applicationFormDetailList.add(applicationFormDetail);
         applicationFormDetail.setApplicationForm(this);
     }
