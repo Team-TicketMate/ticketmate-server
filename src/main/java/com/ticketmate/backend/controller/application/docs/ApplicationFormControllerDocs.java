@@ -1,5 +1,6 @@
 package com.ticketmate.backend.controller.application.docs;
 
+import com.ticketmate.backend.object.dto.application.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
@@ -16,42 +17,34 @@ public interface ApplicationFormControllerDocs {
     @Operation(
             summary = "대리 티켓팅 신청서 작성",
             description = """
-
-                    이 API는 인증이 필요합니다
-
-                    ### 요청 파라미터
+                    의뢰인이 대리인에게 티켓팅을 요청하기 위한 신청서를 작성합니다.
+                    
+                    ### 인증 필요
+                    - 의뢰인(CLIENT) 타입의 사용자만 요청 가능합니다.
+                    
+                    ### 요청 본문
                     - **agentId** (UUID): 대리인 PK [필수]
-                    - **concertId** (UUID): 콘서트 PK [필수]
-                    - **performanceDate** (LocalDateTime): 공연 일자 [필수]
-                    - **requestCount** (Integer): 요청한 티켓 수 [필수]
-                    - **hopeAreaList** (List<HopeAreaRequest>): 희망 구역 리스트 [선택]
-                    - **requestDetails** (String): 요청 사항 [선택]
-                    - **isPreOpen** (Boolean): 선예매 여부 [필수]
-    
-                    ### 사용 방법
-                    `요청 사항`
-                    - agentId: 대리인으로 지정된 회원의 ID를 입력합니다.
-                    - concertId: 신청할 콘서트의 ID를 입력합니다.
-                    - performanceDate: 신청할 공연의 일시를 입력합니다.
-                    - requestCount: 요청할 티켓 수를 입력합니다. (최소 1, 최대 공연 티켓 수 제한)
-                    - hopeAreaList: 티켓을 원하는 구역을 지정할 수 있습니다.
-                    - requestDetails: 추가적인 요청 사항을 입력할 수 있습니다.
-                    - isPreOpen: 선예매 여부를 설정합니다. (`true`일 경우 선예매, `false`일 경우 일반 예매)
-    
-                    ### 유의사항
-                    - 대리인(`agentId`)과 의뢰인(`clientId`)은 반드시 올바른 회원 유형이어야 합니다.
-                    - 요청된 티켓 수(`requestCount`)는 공연의 티켓 예매 가능 범위 내여야 합니다.
-                    - 중복된 신청서는 허용되지 않으며, 이미 대리인에게 신청서를 제출한 경우 오류가 발생합니다.
-                    - 희망 구역은 선택 사항으로, 제공된 공연 구역에 맞춰 유효한 구역을 선택해야 합니다.
-                    - 선예매와 일반 예매 구분은 `isPreOpen`으로 결정됩니다.
-    
-                    `TicketOpenDate`
-                    - 선예매(`isPreOpen=true`)일 경우, 해당 공연의 선예매 정보가 있어야 합니다.
-                    - 일반 예매(`isPreOpen=false`)일 경우, 일반 예매 정보가 있어야 합니다.
-    
-                    ### 주의사항
-                    - 대리인이 아닌 회원이 대리인으로 지정되면 `INVALID_MEMBER_TYPE` 오류가 발생합니다.
-                    - 이미 신청서를 제출한 경우, `DUPLICATE_APPLICATION_FROM_REQUEST` 오류가 발생합니다.
+                    - **concertId** (UUID): 공연 PK [필수]
+                    - **applicationFormDetailRequestList** (배열): 신청 공연 회차 목록 [최소 1개 이상 필수]
+                      - **performanceDate** (String): 공연 일시 (yyyy-MM-dd'T'HH:mm:ss 형식) [필수]
+                      - **requestCount** (Integer): 요청 매수 [필수, 최소 1장]
+                      - **hopeAreaList** (배열): 희망 구역 목록
+                        - **priority** (Integer): 희망 구역 우선순위 [필수, 1~10 사이 값]
+                        - **location** (String): 희망 구역 위치명 [필수, 예: "A구역"]
+                        - **price** (Long): 희망 구역 가격 [필수, 0원 이상]
+                      - **requestDetails** (String): 요청 사항
+                    - **ticketOpenType** (Enum): 선예매/일반예매 구분 [필수]
+                      - GENERAL_OPEN: 일반예매
+                      - PRE_OPEN: 선예매
+                    
+                    ### 주요 오류 코드
+                    - MEMBER_NOT_FOUND: 존재하지 않는 회원
+                    - INVALID_MEMBER_TYPE: 부적절한 회원 타입 (대리인이 아님)
+                    - CONCERT_NOT_FOUND: 존재하지 않는 공연
+                    - DUPLICATE_APPLICATION_FROM_REQUEST: 이미 해당 공연에 대한 신청서 존재
+                    - APPLICATION_FORM_DETAIL_REQUIRED: 공연 회차 정보 누락
+                    - TICKET_OPEN_DATE_NOT_FOUND: 티켓 오픈일 정보 없음
+                    - TICKET_REQUEST_COUNT_EXCEED: 요청 매수 초과
                     """
     )
     ResponseEntity<Void> saveApplicationForm(
@@ -59,46 +52,42 @@ public interface ApplicationFormControllerDocs {
             ApplicationFormRequest request);
 
     @Operation(
-            summary = "대리 티켓팅 신청서 필터링 조회",
+            summary = "신청서 필터링 조회",
             description = """
-
-                    이 API는 인증이 필요합니다.
-
+                    다양한 조건으로 신청서 목록을 필터링하여 조회합니다.
+                    
+                    ### 인증 필요
+                    
                     ### 요청 파라미터
-                    - **clientId** (UUID): 의뢰인 PK [선택]
-                    - **agentId** (UUID): 대리인 PK [선택]
-                    - **concertId** (UUID): 공연 PK [선택]
-                    - **requestCount** (Integer): 매수 [선택]
-                    - **applicationStatus** (Enum): 신청서 상태 [선택]
-                    - **pageNumber** (Integer): 요청 페이지 번호 [선택]
-                    - **pageSize** (Integer): 한 페이지 당 항목 수 [선택]
-                    - **sortField** (String): 정렬할 필드 [선택]
-                    - **sortDirection** (String): 정렬 방향 [선택]
-
-                    ### 사용 방법
-                    `필터링 파라미터`
-                    - clientId: 의뢰인이 작성한 신청서를 반환합니다
-                    - agentId: 대리인이 받은 신청서를 반환합니다
-                    - concertId: 특정 공연에 작성된 신청서를 반환합니다
-                    - requestCount: 요청 매수에 따른 신청서를 반환합니다
-                    - applicationStatus: 신청서 상태에 따른 신청서를 반환합니다
-
-                    `정렬 조건`
-                    - sortField: created_date(기본값), request_count
-                    - sortDirection: DESC(기본값), ASC
-
-                    `ApplicationStatus`
-                    PENDING("대기")
-                
-                    APPROVED("승인")
-                
-                    REJECTED("거절")
-                
-                    EXPIRED("만료")
-
-                    ### 유의사항
-                    - clientId, agentId, concertId, requestCount, applicationStatus 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-                    - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다.
+                    - **clientId** (UUID): 의뢰인 PK [선택, 생략 시 모든 의뢰인]
+                    - **agentId** (UUID): 대리인 PK [선택, 생략 시 모든 대리인]
+                    - **concertId** (UUID): 공연 PK [선택, 생략 시 모든 공연]
+                    - **applicationFormStatus** (Enum): 신청서 상태 [선택]
+                      - PENDING: 대기 중
+                      - APPROVED: 승인됨
+                      - REJECTED: 거절됨
+                      - COMPLETED: 완료됨
+                    - **pageNumber** (Integer): 페이지 번호 [선택, 기본값 0]
+                    - **pageSize** (Integer): 페이지 크기 [선택, 기본값 30]
+                    - **sortField** (String): 정렬 기준 [선택, 기본값 created_date]
+                      - created_date: 생성일 기준
+                      - total_request_count: 요청 매수 기준
+                    - **sortDirection** (String): 정렬 방향 [선택, 기본값 DESC]
+                      - ASC: 오름차순
+                      - DESC: 내림차순
+                      
+                    ### 반환 데이터
+                    - Page<ApplicationFormFilteredResponse>: 페이지네이션된 신청서 목록
+                      - content: 신청서 정보 배열
+                      - totalElements: 전체 항목 수
+                      - totalPages: 전체 페이지 수
+                      - number: 현재 페이지 번호
+                      - size: 페이지 크기
+                      
+                    ### 주요 오류 코드
+                    - INVALID_MEMBER_TYPE: 부적절한 회원 타입
+                    - MEMBER_NOT_FOUND: 존재하지 않는 회원
+                    - CONCERT_NOT_FOUND: 존재하지 않는 공연
                     """
     )
     ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
@@ -108,13 +97,35 @@ public interface ApplicationFormControllerDocs {
     @Operation(
             summary = "대리 티켓팅 신청서 상세 조회",
             description = """
-
-                    이 API는 인증이 필요합니다
-
-                    ### 요청 파라미터
+                    특정 신청서의 상세 정보를 조회합니다.
+                    
+                    ### 인증 필요
+                    
+                    ### 경로 변수
                     - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
-
-                    ### 유의사항
+                    
+                    ### 반환 데이터
+                    - ApplicationFormFilteredResponse: 신청서 상세 정보
+                      - applicationFormId: 신청서 ID
+                      - clientId: 의뢰인 ID
+                      - agentId: 대리인 ID
+                      - concertId: 공연 ID
+                      - openDate: 티켓 오픈일
+                      - applicationFormDetailResponseList: 신청 회차 정보 목록
+                        - performanceDate: 공연 일시
+                        - session: 회차
+                        - requestCount: 요청 매수
+                        - hopeAreaResponseList: 희망 구역 목록
+                          - priority: 우선순위
+                          - location: 위치
+                          - price: 가격
+                        - requirement: 요청 사항
+                      - totalRequestCount: 전체 요청 매수
+                      - applicationFormStatus: 신청서 상태
+                      - ticketOpenType: 선예매/일반예매 구분
+                      
+                    ### 주요 오류 코드
+                    - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
                     """
     )
     ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
@@ -124,13 +135,22 @@ public interface ApplicationFormControllerDocs {
     @Operation(
             summary = "대리 티켓팅 신청서 거절",
             description = """
-
-                    이 API는 인증이 필요합니다
-
-                    ### 요청 파라미터
-                    - **applicationFormId** (UUID): 거절할 신청서 PK [필수]
-                    - **applicationFormRejectedType** (String): 거절사유 [필수]
-                    - **otherMemo** (String): 거절사유 '기타'일 시 작성할 메모                  
+                    대리인이 의뢰인의 티켓팅 신청서를 거절합니다.
+                    
+                    ### 인증 필요
+                    - 대리인(AGENT) 타입의 사용자만 요청 가능합니다.
+                    
+                    ### 경로 변수
+                    - **application-form-id** (UUID): 거절할 신청서 PK [필수]
+                    
+                    ### 요청 본문
+                    - **applicationFormRejectedType** (Enum): 거절 사유 [필수]
+                    - **otherMemo** (String): 기타 사유인 경우 상세 메모 [기타 사유인 경우 필수, 2자 이상]
+                    
+                    ### 주요 오류 코드
+                    - INVALID_MEMBER_TYPE: 부적절한 회원 타입 (대리인이 아님)
+                    - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
+                    - INVALID_MEMO_REQUEST: 유효하지 않은 메모 (기타 사유인데 메모가 2자 미만)
                     
                     ### ApplicationRejectedType
                     
@@ -141,12 +161,11 @@ public interface ApplicationFormControllerDocs {
                     SCHEDULE_UNAVAILABLE("티켓팅 일정이 안됨")
                     
                     OTHER("기타")
-
+                    
                     ### 유의사항
                     - 해당 API는 대리인만 사용 가능합니다.
                     - 거절사유가 OTHER('기타') 일 시 otherMemo는 2자 이상이여야 합니다.
-                    - 거절 사유가 OTHER이 아닐 시에는 otherMemo는 공백처리해서 주시면 됩니다. 
-                                            
+                    - 거절 사유가 OTHER이 아닐 시에는 otherMemo는 공백처리해서 주시면 됩니다.
                     """
     )
     void reject(
@@ -156,11 +175,23 @@ public interface ApplicationFormControllerDocs {
     @Operation(
             summary = "대리 티켓팅 신청서 수락",
             description = """
-
-                    이 API는 인증이 필요합니다
-
-                    ### 요청 파라미터
-                    - **applicationFormId** (UUID): 수락할 신청서 PK [필수]
+                    대리인이 의뢰인의 티켓팅 신청서를 승인합니다.
+                    승인 시 의뢰인과 대리인 간의 채팅방이 자동으로 생성됩니다.
+                    
+                    ### 인증 필요
+                    - 대리인(AGENT) 타입의 사용자만 요청 가능합니다.
+                    
+                    ### 경로 변수
+                    - **application-form-id** (UUID): 승인할 신청서 PK [필수]
+                    
+                    ### 반환 데이터
+                    - String: 생성된 채팅방 ID
+                    
+                    ### 주요 오류 코드
+                    - INVALID_MEMBER_TYPE: 부적절한 회원 타입 (대리인이 아님)
+                    - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
+                    - INVALID_APPLICATION_FORM_STATUS: 유효하지 않은 신청서 상태 (대기 상태가 아님)
+                    - ALREADY_APPROVED_APPLICATION_FROM: 이미 다른 신청서가 승인된 상태
                     
                     ### 유의사항
                     - 해당 API는 대리인만 사용 가능합니다.
@@ -172,4 +203,31 @@ public interface ApplicationFormControllerDocs {
     )
     ResponseEntity<String> approve(
             CustomOAuth2User customOAuth2User, UUID applicationFormId);
+
+    @Operation(
+            summary = "신청서 중복 확인",
+            description = """
+                    이미 의뢰인이 대리인에게 해당 공연(선예매/일반예매 구분)에 대한 신청서를 작성했는지 확인합니다.
+                    
+                    ### 인증 필요
+                    
+                    ### 요청 파라미터
+                    - **agentId** (UUID): 대리인 PK [필수]
+                    - **concertId** (UUID): 공연 PK [필수]
+                    - **ticketOpenType** (Enum): 선예매/일반예매 타입 [필수]
+                      - GENERAL_OPEN: 일반예매
+                      - PRE_OPEN: 선예매
+                    
+                    ### 반환 데이터
+                    - Boolean: 중복 여부 (true: 중복, false: 중복 아님)
+                    
+                    ### 활용 방법
+                    - 의뢰인이 신청서 작성 전 중복 확인용으로 사용
+                    - 중복(true)인 경우 이미 신청한 신청서가 있으므로 추가 신청 불필요
+                    """
+    )
+    ResponseEntity<Boolean> isDuplicateApplicationForm(
+            CustomOAuth2User customOAuth2User,
+            ApplicationFormDuplicateRequest request
+    );
 }

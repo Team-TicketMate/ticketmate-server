@@ -24,7 +24,7 @@ public class HopeArea extends BasePostgresEntity {
     private UUID hopeAreaId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private ApplicationForm applicationForm; // 신청서
+    private ApplicationFormDetail applicationFormDetail;
 
     @Column(nullable = false)
     private Integer priority; // 순위 (1~10)

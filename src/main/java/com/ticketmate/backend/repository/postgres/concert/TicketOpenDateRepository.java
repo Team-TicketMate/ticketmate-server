@@ -1,5 +1,6 @@
 package com.ticketmate.backend.repository.postgres.concert;
 
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,7 +12,7 @@ public interface TicketOpenDateRepository extends JpaRepository<TicketOpenDate, 
 
     List<TicketOpenDate> findAllByConcertConcertId(UUID concertId);
 
-    Optional<TicketOpenDate> findByConcertConcertIdAndIsPreOpen(UUID concertId, Boolean isPreOpen);
+    Optional<TicketOpenDate> findByConcertConcertIdAndTicketOpenType(UUID concertId, TicketOpenType ticketOpenType);
 
     void deleteAllByConcertConcertId(UUID concertId);
 }
