@@ -130,6 +130,8 @@ public enum ErrorCode {
 
     APPLICATION_FORM_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "신청서 세부사항 값을 찾을 수 없습니다."),
 
+    DUPLICATE_APPLICATION_FORM_DETAIL(HttpStatus.BAD_REQUEST, "중복된 신청서 세부사항입니다."),
+
     // NOTIFICATION
 
     FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다."),
