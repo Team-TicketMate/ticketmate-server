@@ -5,6 +5,7 @@ import com.ticketmate.backend.object.constants.TicketOpenType;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +27,8 @@ public class ApplicationFormFilteredResponse {
 
     private LocalDateTime openDate; // 티켓 예매일
 
-    private List<ApplicationFormDetailResponse> applicationFormDetailResponseList; // 신청서 세부사항 리스트
+    @Builder.Default
+    private List<ApplicationFormDetailResponse> applicationFormDetailResponseList = new ArrayList<>(); // 신청서 세부사항 리스트
 
     private ApplicationFormStatus applicationFormStatus; // 신청서 상태
 
