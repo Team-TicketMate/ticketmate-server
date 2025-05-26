@@ -24,6 +24,7 @@ import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -38,6 +39,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -112,7 +115,8 @@ public class AdminService {
                 .build();
         concertRepository.save(concert);
 
-        // 6. 공연 날짜 저장
+        // 6. 공연 날짜 검증 및 저장
+        validateConcertDateList(request.getConcertDateRequestList());
         List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
                 .map(dateRequest -> ConcertDate.builder()
                         .concert(concert)
@@ -254,8 +258,62 @@ public class AdminService {
         }
     }
 
+    // 공연 날짜 List 검증
+    private void validateConcertDateList(List<ConcertDateRequest> concertDateRequestList) {
+        if (CommonUtil.nullOrEmpty(concertDateRequestList)) {
+            log.error("공연일 데이터가 요청되지 않았습니다.");
+            throw new CustomException(ErrorCode.CONCERT_DATE_REQUIRED);
+        }
+
+        // 모든 회차(session) 값을 추출하여 정렬
+        List<Integer> sessions = concertDateRequestList.stream()
+                .map(ConcertDateRequest::getSession)
+                .sorted()
+                .collect(Collectors.toList());
+
+        // 회차가 1부터 시작하는지 검증
+        if (CommonUtil.nullOrEmpty(sessions) || sessions.get(0) != 1) {
+            log.error("공연 회차는 반드시 1부터 시작해야 합니다.");
+            throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+        }
+
+        // 회차가 연속적으로 증가하는지 검증 (중간에 비어있는 회차가 없는지)
+        for (int i = 0; i < sessions.size() - 1; i++) {
+            if (sessions.get(i + 1) - sessions.get(i) != 1) {
+                log.error("공연 회차는 연속적으로 증가해야 합니다. 누락된 회차 or 중복된 회차가 존재합니다: {}회차 다음에 {}회차 입력됨",
+                        sessions.get(i), sessions.get(i + 1));
+                throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+            }
+        }
+
+        // 날짜와 회차가 올바르게 매칭되었는지 검증
+        List<ConcertDateRequest> sortedByDate = concertDateRequestList.stream()
+                .sorted(Comparator.comparing(ConcertDateRequest::getPerformanceDate))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < sortedByDate.size() - 1; i++) {
+            LocalDateTime prevPerformanceDate = sortedByDate.get(i).getPerformanceDate();
+            LocalDateTime nextPerformanceDate = sortedByDate.get(i + 1).getPerformanceDate();
+            int prevSession = sortedByDate.get(i).getSession();
+            int nextSession = sortedByDate.get(i + 1).getSession();
+
+            // 날짜는 빠른데 회차가 더 늦는 경우
+            if (prevSession > nextSession) {
+                log.error("공연 날짜와 회차의 순서가 일치하지 않습니다. 빠른 날짜({})의 회차({})가 늦은 날짜({})의 회차({})보다 큽니다.",
+                        prevPerformanceDate, prevSession, nextPerformanceDate, nextSession);
+                throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+            }
+        }
+    }
+
     // 티켓 오픈일 검증
     private void validateTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList) {
+
+        // 티켓 오픈일 null or Empty 검증
+        if (CommonUtil.nullOrEmpty(ticketOpenDateRequestList)) {
+            log.error("선예매/일반예매 오픈일 데이터가 요청되지 않았습니다. 최소 하나의 데이터는 필수로 입력해야합니다.");
+            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_REQUIRED);
+        }
 
         // 일반 예매, 선 예매는 각각 최대 한개씩 존재 가능
         long preOpenRequestCount = ticketOpenDateRequestList.stream()
@@ -276,12 +334,15 @@ public class AdminService {
             throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
         }
 
+        // 최대 요청 매수 검증
+        ticketOpenDateRequestList.forEach(ticketOpenDateRequest -> {
+            if (ticketOpenDateRequest.getRequestMaxCount() <= 0) {
+                log.error("티켓팅 최대 예매 매수는 1장 이상 입력되어야합니다.");
+                throw new CustomException(ErrorCode.INVALID_TICKET_REQUEST_MAX_COUNT);
+            }
+        });
+
         // 일반 예매 필수 검증 - 2025.05.16. 삭제
-        // 선예매 or 일반예매 단일 존재가능. 단, 둘다 존재하지 않는 경우는 예외처리
-        if (preOpenRequestCount == 0 && generalOpenRequestCount == 0) {
-            log.error("선예매/일반예매 오픈일 데이터가 요청되지 않았습니다. 둘 중 하나의 데이터는 필수로 입력해야합니다.");
-            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_REQUIRED);
-        }
     }
 
     /*
