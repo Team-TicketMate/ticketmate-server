@@ -62,9 +62,13 @@ public enum ErrorCode {
 
     TICKET_OPEN_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "티켓 선예매/일반예매 오픈일은 필수로 포함되어야 합니다."),
 
+    INVALID_TICKET_REQUEST_MAX_COUNT(HttpStatus.BAD_REQUEST, "티켓 최대 요청 개수 입력이 잘못되었습니다."),
+
     PRE_OPEN_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "선예매 오픈일 데이터는 최대 한개까지만 등록 가능합니다."),
 
     GENERAL_OPEN_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "일반예매 오픈일 데이터는 최대 한개까지만 등록 가능합니다."),
+
+    CONCERT_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "공연일 데이터는 필수로 포함되어야 합니다."),
 
     CONCERT_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "공연 날짜 정보를 찾을 수 없습니다."),
 
@@ -76,7 +80,7 @@ public enum ErrorCode {
 
     TICKET_OPEN_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "티켓 오픈 타입을 찾을 수 없습니다."),
 
-    TICKET_REQUEST_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "티켓 예매 요청 매수가 잘못되었습니다."),
+    TICKET_REQUEST_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "티켓 예매 요청 매수가 초과되었습니다."),
 
     // CONCERT_HALL
 
