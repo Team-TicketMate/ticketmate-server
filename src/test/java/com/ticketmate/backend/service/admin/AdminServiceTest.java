@@ -334,7 +334,8 @@ class AdminServiceTest {
 
         // then
         assertThatThrownBy(() -> adminService.saveConcertInfo(request))
-                .isInstanceOf(CustomException.class);
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining(ErrorCode.INVALID_TICKET_REQUEST_MAX_COUNT.getMessage());
     }
 
     private static ConcertInfoRequest createConcertInfoRequest(UUID concertHallId, String concertName) {
