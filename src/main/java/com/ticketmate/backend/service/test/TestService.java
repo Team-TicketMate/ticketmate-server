@@ -73,6 +73,10 @@ public class TestService {
     public Member createMockMember(LoginRequest request) {
 
         log.debug("테스트 Mock 회원을 생성합니다");
+        String username = request.getUsername();
+        if (CommonUtil.nvl(request.getUsername(), "").isEmpty()) {
+            username = enFaker.internet().emailAddress().replaceAll("[^a-zA-Z0-9@\\s]", "");
+        }
         LocalDate birth = koFaker.timeAndDate().birthday();
         String birthYear = Integer.toString(birth.getYear()); // YYYY
         String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
@@ -85,7 +89,7 @@ public class TestService {
 
         return Member.builder()
                 .socialLoginId(UUID.randomUUID().toString())
-                .username(enFaker.internet().emailAddress().replaceAll("[^a-zA-Z0-9@\\s]", ""))
+                .username(username)
                 .nickname(enFaker.lorem().word())
                 .name(koFaker.name().name().replaceAll(" ", ""))
                 .socialPlatform(request.getSocialPlatform())
@@ -117,7 +121,8 @@ public class TestService {
 
         log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
-        Member member = memberRepository.save(createMockMember(request));
+        Member member = memberRepository.findByUsername(request.getUsername())
+                .orElseGet(() -> memberRepository.save(createMockMember(request)));
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, null);
         String accessToken = jwtUtil.createAccessToken(customOAuth2User);
 

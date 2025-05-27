@@ -6,6 +6,7 @@ import com.ticketmate.backend.service.test.TestService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
-    public ResponseEntity<String> socialLogin(@ModelAttribute LoginRequest request) {
+    public ResponseEntity<String> socialLogin(@Valid @ModelAttribute LoginRequest request) {
         return ResponseEntity.ok(testService.testSocialLogin(request));
     }
 
