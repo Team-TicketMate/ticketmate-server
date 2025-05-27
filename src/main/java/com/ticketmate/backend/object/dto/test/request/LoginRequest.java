@@ -5,6 +5,7 @@ import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.Role;
 import com.ticketmate.backend.object.constants.SocialPlatform;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 
 @ToString
@@ -13,6 +14,10 @@ import lombok.*;
 @Setter
 @Builder
 public class LoginRequest {
+
+    @Email
+    @Schema(defaultValue = "example@naver.com")
+    private String username;
 
     @Schema(defaultValue = "ROLE_TEST")
     private Role role;
