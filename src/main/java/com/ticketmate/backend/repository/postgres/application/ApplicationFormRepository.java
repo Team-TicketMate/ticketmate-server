@@ -4,7 +4,6 @@ import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,28 +14,14 @@ import java.util.UUID;
 
 public interface ApplicationFormRepository extends JpaRepository<ApplicationForm, UUID> {
 
-    // fetch join 을 통한 성능 최적화
-    @EntityGraph(attributePaths = {
-            "applicationFormDetailList",
-            "applicationFormDetailList.hopeAreaList",
-            "client",
-            "agent",
-            "concert",
-            "ticketOpenDate"
-    })
-    Optional<ApplicationForm> findWithDetailByApplicationFormId(@Param("applicationFormId") UUID applicationFormId);
+    Optional<ApplicationForm> findByApplicationFormId(UUID applicationFormId);
 
-    @EntityGraph(attributePaths = {
-            "applicationFormDetailList",
-            "applicationFormDetailList.hopeAreaList"
-    })
     @Query(value = """
             select *
             from application_form af
             where (:clientId is null or af.client_member_id = :clientId)
             and (:agentId is null or af.agent_member_id = :agentId)
             and (:concertId is null or af.concert_concert_id = :concertId)
-            and (:requestCount = 0 or af.request_count = :requestCount)
             and (:applicationFormStatus = '' or af.application_form_status = :applicationFormStatus)
             """,
             countQuery = """
@@ -45,7 +30,6 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
                     where (:clientId is null or af.client_member_id = :clientId)
                     and (:agentId is null or af.agent_member_id = :agentId)
                     and (:concertId is null or af.concert_concert_id = :concertId)
-                    and (:requestCount = 0 or af.request_count = :requestCount)
                     and (:applicationFormStatus = '' or af.application_form_status = :applicationFormStatus)
                     """,
             nativeQuery = true)
