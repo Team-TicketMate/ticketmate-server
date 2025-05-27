@@ -23,7 +23,7 @@ public interface TestControllerDocs {
                     - 개발자의 편의를 위한 소셜 로그인 회원가입/로그인 메서드입니다
                     - 스웨거에서 테스트 용도로만 사용해야하며, 엑세스 토큰만 제공됩니다.
                     - `ROLE_TEST`, `ROLE_TEST_ADMIN`만 선택 가능합니다
-
+                    - username을 입력하지 않을 시 임의의 사용자가 생성됩니다
                     """
     )
     ResponseEntity<String> socialLogin(LoginRequest request);
