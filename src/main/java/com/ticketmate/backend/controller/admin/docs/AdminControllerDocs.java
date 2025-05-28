@@ -312,7 +312,9 @@ public interface AdminControllerDocs {
                         {
                           "portfolioId": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
                           "memberId": "d4c3b2a1-1234-5678-90ab-cdef09876543",
+                          "username": "user@example.com",
                           "nickname": "작가닉네임",
+                          "name": "홍길동",
                           "createdDate": "2024-12-31T13:45:00",
                           "updatedDate": "2025-01-10T08:30:00"
                         }
