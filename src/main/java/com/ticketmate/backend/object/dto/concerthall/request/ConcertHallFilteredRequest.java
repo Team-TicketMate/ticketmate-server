@@ -28,13 +28,13 @@ public class ConcertHallFilteredRequest {
     private Integer cityCode; // 지역 코드
 
     @Schema(defaultValue = "0")
-    @Min(value = 0, message = "페이지 번호 인덱스에 음수는 입력될 수 없습니다.")
+    @Min(value = 0, message = "페이지 번호 인덱스는 0이상 값을 입력해야합니다.")
     @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
     private Integer pageNumber; // 페이지 번호
 
     @Schema(defaultValue = "30")
-    @Min(value = 0, message = "페이지 사이즈에 음수는 입력될 수 없습니다.")
-    @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
+    @Min(value = 1, message = "페이지 당 데이터 최솟값은 1개 입니다.")
+    @Max(value = 100, message = "페이지 당 데이터 최댓값은 100개 입니다.")
     private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
