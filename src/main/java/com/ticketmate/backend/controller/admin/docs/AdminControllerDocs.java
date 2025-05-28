@@ -290,7 +290,7 @@ public interface AdminControllerDocs {
                     - `username` (선택): 사용자 이메일 (like 검색, 부분 일치 허용)
                     - `nickname` (선택): 사용자 닉네임 (like 검색, 부분 일치 허용)
                     - `name` (선택): 사용자 이름 (like 검색, 부분 일치 허용)
-                    - `portfolioType` (선택): 포트폴리오 타입 (예: ARTIST, PRODUCER 등)
+                    - `portfolioType` (선택): 포트폴리오 타입
                     - `pageNumber` (선택, 기본값: 0): 페이지 번호 (0부터 시작)
                     - `pageSize` (선택, 기본값: 30): 페이지당 항목 수
                     - `sortField` (선택, 기본값: created_date): 정렬 기준 필드 (현재는 created_date만 지원)
@@ -300,6 +300,7 @@ public interface AdminControllerDocs {
                     응답은 페이지 형태로 구성되며, 각 항목은 다음 필드를 포함합니다:
                     - `portfolioId` (UUID): 포트폴리오 ID
                     - `memberId` (UUID): 회원 ID
+                    - `username` (String): 회원 이메일
                     - `nickname` (String): 회원 닉네임
                     - `createdDate` (String, ISO-8601): 포트폴리오 생성일시
                     - `updatedDate` (String, ISO-8601): 포트폴리오 최종 수정일시
