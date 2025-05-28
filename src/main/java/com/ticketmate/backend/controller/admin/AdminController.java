@@ -4,7 +4,7 @@ import com.ticketmate.backend.controller.admin.docs.AdminControllerDocs;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
@@ -46,7 +46,7 @@ public class AdminController implements AdminControllerDocs {
     public ResponseEntity<Void> saveHallInfo(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @Valid @RequestBody ConcertHallInfoRequest request) {
-        adminService.saveHallInfo(request);
+        adminService.saveConcertHallInfo(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -107,16 +107,16 @@ public class AdminController implements AdminControllerDocs {
      */
 
     @Override
-    @GetMapping(value = "/portfolio/list")
+    @GetMapping(value = "/portfolio")
     @LogMonitoringInvocation
-    public ResponseEntity<Page<PortfolioListForAdminResponse>> getPortfolioList(
+    public ResponseEntity<Page<PortfolioFilteredAdminResponse>> filteredPortfolio(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @ModelAttribute PortfolioSearchRequest request) {
-        return ResponseEntity.ok(adminService.getPortfolioList(request));
+            @Valid @ModelAttribute PortfolioFilteredRequest request) {
+        return ResponseEntity.ok(adminService.filteredPortfolio(request));
     }
 
     @Override
-    @GetMapping(value = "/portfolio/list/{portfolio-id}")
+    @GetMapping(value = "/portfolio/{portfolio-id}")
     @LogMonitoringInvocation
     public ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
@@ -125,7 +125,7 @@ public class AdminController implements AdminControllerDocs {
     }
 
     @Override
-    @PatchMapping(value = "/portfolio/list/{portfolio-id}")
+    @PatchMapping(value = "/portfolio/{portfolio-id}")
     @LogMonitoringInvocation
     public ResponseEntity<UUID> reviewPortfolio(
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
