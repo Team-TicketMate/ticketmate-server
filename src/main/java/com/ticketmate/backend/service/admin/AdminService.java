@@ -6,8 +6,8 @@ import com.ticketmate.backend.object.constants.PortfolioType;
 import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.ticketmate.backend.util.common.CommonUtil.enumToString;
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
@@ -358,7 +359,7 @@ public class AdminService {
      *                webSiteUrl 웹사이트 URL
      */
     @Transactional
-    public void saveHallInfo(ConcertHallInfoRequest request) {
+    public void saveConcertHallInfo(ConcertHallInfoRequest request) {
 
         // 중복된 공연장이름 검증
         if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
@@ -441,21 +442,37 @@ public class AdminService {
      */
 
     /**
-     * 페이지당 10개씩 관리자에게 포트폴리오 리스트 데이터를 보여줍니다.
-     * 포트폴리오 정렬기준은 오래된순으로 정렬됩니다.
+     * 페이지당 N개씩(기본30개) 반환합니다
+     * 기본 정렬기준: 최신순
      */
     @Transactional(readOnly = true)
-    public Page<PortfolioListForAdminResponse> getPortfolioList(PortfolioSearchRequest request) {
+    public Page<PortfolioFilteredAdminResponse> filteredPortfolio(PortfolioFilteredRequest request) {
 
-        int pageIndex = Math.max(1, request.getIndex()) - 1;
+        // 요청 값 확인
+        String username = nvl(request.getUsername(), "");
+        String nickname = nvl(request.getNickname(), "");
+        String name = nvl(request.getName(), "");
+        String portfolioType = enumToString(request.getPortfolioType());
 
-        Pageable pageable = PageRequest.of(pageIndex,
-                10,
-                Sort.by("createdDate").ascending());
+        // 정렬 조건
+        Sort sort = Sort.by(
+                Sort.Direction.fromString(request.getSortDirection()),
+                request.getSortField()
+        );
 
-        Page<Portfolio> portfolioPage = portfolioRepository.findAllByPortfolioType(PortfolioType.UNDER_REVIEW, pageable);
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), sort);
 
-        return portfolioPage.map(entityMapper::toPortfolioListForAdminResponse);
+        // 데이터베이스 조회
+        Page<Portfolio> portfolioPage = portfolioRepository.filteredPortfolio(
+                username,
+                nickname,
+                name,
+                portfolioType,
+                pageable
+        );
+
+        return portfolioPage.map(entityMapper::toPortfolioFilteredAdminResponse);
     }
 
     /**

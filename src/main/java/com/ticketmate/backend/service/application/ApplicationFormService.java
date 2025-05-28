@@ -283,8 +283,8 @@ public class ApplicationFormService {
     @Transactional(readOnly = true)
     public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
 
-        // 데이터베이스 조회 (fetch join 방식)
-        ApplicationForm applicationForm = applicationFormRepository.findByApplicationFormId(applicationFormId)
+        // 데이터베이스 조회
+        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
                 .orElseThrow(() -> {
                     log.error("대리 티켓팅 신청서를 찾을 수 없습니다.");
                     return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
