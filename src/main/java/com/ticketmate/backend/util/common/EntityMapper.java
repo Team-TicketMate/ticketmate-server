@@ -1,8 +1,8 @@
 package com.ticketmate.backend.util.common;
 
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
@@ -58,10 +58,12 @@ public interface EntityMapper {
     ======================================포트폴리오======================================
      */
 
-    // Portfolio -> PortfolioListForAdminResponse (엔티티 -> DTO)
+    // Portfolio -> PortfolioFilteredAdminResponse (엔티티 -> DTO)
     @Mapping(source = "member.memberId", target = "memberId")
+    @Mapping(source = "member.username", target = "username")
     @Mapping(source = "member.nickname", target = "nickname")
-    PortfolioListForAdminResponse toPortfolioListForAdminResponse(Portfolio portfolio);
+    @Mapping(source = "member.name", target = "name")
+    PortfolioFilteredAdminResponse toPortfolioFilteredAdminResponse(Portfolio portfolio);
 
     // Portfolio -> PortfolioForAdminResponse (엔티티 -> DTO)
     @Mapping(source = "member.memberId", target = "memberId")
