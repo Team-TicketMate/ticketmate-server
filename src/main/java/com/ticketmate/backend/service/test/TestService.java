@@ -35,8 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
@@ -97,22 +95,26 @@ public class TestService {
      */
     @Transactional
     public CompletableFuture<Integer> generateMockMembersAsync(int count) {
-        int actualCount = Math.max(count, 1);
         long startMs = System.currentTimeMillis();
 
-        return CompletableFuture.supplyAsync(() ->
-                        IntStream.range(0, actualCount)
-                                .mapToObj(i -> mockMemberFactory.generate())
-                                .collect(Collectors.toList()), taskExecutor)
+        return CompletableFuture.supplyAsync(() -> {
+                    List<Member> memberList = new ArrayList<>();
+                    for (int i = 0; i < count; i++) {
+                        memberList.add(mockMemberFactory.generate());
+                    }
+                    return memberList;
+                }, taskExecutor)
                 .thenApply(memberList -> {
-                    var saved = memberRepository.saveAll(memberList);
+                    List<Member> savedMemberList = memberRepository.saveAll(memberList);
                     long endMs = System.currentTimeMillis();
-                    log.debug("회원 Mock 데이터 {}개 생성 완료", saved.size());
-                    log.debug("회원 Mock 데이터 {}개 생성 및 저장 소요 시간: {}ms", saved.size(), endMs - startMs);
-                    return saved.size();
-                }).exceptionally(ex -> {
-                    log.error("회원 Mock 데이터 저장 중 오류 발생: {}", ex.getMessage());
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                    log.debug("회원 Mock 데이터 {}개 생성 완료", savedMemberList.size());
+                    log.debug("회원 Mock 데이터 {}개 생성 및 저장 소요 시간: {}ms", savedMemberList.size(), endMs - startMs);
+                    return savedMemberList.size();
+                }).whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("회원 Mock 데이터 저장 중 오류 발생: {}", ex.getMessage());
+                        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                    }
                 });
     }
 
