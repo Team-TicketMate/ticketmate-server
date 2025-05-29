@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +31,6 @@ public class MockMemberFactory {
     /**
      * 개발자용 회원 Mock 데이터 생성
      */
-    @Transactional
     public Member generate() {
         return baseBuilder(Optional.empty())
                 .role(Role.ROLE_TEST)
@@ -47,7 +45,6 @@ public class MockMemberFactory {
      *                accountStatus 활성화/삭제
      *                isFirstLogin 첫 로그인 여부
      */
-    @Transactional
     public Member generate(LoginRequest request) {
         // 테스트 회원 ROLE 검증
         isValidMemberRoleRequest(request.getRole());
@@ -65,13 +62,13 @@ public class MockMemberFactory {
         String birthYear = Integer.toString(birth.getYear()); // YYYY
         String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
 
-        // username
+        // username 생성
         String username = requestOptional
                 .map(LoginRequest::getUsername)
                 .filter(s -> !nvl(s, "").isEmpty())
                 .orElseGet(() -> enFaker.internet()
                         .emailAddress()
-                        .replaceAll("[^a-zA-Z0-9@\\s]", ""));
+                        .replaceAll("[^a-zA-Z0-9@.]", ""));
 
         // 공통 랜덤 필드
         String nickname = enFaker.lorem().word() + koFaker.random().nextInt(100);

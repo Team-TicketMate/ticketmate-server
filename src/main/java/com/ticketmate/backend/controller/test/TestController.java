@@ -7,6 +7,7 @@ import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +29,16 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
-    public ResponseEntity<String> socialLogin(@Valid @ModelAttribute LoginRequest request) {
+    public ResponseEntity<String> socialLogin(
+            @Valid @ModelAttribute LoginRequest request) {
         return ResponseEntity.ok(testService.testSocialLogin(request));
     }
 
     @Override
     @PostMapping(value = "/member")
     @LogMonitoringInvocation
-    public ResponseEntity<CompletableFuture<Integer>> generateMockMembers(int count) {
+    public ResponseEntity<CompletableFuture<Integer>> generateMockMembers(
+            @RequestParam @Schema(defaultValue = "30") @Min(1) int count) {
         return ResponseEntity.ok(testService.generateMockMembersAsync(count));
     }
 
