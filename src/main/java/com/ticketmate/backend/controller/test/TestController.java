@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test")
@@ -26,8 +28,17 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
-    public ResponseEntity<String> socialLogin(@Valid @ModelAttribute LoginRequest request) {
+    public ResponseEntity<String> socialLogin(
+            @Valid @ModelAttribute LoginRequest request) {
         return ResponseEntity.ok(testService.testSocialLogin(request));
+    }
+
+    @Override
+    @PostMapping(value = "/member")
+    @LogMonitoringInvocation
+    public ResponseEntity<CompletableFuture<Integer>> generateMockMembers(
+            @RequestParam @Schema(defaultValue = "30") int count) {
+        return ResponseEntity.ok(testService.generateMockMembersAsync(count));
     }
 
     @Override
