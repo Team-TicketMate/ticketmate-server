@@ -31,11 +31,7 @@ public class MockPortfolioFactory {
      */
     public Portfolio generate() {
         String portfolioDescription = koFaker.lorem().sentence(5, 10);
-        Member client = mockMemberFactory.generate(LoginRequest.builder()
-                .role(Role.ROLE_TEST)
-                .memberType(MemberType.CLIENT)
-                .build());
-        memberRepository.save(client);
+        Member client = createClientMember();
 
         Portfolio portfolio = Portfolio.builder()
                 .portfolioDescription(portfolioDescription)
@@ -66,5 +62,14 @@ public class MockPortfolioFactory {
         }
 
         return portfolioImgList;
+    }
+
+    // Mock 의뢰인 생성 및 저장
+    private Member createClientMember() {
+        Member member = mockMemberFactory.generate(LoginRequest.builder()
+                .role(Role.ROLE_TEST)
+                .memberType(MemberType.CLIENT)
+                .build());
+        return memberRepository.save(member);
     }
 }
