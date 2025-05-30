@@ -477,6 +477,9 @@ public class AdminService {
 
     /**
      * 포트폴리오 상세조회 로직
+     * 포트폴리오 PK를 입력받음
+     * 해당 포트폴리오 상태를 IN_REVIEW(검토중) 으로 변경
+     * 포트폴리오 대상 사용자 알림 발송
      *
      * @param portfolioId (UUID)
      */
@@ -485,14 +488,17 @@ public class AdminService {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        // 검토중으로 update
-        portfolio.setPortfolioType(PortfolioType.REVIEWING);
+        // 포트폴리오 상태 검토중 (IN_REVIEW)으로 변경
+        portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
+        // 포트폴리오 제출 회원 PK
         UUID memberId = portfolio.getMember().getMemberId();
 
+        // 알림 payload 설정
         NotificationPayloadRequest payload = notificationUtil
-                .portfolioNotification(PortfolioType.REVIEWING, portfolio);
+                .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
+        // 알림 발송
         fcmService.sendNotification(memberId, payload);
 
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
@@ -500,8 +506,9 @@ public class AdminService {
         List<PortfolioImg> imgList = portfolio.getImgList();
 
         // 이미지 URL 파싱
-        List<String> portfolioImgList = imgList.stream().map(img -> portFolioDomain + img.getImgName())
-                .toList();
+        List<String> portfolioImgList = imgList.stream()
+                .map(img -> portFolioDomain + img.getImgName())
+                .collect(Collectors.toList());
 
         portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
 
@@ -536,11 +543,11 @@ public class AdminService {
             fcmService.sendNotification(memberId, payload);
         } else {
             // 반려
-            portfolio.setPortfolioType(PortfolioType.COMPANION);
+            portfolio.setPortfolioType(PortfolioType.REVIEW_REJECTED);
             log.debug("반려완료: {}", portfolio.getPortfolioType());
 
             NotificationPayloadRequest payload = notificationUtil
-                    .portfolioNotification(PortfolioType.COMPANION, portfolio);
+                    .portfolioNotification(PortfolioType.REVIEW_REJECTED, portfolio);
 
             fcmService.sendNotification(memberId, payload);
         }
