@@ -11,12 +11,14 @@ import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
+import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -50,6 +52,7 @@ public class TestService {
     private final MemberRepository memberRepository;
     private final Faker koFaker = new Faker(new Locale("ko", "KR"));
     private final MockMemberFactory mockMemberFactory;
+    private final MockPortfolioFactory mockPortfolioFactory;
     private final JwtUtil jwtUtil;
     @Qualifier("applicationTaskExecutor")
     private final TaskExecutor taskExecutor;
@@ -58,6 +61,7 @@ public class TestService {
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final ConcertHallRepository concertHallRepository;
     private final ApplicationFormRepository applicationFormRepository;
+    private final PortfolioRepository portfolioRepository;
 
     /*
     ======================================회원======================================
@@ -94,27 +98,43 @@ public class TestService {
      * 해당 메서드는 멀티스레드를 사용하여 동작합니다
      */
     @Transactional
-    public CompletableFuture<Integer> generateMockMembersAsync(int count) {
+    public void generateMockMembersAsync(int count) {
         long startMs = System.currentTimeMillis();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<Member> memberList = Collections.synchronizedList(new ArrayList<>());
 
-        return CompletableFuture.supplyAsync(() -> {
-                    List<Member> memberList = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        memberList.add(mockMemberFactory.generate());
+        // 각 회원 생성을 별도 스레드에서 처리
+        for (int i = 0; i < count; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    Member member = mockMemberFactory.generate();
+                    synchronized (this) {
+                        memberList.add(member);
                     }
-                    return memberList;
-                }, taskExecutor)
-                .thenApply(memberList -> {
-                    List<Member> savedMemberList = memberRepository.saveAll(memberList);
-                    long endMs = System.currentTimeMillis();
-                    log.debug("회원 Mock 데이터 {}개 생성 완료", savedMemberList.size());
-                    log.debug("회원 Mock 데이터 {}개 생성 및 저장 소요 시간: {}ms", savedMemberList.size(), endMs - startMs);
-                    return savedMemberList.size();
-                }).whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("회원 Mock 데이터 저장 중 오류 발생: {}", ex.getMessage());
+                } catch (Exception e) {
+                    log.error("회원 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
+                }
+            }, taskExecutor);
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenRun(() -> {
+                    try {
+                        // 트랜잭션 내에서 일괄 저장
+                        List<Member> savedMemberList = memberRepository.saveAll(memberList);
+                        long endMs = System.currentTimeMillis();
+                        log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+                                savedMemberList.size(), endMs - startMs);
+                    } catch (Exception e) {
+                        log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
                         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                     }
+                })
+                .exceptionally(ex -> {
+                    log.error("회원 Mock 데이터 멀티스레드 생성 및 저장 중 오류 발생: {}", ex.getMessage());
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                 });
     }
 
@@ -582,5 +602,54 @@ public class TestService {
         int randomNumber = koFaker.number().numberBetween(1, 31);
         // 문자열 결합
         return randomLetter + String.valueOf(randomNumber);
+    }
+
+    /*
+    ======================================포트폴리오======================================
+     */
+
+    /**
+     * 사용자로부터 원하는 개수를 입력받아 포트폴리오 Mock 데이터를 추가합니다
+     * 해당 메서드는 멀티스레드를 사용하여 동작합니다
+     */
+    @Transactional
+    public void generateMockPortfoliosAsync(int count) {
+        long startMs = System.currentTimeMillis();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<Portfolio> portfolioList = Collections.synchronizedList(new ArrayList<>());
+
+        // 각 포트폴리오 생성을 별도 스레드에서 처리
+        for (int i = 0; i < count; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    Portfolio portfolio = mockPortfolioFactory.generate();
+                    synchronized (this) {
+                        portfolioList.add(portfolio);
+                    }
+                } catch (Exception e) {
+                    log.error("포트폴리오 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
+                }
+            }, taskExecutor);
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenRun(() -> {
+                    try {
+                        // 트랜잭션 내에서 일괄 저장
+                        List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
+                        long endMs = System.currentTimeMillis();
+                        log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+                                savedPortfolioList.size(), endMs - startMs);
+                    } catch (Exception e) {
+                        log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+                        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                    }
+                })
+                .exceptionally(ex -> {
+                    log.error("포트폴리오 Mock 데이터 멀티스레드 생성 및 저장 중 오류 발생: {}", ex.getMessage());
+                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                });
     }
 }

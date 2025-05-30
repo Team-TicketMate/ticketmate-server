@@ -25,7 +25,7 @@ import java.util.UUID;
 public class PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final S3Service s3Service;
-    private static final Integer MAX_IMG_COUNT = 20;
+    private static final int MAX_IMG_COUNT = 20;
 
     /**
      * 포트폴리오 업로드
@@ -42,7 +42,7 @@ public class PortfolioService {
         Portfolio portfolio = Portfolio.builder()
                 .member(member)
                 .portfolioDescription(request.getPortfolioDescription())
-                .portfolioType(PortfolioType.UNDER_REVIEW)
+                .portfolioType(PortfolioType.PENDING_REVIEW)
                 .build();
 
         portfolioRepository.save(portfolio);
