@@ -29,9 +29,9 @@ public enum PortfolioNotificationType implements DomainNotificationType{
     private static final Map<PortfolioType, PortfolioNotificationType> MAPPING = new HashMap<>();
 
     static {
-        MAPPING.put(PortfolioType.REVIEWING, REVIEWING);
+        MAPPING.put(PortfolioType.IN_REVIEW, REVIEWING);
         MAPPING.put(PortfolioType.REVIEW_COMPLETED, REVIEW_COMPLETED);
-        MAPPING.put(PortfolioType.COMPANION, COMPANION);
+        MAPPING.put(PortfolioType.REVIEW_REJECTED, COMPANION);
     }
 
     /**
