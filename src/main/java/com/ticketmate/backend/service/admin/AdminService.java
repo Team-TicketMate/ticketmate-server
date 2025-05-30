@@ -488,19 +488,21 @@ public class AdminService {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        // 포트폴리오 상태 검토중 (IN_REVIEW)으로 변경
-        portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
-
         // 포트폴리오 제출 회원 PK
         UUID memberId = portfolio.getMember().getMemberId();
 
-        // 알림 payload 설정
-        NotificationPayloadRequest payload = notificationUtil
-                .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
+        // 포트폴리오가 "검토 대기" 상태인 경우
+        if (portfolio.getPortfolioType().equals(PortfolioType.PENDING_REVIEW)) {
+            // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
+            portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
-        // 알림 발송
-        fcmService.sendNotification(memberId, payload);
+            // 알림 payload 설정
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
+            // 알림 발송
+            fcmService.sendNotification(memberId, payload);
+        }
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
         List<PortfolioImg> imgList = portfolio.getImgList();
