@@ -10,9 +10,9 @@ import lombok.*;
 @Builder
 public class HopeAreaResponse {
 
-    private Integer priority; // 순위
+    private Integer priority; // 우선 순위 (1~10)
 
-    private String location; // 위치
+    private String location; // 위치 (예: A구역, B구역)
 
     private Long price; // 가격
 }

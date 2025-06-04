@@ -28,8 +28,8 @@ public class ConcertDate extends BasePostgresEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Concert concert; // 공연
 
-    @Column(nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime performanceDate; // 공연 일자
 
     @Column(nullable = false)

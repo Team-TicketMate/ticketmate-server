@@ -1,25 +1,26 @@
 package com.ticketmate.backend.service.test;
 
-import com.ticketmate.backend.object.constants.ApplicationFormStatus;
-import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.constants.ConcertType;
-import com.ticketmate.backend.object.constants.TicketReservationSite;
+import com.ticketmate.backend.object.constants.*;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
+import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.util.JwtUtil;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,11 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
@@ -48,7 +51,8 @@ public class TestService {
 
     private final MemberRepository memberRepository;
     private final Faker koFaker = new Faker(new Locale("ko", "KR"));
-    private final Faker enFaker = new Faker(new Locale("en"));
+    private final MockMemberFactory mockMemberFactory;
+    private final MockPortfolioFactory mockPortfolioFactory;
     private final JwtUtil jwtUtil;
     @Qualifier("applicationTaskExecutor")
     private final TaskExecutor taskExecutor;
@@ -57,51 +61,11 @@ public class TestService {
     private final TicketOpenDateRepository ticketOpenDateRepository;
     private final ConcertHallRepository concertHallRepository;
     private final ApplicationFormRepository applicationFormRepository;
+    private final PortfolioRepository portfolioRepository;
 
     /*
     ======================================회원======================================
      */
-
-    /**
-     * 개발자용 회원 Mock 데이터 생성
-     *
-     * @param request socialPlatform 네이버/카카오 소셜 로그인 플랫폼
-     *                memberType 의로인/대리인
-     *                accountStatus 활성화/삭제
-     *                isFirstLogin 첫 로그인 여부
-     */
-    @Transactional
-    public Member createMockMember(LoginRequest request) {
-
-        log.debug("테스트 Mock 회원을 생성합니다");
-        LocalDate birth = koFaker.timeAndDate().birthday();
-        String birthYear = Integer.toString(birth.getYear()); // YYYY
-        String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
-
-        // 테스트 회원 ROLE 검증
-        if (request.getRole() != ROLE_TEST && request.getRole() != ROLE_TEST_ADMIN) {
-            log.error("테스트 로그인은 ROLE_TEST, ROLE_TEST_ADMIN 권한만 생성 가능합니다. 요청된 ROLE: {}", request.getRole());
-            throw new CustomException(ErrorCode.INVALID_MEMBER_ROLE_REQUEST);
-        }
-
-        return Member.builder()
-                .socialLoginId(UUID.randomUUID().toString())
-                .username(enFaker.internet().emailAddress().replaceAll("[^a-zA-Z0-9@\\s]", ""))
-                .nickname(enFaker.lorem().word())
-                .name(koFaker.name().name().replaceAll(" ", ""))
-                .socialPlatform(request.getSocialPlatform())
-                .birthDay(birthYear)
-                .birthYear(birthDay)
-                .phone(koFaker.phoneNumber().cellPhone())
-                .profileUrl(koFaker.internet().image())
-                .gender(koFaker.options().option("male", "female"))
-                .role(request.getRole())
-                .memberType(request.getMemberType())
-                .accountStatus(request.getAccountStatus())
-                .isFirstLogin(request.getIsFirstLogin())
-                .lastLoginTime(LocalDateTime.now())
-                .build();
-    }
 
     /**
      * 개발자용 테스트 로그인 로직
@@ -118,7 +82,8 @@ public class TestService {
 
         log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
-        Member member = memberRepository.save(createMockMember(request));
+        Member member = memberRepository.findByUsername(request.getUsername())
+                .orElseGet(() -> memberRepository.save(mockMemberFactory.generate(request)));
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, null);
         String accessToken = jwtUtil.createAccessToken(customOAuth2User);
 
@@ -126,6 +91,47 @@ public class TestService {
         log.debug("테스트 accessToken = {}", accessToken);
 
         return accessToken;
+    }
+
+    /**
+     * 사용자로부터 원하는 개수를 입력받아 회원 Mock 데이터를 추가합니다
+     * 해당 메서드는 멀티스레드를 사용하여 동작합니다
+     */
+    @Transactional
+    public CompletableFuture<Void> generateMockMembersAsync(int count) {
+        long startMs = System.currentTimeMillis();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<Member> memberList = Collections.synchronizedList(new ArrayList<>());
+
+        // 각 회원 생성을 별도 스레드에서 처리
+        for (int i = 0; i < count; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    Member member = mockMemberFactory.generate();
+                    memberList.add(member); // Collections.synchronizedList 사용으로 이미 스레드 세이프
+                } catch (Exception e) {
+                    log.error("회원 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
+                }
+            }, taskExecutor);
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> {
+                    try {
+                        // 트랜잭션 내에서 일괄 저장
+                        List<Member> savedMemberList = memberRepository.saveAll(memberList);
+                        long endMs = System.currentTimeMillis();
+                        log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+                                savedMemberList.size(), endMs - startMs);
+                        return null;
+                    } catch (Exception e) {
+                        log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                    }
+                });
     }
 
     /**
@@ -147,7 +153,7 @@ public class TestService {
      * 해당 메서드는 멀티스레드를 사용하여 동작합니다
      */
     @Transactional
-    public void createConcertHallMockData(Integer count) {
+    public CompletableFuture<Void> createConcertHallMockData(Integer count) {
 
         log.debug("공연장 Mock 데이터 저장을 시작합니다");
         long startMs = System.currentTimeMillis();
@@ -170,27 +176,26 @@ public class TestService {
                     }
                 } catch (Exception e) {
                     log.error("공연장 데이터 멀티스레드 저장 중 오류: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
                 }
             }, taskExecutor);
             futures.add(future);
         }
 
         // 모든 비동기 작업이 완료될 때까지 대기
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenRun(() -> {
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> {
                     try {
                         // 공연장 Mock데이터 저장
                         concertHallRepository.saveAll(concertHalls);
                         long endMs = System.currentTimeMillis();
                         log.debug("공연장 Mock 데이터 저장 완료, 저장된 개수: {}", concertHalls.size());
                         log.debug("공연장 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
+                        return null;
                     } catch (Exception e) {
                         log.error("공연장 데이터 저장 중 오류: {}", e.getMessage());
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
                     }
-                })
-                .exceptionally(throwable -> {
-                    log.error("공연장 Mock 데이터 생성 중 오류 발생: {}", throwable.getMessage());
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                 });
     }
 
@@ -222,7 +227,7 @@ public class TestService {
      * 해당 메서드는 멀티스레드를 사용하여 동작합니다
      */
     @Transactional
-    public void createConcertMockData(Integer count) {
+    public CompletableFuture<Void> createConcertMockData(Integer count) {
 
         log.debug("공연 Mock 데이터 저장을 시작합니다.");
         long startMs = System.currentTimeMillis();
@@ -262,27 +267,25 @@ public class TestService {
                     }
                 } catch (Exception e) {
                     log.error("공연 데이터 멀티스레드 저장 중 오류 발생: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
                 }
             }, taskExecutor);
             futures.add(future);
         }
 
         // 모든 비동기 작업이 완료될 때까지 대기
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenRun(() -> {
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> {
                     try {
                         concertRepository.saveAll(concertList);
                         long endMs = System.currentTimeMillis();
                         log.debug("공연 Mock 데이터 저장 완료, 저장된 개수: {}", concertList.size());
                         log.debug("공연 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
+                        return null;
                     } catch (Exception e) {
                         log.error("공연 데이터 저장 중 오류 발생: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
                     }
-                })
-                .exceptionally(throwable -> {
-                    log.error("공연 Mock 데이터 생성 중 오류 발생: {}", throwable.getMessage());
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                 });
     }
 
@@ -363,21 +366,35 @@ public class TestService {
                     .openDate(preOpenDate)
                     .requestMaxCount(koFaker.number().numberBetween(1, 6))
                     .isBankTransfer(koFaker.random().nextBoolean())
-                    .isPreOpen(true)
+                    .ticketOpenType(TicketOpenType.PRE_OPEN)
                     .build();
             ticketOpenDateList.add(preOpen);
         }
 
-        // 2. 일반 예매 오픈일 (필수)
-        LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
-        TicketOpenDate generalOpen = TicketOpenDate.builder()
-                .concert(concert)
-                .openDate(generalOpenDate)
-                .requestMaxCount(koFaker.number().numberBetween(1, 6))
-                .isBankTransfer(koFaker.random().nextBoolean())
-                .isPreOpen(false)
-                .build();
-        ticketOpenDateList.add(generalOpen);
+        // 2. 일반 예매 오픈일 (선예매 오픈일이 없다면 필수 생성 / 선예매 오픈일이 있다면 50% 확률로 생성)
+        if (ticketOpenDateList.isEmpty()) { // 선예매 오픈일이 없는 경우 -> 일반예매 필수 생성
+            LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
+            TicketOpenDate generalOpen = TicketOpenDate.builder()
+                    .concert(concert)
+                    .openDate(generalOpenDate)
+                    .requestMaxCount(koFaker.number().numberBetween(1, 6))
+                    .isBankTransfer(koFaker.random().nextBoolean())
+                    .ticketOpenType(TicketOpenType.GENERAL_OPEN)
+                    .build();
+            ticketOpenDateList.add(generalOpen);
+        } else { // 선예매 오픈일이 있는 경우 -> 일반예매 50% 확률로 생성
+            if (koFaker.random().nextBoolean()) {
+                LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
+                TicketOpenDate generalOpen = TicketOpenDate.builder()
+                        .concert(concert)
+                        .openDate(generalOpenDate)
+                        .requestMaxCount(koFaker.number().numberBetween(1, 6))
+                        .isBankTransfer(koFaker.random().nextBoolean())
+                        .ticketOpenType(TicketOpenType.GENERAL_OPEN)
+                        .build();
+                ticketOpenDateList.add(generalOpen);
+            }
+        }
 
         return ticketOpenDateList;
     }
@@ -391,7 +408,7 @@ public class TestService {
      * 해당 메서드는 멀티 스레드를 사용하여 동작합니다
      */
     @Transactional
-    public void createApplicationMockData(Integer count) {
+    public CompletableFuture<Void> createApplicationMockData(Integer count) {
 
         log.debug("신청서 Mock 데이터 저장을 시작합니다");
         long startMs = System.currentTimeMillis();
@@ -426,31 +443,28 @@ public class TestService {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
                     ApplicationForm applicationForm = createApplicationMockData(agentList, clientList, concertList);
-                    synchronized (this) {
-                        applicationForms.add(applicationForm);
-                    }
+                    applicationForms.add(applicationForm);
                 } catch (Exception e) {
                     log.error("신청서 Mock 데이터 멀티스레드 저장 중 오류 발생: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
                 }
             }, taskExecutor);
             futures.add(future);
         }
 
         // 모든 비동기 작업이 완료될 때까지 대기
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenRun(() -> {
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> {
                     try {
                         applicationFormRepository.saveAll(applicationForms);
                         long endMs = System.currentTimeMillis();
                         log.debug("신청서 Mock 데이터 저장 완료, 저장된 개수: {}", applicationForms.size());
                         log.debug("신청서 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
+                        return null;
                     } catch (Exception e) {
                         log.error("신청서 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
                     }
-                })
-                .exceptionally(throwable -> {
-                    log.error("신청서 Mock 데이터 생성 중 오류 발생: {}", throwable.getMessage());
-                    throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
                 });
     }
 
@@ -462,48 +476,91 @@ public class TestService {
      * @param concertList DB에 저장된 콘서트 리스트
      * @return 생성된 신청서 Mock데이터
      */
-    private ApplicationForm createApplicationMockData(
-            List<Member> agentList, List<Member> clientList, List<Concert> concertList) {
+    private ApplicationForm createApplicationMockData(List<Member> agentList, List<Member> clientList, List<Concert> concertList) {
 
-        // 1. 의뢰인 (DB에서 랜덤 선택)
+        // 의뢰인 (DB에서 랜덤 선택)
         Member client = clientList.get(koFaker.random().nextInt(clientList.size()));
 
-        // 2. 대리인 (DB에서 랜덤 선택)
+        // 대리인 (DB에서 랜덤 선택)
         Member agent = agentList.get(koFaker.random().nextInt(agentList.size()));
 
-        // 3. 콘서트 (DB에서 랜덤 선택)
+        // 콘서트 (DB에서 랜덤 선택)
         Concert concert = concertList.get(koFaker.random().nextInt(concertList.size()));
 
-        // 4. 공연일자 (ConcertDate) 생성
-        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
-        ConcertDate concertDate = concertDateList.get(koFaker.random().nextInt(concertDateList.size()));
-
-        // 5. 티켓 오픈일 (TicketOpenDate) 생성
+        // 티켓 오픈일 (TicketOpenDate) 생성
         List<TicketOpenDate> ticketOpenDateList = ticketOpenDateRepository.findAllByConcertConcertId(concert.getConcertId());
         TicketOpenDate ticketOpenDate = ticketOpenDateList.get(koFaker.random().nextInt(ticketOpenDateList.size()));
 
-        // 6. 희망구역 리스트 (0 ~ 10개 랜덤)
-        List<HopeArea> hopeAreaList = createHopeAreaList();
-
-        // 7. 신청서 상태 (랜덤)
+        // 신청서 상태 (랜덤)
         ApplicationFormStatus applicationFormStatus = ApplicationFormStatus
                 .values()[koFaker.random().nextInt(ApplicationFormStatus.values().length)];
+
+        // 선예매/일반예매 (랜덤)
+        TicketOpenType ticketOpenType = ticketOpenDate.getTicketOpenType();
 
         ApplicationForm applicationForm = ApplicationForm.builder()
                 .client(client)
                 .agent(agent)
                 .concert(concert)
-                .concertDate(concertDate)
                 .ticketOpenDate(ticketOpenDate)
-                .requestCount(koFaker.number().numberBetween(1, ticketOpenDate.getRequestMaxCount() + 1))
-                .hopeAreaList(new ArrayList<>())
-                .requestDetails(koFaker.lorem().paragraph(2))
+                .applicationFormDetailList(new ArrayList<>())
                 .applicationFormStatus(applicationFormStatus)
+                .ticketOpenType(ticketOpenType)
                 .build();
 
-        hopeAreaList.forEach(applicationForm::addHopeArea);
+        // 신청서 세부사항 추가
+        // 양방향 연관관계
+        createApplicationFormDetailList(concert, ticketOpenType)
+                .forEach(applicationForm::addApplicationFormDetail);
 
         return applicationForm;
+    }
+
+    /**
+     * 신청서 세부사항 Mock 데이터를 생성합니다
+     */
+    private List<ApplicationFormDetail> createApplicationFormDetailList(Concert concert, TicketOpenType ticketOpenType) {
+        List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
+        if (CommonUtil.nullOrEmpty(concertDateList)) {
+            log.error("신청서 세부사항 Mock 데이터 생성 중 공연: {}에 해당하는 공연 날짜가 존재하지 않습니다.", concert.getConcertName());
+            throw new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
+        }
+        int size = koFaker.random().nextInt(1, concertDateList.size() + 1);
+        List<ApplicationFormDetail> applicationFormDetailList = new ArrayList<>();
+
+        // 선예매/일반예매 예매일 조회
+        TicketOpenDate ticketOpenDate = ticketOpenDateRepository
+                .findByConcertConcertIdAndTicketOpenType(concert.getConcertId(), ticketOpenType)
+                .orElseThrow(() -> {
+                    log.error("신청서 세부사항 Mock 데이터 생성 중 공연: {}, 예매타입: {}에 해당하는 TicketOpenDate 정보가 존재하지 않습니다.",
+                            concert.getConcertName(), ticketOpenType.getDescription());
+                    return new CustomException(ErrorCode.TICKET_OPEN_DATE_NOT_FOUND);
+                });
+
+        // 공연일자를 랜덤하게 섞기
+        Collections.shuffle(concertDateList);
+
+        for (int i = 0; i < size; i++) {
+            // 세부 요청별 요청 매수 (1 ~ Max장)
+            int requestCount = koFaker.random().nextInt(1, ticketOpenDate.getRequestMaxCount() + 1);
+
+            // ApplicationFormDetail 생성
+            ApplicationFormDetail applicationFormDetail = ApplicationFormDetail.builder()
+                    .concertDate(concertDateList.get(i))
+                    .requestCount(requestCount)
+                    .requirement(koFaker.lorem().sentence(5, 10))
+                    .hopeAreaList(new ArrayList<>())
+                    .build();
+
+            // 희망구역 추가 (양방향 관계 설정)
+            List<HopeArea> hopeAreaList = createHopeAreaList();
+            if (!CommonUtil.nullOrEmpty(hopeAreaList)) {
+                hopeAreaList.forEach(applicationFormDetail::addHopeArea);
+            }
+            applicationFormDetailList.add(applicationFormDetail);
+        }
+
+        return applicationFormDetailList;
     }
 
     /**
@@ -535,5 +592,52 @@ public class TestService {
         int randomNumber = koFaker.number().numberBetween(1, 31);
         // 문자열 결합
         return randomLetter + String.valueOf(randomNumber);
+    }
+
+    /*
+    ======================================포트폴리오======================================
+     */
+
+    /**
+     * 사용자로부터 원하는 개수를 입력받아 포트폴리오 Mock 데이터를 추가합니다
+     * 해당 메서드는 멀티스레드를 사용하여 동작합니다
+     */
+    @Transactional
+    public CompletableFuture<Void> generateMockPortfoliosAsync(int count) {
+        long startMs = System.currentTimeMillis();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        List<Portfolio> portfolioList = Collections.synchronizedList(new ArrayList<>());
+
+        // 각 포트폴리오 생성을 별도 스레드에서 처리
+        for (int i = 0; i < count; i++) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                try {
+                    Portfolio portfolio = mockPortfolioFactory.generate();
+                    synchronized (this) {
+                        portfolioList.add(portfolio);
+                    }
+                } catch (Exception e) {
+                    log.error("포트폴리오 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
+                }
+            }, taskExecutor);
+            futures.add(future);
+        }
+
+        // 모든 비동기 작업이 완료될 때까지 대기
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .thenApply(v -> {
+                    try {
+                        // 트랜잭션 내에서 일괄 저장
+                        List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
+                        long endMs = System.currentTimeMillis();
+                        log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+                                savedPortfolioList.size(), endMs - startMs);
+                        return null;
+                    } catch (Exception e) {
+                        log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                    }
+                });
     }
 }

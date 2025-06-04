@@ -3,10 +3,11 @@ package com.ticketmate.backend.service.admin;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.constants.PortfolioType;
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.object.dto.admin.response.PortfolioListForAdminResponse;
 import com.ticketmate.backend.object.dto.concerthall.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.object.dto.notification.request.NotificationPayloadRequest;
 import com.ticketmate.backend.object.postgres.concert.Concert;
@@ -23,6 +24,7 @@ import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
 import com.ticketmate.backend.service.file.FileService;
+import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -36,12 +38,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.View;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.ticketmate.backend.util.common.CommonUtil.enumToString;
 import static com.ticketmate.backend.util.common.CommonUtil.nvl;
 
 @Service
@@ -59,7 +63,6 @@ public class AdminService {
     private final EntityMapper entityMapper;
     private final FcmService fcmService;
     private final NotificationUtil notificationUtil;
-    private final View error;
     @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
     private String portFolioDomain;
 
@@ -113,34 +116,31 @@ public class AdminService {
                 .build();
         concertRepository.save(concert);
 
-        // 6. 공연 날짜 저장
-        if (request.getConcertDateRequestList() != null && !request.getConcertDateRequestList().isEmpty()) {
-            List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
-                    .map(dateRequest -> ConcertDate.builder()
-                            .concert(concert)
-                            .performanceDate(dateRequest.getPerformanceDate())
-                            .session(dateRequest.getSession())
-                            .build()
-                    )
-                    .collect(Collectors.toList());
-            concertDateRepository.saveAll(concertDateList);
-        }
+        // 6. 공연 날짜 검증 및 저장
+        validateConcertDateList(request.getConcertDateRequestList());
+        List<ConcertDate> concertDateList = request.getConcertDateRequestList().stream()
+                .map(dateRequest -> ConcertDate.builder()
+                        .concert(concert)
+                        .performanceDate(dateRequest.getPerformanceDate())
+                        .session(dateRequest.getSession())
+                        .build()
+                )
+                .collect(Collectors.toList());
+        concertDateRepository.saveAll(concertDateList);
 
         // 7. 티켓 오픈일 검증 및 저장
-        if (request.getTicketOpenDateRequestList() != null && !request.getTicketOpenDateRequestList().isEmpty()) { // 티켓 오픈일이 입력된 경우
-            // 티켓 오픈일 요청에 일반 예매 오픈일이 있는지 확인
-            validateTicketOpenDateList(request.getTicketOpenDateRequestList());
-            List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
-                    .map(ticketOpenDateRequest -> TicketOpenDate.builder()
-                            .concert(concert)
-                            .openDate(ticketOpenDateRequest.getOpenDate())
-                            .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
-                            .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
-                            .build())
-                    .collect(Collectors.toList());
-            ticketOpenDateRepository.saveAll(ticketOpenDateList);
-        }
+        // 티켓 오픈일 요청에 선예매/일반예매 데이터가 최소 한개 이상 존재하는지 검증
+        validateTicketOpenDateList(request.getTicketOpenDateRequestList());
+        List<TicketOpenDate> ticketOpenDateList = request.getTicketOpenDateRequestList().stream()
+                .map(ticketOpenDateRequest -> TicketOpenDate.builder()
+                        .concert(concert)
+                        .openDate(ticketOpenDateRequest.getOpenDate())
+                        .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
+                        .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
+                        .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
+                        .build())
+                .collect(Collectors.toList());
+        ticketOpenDateRepository.saveAll(ticketOpenDateList);
         log.debug("공연 정보 저장 성공: {}", request.getConcertName());
     }
 
@@ -240,7 +240,7 @@ public class AdminService {
                             .openDate(ticketOpenDateRequest.getOpenDate())
                             .requestMaxCount(ticketOpenDateRequest.getRequestMaxCount())
                             .isBankTransfer(ticketOpenDateRequest.getIsBankTransfer())
-                            .isPreOpen(ticketOpenDateRequest.getIsPreOpen())
+                            .ticketOpenType(ticketOpenDateRequest.getTicketOpenType())
                             .build())
                     .collect(Collectors.toList());
             ticketOpenDateRepository.saveAll(ticketOpenDateList);
@@ -259,16 +259,91 @@ public class AdminService {
         }
     }
 
+    // 공연 날짜 List 검증
+    private void validateConcertDateList(List<ConcertDateRequest> concertDateRequestList) {
+        if (CommonUtil.nullOrEmpty(concertDateRequestList)) {
+            log.error("공연일 데이터가 요청되지 않았습니다.");
+            throw new CustomException(ErrorCode.CONCERT_DATE_REQUIRED);
+        }
+
+        // 모든 회차(session) 값을 추출하여 정렬
+        List<Integer> sessions = concertDateRequestList.stream()
+                .map(ConcertDateRequest::getSession)
+                .sorted()
+                .collect(Collectors.toList());
+
+        // 회차가 1부터 시작하는지 검증
+        if (CommonUtil.nullOrEmpty(sessions) || sessions.get(0) != 1) {
+            log.error("공연 회차는 반드시 1부터 시작해야 합니다.");
+            throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+        }
+
+        // 회차가 연속적으로 증가하는지 검증 (중간에 비어있는 회차가 없는지)
+        for (int i = 0; i < sessions.size() - 1; i++) {
+            if (sessions.get(i + 1) - sessions.get(i) != 1) {
+                log.error("공연 회차는 연속적으로 증가해야 합니다. 누락된 회차 or 중복된 회차가 존재합니다: {}회차 다음에 {}회차 입력됨",
+                        sessions.get(i), sessions.get(i + 1));
+                throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+            }
+        }
+
+        // 날짜와 회차가 올바르게 매칭되었는지 검증
+        List<ConcertDateRequest> sortedByDate = concertDateRequestList.stream()
+                .sorted(Comparator.comparing(ConcertDateRequest::getPerformanceDate))
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < sortedByDate.size() - 1; i++) {
+            LocalDateTime prevPerformanceDate = sortedByDate.get(i).getPerformanceDate();
+            LocalDateTime nextPerformanceDate = sortedByDate.get(i + 1).getPerformanceDate();
+            int prevSession = sortedByDate.get(i).getSession();
+            int nextSession = sortedByDate.get(i + 1).getSession();
+
+            // 날짜는 빠른데 회차가 더 늦는 경우
+            if (prevSession > nextSession) {
+                log.error("공연 날짜와 회차의 순서가 일치하지 않습니다. 빠른 날짜({})의 회차({})가 늦은 날짜({})의 회차({})보다 큽니다.",
+                        prevPerformanceDate, prevSession, nextPerformanceDate, nextSession);
+                throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
+            }
+        }
+    }
+
     // 티켓 오픈일 검증
     private void validateTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList) {
 
-        // 일반 예매 필수 검증
-        boolean hasGeneralOpen = ticketOpenDateRequestList.stream()
-                .anyMatch(date -> !date.getIsPreOpen());
-        if (!hasGeneralOpen) {
-            log.error("일반 예매 날짜는 필수로 포함되어야합니다");
-            throw new CustomException(ErrorCode.GENERAL_TICKET_OPEN_DATE_REQUIRED);
+        // 티켓 오픈일 null or Empty 검증
+        if (CommonUtil.nullOrEmpty(ticketOpenDateRequestList)) {
+            log.error("선예매/일반예매 오픈일 데이터가 요청되지 않았습니다. 최소 하나의 데이터는 필수로 입력해야합니다.");
+            throw new CustomException(ErrorCode.TICKET_OPEN_DATE_REQUIRED);
         }
+
+        // 일반 예매, 선 예매는 각각 최대 한개씩 존재 가능
+        long preOpenRequestCount = ticketOpenDateRequestList.stream()
+                .filter(ticketOpenDateRequest ->
+                        ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.PRE_OPEN))
+                .count();
+        if (preOpenRequestCount > 1) {
+            log.error("선예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 선예매 데이터 개수: {}개", preOpenRequestCount);
+            throw new CustomException(ErrorCode.PRE_OPEN_COUNT_EXCEED);
+        }
+
+        long generalOpenRequestCount = ticketOpenDateRequestList.stream()
+                .filter(ticketOpenDateRequest ->
+                        ticketOpenDateRequest.getTicketOpenType().equals(TicketOpenType.GENERAL_OPEN))
+                .count();
+        if (generalOpenRequestCount > 1) {
+            log.error("일반 예매 오픈일 데이터가 여러 개 요청되었습니다. 요청된 일반예매 데이터 개수: {}개", generalOpenRequestCount);
+            throw new CustomException(ErrorCode.GENERAL_OPEN_COUNT_EXCEED);
+        }
+
+        // 최대 요청 매수 검증
+        ticketOpenDateRequestList.forEach(ticketOpenDateRequest -> {
+            if (ticketOpenDateRequest.getRequestMaxCount() <= 0) {
+                log.error("티켓팅 최대 예매 매수는 1장 이상 입력되어야합니다.");
+                throw new CustomException(ErrorCode.INVALID_TICKET_REQUEST_MAX_COUNT);
+            }
+        });
+
+        // 일반 예매 필수 검증 - 2025.05.16. 삭제
     }
 
     /*
@@ -284,7 +359,7 @@ public class AdminService {
      *                webSiteUrl 웹사이트 URL
      */
     @Transactional
-    public void saveHallInfo(ConcertHallInfoRequest request) {
+    public void saveConcertHallInfo(ConcertHallInfoRequest request) {
 
         // 중복된 공연장이름 검증
         if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
@@ -367,25 +442,44 @@ public class AdminService {
      */
 
     /**
-     * 페이지당 10개씩 관리자에게 포트폴리오 리스트 데이터를 보여줍니다.
-     * 포트폴리오 정렬기준은 오래된순으로 정렬됩니다.
+     * 페이지당 N개씩(기본30개) 반환합니다
+     * 기본 정렬기준: 최신순
      */
     @Transactional(readOnly = true)
-    public Page<PortfolioListForAdminResponse> getPortfolioList(PortfolioSearchRequest request) {
+    public Page<PortfolioFilteredAdminResponse> filteredPortfolio(PortfolioFilteredRequest request) {
 
-        int pageIndex = Math.max(1, request.getIndex()) - 1;
+        // 요청 값 확인
+        String username = nvl(request.getUsername(), "");
+        String nickname = nvl(request.getNickname(), "");
+        String name = nvl(request.getName(), "");
+        String portfolioType = enumToString(request.getPortfolioType());
 
-        Pageable pageable = PageRequest.of(pageIndex,
-                10,
-                Sort.by("createdDate").ascending());
+        // 정렬 조건
+        Sort sort = Sort.by(
+                Sort.Direction.fromString(request.getSortDirection()),
+                request.getSortField()
+        );
 
-        Page<Portfolio> portfolioPage = portfolioRepository.findAllByPortfolioType(PortfolioType.UNDER_REVIEW, pageable);
+        // Pageable 생성
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), sort);
 
-        return portfolioPage.map(entityMapper::toPortfolioListForAdminResponse);
+        // 데이터베이스 조회
+        Page<Portfolio> portfolioPage = portfolioRepository.filteredPortfolio(
+                username,
+                nickname,
+                name,
+                portfolioType,
+                pageable
+        );
+
+        return portfolioPage.map(entityMapper::toPortfolioFilteredAdminResponse);
     }
 
     /**
      * 포트폴리오 상세조회 로직
+     * 포트폴리오 PK를 입력받음
+     * 해당 포트폴리오 상태를 IN_REVIEW(검토중) 으로 변경
+     * 포트폴리오 대상 사용자 알림 발송
      *
      * @param portfolioId (UUID)
      */
@@ -394,23 +488,29 @@ public class AdminService {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        // 검토중으로 update
-        portfolio.setPortfolioType(PortfolioType.REVIEWING);
-
+        // 포트폴리오 제출 회원 PK
         UUID memberId = portfolio.getMember().getMemberId();
 
-        NotificationPayloadRequest payload = notificationUtil
-                .portfolioNotification(PortfolioType.REVIEWING, portfolio);
+        // 포트폴리오가 "검토 대기" 상태인 경우
+        if (portfolio.getPortfolioType().equals(PortfolioType.PENDING_REVIEW)) {
+            // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
+            portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
-        fcmService.sendNotification(memberId, payload);
+            // 알림 payload 설정
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
+            // 알림 발송
+            fcmService.sendNotification(memberId, payload);
+        }
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
         List<PortfolioImg> imgList = portfolio.getImgList();
 
         // 이미지 URL 파싱
-        List<String> portfolioImgList = imgList.stream().map(img -> portFolioDomain + img.getImgName())
-                .toList();
+        List<String> portfolioImgList = imgList.stream()
+                .map(img -> portFolioDomain + img.getImgName())
+                .collect(Collectors.toList());
 
         portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
 
@@ -420,40 +520,45 @@ public class AdminService {
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
      *
-     * @param portfolioId (UUID)
-     *                    PortfolioType (포트폴리오 상태)
+     * @param request portfolioId (UUID)
+     *                PortfolioType (포트폴리오 상태)
      */
     @Transactional
     public UUID reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        log.debug("변경전 포트폴리오 TYPE: {}", portfolio.getPortfolioType());
+        if (!portfolio.getPortfolioType().equals(PortfolioType.IN_REVIEW)) {
+            log.error("검토중인 상태의 포트폴리오만 승인 및 반려처리 가능합니다. 요청된 포트폴리오 상태: {}", portfolio.getPortfolioType());
+            throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
+        }
 
         UUID memberId = portfolio.getMember().getMemberId();
 
         // 승인
-        if (request.getPortfolioType().equals(PortfolioType.REVIEW_COMPLETED)) {
-            portfolio.setPortfolioType(PortfolioType.REVIEW_COMPLETED);
-            log.debug("승인완료: {}", portfolio.getPortfolioType());
+        if (request.getPortfolioType().equals(PortfolioType.ACCEPTED)) {
+            portfolio.setPortfolioType(PortfolioType.ACCEPTED);
+            log.debug("포트폴리오: {} 승인완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
 
             NotificationPayloadRequest payload = notificationUtil
-                    .portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
+                    .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
+        } else if (request.getPortfolioType().equals(PortfolioType.REJECTED)) {
+            // 반려
+            portfolio.setPortfolioType(PortfolioType.REJECTED);
+            log.debug("포트폴리오: {} 반려완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
+
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.REJECTED, portfolio);
 
             fcmService.sendNotification(memberId, payload);
         } else {
-            // 반려
-            portfolio.setPortfolioType(PortfolioType.COMPANION);
-            log.debug("반려완료: {}", portfolio.getPortfolioType());
-
-            NotificationPayloadRequest payload = notificationUtil
-                    .portfolioNotification(PortfolioType.COMPANION, portfolio);
-
-            fcmService.sendNotification(memberId, payload);
+            log.error("유효하지않은 PortfolioType이 요청되었습니다: {}", request.getPortfolioType());
+            throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
         }
-
         return portfolio.getPortfolioId();
     }
 }

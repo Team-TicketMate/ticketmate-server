@@ -1,5 +1,6 @@
-package com.ticketmate.backend.object.dto.concerthall.request;
+package com.ticketmate.backend.object.dto.admin.request;
 
+import com.ticketmate.backend.object.constants.PortfolioType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -11,21 +12,23 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class ConcertHallFilteredRequest {
+public class PortfolioFilteredRequest {
 
     // 기본값 할당 (1페이지 30개, 최신순)
-    public ConcertHallFilteredRequest() {
+    public PortfolioFilteredRequest() {
         this.pageNumber = 0;
         this.pageSize = 30;
         this.sortField = "created_date";
         this.sortDirection = "DESC";
     }
 
-    @Schema(defaultValue = "장충")
-    private String concertHallName; // 공연장 명 (검색어)
+    private String username; // 사용자 이메일
 
-    @Schema(defaultValue = "11")
-    private Integer cityCode; // 지역 코드
+    private String nickname; // 사용자 닉네임
+
+    private String name; // 사용자 이름
+
+    private PortfolioType portfolioType; // 포트폴리오 타입
 
     @Schema(defaultValue = "0")
     @Min(value = 0, message = "페이지 번호 인덱스는 0이상 값을 입력해야합니다.")
@@ -38,10 +41,10 @@ public class ConcertHallFilteredRequest {
     private Integer pageSize; // 페이지 사이즈
 
     @Schema(defaultValue = "created_date")
-    @Pattern(regexp = "^(created_date)$", message = "sortType에는 지정된 값을 입력해야합니다")
-    private String sortField; // 정렬 조건 (생성일, 선 예매 오픈일, 티켓 오픈일, 공연시간)
+    @Pattern(regexp = "^(created_date)$")
+    private String sortField; // 정렬 조건
 
     @Schema(defaultValue = "DESC")
-    @Pattern(regexp = "^(ASC|DESC)$", message = "sortDirection에는 'ASC', 'DESC' 만 입력 가능합니다.")
-    private String sortDirection; // ASC, DESC
+    @Pattern(regexp = "^(ASC|DESC)$")
+    private String sortDirection;
 }
