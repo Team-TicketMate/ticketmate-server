@@ -26,6 +26,7 @@ public class Portfolio extends BasePostgresEntity {
     @Column(updatable = false, nullable = false)
     private UUID portfolioId;
 
+    @Column(columnDefinition = "TEXT")
     private String portfolioDescription;  // 자기소개
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -37,8 +38,12 @@ public class Portfolio extends BasePostgresEntity {
     @Enumerated(EnumType.STRING)
     private PortfolioType portfolioType;
 
+    public static final int MAX_IMG_COUNT = 20;
+
     public void addImg(PortfolioImg img) {
-        this.getImgList().add(img);
-        img.setPortfolio(this);
+        if (this.getImgList().size() < MAX_IMG_COUNT) {
+            this.getImgList().add(img);
+            img.setPortfolio(this);
+        }
     }
 }

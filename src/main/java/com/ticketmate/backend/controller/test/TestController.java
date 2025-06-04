@@ -36,9 +36,10 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/member")
     @LogMonitoringInvocation
-    public ResponseEntity<CompletableFuture<Integer>> generateMockMembers(
+    public ResponseEntity<CompletableFuture<Void>> generateMockMembers(
             @RequestParam @Schema(defaultValue = "30") int count) {
-        return ResponseEntity.ok(testService.generateMockMembersAsync(count));
+        testService.generateMockMembersAsync(count);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -52,7 +53,7 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping("/concert-hall")
     @LogMonitoringInvocation
-    public ResponseEntity<Void> createConcertHallMockData(
+    public ResponseEntity<CompletableFuture<Void>> createConcertHallMockData(
             @Schema(defaultValue = "30") Integer count) {
         testService.createConcertHallMockData(count);
         return ResponseEntity.ok().build();
@@ -61,7 +62,7 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping("/concert")
     @LogMonitoringInvocation
-    public ResponseEntity<Void> createConcertMockData(
+    public ResponseEntity<CompletableFuture<Void>> createConcertMockData(
             @Schema(defaultValue = "30") Integer count) {
         testService.createConcertMockData(count);
         return ResponseEntity.ok().build();
@@ -70,11 +71,18 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping("/application-form")
     @LogMonitoringInvocation
-    public ResponseEntity<Void> createApplicationFormMockData(
+    public ResponseEntity<CompletableFuture<Void>> createApplicationFormMockData(
             @Schema(defaultValue = "30") Integer count) {
         testService.createApplicationMockData(count);
         return ResponseEntity.ok().build();
     }
 
-
+    @Override
+    @PostMapping("/portfolio")
+    @LogMonitoringInvocation
+    public ResponseEntity<CompletableFuture<Void>> createPortfolioMockData(
+            @Schema(defaultValue = "30") Integer count) {
+        testService.generateMockPortfoliosAsync(count);
+        return ResponseEntity.ok().build();
+    }
 }

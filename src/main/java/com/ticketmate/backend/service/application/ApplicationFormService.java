@@ -39,10 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.ticketmate.backend.object.constants.MemberType.AGENT;
 import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
@@ -151,6 +148,7 @@ public class ApplicationFormService {
                 .agent(agent)
                 .concert(concert)
                 .ticketOpenDate(ticketOpenDate)
+                .applicationFormDetailList(new ArrayList<>())
                 .applicationFormStatus(ApplicationFormStatus.PENDING) // 신청서는 기본 '대기'상태
                 .ticketOpenType(request.getTicketOpenType())
                 .build();
@@ -177,6 +175,7 @@ public class ApplicationFormService {
                     .concertDate(concertDate)
                     .requestCount(detailRequest.getRequestCount())
                     .requirement(detailRequest.getRequestDetails())
+                    .hopeAreaList(new ArrayList<>())
                     .build();
 
             // 신청서 세부사항 희망구역 설정

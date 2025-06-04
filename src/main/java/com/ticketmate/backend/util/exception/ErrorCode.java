@@ -90,6 +90,12 @@ public enum ErrorCode {
 
     CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다."),
 
+    // MOCK DATA TODO: 출시 후 삭제
+
+    GENERATE_MOCK_DATA_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Mock 데이터 생성 중 오류 발생"),
+
+    SAVE_MOCK_DATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Mock 데이터 저장 중 오류 발생"),
+
     // FILE IO
 
     FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생했습니다."),
@@ -109,6 +115,8 @@ public enum ErrorCode {
     PORTFOLIO_IMG_BLACK(HttpStatus.BAD_REQUEST, "자신을 소개할 수 있는 포트폴리오 이미지를 첨부해주세요."),
 
     PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다."),
+
+    INVALID_PORTFOLIO_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 포트폴리오 타입 입니다."),
 
     // REDIS_LOCK
 
