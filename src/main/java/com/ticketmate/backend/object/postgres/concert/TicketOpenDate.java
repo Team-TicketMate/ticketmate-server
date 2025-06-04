@@ -1,5 +1,6 @@
 package com.ticketmate.backend.object.postgres.concert;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
@@ -28,6 +29,8 @@ public class TicketOpenDate extends BasePostgresEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Concert concert;
 
+    @Column(columnDefinition = "TIMESTAMP(0)")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime openDate; // 티켓 오픈일
 
     private Integer requestMaxCount; // 최대 예매 매수
