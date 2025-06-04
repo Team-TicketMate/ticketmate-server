@@ -38,7 +38,7 @@ public class Portfolio extends BasePostgresEntity {
     @Enumerated(EnumType.STRING)
     private PortfolioType portfolioType;
 
-    private static final int MAX_IMG_COUNT = 20;
+    public static final int MAX_IMG_COUNT = 20;
 
     public void addImg(PortfolioImg img) {
         if (this.getImgList().size() < MAX_IMG_COUNT) {

@@ -90,6 +90,12 @@ public enum ErrorCode {
 
     CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다."),
 
+    // MOCK DATA TODO: 출시 후 삭제
+
+    GENERATE_MOCK_DATA_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Mock 데이터 생성 중 오류 발생"),
+
+    SAVE_MOCK_DATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Mock 데이터 저장 중 오류 발생"),
+
     // FILE IO
 
     FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드 중 오류가 발생했습니다."),
