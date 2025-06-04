@@ -346,7 +346,7 @@ public interface AdminControllerDocs {
                     이 API는 관리자 인증이 필요합니다
                     
                     ### 요청 파라미터
-                    - 포트폴리오의 고유한 id                  
+                    - 포트폴리오의 고유한 id
                     
                     ### 유의사항
                     - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관라지에게 필요한 데이터를 반환합니다.
@@ -373,14 +373,14 @@ public interface AdminControllerDocs {
                     
                     ### PortfolioType
                     
-                    REVIEW_COMPLETED ("승인된 포트폴리오")
+                    ACCEPTED ("승인된 포트폴리오")
                     
-                    COMPANION("반려된 포트폴리오")
+                    REJECTED ("반려된 포트폴리오")
                     
                     ### 유의사항
                     - 관리자가 승인 요청이된 포트폴리오를 승인 및 반려하는 작업입니다.
-                    - 승인(REVIEW_COMPLETED)시 해당 포트폴리오의 상태가 "REVIEW_COMPLETED("승인된 포트폴리오")" 로 변경됩니다.
-                    - 반려(COMPANION)시 해당 포트폴리오의 상태가 "COMPANION("반려된 포트폴리오")" 로 변경됩니다. 
+                    - 승인(ACCEPTED)시 해당 포트폴리오의 상태가 "ACCEPTED("승인된 포트폴리오")" 로 변경됩니다.
+                    - 반려(REJECTED)시 해당 포트폴리오의 상태가 "REJECTED("반려된 포트폴리오")" 로 변경됩니다.
                     
                     ### 알림전송 특이사항
                     - 관리자가 포트폴리오를 승인 혹은 반려 상태로 변경합니다.
