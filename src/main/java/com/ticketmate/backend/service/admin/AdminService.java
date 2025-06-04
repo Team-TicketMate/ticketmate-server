@@ -477,6 +477,9 @@ public class AdminService {
 
     /**
      * 포트폴리오 상세조회 로직
+     * 포트폴리오 PK를 입력받음
+     * 해당 포트폴리오 상태를 IN_REVIEW(검토중) 으로 변경
+     * 포트폴리오 대상 사용자 알림 발송
      *
      * @param portfolioId (UUID)
      */
@@ -485,23 +488,29 @@ public class AdminService {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        // 검토중으로 update
-        portfolio.setPortfolioType(PortfolioType.REVIEWING);
-
+        // 포트폴리오 제출 회원 PK
         UUID memberId = portfolio.getMember().getMemberId();
 
-        NotificationPayloadRequest payload = notificationUtil
-                .portfolioNotification(PortfolioType.REVIEWING, portfolio);
+        // 포트폴리오가 "검토 대기" 상태인 경우
+        if (portfolio.getPortfolioType().equals(PortfolioType.PENDING_REVIEW)) {
+            // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
+            portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
-        fcmService.sendNotification(memberId, payload);
+            // 알림 payload 설정
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
+            // 알림 발송
+            fcmService.sendNotification(memberId, payload);
+        }
         PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
         List<PortfolioImg> imgList = portfolio.getImgList();
 
         // 이미지 URL 파싱
-        List<String> portfolioImgList = imgList.stream().map(img -> portFolioDomain + img.getImgName())
-                .toList();
+        List<String> portfolioImgList = imgList.stream()
+                .map(img -> portFolioDomain + img.getImgName())
+                .collect(Collectors.toList());
 
         portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
 
@@ -511,40 +520,45 @@ public class AdminService {
     /**
      * 관리자의 포트폴리오 승인 및 반려처리 로직
      *
-     * @param portfolioId (UUID)
-     *                    PortfolioType (포트폴리오 상태)
+     * @param request portfolioId (UUID)
+     *                PortfolioType (포트폴리오 상태)
      */
     @Transactional
     public UUID reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        log.debug("변경전 포트폴리오 TYPE: {}", portfolio.getPortfolioType());
+        if (!portfolio.getPortfolioType().equals(PortfolioType.IN_REVIEW)) {
+            log.error("검토중인 상태의 포트폴리오만 승인 및 반려처리 가능합니다. 요청된 포트폴리오 상태: {}", portfolio.getPortfolioType());
+            throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
+        }
 
         UUID memberId = portfolio.getMember().getMemberId();
 
         // 승인
-        if (request.getPortfolioType().equals(PortfolioType.REVIEW_COMPLETED)) {
-            portfolio.setPortfolioType(PortfolioType.REVIEW_COMPLETED);
-            log.debug("승인완료: {}", portfolio.getPortfolioType());
+        if (request.getPortfolioType().equals(PortfolioType.ACCEPTED)) {
+            portfolio.setPortfolioType(PortfolioType.ACCEPTED);
+            log.debug("포트폴리오: {} 승인완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
 
             portfolio.getMember().setMemberType(MemberType.AGENT);
 
             NotificationPayloadRequest payload = notificationUtil
-                    .portfolioNotification(PortfolioType.REVIEW_COMPLETED, portfolio);
+                    .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
+
+            fcmService.sendNotification(memberId, payload);
+        } else if (request.getPortfolioType().equals(PortfolioType.REJECTED)) {
+            // 반려
+            portfolio.setPortfolioType(PortfolioType.REJECTED);
+            log.debug("포트폴리오: {} 반려완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
+
+            NotificationPayloadRequest payload = notificationUtil
+                    .portfolioNotification(PortfolioType.REJECTED, portfolio);
 
             fcmService.sendNotification(memberId, payload);
         } else {
-            // 반려
-            portfolio.setPortfolioType(PortfolioType.COMPANION);
-            log.debug("반려완료: {}", portfolio.getPortfolioType());
-
-            NotificationPayloadRequest payload = notificationUtil
-                    .portfolioNotification(PortfolioType.COMPANION, portfolio);
-
-            fcmService.sendNotification(memberId, payload);
+            log.error("유효하지않은 PortfolioType이 요청되었습니다: {}", request.getPortfolioType());
+            throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
         }
-
         return portfolio.getPortfolioId();
     }
 }

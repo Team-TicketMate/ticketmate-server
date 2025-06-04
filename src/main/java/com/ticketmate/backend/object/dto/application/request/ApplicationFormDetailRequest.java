@@ -21,7 +21,7 @@ import java.util.List;
 public class ApplicationFormDetailRequest {
 
     @NotNull(message = "공열일자를 입력하세요")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     @Schema(defaultValue = "2025-02-11T20:00:00")
     private LocalDateTime performanceDate; // 공연일자
 

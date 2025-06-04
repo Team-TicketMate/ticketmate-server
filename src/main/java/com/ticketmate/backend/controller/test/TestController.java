@@ -12,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/test")
@@ -36,9 +34,10 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/member")
     @LogMonitoringInvocation
-    public ResponseEntity<CompletableFuture<Integer>> generateMockMembers(
+    public ResponseEntity<Void> generateMockMembers(
             @RequestParam @Schema(defaultValue = "30") int count) {
-        return ResponseEntity.ok(testService.generateMockMembersAsync(count));
+        testService.generateMockMembersAsync(count);
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -76,5 +75,12 @@ public class TestController implements TestControllerDocs {
         return ResponseEntity.ok().build();
     }
 
-
+    @Override
+    @PostMapping("/portfolio")
+    @LogMonitoringInvocation
+    public ResponseEntity<Void> createPortfolioMockData(
+            @Schema(defaultValue = "30") Integer count) {
+        testService.generateMockPortfoliosAsync(count);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -40,7 +40,9 @@ public class MockMemberFactory {
     /**
      * 개발자용 회원 Mock 데이터 생성
      *
-     * @param request socialPlatform 네이버/카카오 소셜 로그인 플랫폼
+     * @param request username 이메일 (선택)
+     *                role 권한
+     *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
      *                memberType 의로인/대리인
      *                accountStatus 활성화/삭제
      *                isFirstLogin 첫 로그인 여부

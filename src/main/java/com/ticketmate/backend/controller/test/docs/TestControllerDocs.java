@@ -4,8 +4,6 @@ import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 
-import java.util.concurrent.CompletableFuture;
-
 public interface TestControllerDocs {
 
     @Operation(
@@ -38,13 +36,6 @@ public interface TestControllerDocs {
                     
                     ### 🔄 응답 데이터
                     - HTTP 200 OK
-                    - 반환값: 생성된 회원 수 (Integer)
-                    
-                    ```json
-                    {
-                      "result": 10
-                    }
-                    ```
                     
                     ### 🛠️ 사용 방법
                     - 테스트 환경에서 회원 데이터가 필요할 때 사용하는 API입니다.
@@ -61,7 +52,7 @@ public interface TestControllerDocs {
                     - `INVALID_MEMBER_ROLE_REQUEST (400)`: 테스트 전용 Role(ROLE_TEST, ROLE_TEST_ADMIN) 외의 값이 요청될 경우
                     """
     )
-    ResponseEntity<CompletableFuture<Integer>> generateMockMembers(int count);
+    ResponseEntity<Void> generateMockMembers(int count);
 
     @Operation(
             summary = "테스트 회원 삭제",
@@ -128,4 +119,26 @@ public interface TestControllerDocs {
                     """
     )
     ResponseEntity<Void> createApplicationFormMockData(Integer count);
+
+    @Operation(
+            summary = "포트폴리오 Mock 데이터 비동기 생성",
+            description = """
+                    ### 요청 파라미터
+                    - `count` (int): 생성할 포트폴리오 Mock 데이터의 개수. 예: 10
+                    
+                    ### 응답 데이터
+                    - 본 API는 반환값이 없으며, 정상적으로 요청이 처리된 경우 HTTP 200 OK 상태 코드가 반환됩니다.
+                    
+                    ### 사용 방법 & 유의 사항
+                    - 이 API는 테스트나 개발 목적으로 포트폴리오 데이터를 대량으로 생성할 때 사용됩니다.
+                    - 내부적으로 멀티스레딩을 사용하여 비동기 방식으로 데이터를 생성하며, 모든 작업이 완료된 후 일괄 저장됩니다.
+                    - Portfolio 객체는 무작위로 생성되며, 포트폴리오 설명, 클라이언트 회원 정보, 포트폴리오 유형, 이미지 리스트를 포함합니다.
+                    - 생성된 포트폴리오는 실제 서비스와 무관한 테스트용 데이터입니다.
+                    - 동시에 다량의 데이터를 생성하므로 서버 부하에 유의해야 하며, 운영 환경에서는 사용하지 않는 것을 권장합니다.
+                    
+                    ### 예외 처리
+                    - `INTERNAL_SERVER_ERROR (500)`: 포트폴리오 데이터 생성 또는 저장 중 서버 내부 오류가 발생한 경우
+                    """
+    )
+    ResponseEntity<Void> createPortfolioMockData(Integer count);
 }
