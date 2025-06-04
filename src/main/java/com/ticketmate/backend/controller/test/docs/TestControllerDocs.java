@@ -4,6 +4,8 @@ import com.ticketmate.backend.object.dto.test.request.LoginRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface TestControllerDocs {
 
     @Operation(
@@ -52,7 +54,7 @@ public interface TestControllerDocs {
                     - `INVALID_MEMBER_ROLE_REQUEST (400)`: 테스트 전용 Role(ROLE_TEST, ROLE_TEST_ADMIN) 외의 값이 요청될 경우
                     """
     )
-    ResponseEntity<Void> generateMockMembers(int count);
+    ResponseEntity<CompletableFuture<Void>> generateMockMembers(int count);
 
     @Operation(
             summary = "테스트 회원 삭제",
@@ -85,7 +87,7 @@ public interface TestControllerDocs {
                     
                     """
     )
-    ResponseEntity<Void> createConcertHallMockData(Integer count);
+    ResponseEntity<CompletableFuture<Void>> createConcertHallMockData(Integer count);
 
     @Operation(
             summary = "테스트 공연 데이터 추가",
@@ -102,7 +104,7 @@ public interface TestControllerDocs {
                     
                     """
     )
-    ResponseEntity<Void> createConcertMockData(Integer count);
+    ResponseEntity<CompletableFuture<Void>> createConcertMockData(Integer count);
 
     @Operation(
             summary = "테스트 신청서 데이터 추가",
@@ -118,7 +120,7 @@ public interface TestControllerDocs {
                     - 중복 데이터 생성에 따라 사용자가 원하는 개수보다 적은 데이터가 저장될 수 있습니다
                     """
     )
-    ResponseEntity<Void> createApplicationFormMockData(Integer count);
+    ResponseEntity<CompletableFuture<Void>> createApplicationFormMockData(Integer count);
 
     @Operation(
             summary = "포트폴리오 Mock 데이터 비동기 생성",
@@ -140,5 +142,5 @@ public interface TestControllerDocs {
                     - `INTERNAL_SERVER_ERROR (500)`: 포트폴리오 데이터 생성 또는 저장 중 서버 내부 오류가 발생한 경우
                     """
     )
-    ResponseEntity<Void> createPortfolioMockData(Integer count);
+    ResponseEntity<CompletableFuture<Void>> createPortfolioMockData(Integer count);
 }
