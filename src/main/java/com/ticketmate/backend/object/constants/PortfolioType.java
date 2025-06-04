@@ -11,9 +11,9 @@ public enum PortfolioType {
 
     IN_REVIEW("검토 중"),  // 현재 관리자가 검토중인 포트폴리오
 
-    REVIEW_COMPLETED("승인"),  // 관리자가 승인해 의뢰인 -> 대리인으로 바뀐 포트폴리오
+    ACCEPTED("승인"),  // 관리자가 승인해 의뢰인 -> 대리인으로 바뀐 포트폴리오
 
-    REVIEW_REJECTED("반려");  // 관리자에게 반려당한 포트폴리오
+    REJECTED("반려");  // 관리자에게 반려당한 포트폴리오
 
     private final String description;
 }
