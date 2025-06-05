@@ -56,7 +56,7 @@ public class MockPortfolioFactory {
 
         for (int i = 0; i < count; i++) {
             PortfolioImg portfolioImg = PortfolioImg.builder()
-                    .imgName(koFaker.internet().image())
+                    .filePath(koFaker.internet().image())
                     .build();
             portfolioImgList.add(portfolioImg);
         }

@@ -4,8 +4,8 @@ import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdmin
 import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
-import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
+import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.object.dto.concert.response.TicketOpenDateInfoResponse;
@@ -19,11 +19,14 @@ import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
+import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
 import com.ticketmate.backend.object.redis.FcmToken;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface EntityMapper {
@@ -71,7 +74,19 @@ public interface EntityMapper {
     @Mapping(source = "member.phone", target = "phone")
     @Mapping(source = "member.profileUrl", target = "profileUrl")
     @Mapping(source = "member.memberType", target = "memberType")
+    @Mapping(target = "portfolioImgList", expression = "java(mapToFilePathList(portfolio.getPortfolioImgList()))")
     PortfolioForAdminResponse toPortfolioForAdminResponse(Portfolio portfolio);
+
+    // PortfolioImg 엔티티 리스트에서 각 filePath만 추출하여 String 리스트로 변환
+    @Named("mapToFilePathList")
+    default List<String> mapToFilePathList(List<PortfolioImg> imgList) {
+        if (CommonUtil.nullOrEmpty(imgList)) {
+            return List.of();
+        }
+        return imgList.stream()
+                .map(PortfolioImg::getFilePath)
+                .collect(Collectors.toList());
+    }
   
 
     /*
@@ -108,8 +123,8 @@ public interface EntityMapper {
     /*
     ======================================FCM======================================
      */
-  
-  
+
+
     // FcmToken -> FcmTokenSaveResponse
     FcmTokenSaveResponse toFcmTokenSaveResponse(FcmToken fcmToken);
 }
