@@ -63,10 +63,11 @@ public interface ApplicationFormControllerDocs {
                     - **agentId** (UUID): 대리인 PK [선택, 생략 시 모든 대리인]
                     - **concertId** (UUID): 공연 PK [선택, 생략 시 모든 공연]
                     - **applicationFormStatus** (Enum): 신청서 상태 [선택]
-                      - PENDING: 대기 중
-                      - APPROVED: 승인됨
-                      - REJECTED: 거절됨
-                      - COMPLETED: 완료됨
+                      - PENDING: 대기
+                      - ACCEPTED: 승인
+                      - REJECTED: 거절
+                      - CANCELED: 취소
+                      - CANCELED_IN_PROCESS: 진행 취소
                     - **pageNumber** (Integer): 페이지 번호 [선택, 기본값 0]
                     - **pageSize** (Integer): 페이지 크기 [선택, 기본값 30]
                     - **sortField** (String): 정렬 기준 [선택, 기본값 created_date]
@@ -75,7 +76,7 @@ public interface ApplicationFormControllerDocs {
                     - **sortDirection** (String): 정렬 방향 [선택, 기본값 DESC]
                       - ASC: 오름차순
                       - DESC: 내림차순
-                      
+                    
                     ### 반환 데이터
                     - Page<ApplicationFormFilteredResponse>: 페이지네이션된 신청서 목록
                       - content: 신청서 정보 배열
@@ -83,7 +84,7 @@ public interface ApplicationFormControllerDocs {
                       - totalPages: 전체 페이지 수
                       - number: 현재 페이지 번호
                       - size: 페이지 크기
-                      
+                    
                     ### 주요 오류 코드
                     - INVALID_MEMBER_TYPE: 부적절한 회원 타입
                     - MEMBER_NOT_FOUND: 존재하지 않는 회원
@@ -123,7 +124,7 @@ public interface ApplicationFormControllerDocs {
                       - totalRequestCount: 전체 요청 매수
                       - applicationFormStatus: 신청서 상태
                       - ticketOpenType: 선예매/일반예매 구분
-                      
+                    
                     ### 주요 오류 코드
                     - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
                     """
