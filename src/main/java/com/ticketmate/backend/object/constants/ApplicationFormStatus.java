@@ -6,13 +6,16 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ApplicationFormStatus {
+
     PENDING("대기"),
 
-    APPROVED("승인"),
+    ACCEPTED("승인"),
+
+    CANCELED("취소"),
 
     REJECTED("거절"),
 
-    EXPIRED("만료");
+    CANCELED_IN_PROCESS("진행 취소");
 
     private final String description;
 }

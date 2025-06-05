@@ -2,7 +2,6 @@ package com.ticketmate.backend.service.application;
 
 import com.ticketmate.backend.object.constants.ApplicationFormRejectedType;
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
-import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.dto.application.request.*;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.expressions.request.ApplicationFormRejectRequest;
@@ -24,6 +23,7 @@ import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
 import com.ticketmate.backend.service.fcm.FcmService;
+import com.ticketmate.backend.service.member.MemberService;
 import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -53,6 +53,7 @@ public class ApplicationFormService {
     private final ApplicationFormRepository applicationFormRepository;
     private final NotificationUtil notificationUtil;
     private final FcmService fcmService;
+    private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final ConcertRepository concertRepository;
     private final ConcertDateRepository concertDateRepository;
@@ -281,19 +282,13 @@ public class ApplicationFormService {
      */
     @Transactional(readOnly = true)
     public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
-
         // 데이터베이스 조회
-        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
-                .orElseThrow(() -> {
-                    log.error("대리 티켓팅 신청서를 찾을 수 없습니다.");
-                    return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
-                });
-
+        ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
         return entityMapper.toApplicationFormFilteredResponse(applicationForm);
     }
 
     /**
-     * 대리 티켓팅 신청서 거절
+     * '대리인'의 신청서 거절
      *
      * @param applicationFormId 신청서 PK
      * @param agent             신청서 확인한 대리인
@@ -301,11 +296,9 @@ public class ApplicationFormService {
      *                          otherMemo 거절 메모 (거절 사유가 '기타' 일 때)
      */
     @Transactional
-    public void reject(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
-        // 현재 회원이 '대리인'인가
-        if (!agent.getMemberType().equals(MemberType.AGENT)) {
-            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-        }
+    public void rejectApplicationForm(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
+        // 현재 회원이 '대리인' 인지 검증
+        memberService.validateMemberType(agent, AGENT);
 
         // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
         if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
@@ -313,12 +306,8 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
         }
 
-        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId).orElseThrow(
-                () -> {
-                    log.error("신청폼 조회에 실패했습니다.");
-                    throw new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
-                }
-        );
+        // DB에서 신청서 조회
+        ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
         // 메모 default 세팅 or '기타' 사유의 메모 세팅
         String memo = request.getApplicationFormRejectedType() == ApplicationFormRejectedType.OTHER
@@ -351,19 +340,19 @@ public class ApplicationFormService {
         fcmService.sendNotification(client.getMemberId(), payloadRequest);
     }
 
+    /**
+     * '대리인'의 신청서 승인
+     *
+     * @param applicationFormId 신청서 PK
+     * @param agent             대리인 PK
+     * @return 생성된 채팅방 PK
+     */
     @Transactional
-    public String approve(UUID applicationFormId, Member agent) {
-        // 현재 회원이 '대리인'인가
-        if (!agent.getMemberType().equals(MemberType.AGENT)) {
-            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-        }
+    public String acceptedApplicationForm(UUID applicationFormId, Member agent) {
+        // 현재 회원이 '대리인' 인지 검증
+        memberService.validateMemberType(agent, AGENT);
 
-        ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
-                .orElseThrow(() -> {
-                            log.error("신청폼 조회에 실패했습니다.");
-                            return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
-                        }
-                );
+        ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
         Member client = applicationForm.getClient();
 
@@ -377,21 +366,20 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
         }
 
-        /**
-         * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 신청 자체가 불가합니다.
-         * 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
-         */
+
+        //  이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 신청 자체가 불가합니다.
+        // 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
         List<ApplicationForm> applicationFormList = applicationFormRepository
                 .findAllByConcertConcertIdAndClientMemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
 
         for (ApplicationForm form : applicationFormList) {
-            if (form.getApplicationFormStatus().equals(ApplicationFormStatus.APPROVED)) {
+            if (form.getApplicationFormStatus().equals(ApplicationFormStatus.ACCEPTED)) {
                 throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
             }
         }
 
         // 신청서 상태 승인 변경
-        applicationForm.setApplicationFormStatus(ApplicationFormStatus.APPROVED);
+        applicationForm.setApplicationFormStatus(ApplicationFormStatus.ACCEPTED);
         log.debug("신청서 상태 승인변경 : {}", applicationForm.getApplicationFormStatus());
 
         /*
@@ -439,6 +427,20 @@ public class ApplicationFormService {
                         request.getAgentId(),
                         request.getConcertId(),
                         request.getTicketOpenType()
+                );
+    }
+
+    /**
+     * DB에서 applicationFormId에 해당하는 신청서를 찾고 반환합니다
+     * @param applicationFormId 신청서 PK
+     * @return ApplicationForm
+     */
+    private ApplicationForm findApplicationFormById(UUID applicationFormId) {
+        return applicationFormRepository.findById(applicationFormId)
+                .orElseThrow(() -> {
+                            log.error("신청폼 조회에 실패했습니다.");
+                            return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+                        }
                 );
     }
 }
