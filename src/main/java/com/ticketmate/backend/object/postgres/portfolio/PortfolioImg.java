@@ -22,9 +22,9 @@ public class PortfolioImg extends BasePostgresEntity {
     @Column(updatable = false, nullable = false)
     private UUID portfolioImgId;
 
-    @Column(columnDefinition = "TEXT", length = 1024)
-    private String imgName;  // 포트폴리오 이미지 이름
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Portfolio portfolio;
+
+    @Column(columnDefinition = "TEXT", length = 1024)
+    private String filePath;  // 포트폴리오 이미지 URL
 }
