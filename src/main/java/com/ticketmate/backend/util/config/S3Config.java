@@ -24,22 +24,22 @@ public class S3Config {
     private String region;
 
     @Value("${cloud.aws.s3.bucket}")
-    public String bucket;
+    private String bucket;
 
     @Value("${cloud.aws.s3.domain}")
-    public String domain;
+    private String domain;
 
     @Value("${cloud.aws.s3.path.member}")
-    public String memberPrefix;
+    private String memberPrefix;
 
     @Value("${cloud.aws.s3.path.concert-hall}")
-    public String concertHallPrefix;
+    private String concertHallPrefix;
 
     @Value("${cloud.aws.s3.path.concert}")
-    public String concertPrefix;
+    private String concertPrefix;
 
     @Value("${cloud.aws.s3.path.portfolio}")
-    public String portfolioPrefix;
+    private String portfolioPrefix;
 
     @Bean
     public AmazonS3 amazonS3() {

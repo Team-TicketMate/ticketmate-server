@@ -174,7 +174,7 @@ public class S3Service implements FileService {
     /**
      * FileUploadType에 따라 S3 내부에 붙일 prefix(=하위폴더) 반환
      */
-    public String determinePrefix(UploadType type) {
+    private String determinePrefix(UploadType type) {
         return switch (type) {
             case MEMBER -> s3Config.getMemberPrefix();
             case CONCERT_HALL -> s3Config.getConcertHallPrefix();
