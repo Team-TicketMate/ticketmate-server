@@ -35,7 +35,7 @@ public class SecurityConfig {
     private final CustomLogoutHandler customLogoutHandler;
 
     /**
-     * 허용된 CORS Origin 목록
+     * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
      */
     private static final List<String> ALLOWED_ORIGINS = List.of(
 
@@ -58,6 +58,12 @@ public class SecurityConfig {
             "http://10.*:*", // 10.0.0.0/8
             "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
             "http://192.168.*:*" // 192.168.0.0/16
+    );
+
+    private static final List<String> PATTERN_ORIGINS = List.of(
+            "http://10.*:*",                // 10.0.0.0/8
+            "http://172.*:*",               // 172.16.0.0/12 전체 (16~31)
+            "http://192.168.*:*"            // 192.168.0.0/16
     );
 
     /**
