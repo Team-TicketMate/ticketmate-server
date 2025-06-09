@@ -1,9 +1,6 @@
 package com.ticketmate.backend.service.admin;
 
-import com.ticketmate.backend.object.constants.City;
-import com.ticketmate.backend.object.constants.MemberType;
-import com.ticketmate.backend.object.constants.PortfolioType;
-import com.ticketmate.backend.object.constants.TicketOpenType;
+import com.ticketmate.backend.object.constants.*;
 import com.ticketmate.backend.object.dto.admin.request.*;
 import com.ticketmate.backend.object.dto.admin.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.object.dto.admin.response.PortfolioFilteredAdminResponse;
@@ -15,7 +12,6 @@ import com.ticketmate.backend.object.postgres.concert.ConcertDate;
 import com.ticketmate.backend.object.postgres.concert.TicketOpenDate;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
 import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
-import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
@@ -23,7 +19,7 @@ import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallReposit
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
-import com.ticketmate.backend.service.file.FileService;
+import com.ticketmate.backend.service.storage.FileService;
 import com.ticketmate.backend.util.common.CommonUtil;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -31,7 +27,6 @@ import com.ticketmate.backend.util.exception.ErrorCode;
 import com.ticketmate.backend.util.notification.NotificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,8 +58,6 @@ public class AdminService {
     private final EntityMapper entityMapper;
     private final FcmService fcmService;
     private final NotificationUtil notificationUtil;
-    @Value("${cloud.aws.s3.path.portfolio.cloud-front-domain}")
-    private String portFolioDomain;
 
 
     /*
@@ -97,12 +90,12 @@ public class AdminService {
         }
 
         // 3. 콘서트 썸네일 저장
-        String concertThumbnailUrl = fileService.saveFile(request.getConcertThumbNail());
+        String concertThumbnailUrl = fileService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
 
         // 4. 좌석 배치도 저장
         String seatingChartUrl = null;
         if (request.getSeatingChart() != null) {
-            seatingChartUrl = fileService.saveFile(request.getSeatingChart());
+            seatingChartUrl = fileService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
         }
 
         // 5. 공연 정보 저장
@@ -187,14 +180,14 @@ public class AdminService {
 
         // 공연 썸네일 이미지 업데이트
         if (request.getConcertThumbNail() != null && !request.getConcertThumbNail().isEmpty()) {
-            String newThumbnailUrl = fileService.saveFile(request.getConcertThumbNail());
+            String newThumbnailUrl = fileService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
             log.debug("공연 썸네일 이미지 업데이트: {}", newThumbnailUrl);
             concert.setConcertThumbnailUrl(newThumbnailUrl);
         }
 
         // 좌석 배치도 업데이트
         if (request.getSeatingChart() != null && !request.getSeatingChart().isEmpty()) {
-            String newSeatingChartUrl = fileService.saveFile(request.getSeatingChart());
+            String newSeatingChartUrl = fileService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
             log.debug("좌석 배치도 이미지 업데이트: {}", newSeatingChartUrl);
             concert.setSeatingChartUrl(newSeatingChartUrl);
         }
@@ -488,8 +481,8 @@ public class AdminService {
         Portfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
 
-        // 포트폴리오 제출 회원 PK
-        UUID memberId = portfolio.getMember().getMemberId();
+        // 포트폴리오 작성 의뢰인 PK
+        UUID clientId = portfolio.getMember().getMemberId();
 
         // 포트폴리오가 "검토 대기" 상태인 경우
         if (portfolio.getPortfolioType().equals(PortfolioType.PENDING_REVIEW)) {
@@ -501,20 +494,10 @@ public class AdminService {
                     .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
             // 알림 발송
-            fcmService.sendNotification(memberId, payload);
+            fcmService.sendNotification(clientId, payload);
         }
-        PortfolioForAdminResponse portfolioForAdminResponse = entityMapper.toPortfolioForAdminResponse(portfolio);
 
-        List<PortfolioImg> imgList = portfolio.getImgList();
-
-        // 이미지 URL 파싱
-        List<String> portfolioImgList = imgList.stream()
-                .map(img -> portFolioDomain + img.getImgName())
-                .collect(Collectors.toList());
-
-        portfolioForAdminResponse.addPortfolioImg(portfolioImgList);
-
-        return portfolioForAdminResponse;
+        return entityMapper.toPortfolioForAdminResponse(portfolio);
     }
 
     /**

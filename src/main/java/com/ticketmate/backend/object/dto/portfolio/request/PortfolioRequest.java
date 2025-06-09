@@ -19,5 +19,6 @@ public class PortfolioRequest {
     @Schema(defaultValue = "NCT드림, 세븐틴, 투바투, 보넥도등 남자 아이돌 티켓팅 전문입니다. 최대한 고객님의 니즈에 맞춰 자리 잡아드립니다.")
     private String portfolioDescription;
 
-    private List<MultipartFile> portfolioImgs;
+    @Size(min = 1, max = 20, message = "포트폴리오 첨부파일은 최소 1개, 최대 20개까지 등록 가능합니다.")
+    private List<MultipartFile> portfolioImgList;
 }
