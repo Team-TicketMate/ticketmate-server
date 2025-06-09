@@ -154,13 +154,11 @@ public class ChatMessageService {
 
         // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
         TransactionSynchronizationManager.registerSynchronization(
-                new TransactionSynchronizationAdapter() {
+                new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
                         ChatMessage lastMessage = chatMessageRepository.findById(lastMessageId).orElseThrow(
-                                () -> {
-                                    throw new CustomException(ErrorCode.MESSAGE_NOT_FOUND);
-                                }
+                                () -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND)
                         );
                         rabbitTemplate.convertAndSend(
                                 CHAT_EXCHANGE_NAME,
