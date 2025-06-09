@@ -20,7 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,12 +37,12 @@ public class SecurityConfig {
     /**
      * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
      */
-    private static final String[] ALLOWED_ORIGINS = {
+    private static final List<String> ALLOWED_ORIGINS = List.of(
 
             // 3000번 포트
             "https://ticketmate.site", // 프론트
             "https://ticketmate-client.vercel.app", // 프론트 배포
-            "https://ticketmate-admin.vercel.app/", // 프론트 관리자
+            "https://ticketmate-admin.vercel.app", // 프론트 관리자
 
             "https://www.ticketmate.site", // 프론트 배포
             "https://dev.ticketmate.site", // 프론트 test
@@ -56,15 +55,10 @@ public class SecurityConfig {
             "http://localhost:8080", // 로컬 API 서버
             "http://localhost:3000", // 로컬 웹 서버
 
-            // 내부망 cors TODO: 개발 단계에서만 허용
-            "http://172.16.*.*:3000",
-            "http://172.17.*.*:3000",
-            "http://172.18.*.*:3000",
-            "http://172.19.*.*:3000",
-            "http://172.2[0-9].*.*:3000",
-            "http://172.3[01].*.*:3000",
-            "http://192.168.*.*:3000"
-    };
+            "http://10.*:*", // 10.0.0.0/8
+            "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
+            "http://192.168.*:*" // 192.168.0.0/16
+    );
 
     private static final List<String> PATTERN_ORIGINS = List.of(
             "http://10.*:*",                // 10.0.0.0/8
@@ -133,9 +127,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList(ALLOWED_ORIGINS)); // 고정 도메인은 정확한 매칭
-        configuration.setAllowedOriginPatterns(PATTERN_ORIGINS); // 사설 & 내부망은 패턴 매칭
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedOriginPatterns(ALLOWED_ORIGINS);
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Collections.singletonList("*"));
         configuration.setMaxAge(3600L);
