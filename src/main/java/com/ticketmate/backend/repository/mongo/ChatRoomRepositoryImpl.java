@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.ticketmate.backend.util.common.CommonUtil.opponentIdOf;
+
 @Repository
 @RequiredArgsConstructor
 @Slf4j
@@ -96,15 +98,5 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
                 .lastChatSendTime(room.getLastMessageTime())
                 .profileImg(other.getProfileUrl())
                 .build();
-    }
-
-    /**
-     * 자신이 아닌 상대방의 id를 찾아주는 메서드입니다.
-     */
-    private UUID opponentIdOf(ChatRoom room, Member member) {
-        // 여기서 member는 자기 자신입니다.
-        return room.getAgentMemberId().equals(member.getMemberId())
-                ? room.getClientMemberId()
-                : room.getAgentMemberId();
     }
 }
