@@ -47,12 +47,10 @@ public class ChatMessageService {
      * 채팅 메시지를 보내는 메서드입니다.
      */
     @Transactional
-    public ChatMessageResponse sendMessage(ChatMessageRequest request, Member sender, String roomId) {
+    public void sendMessage(ChatMessageRequest request, Member sender, String roomId) {
         // 메시지 발송
         ChatMessageResponse messageResponse = saveMessage(sender, request, roomId);
         rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + roomId, messageResponse);
-
-        return messageResponse;
     }
 
     @Transactional
