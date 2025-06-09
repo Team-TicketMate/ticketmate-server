@@ -1,8 +1,8 @@
 package com.ticketmate.backend.controller.chat;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.dto.chat.reqeust.ChatMessageRequest;
-import com.ticketmate.backend.object.dto.chat.reqeust.ReadAckRequest;
+import com.ticketmate.backend.object.dto.chat.request.ChatMessageRequest;
+import com.ticketmate.backend.object.dto.chat.request.ReadAckRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.chat.ChatMessageService;
 import lombok.RequiredArgsConstructor;

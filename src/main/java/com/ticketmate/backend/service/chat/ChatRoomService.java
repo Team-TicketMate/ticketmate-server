@@ -1,7 +1,7 @@
 package com.ticketmate.backend.service.chat;
 
 import com.ticketmate.backend.object.constants.TicketOpenType;
-import com.ticketmate.backend.object.dto.chat.reqeust.ChatRoomFilteredRequest;
+import com.ticketmate.backend.object.dto.chat.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
 import com.ticketmate.backend.object.mongo.chat.ChatMessage;

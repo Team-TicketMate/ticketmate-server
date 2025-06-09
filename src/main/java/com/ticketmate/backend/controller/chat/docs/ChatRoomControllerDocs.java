@@ -1,7 +1,7 @@
 package com.ticketmate.backend.controller.chat.docs;
 
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.dto.chat.reqeust.ChatRoomFilteredRequest;
+import com.ticketmate.backend.object.dto.chat.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
 import io.swagger.v3.oas.annotations.Operation;

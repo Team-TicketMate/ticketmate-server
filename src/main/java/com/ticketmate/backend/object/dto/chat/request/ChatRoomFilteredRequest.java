@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.dto.chat.reqeust;
+package com.ticketmate.backend.object.dto.chat.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;

@@ -2,7 +2,7 @@ package com.ticketmate.backend.controller.chat;
 
 import com.ticketmate.backend.controller.chat.docs.ChatRoomControllerDocs;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
-import com.ticketmate.backend.object.dto.chat.reqeust.ChatRoomFilteredRequest;
+import com.ticketmate.backend.object.dto.chat.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
 import com.ticketmate.backend.object.postgres.Member.Member;

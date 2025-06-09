@@ -1,4 +1,4 @@
-package com.ticketmate.backend.object.dto.chat.reqeust;
+package com.ticketmate.backend.object.dto.chat.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
