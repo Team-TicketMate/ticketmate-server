@@ -1,13 +1,13 @@
 package com.ticketmate.backend.service.admin;
 
-import com.ticketmate.backend.object.constants.ConcertType;
-import com.ticketmate.backend.object.constants.TicketOpenType;
-import com.ticketmate.backend.object.constants.TicketReservationSite;
-import com.ticketmate.backend.object.dto.admin.request.ConcertDateRequest;
-import com.ticketmate.backend.object.dto.admin.request.ConcertInfoRequest;
-import com.ticketmate.backend.object.dto.admin.request.TicketOpenDateRequest;
+import com.ticketmate.backend.object.constants.*;
+import com.ticketmate.backend.object.dto.admin.request.*;
+import com.ticketmate.backend.object.dto.admin.response.PortfolioForAdminResponse;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.concert.Concert;
 import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
+import com.ticketmate.backend.object.postgres.portfolio.Portfolio;
+import com.ticketmate.backend.object.postgres.portfolio.PortfolioImg;
 import com.ticketmate.backend.repository.postgres.concert.ConcertDateRepository;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
 import com.ticketmate.backend.repository.postgres.concert.TicketOpenDateRepository;
@@ -15,7 +15,7 @@ import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallReposit
 import com.ticketmate.backend.repository.postgres.portfolio.PortfolioRepository;
 import com.ticketmate.backend.service.concerthall.ConcertHallService;
 import com.ticketmate.backend.service.fcm.FcmService;
-import com.ticketmate.backend.service.file.FileService;
+import com.ticketmate.backend.service.storage.FileService;
 import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -82,6 +84,9 @@ class AdminServiceTest {
     void tearDown() {
     }
 
+    /*
+    --------------------------------------공연 관련 테스트--------------------------------------
+     */
     @Test
     void 공연_저장_성공() {
 
@@ -95,7 +100,7 @@ class AdminServiceTest {
                 .thenReturn(Optional.of(new ConcertHall()));
 
         // MultipartFile 저장
-        when(fileService.saveFile(any()))
+        when(fileService.uploadFile(any(), any()))
                 .thenReturn("https://test.example.com/mock-file.png");
 
         // then
@@ -104,7 +109,7 @@ class AdminServiceTest {
         verify(concertRepository, times(1)).save(any(Concert.class));
         verify(concertDateRepository, times(1)).saveAll(any());
         verify(ticketOpenDateRepository, times(1)).saveAll(any());
-        verify(fileService, times(2)).saveFile(any());
+        verify(fileService, times(2)).uploadFile(any(), any());
     }
 
     @Test
@@ -375,5 +380,191 @@ class AdminServiceTest {
                                 .build()
                 ))
                 .build();
+    }
+
+    /*
+    --------------------------------------공연장 관련 테스트--------------------------------------
+     */
+
+    @Test
+    void 공연장_저장_성공() {
+        // given
+        ConcertHallInfoRequest request = createConcertHallInfoRequest(
+                "테스트 공연장",
+                "서울특별시 중구 동호로 241",
+                "https://www.ticketmate.com"
+        );
+        request.setAddress(null);
+        request.setWebSiteUrl(null);
+
+        // when
+        adminService.saveConcertHallInfo(request);
+
+        // then
+        verify(concertHallRepository, times(1)).save(any(ConcertHall.class));
+    }
+
+    @Test
+    void 공연장_저장_실패_중복_공연장명() {
+        // given
+        ConcertHallInfoRequest request = createConcertHallInfoRequest(
+                "테스트 공연장",
+                "서울특별시 중구 동호로 241",
+                "https://www.ticketmate.com"
+        );
+
+        // when
+        when(concertHallRepository.existsByConcertHallName("테스트 공연장")).thenReturn(true);
+
+        // then
+        assertThatThrownBy(() -> adminService.saveConcertHallInfo(request))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining(ErrorCode.DUPLICATE_CONCERT_HALL_NAME.getMessage());
+    }
+
+    @Test
+    void 공연장_주소에_따른_지역코드_확인() {
+        // given
+        ArgumentCaptor<ConcertHall> captor = ArgumentCaptor.forClass(ConcertHall.class);
+
+        ConcertHallInfoRequest request = createConcertHallInfoRequest(
+                "테스트 공연장",
+                "서울특별시 중구 동호로 241",
+                "https://www.ticketmate.com"
+        );
+
+        // when
+        adminService.saveConcertHallInfo(request);
+
+        // then
+        verify(concertHallRepository).save(captor.capture());
+        ConcertHall savedConcertHall = captor.getValue();
+        assertThat(savedConcertHall.getCity()).isEqualTo(City.SEOUL);
+        assertThat(savedConcertHall.getCity().getCityCode()).isEqualTo(11);
+    }
+
+    private static ConcertHallInfoRequest createConcertHallInfoRequest(String concertHallName, String address, String webSiteUrl) {
+        return ConcertHallInfoRequest.builder()
+                .concertHallName(concertHallName)
+                .address(address)
+                .webSiteUrl(webSiteUrl)
+                .build();
+    }
+
+    /*
+    --------------------------------------포트폴리오 관련 테스트--------------------------------------
+     */
+
+    @Test
+    void 포트폴리오_상세_조회_성공_검토중_업데이트() {
+        // given
+        UUID portfolioId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.PENDING_REVIEW);
+
+        // when
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(entityMapper.toPortfolioForAdminResponse(portfolio))
+                .thenReturn(PortfolioForAdminResponse.builder()
+                        .portfolioId(portfolioId)
+                        .build());
+
+        // then
+        PortfolioForAdminResponse response = adminService.getPortfolio(portfolioId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getPortfolioId()).isEqualTo(portfolioId);
+        verify(portfolioRepository).findById(portfolioId);
+
+        // 포트폴리오 상태가 IN_REVIEW로 변경되었는지 확인
+        assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.IN_REVIEW);
+
+        // 알림 전송 확인
+        verify(notificationUtil).portfolioNotification(eq(PortfolioType.IN_REVIEW), eq(portfolio));
+        verify(fcmService).sendNotification(eq(memberId), any());
+    }
+
+    @Test
+    void 포트폴리오_상세_조회_성공_검토중_업데이트_및_알림전송_안됨() {
+        // given
+        UUID portfolioId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.ACCEPTED);
+
+        // when
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        when(entityMapper.toPortfolioForAdminResponse(portfolio))
+                .thenReturn(PortfolioForAdminResponse.builder()
+                        .portfolioId(portfolioId)
+                        .build());
+
+        // then
+        PortfolioForAdminResponse response = adminService.getPortfolio(portfolioId);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getPortfolioId()).isEqualTo(portfolioId);
+        verify(portfolioRepository).findById(portfolioId);
+
+        // 포트폴리오 상태가 IN_REVIEW로 변경되지 않았는지 확인
+        assertThat(portfolio.getPortfolioType()).isNotEqualTo(PortfolioType.IN_REVIEW);
+        assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.ACCEPTED);
+
+        // 알림 전송 확인
+        verify(notificationUtil, never()).portfolioNotification(eq(PortfolioType.IN_REVIEW), eq(portfolio));
+        verify(fcmService, never()).sendNotification(eq(memberId), any());
+    }
+
+    @Test
+    void 관리자_포트폴리오_승인_성공() {
+        // given
+        UUID portfolioId = UUID.randomUUID();
+        UUID memberId = UUID.randomUUID();
+        Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.IN_REVIEW);
+
+        when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
+        PortfolioStatusUpdateRequest request = PortfolioStatusUpdateRequest.builder()
+                .portfolioType(PortfolioType.ACCEPTED)
+                .build();
+
+        // when
+        UUID returnId = adminService.reviewPortfolioCompleted(portfolioId, request);
+
+        // then
+        assertThat(returnId).isEqualTo(portfolioId);
+        assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.ACCEPTED);
+        assertThat(portfolio.getMember().getMemberType()).isEqualTo(MemberType.AGENT);
+        verify(notificationUtil).portfolioNotification(PortfolioType.ACCEPTED, eq(portfolio));
+        verify(fcmService).sendNotification(eq(memberId), any());
+    }
+
+    @Test
+    void 포트폴리오_승인_반려_에러_발생_검토중이_아닌_포트폴리오_요청() {
+
+    }
+
+    @Test
+    void 포트폴리오_승인_반려_에러_발생_유효하지_않은_포트폴리오_타입_요청() {
+
+    }
+
+    private static Portfolio createPortfolio(UUID portfolioId, UUID memberId, PortfolioType portfolioType) {
+        Portfolio portfolio = Portfolio.builder()
+                .portfolioId(portfolioId)
+                .portfolioDescription("포트폴리오 소개")
+                .portfolioType(portfolioType)
+                .member(Member.builder()
+                        .memberId(memberId)
+                        .memberType(MemberType.CLIENT)
+                        .build())
+                .build();
+
+        PortfolioImg portfolioImg = PortfolioImg.builder()
+                .portfolioImgId(UUID.randomUUID())
+                .filePath("https://test-image.png.com")
+                .portfolio(portfolio)
+                .build();
+
+        portfolio.addImg(portfolioImg);
+        return portfolio;
     }
 }
