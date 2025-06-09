@@ -1,5 +1,6 @@
 package com.ticketmate.backend.repository.mongo;
 
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
 import com.ticketmate.backend.object.mongo.chat.ChatRoom;
 import com.ticketmate.backend.object.postgres.Member.Member;
@@ -15,7 +16,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,11 +31,13 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
      * MongoDB 동적 쿼리 생성
      */
     @Override
-    public Page<ChatRoom> search(Boolean preOpen, String keyword, Member member, Integer pageNum) {
+    public Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNum) {
         log.debug("받아온 키워드 : {}", keyword);
         UUID memberId = member.getMemberId();
 
-        /* 1. 내가 ‘대리인’으로 들어가 있는 방 조건 */
+        log.debug("선예매 일반예매 구분 : {}", preOpen);
+
+        // 1. 내가 ‘대리인’으로 들어가 있는 방 조건
         Criteria asAgent = Criteria.where("agentMemberId").is(memberId);
         if (preOpen != null) {
             asAgent = asAgent.and("preOpen").is(preOpen);
@@ -44,7 +46,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
             asAgent = asAgent.and("clientMemberNickname").regex(keyword, "i");
         }
 
-        /* 2. 내가 ‘의뢰인’으로 들어가 있는 방 조건 */
+        // 2. 내가 ‘의뢰인’으로 들어가 있는 방 조건
         Criteria asClient = Criteria.where("clientMemberId").is(memberId);
         if (preOpen != null) {
             asClient = asClient.and("preOpen").is(preOpen);
@@ -52,7 +54,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         if (!keyword.isEmpty())         {
             asClient = asClient.and("agentMemberNickname").regex(keyword, "i"); }
 
-        /* 3. 두 분기 OR로 결합 */
+        // 3. 두 분기 OR로 결합
         Criteria criteria = new Criteria().orOperator(asAgent, asClient);
 
         // 마지막 채팅 메시지 시간 기준 내림차순 정렬 (6개씩)
@@ -77,7 +79,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
      */
     public ChatRoomListResponse toResponse(ChatRoom room, Member member,
                                            Map<UUID, ApplicationForm> applicationFormMap,
-                                           Map<UUID, Member> memberMap) {
+                                           Map<UUID, Member> memberMap, int unRead) {
 
         // 매핑을 위한 값 세팅
         UUID opponentId = opponentIdOf(room, member);
@@ -85,13 +87,13 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         ApplicationForm applicationForm = applicationFormMap.get(room.getApplicationFormId());
 
         return ChatRoomListResponse.builder()
+                .unRead(unRead)
                 .roomId(room.getRoomId())
                 .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
                 .isPreOpen(room.getPreOpen())
-                .lastChatMessage("마지막메시지들어가야됨")  // TODO 채팅 메시지 구현 후 설계
+                .lastChatMessage(room.getLastMessage())
                 .concertImg(applicationForm.getConcert().getConcertThumbnailUrl())
-                .lastChatSendTime(LocalDateTime.now())  // TODO 채팅 메시지 구현 후 설계
-                .messageCount(1)  // TODO 채팅 메시지 구현 후 설계
+                .lastChatSendTime(room.getLastMessageTime())
                 .profileImg(other.getProfileUrl())
                 .build();
     }

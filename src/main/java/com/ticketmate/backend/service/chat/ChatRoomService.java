@@ -1,17 +1,26 @@
 package com.ticketmate.backend.service.chat;
 
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.chat.reqeust.ChatRoomFilteredRequest;
+import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
+import com.ticketmate.backend.object.mongo.chat.ChatMessage;
 import com.ticketmate.backend.object.mongo.chat.ChatRoom;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
+import com.ticketmate.backend.repository.mongo.ChatMessageRepository;
 import com.ticketmate.backend.repository.mongo.ChatRoomRepository;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
+import com.ticketmate.backend.util.common.MongoMapper;
+import com.ticketmate.backend.util.exception.CustomException;
+import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,8 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.ticketmate.backend.util.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +41,9 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberRepository memberRepository;
     private final ApplicationFormRepository applicationFormRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final MongoMapper mongoMapper;
+    private final RedisTemplate<String, String> redisTemplate;
 
     /**
      * 사용자별 존재하는 채팅방 리스트를 불러오는 메서드입니다.
@@ -36,7 +51,7 @@ public class ChatRoomService {
     @Transactional(readOnly = true)
     public Page<ChatRoomListResponse> getChatRoomList(Member member, ChatRoomFilteredRequest request) {
         // 필터링 관련 필드값 세팅
-        Boolean preOpen = null;
+        TicketOpenType preOpen = null;
 
         String keyword = (request.getSearchKeyword() != null && request.getSearchKeyword() != "") ?
                 request.getSearchKeyword() : "";
@@ -45,9 +60,11 @@ public class ChatRoomService {
                 request.getPageNum() : 0;
 
         if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.PRE_OPEN)) {
-            preOpen = true;
+            // 선예매만 필터링
+            preOpen = TicketOpenType.PRE_OPEN;
         } else if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.NORMAL)) {
-            preOpen = false;
+            // 일반예매만 필터링
+            preOpen = TicketOpenType.GENERAL_OPEN;
         }
 
         // 채팅방 리스트 불러오기 (20개씩)
@@ -74,12 +91,24 @@ public class ChatRoomService {
                 .stream()
                 .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
 
-        // TODO 마지막으로 저장된 메시지 일괄조회 로직 or 내부에서 처리 고민
+        List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
+            chatRoomList.forEach(r -> {
+                String redisKey = ("unRead:%s:%s").formatted(r.getRoomId(), member.getMemberId());
+                con.stringCommands().get(redisKey.getBytes());
+            });
+            return null;
+        });
 
-        // 매핑
+
+
+        AtomicInteger i = new AtomicInteger();
         List<ChatRoomListResponse> response = chatRoomList.stream()
-                .map(room -> chatRoomRepository.toResponse(room, member, applicationFormMap, memberMap))
-                        .toList();
+                .map(r -> {
+                    int unRead = parseInt(countList.get(i.getAndIncrement()));
+                    return chatRoomRepository.toResponse(
+                            r, member, applicationFormMap, memberMap, unRead);
+                })
+                .toList();
 
         return new PageImpl<>(response, chatRoomList.getPageable(), chatRoomList.getTotalElements());
     }
@@ -92,5 +121,39 @@ public class ChatRoomService {
         return room.getAgentMemberId().equals(member.getMemberId())
                 ? room.getClientMemberId()
                 : room.getAgentMemberId();
+    }
+
+    /**
+     * 현재 진행한 채팅 메시지 불러오는 메서드
+     */
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponse> getChatMessage(Member member, String roomId){
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+        validateRoomMember(room, member);
+
+        List<ChatMessage> massageList = chatMessageRepository
+                .findByRoomIdOrderBySendDateAsc(roomId);
+
+        return massageList.stream().map(mongoMapper::toResponse).toList();
+    }
+
+    /**
+     * 방 참가자 검증
+     */
+    private void validateRoomMember(ChatRoom room, Member member) {
+        UUID id = member.getMemberId();
+        if (!id.equals(room.getAgentMemberId()) && !id.equals(room.getClientMemberId())) {
+            throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
+        }
+    }
+
+    /**
+     * 형변환 메서드
+     */
+    private int parseInt(Object o){
+        if(o == null) return 0;
+        if(o instanceof byte[] b) return Integer.parseInt(new String(b));
+        return Integer.parseInt(o.toString());
     }
 }

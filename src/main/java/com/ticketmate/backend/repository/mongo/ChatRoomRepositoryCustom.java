@@ -1,5 +1,6 @@
 package com.ticketmate.backend.repository.mongo;
 
+import com.ticketmate.backend.object.constants.TicketOpenType;
 import com.ticketmate.backend.object.dto.chat.response.ChatRoomListResponse;
 import com.ticketmate.backend.object.mongo.chat.ChatRoom;
 import com.ticketmate.backend.object.postgres.Member.Member;
@@ -12,9 +13,10 @@ import java.util.UUID;
 
 @Repository
 public interface ChatRoomRepositoryCustom {
-    Page<ChatRoom> search(Boolean preOpen, String keyword, Member member, Integer pageNum);
+    Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNum);
 
     ChatRoomListResponse toResponse(ChatRoom room, Member member,
                                     Map<UUID, ApplicationForm> applicationFormMap,
-                                    Map<UUID, Member> memberMap);
+                                    Map<UUID, Member> memberMap,
+                                    int unRead);
 }
