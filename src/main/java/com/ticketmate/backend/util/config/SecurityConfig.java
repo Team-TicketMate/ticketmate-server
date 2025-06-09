@@ -22,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +36,7 @@ public class SecurityConfig {
     private final CustomLogoutHandler customLogoutHandler;
 
     /**
-     * 허용된 CORS Origin 목록
+     * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
      */
     private static final String[] ALLOWED_ORIGINS = {
 
@@ -64,6 +65,12 @@ public class SecurityConfig {
             "http://172.3[01].*.*:3000",
             "http://192.168.*.*:3000"
     };
+
+    private static final List<String> PATTERN_ORIGINS = List.of(
+            "http://10.*:*",                // 10.0.0.0/8
+            "http://172.*:*",               // 172.16.0.0/12 전체 (16~31)
+            "http://192.168.*:*"            // 192.168.0.0/16
+    );
 
     /**
      * Security Filter Chain 설정
@@ -126,7 +133,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList(ALLOWED_ORIGINS));
+        configuration.setAllowedOriginPatterns(Arrays.asList(ALLOWED_ORIGINS)); // 고정 도메인은 정확한 매칭
+        configuration.setAllowedOriginPatterns(PATTERN_ORIGINS); // 사설 & 내부망은 패턴 매칭
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Collections.singletonList("*"));
