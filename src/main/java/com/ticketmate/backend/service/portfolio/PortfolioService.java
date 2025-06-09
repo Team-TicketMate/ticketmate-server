@@ -50,7 +50,7 @@ public class PortfolioService {
         Portfolio portfolio = createPortfolio(request, client);
 
         if (!CommonUtil.nullOrEmpty(request.getPortfolioImgList())) {
-            processPortfolioImageList(portfolio, request.getPortfolioImgList());
+            processPortfolioImgList(portfolio, request.getPortfolioImgList());
         }
 
         return portfolioRepository.save(portfolio).getPortfolioId();
@@ -83,19 +83,36 @@ public class PortfolioService {
     /**
      * 포트폴리오 이미지 처리
      */
-    private void processPortfolioImageList(Portfolio portfolio, List<MultipartFile> imgList) {
+    private void processPortfolioImgList(Portfolio portfolio, List<MultipartFile> imgList) {
+        List<String> filePathList = new ArrayList<>();
         int uploadCount = 0;
-        for (MultipartFile file : imgList) {
-            String filePath = fileService.uploadFile(file, UploadType.PORTFOLIO);
 
-            PortfolioImg portfolioImg = PortfolioImg.builder()
-                    .portfolio(portfolio)
-                    .filePath(filePath)
-                    .build();
+        try {
+            for (MultipartFile file : imgList) {
+                String filePath = fileService.uploadFile(file, UploadType.PORTFOLIO);
+                filePathList.add(filePath);
 
-            portfolio.addImg(portfolioImg);
-            uploadCount++;
+                PortfolioImg portfolioImg = PortfolioImg.builder()
+                        .portfolio(portfolio)
+                        .filePath(filePath)
+                        .build();
+
+                portfolio.addImg(portfolioImg);
+                uploadCount++;
+            }
+            log.debug("총 저장된 포트폴리오 이미지 파일 개수: {}", uploadCount);
+        } catch (Exception e) {
+            log.error("포트폴리오 이미지 업로드 중 오류 발생, 이미 업로드 된 {} 개 파일 삭제", filePathList.size());
+
+            // 이미 업로드 된 파일들 모두 삭제
+            for (String filePath : filePathList) {
+                try {
+                    fileService.deleteFile(filePath);
+                } catch (Exception exception) {
+                    log.error("롤백 중 파일 삭제 실패: {}, 오류: {}", filePath, exception.getMessage());
+                }
+            }
+            throw e;
         }
-        log.debug("총 저장된 포트폴리오 이미지 파일 개수: {}", uploadCount);
     }
 }

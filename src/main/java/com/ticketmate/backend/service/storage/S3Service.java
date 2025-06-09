@@ -140,7 +140,9 @@ public class S3Service implements FileService {
      */
     private String generateFilename(String originalFilename, String prefix) {
         String datePart = LocalDateTime.now().format(DATE_TIME_FORMATTER);
-        return String.format("%s/%s-%s-%s", prefix, datePart, UUID.randomUUID(), originalFilename);
+        // 파일명에서 경로 구분자와 특수 문자 제거
+        String sanitizedFilename = originalFilename.replaceAll("[/\\\\:*?\"<>|]", "_");
+        return String.format("%s/%s-%s-%s", prefix, datePart, UUID.randomUUID(), sanitizedFilename);
     }
 
     /**
