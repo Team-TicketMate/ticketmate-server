@@ -1,6 +1,6 @@
 package com.ticketmate.backend.service.chat;
 
-import com.ticketmate.backend.object.dto.chat.reqeust.ChatMessageRequest;
+import com.ticketmate.backend.object.dto.chat.request.ChatMessageRequest;
 import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ReadAckResponse;
 import com.ticketmate.backend.object.mongo.chat.ChatMessage;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Duration;
