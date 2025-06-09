@@ -366,46 +366,52 @@ public class ApplicationFormService {
             throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
         }
 
+        /**
+         * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 수락 자체가 불가합니다.
+         * 채팅방은 공연당 하나씩 생성합니다.
+         * 선예매/일반예매는 각각 다른 공연으로 취급되어 한 공연당 2개의 채팅방이 존재할 수 있습니다.
+         */
 
-        //  이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 신청 자체가 불가합니다.
-        // 추후 의뢰인은 한 콘서트당 하나의 신청폼을 작성해 매칭을 신청하는 부분을 고민합니다. (콘서트, 신청폼 1:1)
-        List<ApplicationForm> applicationFormList = applicationFormRepository
-                .findAllByConcertConcertIdAndClientMemberId(applicationForm.getConcert().getConcertId(), client.getMemberId());
+        // 신청서가 수락상태인지 검증
+        boolean applicationFormExist = applicationFormRepository
+                .existsByConcertAndClientAndTicketOpenTypeAndApplicationFormStatus(applicationForm.getConcert(),
+                        client, applicationForm.getTicketOpenType(), ApplicationFormStatus.ACCEPTED);
 
-        for (ApplicationForm form : applicationFormList) {
-            if (form.getApplicationFormStatus().equals(ApplicationFormStatus.ACCEPTED)) {
-                throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
-            }
+        // 이미 수락된 신청서인지
+        if (applicationFormExist) {
+            throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
         }
 
         // 신청서 상태 승인 변경
         applicationForm.setApplicationFormStatus(ApplicationFormStatus.ACCEPTED);
         log.debug("신청서 상태 승인변경 : {}", applicationForm.getApplicationFormStatus());
 
-        /*
-         * 채팅방이 이미 존재한다면 해당 채팅방이 갖고있는 신청폼 정보만 바꿔줍니다.
-         */
-        // 이미 똑같은 대리인, 의뢰인의 채팅방이 존재하는지
-        ChatRoom chatRoom = chatRoomRepository
-                .findByAgentMemberIdAndClientMemberId(agent.getMemberId(), client.getMemberId())
-                // 이미 존재한다면 기존 신청폼의 정보만 바꿉니다.
-                .map(room -> {
-                    log.debug("기존 채팅방 존재");
-                    room.setApplicationFormId(applicationFormId);
-                    return room;
-                })
-                // 없다면 새로운 채팅방을 생성합니다.
-                .orElseGet(() ->
-                        ChatRoom.builder()
-                                .agentMemberId(agent.getMemberId())
-                                .clientMemberId(client.getMemberId())
-                                .applicationFormId(applicationFormId)
-                                .build()
-                );
+        // 신청서의 콘서트, 의뢰인, 대리인, 선예매/일반예매 필드를 참조해 이미 채팅방이 존재하는지 판별
+        boolean chatRoomExist = chatRoomRepository
+                .existsByAgentMemberIdAndClientMemberIdAndConcertIdAndPreOpen(agent.getMemberId(), client.getMemberId(),
+                        applicationForm.getConcert().getConcertId(), applicationForm.getTicketOpenType());
+
+        // 존재한다면 에러 반환
+        if (chatRoomExist) {
+            throw new CustomException(ErrorCode.ALREADY_EXIST_CHAT_ROOM);
+        }
+
+        // 없으면 새로운 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .agentMemberId(agent.getMemberId())
+                .agentMemberNickname(agent.getNickname())
+                .clientMemberNickname(client.getNickname())
+                .lastMessage("")
+                .lastMessageId("")
+                .clientMemberId(client.getMemberId())
+                .applicationFormId(applicationFormId)
+                .concertId(applicationForm.getConcert().getConcertId())
+                .preOpen(applicationForm.getTicketOpenType())
+                .build();
 
         chatRoomRepository.save(chatRoom);
 
-        // 알림전송
+        // 알림전송 TODO : FCM 토큰이 없을시 분기처리
         NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
         fcmService.sendNotification(client.getMemberId(), payloadRequest);
 

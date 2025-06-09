@@ -54,8 +54,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     @GetMapping("/{applicationFormId}")
     @LogMonitoringInvocation
     public ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @PathVariable UUID applicationFormId) {
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable UUID applicationFormId){
         return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));
     }
 
