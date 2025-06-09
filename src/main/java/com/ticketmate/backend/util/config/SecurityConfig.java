@@ -42,6 +42,7 @@ public class SecurityConfig {
             // 3000번 포트
             "https://ticketmate.site", // 프론트
             "https://ticketmate-client.vercel.app", // 프론트 배포
+            "https://ticketmate-admin.vercel.app/", // 프론트 관리자
 
             "https://www.ticketmate.site", // 프론트 배포
             "https://dev.ticketmate.site", // 프론트 test
