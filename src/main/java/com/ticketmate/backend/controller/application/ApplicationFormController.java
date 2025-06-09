@@ -66,7 +66,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
                        @PathVariable(value = "application-form-id") UUID applicationFormId,
                        @RequestBody ApplicationFormRejectRequest request) {
         Member member = customOAuth2User.getMember();
-        applicationFormService.reject(applicationFormId, member, request);
+        applicationFormService.rejectApplicationForm(applicationFormId, member, request);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
     public ResponseEntity<String> approve(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                        @PathVariable(value = "application-form-id") UUID applicationFormId) {
         Member member = customOAuth2User.getMember();
-        return ResponseEntity.ok(applicationFormService.approve(applicationFormId, member));
+        return ResponseEntity.ok(applicationFormService.acceptedApplicationForm(applicationFormId, member));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.ticketmate.backend.service.member;
 
+import com.ticketmate.backend.object.constants.MemberType;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
+import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.util.JwtUtil;
 import com.ticketmate.backend.util.common.CookieUtil;
 import com.ticketmate.backend.util.exception.CustomException;
@@ -55,7 +57,7 @@ public class MemberService {
         }
 
         // 해당 refreshToken이 유효한지 검증
-        isValidateRefreshToken(refreshToken);
+        validateRefreshToken(refreshToken);
 
         // 새로운 accessToken, refreshToken 발급
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) jwtUtil
@@ -86,9 +88,22 @@ public class MemberService {
     }
 
     /**
+     * 요청 된 Member.MemberType 과 MemberType 비교
+     *
+     * @param member 검증하고자 하는 사용자
+     * @param memberType 예상 MemberType
+     */
+    public void validateMemberType(Member member, MemberType memberType) {
+        if (!member.getMemberType().equals(memberType)) {
+            log.error("잘못된 MemberType 입니다.. 사용자 MemberType: {}", member.getMemberType());
+            throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+        }
+    }
+
+    /**
      * 요청된 리프레시 토큰이 유효한지 확인하고 유효하다면 해당 리프레시 토큰을 반환합니다.
      */
-    private void isValidateRefreshToken(String token) {
+    private void validateRefreshToken(String token) {
         if (jwtUtil.isExpired(token)) { // 리프레시 토큰 만료 여부 확인
             log.error("refreshToken이 만료되었습니다.");
             throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
