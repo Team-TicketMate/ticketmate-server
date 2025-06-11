@@ -1,6 +1,7 @@
 package com.ticketmate.backend.controller.test.docs;
 
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
+import com.ticketmate.backend.object.dto.test.response.LoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 
@@ -28,7 +29,7 @@ public interface TestControllerDocs {
                     - username을 입력하지 않을 시 임의의 사용자가 생성됩니다
                     """
     )
-    ResponseEntity<String> socialLogin(LoginRequest request);
+    ResponseEntity<LoginResponse> socialLogin(LoginRequest request);
 
     @Operation(
             summary = "회원 Mock 데이터 생성",
