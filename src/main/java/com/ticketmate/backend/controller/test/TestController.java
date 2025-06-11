@@ -2,6 +2,7 @@ package com.ticketmate.backend.controller.test;
 
 import com.ticketmate.backend.controller.test.docs.TestControllerDocs;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
+import com.ticketmate.backend.object.dto.test.response.LoginResponse;
 import com.ticketmate.backend.service.test.TestService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,7 +29,7 @@ public class TestController implements TestControllerDocs {
     @Override
     @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LogMonitoringInvocation
-    public ResponseEntity<String> socialLogin(
+    public ResponseEntity<LoginResponse> socialLogin(
             @Valid @ModelAttribute LoginRequest request) {
         return ResponseEntity.ok(testService.testSocialLogin(request));
     }

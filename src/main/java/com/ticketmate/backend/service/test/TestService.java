@@ -3,6 +3,7 @@ package com.ticketmate.backend.service.test;
 import com.ticketmate.backend.object.constants.*;
 import com.ticketmate.backend.object.dto.auth.request.CustomOAuth2User;
 import com.ticketmate.backend.object.dto.test.request.LoginRequest;
+import com.ticketmate.backend.object.dto.test.response.LoginResponse;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
@@ -78,7 +79,7 @@ public class TestService {
      *                isFirstLogin 첫 로그인 여부
      */
     @Transactional
-    public String testSocialLogin(LoginRequest request) {
+    public LoginResponse testSocialLogin(LoginRequest request) {
 
         log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
@@ -90,7 +91,11 @@ public class TestService {
         log.debug("테스트 로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
         log.debug("테스트 accessToken = {}", accessToken);
 
-        return accessToken;
+        return LoginResponse.builder()
+                .memberId(member.getMemberId())
+                .memberType(member.getMemberType())
+                .accessToken(accessToken)
+                .build();
     }
 
     /**
