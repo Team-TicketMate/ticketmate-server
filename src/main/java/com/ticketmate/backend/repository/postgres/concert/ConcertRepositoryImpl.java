@@ -26,14 +26,14 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository("concertRepositoryOriginal")
+@Repository
 @RequiredArgsConstructor
 public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
     /**
-     * 공연 필터링 조회 (Left Join)
+     * 공연 필터링 조회 (JOIN + GROUP BY)
      *
      * @param concertName           공연 이름 (검색어)
      * @param concertHallName       공연장 이름 (검색어)
@@ -61,7 +61,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         whereClause = combineWhereClause(whereClause, whereConcertType(concertType));
         whereClause = combineWhereClause(whereClause, whereTicketReservationSite(ticketReservationSite));
 
-        // 쿼리 작성
+        // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
         JPAQuery<ConcertFilteredResponse> query = queryFactory
                 .select(Projections.constructor(ConcertFilteredResponse.class,
                         concert.concertId,
@@ -69,6 +69,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         concertHall.concertHallName,
                         concert.concertType,
                         concert.ticketReservationSite,
+
+                        // 성능 최적화를 위한 CASE WHEN
                         // 선예매 오픈일
                         Expressions.dateTimeTemplate(
                                 LocalDateTime.class,
@@ -109,9 +111,11 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                         concert.seatingChartUrl
                 ))
                 .from(concert)
+                // 공연장은 필수가 아니므로 Left Join
                 .leftJoin(concert.concertHall, concertHall)
-                .leftJoin(concertDate).on(concert.concertId.eq(concertDate.concert.concertId))
-                .leftJoin(ticketOpenDate).on(concert.concertId.eq(ticketOpenDate.concert.concertId))
+                // 공연일(ConcertDate), 티켓오픈일(TicketOpenDate)은 필수이므로 Inner Join
+                .join(concertDate).on(concert.concertId.eq(concertDate.concert.concertId))
+                .join(ticketOpenDate).on(concert.concertId.eq(ticketOpenDate.concert.concertId))
                 .where(whereClause)
                 .groupBy(concert.concertId,
                         concert.concertName,
@@ -132,19 +136,15 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 전체 개수 조회
+        // Count Query 최적화 (필요한 조인만 사용)
         Long total = queryFactory
                 .select(concert.concertId.countDistinct())
                 .from(concert)
                 .leftJoin(concert.concertHall, concertHall)
-                .leftJoin(concertDate).on(concert.concertId.eq(concertDate.concert.concertId))
-                .leftJoin(ticketOpenDate).on(concert.concertId.eq(ticketOpenDate.concert.concertId))
                 .where(whereClause)
                 .fetchOne();
 
-        if (total == null) {
-            total = 0L;
-        }
+        total = total == null ? 0 : total;
 
         return new PageImpl<>(content, pageable, total);
     }

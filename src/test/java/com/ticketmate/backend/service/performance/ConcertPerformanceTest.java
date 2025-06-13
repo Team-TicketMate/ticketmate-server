@@ -1,9 +1,9 @@
 package com.ticketmate.backend.service.performance;
 
-import com.ticketmate.backend.object.constants.ConcertType;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
-import com.ticketmate.backend.repository.postgres.concert.*;
+import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
+import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
 import com.ticketmate.backend.service.concert.ConcertService;
 import com.ticketmate.backend.service.test.TestService;
 import lombok.Builder;
@@ -36,19 +36,13 @@ public class ConcertPerformanceTest {
     TestService testService;
 
     @Autowired
-    ConcertRepository concertRepository;
-
-    @Autowired
     ConcertRepositoryImpl concertRepositoryImpl;
 
     @Autowired
-    ConcertRepositoryOptimizedImpl concertRepositoryOptimizedImpl;
+    ConcertRepositorySubqueryImpl concertRepositorySubqueryImpl;
 
     @Autowired
-    ConcertDateRepository concertDateRepository;
-
-    @Autowired
-    TicketOpenDateRepository ticketOpenDateRepository;
+    private ConcertRepository concertRepository;
 
     @Autowired
     ConcertService concertService;
@@ -90,12 +84,12 @@ public class ConcertPerformanceTest {
     /**
      * N번 테스트 실행
      */
-    @RepeatedTest(10)
+    @RepeatedTest(1)
     void 기존_공연_필터링_조회_테스트(RepetitionInfo info) {
 
         ConcertFilteredRequest request = ConcertFilteredRequest.builder()
-                .concertName("e")
-                .ConcertType(ConcertType.CONCERT)
+//                .concertName("e")
+//                .ConcertType(ConcertType.CONCERT)
                 .pageNumber(0)
                 .pageSize(30)
                 .sortField("created_date")
@@ -181,7 +175,7 @@ public class ConcertPerformanceTest {
         log.info("Left Join 쿼리 소요시간: {}ms", stopWatch.getTotalTimeMillis());
 
         stopWatch.start("서브 쿼리");
-        Page<ConcertFilteredResponse> subqueryResponse = concertRepositoryOptimizedImpl
+        Page<ConcertFilteredResponse> subqueryResponse = concertRepositorySubqueryImpl
                 .filteredConcert(
                         "",
                         "",
