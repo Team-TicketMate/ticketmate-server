@@ -1,4 +1,4 @@
-package com.ticketmate.backend.repository.postgres.concert;
+package com.ticketmate.backend.service.performance;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -12,6 +12,7 @@ import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.object.postgres.concert.QConcert;
 import com.ticketmate.backend.object.postgres.concerthall.QConcertHall;
+import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryCustom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,9 +23,9 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository("concertRepositoryOptimized")
+@Repository
 @RequiredArgsConstructor
-public class ConcertRepositoryOptimizedImpl implements ConcertRepositoryCustom {
+public class ConcertRepositorySubqueryImpl implements ConcertRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
