@@ -1,5 +1,7 @@
 package com.ticketmate.backend.service.performance;
 
+import com.ticketmate.backend.object.constants.ConcertType;
+import com.ticketmate.backend.object.constants.TicketReservationSite;
 import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
 import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
 import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
@@ -84,21 +86,20 @@ public class ConcertPerformanceTest {
     /**
      * N번 테스트 실행
      */
-    @RepeatedTest(1)
+    @RepeatedTest(10)
     void 기존_공연_필터링_조회_테스트(RepetitionInfo info) {
+        Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "created_date"));
 
-        ConcertFilteredRequest request = ConcertFilteredRequest.builder()
-//                .concertName("e")
-//                .ConcertType(ConcertType.CONCERT)
-                .pageNumber(0)
-                .pageSize(30)
-                .sortField("created_date")
-                .sortDirection("DESC")
-                .build();
         StopWatch stopWatch = new StopWatch("공연 필터링 조회");
 
         stopWatch.start();
-        Page<ConcertFilteredResponse> concertFilteredResponses = concertService.filteredConcert(request);
+        Page<ConcertFilteredResponse> concertFilteredResponses = concertRepositoryImpl.filteredConcert(
+                "연",
+                "",
+                ConcertType.CONCERT,
+                TicketReservationSite.INTERPARK_TICKET,
+                pageable
+        );
         stopWatch.stop();
 
         long totalTimeMillis = stopWatch.getTotalTimeMillis();
