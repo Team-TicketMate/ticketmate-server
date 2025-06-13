@@ -31,8 +31,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StopWatch;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,7 @@ public class TestService {
     private final MemberRepository memberRepository;
     private final Faker koFaker = new Faker(new Locale("ko", "KR"));
     private final MockMemberFactory mockMemberFactory;
+    private final MockConcertFactory mockConcertFactory;
     private final MockPortfolioFactory mockPortfolioFactory;
     private final JwtUtil jwtUtil;
     @Qualifier("applicationTaskExecutor")
@@ -63,6 +65,10 @@ public class TestService {
     private final ConcertHallRepository concertHallRepository;
     private final ApplicationFormRepository applicationFormRepository;
     private final PortfolioRepository portfolioRepository;
+    private final TransactionTemplate transactionTemplate;
+
+    // 배치 사이즈
+    private static final int BATCH_SIZE = 500;
 
     /*
     ======================================회원======================================
@@ -103,7 +109,7 @@ public class TestService {
      * 해당 메서드는 멀티스레드를 사용하여 동작합니다
      */
     @Transactional
-    public CompletableFuture<Void> generateMockMembersAsync(int count) {
+    public CompletableFuture<Void> generateMemberMockDataAsync(int count) {
         long startMs = System.currentTimeMillis();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         List<Member> memberList = Collections.synchronizedList(new ArrayList<>());
@@ -134,7 +140,7 @@ public class TestService {
                         return null;
                     } catch (Exception e) {
                         log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                     }
                 });
     }
@@ -199,7 +205,7 @@ public class TestService {
                         return null;
                     } catch (Exception e) {
                         log.error("공연장 데이터 저장 중 오류: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                     }
                 });
     }
@@ -229,50 +235,66 @@ public class TestService {
 
     /**
      * 사용자로부터 원하는 개수를 입력받아 공연 Mock 데이터를 추가합니다
-     * 해당 메서드는 멀티스레드를 사용하여 동작합니다
+     * 배치 단위로 멀티스레드를 사용하여 동작합니다
      */
     @Transactional
-    public CompletableFuture<Void> createConcertMockData(Integer count) {
+    public CompletableFuture<Void> generateConcertMockDataAsync(Integer count) {
 
         log.debug("공연 Mock 데이터 저장을 시작합니다.");
-        long startMs = System.currentTimeMillis();
-        count = null2ZeroInt(count) == 0 ? 30 : count;
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        int total = null2ZeroInt(count) == 0 ? 30 : count;
 
         // 데이터베이스에서 공연장 목록 조회
         List<ConcertHall> concertHallList = concertHallRepository.findAll();
-        if (concertHallList.isEmpty()) {
+        if (CommonUtil.nullOrEmpty(concertHallList)) {
             log.error("저장된 공연장이 없습니다. 공연장 Mock 데이터를 먼저 생성하세요");
             throw new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND);
         }
 
+        // 배치 사이즈 계산
+        int totalBatches = (total + BATCH_SIZE - 1) / BATCH_SIZE;
+
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        List<Concert> concertList = Collections.synchronizedList(new ArrayList<>());
 
         // 멀티스레드 처리
-        for (int i = 0; i < count; i++) {
+        for (int batch = 0; batch < totalBatches; batch++) {
+            int startIndex = batch * BATCH_SIZE;
+            int size = Math.min(BATCH_SIZE, total - startIndex);
+
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
-                    // 공연과 관련된 객체 생성
-                    Concert concert = createConcertMockData(concertHallList);
-                    List<ConcertDate> concertDateList = createConcertDateList(concert);
-                    List<TicketOpenDate> ticketOpenDateList = createTicketOpenDateList(concert);
 
-                    synchronized (this) {
-                        // Concert 저장
-                        concertRepository.save(concert);
-                        // ConcertDate 저장
-                        if (!concertDateList.isEmpty()) {
-                            concertDateRepository.saveAll(concertDateList);
-                        }
-                        // TicketOpenDate 저장
-                        if (!ticketOpenDateList.isEmpty()) {
-                            ticketOpenDateRepository.saveAll(ticketOpenDateList);
-                        }
+                    // Mock 데이터 생성
+                    List<Concert> concertList = new ArrayList<>();
+                    List<List<ConcertDate>> concertDateLists = new ArrayList<>();
+                    List<List<TicketOpenDate>> ticketOpenDateLists = new ArrayList<>();
+
+                    for (int i = 0; i < size; i++) {
+                        Concert concert = mockConcertFactory.generate(concertHallList);
                         concertList.add(concert);
+                        concertDateLists.add(mockConcertFactory.generateConcertDateList(concert));
+                        ticketOpenDateLists.add(mockConcertFactory.generalTicketOpenDateList(concert));
                     }
+
+                    // 배치 단위 트랜잭션 저장
+                    transactionTemplate.execute(status -> {
+                        concertRepository.saveAll(concertList);
+                        concertDateLists.forEach(list -> {
+                            if (!CommonUtil.nullOrEmpty(list)) {
+                                concertDateRepository.saveAll(list);
+                            }
+                        });
+                        ticketOpenDateLists.forEach(list -> {
+                            if (!CommonUtil.nullOrEmpty(list)) {
+                                ticketOpenDateRepository.saveAll(list);
+                            }
+                        });
+                        return null;
+                    });
                 } catch (Exception e) {
-                    log.error("공연 데이터 멀티스레드 저장 중 오류 발생: {}", e.getMessage());
-                    throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
+                    log.error("공연 Mock 데이터 청크 저장 실패: {}", e.getMessage());
+                    throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                 }
             }, taskExecutor);
             futures.add(future);
@@ -280,128 +302,15 @@ public class TestService {
 
         // 모든 비동기 작업이 완료될 때까지 대기
         return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenApply(v -> {
-                    try {
-                        concertRepository.saveAll(concertList);
-                        long endMs = System.currentTimeMillis();
-                        log.debug("공연 Mock 데이터 저장 완료, 저장된 개수: {}", concertList.size());
-                        log.debug("공연 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
-                        return null;
-                    } catch (Exception e) {
-                        log.error("공연 데이터 저장 중 오류 발생: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                .handle((res, ex) -> {
+                    if (ex != null) {
+                        log.error("공연 Mock 데이터 전체 저장 중 오류: {}", ex.getMessage(), ex);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                     }
+                    stopWatch.stop();
+                    log.debug("공연 Mock 데이터 저장 완료: 총 {}건, 소요시간 {}ms", total, stopWatch.getTotalTimeMillis());
+                    return null;
                 });
-    }
-
-    /**
-     * 공연 단일 Mock 데이터를 생성 후 반환합니다. (저장 X)
-     */
-    private Concert createConcertMockData(List<ConcertHall> concertHallList) {
-
-        // 1. 공연 이름
-        String concertName = koFaker.music().genre() + " " + koFaker.team().name() + "공연";
-
-        // 2. 공연장 (DB에서 랜덤 선택)
-        ConcertHall concertHall = concertHallList.get(koFaker.random().nextInt(concertHallList.size()));
-
-        // 3. 공연 카테고리 (랜덤)
-        ConcertType concertType = ConcertType.values()[koFaker.random().nextInt(ConcertType.values().length)];
-
-        // 4. 썸네일 이미지 URL (랜덤)
-        String concertThumbnailUrl = koFaker.internet().image();
-
-        // 5. 좌석 배치도 이미지 URL (랜덤)
-        String seatingChartUrl = koFaker.internet().image();
-
-        // 6. 예매처 (랜덤)
-        TicketReservationSite ticketReservationSite = TicketReservationSite
-                .values()[koFaker.random().nextInt(TicketReservationSite.values().length)];
-
-        return Concert.builder()
-                .concertName(concertName)
-                .concertHall(concertHall)
-                .concertType(concertType)
-                .concertThumbnailUrl(concertThumbnailUrl)
-                .seatingChartUrl(seatingChartUrl)
-                .ticketReservationSite(ticketReservationSite)
-                .build();
-    }
-
-    /**
-     * 공연 날짜 리스트를 생성합니다 (1~5개 랜덤)
-     */
-    private List<ConcertDate> createConcertDateList(Concert concert) {
-
-        int size = koFaker.random().nextInt(1, 6);
-        List<ConcertDate> concertDateList = new ArrayList<>();
-
-        // 기준 날짜 (현재로부터 60~90 일 이후)
-        LocalDateTime baseDate = LocalDateTime.now().plusDays(koFaker.number().numberBetween(60, 91));
-
-        // 1. 공연 일자
-        for (int i = 0; i < size; i++) {
-            // 공연 날짜 (기준 날짜로 부터 하루 단위로 증가)
-            LocalDateTime concertDate = baseDate.plusDays(i);
-
-            concertDateList.add(ConcertDate.builder()
-                    .concert(concert)
-                    .performanceDate(concertDate)
-                    .session(i + 1)
-                    .build()
-            );
-        }
-        return concertDateList;
-    }
-
-    /**
-     * 티켓 오픈일 리스트를 생성합니다
-     */
-    private List<TicketOpenDate> createTicketOpenDateList(Concert concert) {
-        List<TicketOpenDate> ticketOpenDateList = new ArrayList<>();
-
-        // 기준 날짜 (현재로부터 10~30 일 이후)
-        LocalDateTime baseDate = LocalDateTime.now().plusDays(koFaker.number().numberBetween(10, 31));
-
-        // 1. 선예매 오픈일 (50% 확률로 생성)
-        if (koFaker.random().nextBoolean()) {
-            LocalDateTime preOpenDate = baseDate.plusDays(koFaker.number().numberBetween(0, 5));
-            TicketOpenDate preOpen = TicketOpenDate.builder()
-                    .concert(concert)
-                    .openDate(preOpenDate)
-                    .requestMaxCount(koFaker.number().numberBetween(1, 6))
-                    .isBankTransfer(koFaker.random().nextBoolean())
-                    .ticketOpenType(TicketOpenType.PRE_OPEN)
-                    .build();
-            ticketOpenDateList.add(preOpen);
-        }
-
-        // 2. 일반 예매 오픈일 (선예매 오픈일이 없다면 필수 생성 / 선예매 오픈일이 있다면 50% 확률로 생성)
-        if (ticketOpenDateList.isEmpty()) { // 선예매 오픈일이 없는 경우 -> 일반예매 필수 생성
-            LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
-            TicketOpenDate generalOpen = TicketOpenDate.builder()
-                    .concert(concert)
-                    .openDate(generalOpenDate)
-                    .requestMaxCount(koFaker.number().numberBetween(1, 6))
-                    .isBankTransfer(koFaker.random().nextBoolean())
-                    .ticketOpenType(TicketOpenType.GENERAL_OPEN)
-                    .build();
-            ticketOpenDateList.add(generalOpen);
-        } else { // 선예매 오픈일이 있는 경우 -> 일반예매 50% 확률로 생성
-            if (koFaker.random().nextBoolean()) {
-                LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
-                TicketOpenDate generalOpen = TicketOpenDate.builder()
-                        .concert(concert)
-                        .openDate(generalOpenDate)
-                        .requestMaxCount(koFaker.number().numberBetween(1, 6))
-                        .isBankTransfer(koFaker.random().nextBoolean())
-                        .ticketOpenType(TicketOpenType.GENERAL_OPEN)
-                        .build();
-                ticketOpenDateList.add(generalOpen);
-            }
-        }
-
-        return ticketOpenDateList;
     }
 
     /*
@@ -468,7 +377,7 @@ public class TestService {
                         return null;
                     } catch (Exception e) {
                         log.error("신청서 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                     }
                 });
     }
@@ -641,7 +550,7 @@ public class TestService {
                         return null;
                     } catch (Exception e) {
                         log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-                        throw new CustomException(ErrorCode.SAVE_MOCK_DATE_ERROR);
+                        throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
                     }
                 });
     }
