@@ -20,8 +20,8 @@ public class ChatMessageRepositoryCustomImpl implements ChatMessageRepositoryCus
 
         Query query = new Query(
                 Criteria.where("chatRoomId").is(chatRoomId)
-                        .and("senderId").ne(readerId)   // 상대가 보낸 내 메시지
-                        .and("isRead").is(false));      // 아직 안 읽힌 것만
+                        .and("senderId").ne(readerId)  // 상대가 보낸 내 메시지
+                        .and("isRead").is(false));  // 아직 안 읽힌 것만
         Update update = Update.update("isRead", true);
 
         return mongoTemplate.updateMulti(query, update, ChatMessage.class)
