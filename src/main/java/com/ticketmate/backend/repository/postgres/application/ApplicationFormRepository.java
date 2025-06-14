@@ -2,9 +2,7 @@ package com.ticketmate.backend.repository.postgres.application;
 
 import com.ticketmate.backend.object.constants.ApplicationFormStatus;
 import com.ticketmate.backend.object.constants.TicketOpenType;
-import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
-import com.ticketmate.backend.object.postgres.concert.Concert;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,5 +42,5 @@ public interface ApplicationFormRepository extends JpaRepository<ApplicationForm
     boolean existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(UUID clientID, UUID agentId, UUID concertId, TicketOpenType ticketOpenType);
 
     // 이미 동일한 의뢰인에 대해서 신청서를 수락했는지 검증 (똑같은 공연 + 똑같은 선예매/일반예매 + 수락상태[이미 수락했는 뜻])
-    boolean existsByConcertAndClientAndTicketOpenTypeAndApplicationFormStatus(Concert concert, Member client, TicketOpenType ticketOpenType, ApplicationFormStatus applicationFormStatus);
+    boolean existsByConcertConcertIdAndClientMemberIdAndTicketOpenTypeAndApplicationFormStatus(UUID concertId, UUID clientId, TicketOpenType ticketOpenType, ApplicationFormStatus applicationFormStatus);
 }

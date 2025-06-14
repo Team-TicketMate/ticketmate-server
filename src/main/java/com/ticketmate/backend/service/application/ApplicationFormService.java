@@ -374,12 +374,12 @@ public class ApplicationFormService {
 
         // 신청서가 수락상태인지 검증
         boolean applicationFormExist = applicationFormRepository
-                .existsByConcertAndClientAndTicketOpenTypeAndApplicationFormStatus(applicationForm.getConcert(),
-                        client, applicationForm.getTicketOpenType(), ApplicationFormStatus.ACCEPTED);
+                .existsByConcertConcertIdAndClientMemberIdAndTicketOpenTypeAndApplicationFormStatus(applicationForm.getConcert().getConcertId(),
+                        client.getMemberId(), applicationForm.getTicketOpenType(), ApplicationFormStatus.ACCEPTED);
 
         // 이미 수락된 신청서인지
         if (applicationFormExist) {
-            throw new CustomException(ErrorCode.ALREADY_APPROVED_APPLICATION_FROM);
+            throw new CustomException(ErrorCode.ALREADY_ACCEPTED_APPLICATION_FROM);
         }
 
         // 신청서 상태 승인 변경
@@ -388,7 +388,7 @@ public class ApplicationFormService {
 
         // 신청서의 콘서트, 의뢰인, 대리인, 선예매/일반예매 필드를 참조해 이미 채팅방이 존재하는지 판별
         boolean chatRoomExist = chatRoomRepository
-                .existsByAgentMemberIdAndClientMemberIdAndConcertIdAndPreOpen(agent.getMemberId(), client.getMemberId(),
+                .existsByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(agent.getMemberId(), client.getMemberId(),
                         applicationForm.getConcert().getConcertId(), applicationForm.getTicketOpenType());
 
         // 존재한다면 에러 반환
