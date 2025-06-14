@@ -105,9 +105,9 @@ public class ChatRoomService {
         AtomicInteger i = new AtomicInteger();
         List<ChatRoomListResponse> response = chatRoomList.stream()
                 .map(r -> {
-                    int unRead = parseInt(countList.get(i.getAndIncrement()));
+                    int unReadMessageCount = parseInt(countList.get(i.getAndIncrement()));
                     return chatRoomRepository.toResponse(
-                            r, member, applicationFormMap, memberMap, unRead);
+                            r, member, applicationFormMap, memberMap, unReadMessageCount);
                 })
                 .toList();
 
@@ -142,9 +142,9 @@ public class ChatRoomService {
     /**
      * 형변환 메서드
      */
-    private int parseInt(Object o){
-        if(o == null) return 0;
-        if(o instanceof byte[] b) return Integer.parseInt(new String(b));
-        return Integer.parseInt(o.toString());
+    private int parseInt(Object object){
+        if(object == null) return 0;
+        if(object instanceof byte[] b) return Integer.parseInt(new String(b));
+        return Integer.parseInt(object.toString());
     }
 }
