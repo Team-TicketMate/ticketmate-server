@@ -14,22 +14,22 @@ public class ChatMessageResponse {
     private String chatRoomId;
     private String messageId;
     private UUID senderId;
-    private String sender;
+    private String senderNickname;
     private String message;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime sendDate;
     private boolean isRead;  // 읽음 여부
-    private String profileImageUrl;  // 프사
+    private String profileUrl;  // 프사
 
     @Builder
-    public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String sender, String message, LocalDateTime sendDate, boolean isRead, String profileImageUrl) {
+    public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname, String message, LocalDateTime sendDate, boolean isRead, String profileUrl) {
         this.chatRoomId = chatRoomId;
         this.messageId = messageId;
         this.senderId = senderId;
-        this.sender = sender;
+        this.senderNickname = senderNickname;
         this.message = message;
         this.sendDate = sendDate;
         this.isRead = isRead;
-        this.profileImageUrl = profileImageUrl;
+        this.profileUrl = profileUrl;
     }
 }

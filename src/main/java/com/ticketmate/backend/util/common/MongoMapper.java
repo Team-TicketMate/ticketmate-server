@@ -11,9 +11,9 @@ public class MongoMapper {
                 .messageId(message.getMessageId())
                 .senderId(message.getSenderId())
                 .chatRoomId(message.getRoomId())
-                .sender(message.getSenderNickName())
+                .senderNickname(message.getSenderNickName())
                 .message(message.getMessage())
-                .profileImageUrl(message.getSenderProfileImg())
+                .profileUrl(message.getSenderProfileImg())
                 .isRead(message.isRead())
                 .sendDate(message.getSendDate())
                 .build();

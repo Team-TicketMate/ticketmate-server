@@ -19,15 +19,15 @@ public class ChatMessageController {
 
     /**
      * 실제로 메시지를 발송하는 컨트롤러입니다.
-     * @param roomId (채팅방 Id)
+     * @param chatRoomId (채팅방 Id)
      * @param request (메시지 DTO)
      */
     @MessageMapping("chat.message.{roomId}")
-    public void sendMessage(@DestinationVariable String roomId,
+    public void sendMessage(@DestinationVariable String chatRoomId,
                             @Payload ChatMessageRequest request,
                             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Member member = customOAuth2User.getMember();
-        chatMessageService.sendMessage(roomId, request, member);
+        chatMessageService.sendMessage(chatRoomId, request, member);
     }
 
     @MessageMapping("chat.read.{roomId}")

@@ -19,17 +19,17 @@ public interface ChatRoomControllerDocs {
 
                     ### 요청 파라미터
                     - **isPreOpen (PreOpenFilter)** : 선예매/일반예매 검색 카테고리 여부 [필수]
-                    - **pageNum (INTEGER)** : 요청 페이지 번호 [필수X]
+                    - **pageSize (INTEGER)** : 요청 페이지 번호 [필수X]
                     - **searchKeyword (STRING)** : 검색키워드 [필수X]
                         
                     ### 반환값
-                    - **roomId** : 채팅방 고유 PK
+                    - **chatRoomId** : 채팅방 고유 PK
                     - **chatRoomName** : 채팅방 이름 (상대방 닉네임)
                     - **lastChatMessage** : 마지막 채팅 내용
                     - **lastChatSendTime** : 마지막 채팅 시간
-                    - **profileImg** : 상대방 프로필 이미지
+                    - **concertThumbnailUrl** : 상대방 프로필 이미지
                     - **concertImg** : 콘서트 썸네일 이미지
-                    - **isPreOpen** : 선예매/일반예매 구분
+                    - **ticketOpenType** : 선예매/일반예매 구분
                     - **unRead** : 읽지 않은 메시지 카운트
                      
                     ### 사용 방법
@@ -62,11 +62,11 @@ public interface ChatRoomControllerDocs {
                     - **chatRoomId** : 채팅방 고유 ID
                     - **messageId** : 채팅 메시지 ID
                     - **senderId** : 채팅 메시지를 보낸 사용자 ID
-                    - **sender** : 채팅 메시지를 보낸 사용자 닉네임
+                    - **senderNickname** : 채팅 메시지를 보낸 사용자 닉네임
                     - **message** : 메시지 정보
                     - **sendDate** : 채팅을 보낸 시간
                     - **isRead** : 채팅의 읽음 여부
-                    - **profileImageUrl** : 채팅을 보낸 사용자의 프로필 사진
+                    - **profileUrl** : 채팅을 보낸 사용자의 프로필 사진
                      
                     ### 유의사항
                     - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.

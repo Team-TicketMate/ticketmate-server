@@ -57,8 +57,8 @@ public class ChatRoomService {
         String keyword = (request.getSearchKeyword() != null && request.getSearchKeyword() != "") ?
                 request.getSearchKeyword() : "";
 
-        Integer pageNum = (request.getPageNum() != null && request.getPageNum() > 0) ?
-                request.getPageNum() : 0;
+        Integer pageNum = (request.getPageSize() != null && request.getPageSize() > 0) ?
+                request.getPageSize() : 0;
 
         if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.PRE_OPEN)) {
             // 선예매만 필터링
@@ -118,13 +118,13 @@ public class ChatRoomService {
      * 현재 진행한 채팅 메시지 불러오는 메서드
      */
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> getChatMessage(Member member, String roomId){
-        ChatRoom room = chatRoomRepository.findById(roomId)
+    public List<ChatMessageResponse> getChatMessage(Member member, String chatRoomId){
+        ChatRoom room = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
         validateRoomMember(room, member);
 
         List<ChatMessage> massageList = chatMessageRepository
-                .findByRoomIdOrderBySendDateAsc(roomId);
+                .findByRoomIdOrderBySendDateAsc(chatRoomId);
 
         return massageList.stream().map(mongoMapper::toResponse).toList();
     }

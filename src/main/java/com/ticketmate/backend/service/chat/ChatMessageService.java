@@ -48,10 +48,10 @@ public class ChatMessageService {
      * 채팅 메시지를 보내는 메서드입니다.
      */
     @Transactional
-    public void sendMessage(String roomId, ChatMessageRequest request, Member sender) {
+    public void sendMessage(String chatRoomId, ChatMessageRequest request, Member sender) {
         // 메시지 발송
-        ChatMessageResponse messageResponse = saveMessage(sender, request, roomId);
-        rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + roomId, messageResponse);
+        ChatMessageResponse messageResponse = saveMessage(sender, request, chatRoomId);
+        rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + chatRoomId, messageResponse);
     }
 
     @Transactional
@@ -119,18 +119,18 @@ public class ChatMessageService {
      * Read ACK 를 보냈을 때 호출된다.
      */
     @Transactional
-    public void acknowledgeRead(ReadAckRequest ack, Member reader, String roomId) {
+    public void acknowledgeRead(ReadAckRequest ack, Member reader, String chatRoomId) {
 
         log.debug("acknowledgeRead 메서드 동작");
 
         // Redis포인터 기본 키값 추출
-        String redisKey = "userLastRead:%s:%s".formatted(roomId, reader.getMemberId());
+        String redisKey = "userLastRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
 
         // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
         LastReadMessage lrm = lastReadMessageRepository.findById(redisKey)
                 .orElseGet(() ->
                         LastReadMessage.builder()
-                                .roomId(roomId)
+                                .roomId(chatRoomId)
                                 .memberId(reader.getMemberId())
                                 .lastMessageId(ack.getUptoMessageId())
                                 .readAt(ack.getReadAt())
@@ -140,17 +140,17 @@ public class ChatMessageService {
         lastReadMessageRepository.save(lrm); // TTL(30일)
 
         // Redis 카운터 제거
-        String unReadRedisKey = "unRead:%s:%s".formatted(roomId, reader.getMemberId());
+        String unReadRedisKey = "unRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
         redisTemplate.delete(unReadRedisKey);
 
         // 채팅방 리스트에 즉시 갱신하기 위한 코드
         rabbitTemplate.convertAndSend(
                 "",
                 "unread." + reader.getMemberId(),
-                Map.of("roomId", roomId, "unread", 0)
+                Map.of("roomId", chatRoomId, "unread", 0)
         );
 
-        chatMessageRepository.markReadUpTo(roomId, reader.getMemberId());
+        chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
 
         // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
         TransactionSynchronizationManager.registerSynchronization(
@@ -162,9 +162,9 @@ public class ChatMessageService {
                         );
                         rabbitTemplate.convertAndSend(
                                 CHAT_EXCHANGE_NAME,
-                                "chat.room." + roomId,
+                                "chat.room." + chatRoomId,
                                 ReadAckResponse.builder()
-                                        .roomId(roomId)
+                                        .chatRoomId(chatRoomId)
                                         .reader(reader.getMemberId())
                                         .sender(lastMessage.getSenderId())
                                         .uptoMessageId(lrm.getLastMessageId())

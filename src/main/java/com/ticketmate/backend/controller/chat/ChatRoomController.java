@@ -40,8 +40,8 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     @GetMapping("/{chat-room-id}")
     @LogMonitoringInvocation
     public ResponseEntity<List<ChatMessageResponse>> enterChatRoom(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-                                                                   @PathVariable("chat-room-id") String roomId) {
+                                                                   @PathVariable("chat-room-id") String chatRoomId) {
         Member member = customOAuth2User.getMember();
-        return ResponseEntity.ok(chatRoomService.getChatMessage(member, roomId));
+        return ResponseEntity.ok(chatRoomService.getChatMessage(member, chatRoomId));
     }
 }
