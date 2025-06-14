@@ -7,6 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.UUID;
 
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String>, ChatRoomRepositoryCustom {
-    boolean existsByAgentMemberIdAndClientMemberIdAndConcertIdAndPreOpen(UUID agentId, UUID clientId
+    boolean existsByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(UUID agentId, UUID clientId
             , UUID concertId, TicketOpenType ticketOpenType);
 }
