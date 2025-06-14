@@ -29,7 +29,7 @@ import java.util.UUID;
 @Getter
 public class ChatRoom extends BaseMongoDocument {
     @Id
-    private String roomId;  // 채팅방 PK
+    private String chatRoomId;  // 채팅방 PK
     @Indexed
     private UUID agentMemberId;  // 대리인 PK
     @Indexed
@@ -48,7 +48,7 @@ public class ChatRoom extends BaseMongoDocument {
     private UUID concertId;  // 콘서트
     @Indexed
     private String lastMessageId;  // 마지막 메시지의 ID 정보
-    private TicketOpenType preOpen;  // 신청폼의 선예매, 일반예매인지
+    private TicketOpenType ticketOpenType;  // 신청폼의 선예매, 일반예매인지
 
     public void updateLastMessage(String message) {
         this.lastMessage = message;

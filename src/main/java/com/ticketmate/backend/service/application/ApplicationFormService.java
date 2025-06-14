@@ -406,7 +406,7 @@ public class ApplicationFormService {
                 .clientMemberId(client.getMemberId())
                 .applicationFormId(applicationFormId)
                 .concertId(applicationForm.getConcert().getConcertId())
-                .preOpen(applicationForm.getTicketOpenType())
+                .ticketOpenType(applicationForm.getTicketOpenType())
                 .build();
 
         chatRoomRepository.save(chatRoom);
@@ -415,7 +415,7 @@ public class ApplicationFormService {
         NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
         fcmService.sendNotification(client.getMemberId(), payloadRequest);
 
-        return chatRoom.getRoomId();
+        return chatRoom.getChatRoomId();
     }
 
     /**

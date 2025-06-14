@@ -33,16 +33,16 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
      * MongoDB 동적 쿼리 생성
      */
     @Override
-    public Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNumber) {
+    public Page<ChatRoom> search(TicketOpenType ticketOpenType, String keyword, Member member, Integer pageNumber) {
         log.debug("받아온 키워드 : {}", keyword);
         UUID memberId = member.getMemberId();
 
-        log.debug("선예매 일반예매 구분 : {}", preOpen);
+        log.debug("선예매 일반예매 구분 : {}", ticketOpenType);
 
         // 1. 내가 ‘대리인’으로 들어가 있는 방 조건
         Criteria asAgent = Criteria.where("agentMemberId").is(memberId);
-        if (preOpen != null) {
-            asAgent = asAgent.and("preOpen").is(preOpen);
+        if (ticketOpenType != null) {
+            asAgent = asAgent.and("ticketOpenType").is(ticketOpenType);
         }
         if (!keyword.isEmpty()) {
             asAgent = asAgent.and("clientMemberNickname").regex(keyword, "i");
@@ -50,8 +50,8 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
         // 2. 내가 ‘의뢰인’으로 들어가 있는 방 조건
         Criteria asClient = Criteria.where("clientMemberId").is(memberId);
-        if (preOpen != null) {
-            asClient = asClient.and("preOpen").is(preOpen);
+        if (ticketOpenType != null) {
+            asClient = asClient.and("ticketOpenType").is(ticketOpenType);
         }
         if (!keyword.isEmpty())         {
             asClient = asClient.and("agentMemberNickname").regex(keyword, "i"); }
@@ -90,9 +90,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
         return ChatRoomListResponse.builder()
                 .unReadMessageCount(unRead)
-                .chatRoomId(room.getRoomId())
+                .chatRoomId(room.getChatRoomId())
                 .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
-                .ticketOpenType(room.getPreOpen())
+                .ticketOpenType(room.getTicketOpenType())
                 .lastChatMessage(room.getLastMessage())
                 .concertThumbnailUrl(applicationForm.getConcert().getConcertThumbnailUrl())
                 .lastChatSendTime(room.getLastMessageTime())

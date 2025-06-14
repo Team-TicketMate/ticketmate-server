@@ -94,7 +94,7 @@ public class ChatRoomService {
 
         List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
             chatRoomList.forEach(r -> {
-                String redisKey = ("unRead:%s:%s").formatted(r.getRoomId(), member.getMemberId());
+                String redisKey = ("unRead:%s:%s").formatted(r.getChatRoomId(), member.getMemberId());
                 con.stringCommands().get(redisKey.getBytes());
             });
             return null;

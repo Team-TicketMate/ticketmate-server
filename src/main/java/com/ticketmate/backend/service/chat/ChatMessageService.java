@@ -62,7 +62,7 @@ public class ChatMessageService {
         ChatMessage message = ChatMessage.builder()
                 .message(request.getMessage())
                 .senderProfileUrl(sender.getProfileUrl())
-                .chatRoomId(chatRoom.getRoomId())
+                .chatRoomId(chatRoom.getChatRoomId())
                 .isRead(false)  // 나 이외에는 아직 안읽었다는 판정
                 .senderId(sender.getMemberId())
                 .senderNickName(sender.getNickname())
