@@ -89,7 +89,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         ApplicationForm applicationForm = applicationFormMap.get(room.getApplicationFormId());
 
         return ChatRoomListResponse.builder()
-                .unRead(unRead)
+                .unReadMessageCount(unRead)
                 .chatRoomId(room.getRoomId())
                 .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
                 .ticketOpenType(room.getPreOpen())

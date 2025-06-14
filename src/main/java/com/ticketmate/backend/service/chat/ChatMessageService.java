@@ -61,8 +61,8 @@ public class ChatMessageService {
 
         ChatMessage message = ChatMessage.builder()
                 .message(request.getMessage())
-                .senderProfileImg(sender.getProfileUrl())
-                .roomId(chatRoom.getRoomId())
+                .senderProfileUrl(sender.getProfileUrl())
+                .chatRoomId(chatRoom.getRoomId())
                 .isRead(false)  // 나 이외에는 아직 안읽었다는 판정
                 .senderId(sender.getMemberId())
                 .senderNickName(sender.getNickname())
@@ -81,7 +81,7 @@ public class ChatMessageService {
         chatRoom.updateLastMessage(message.getMessage());
         log.debug("세팅된 마지막 메시지: {}", chatRoom.getLastMessage());
 
-        chatRoom.updateLastMessageId(message.getMessageId());
+        chatRoom.updateLastMessageId(message.getChatMessageId());
         log.debug("마지막 메시지Id : {}", chatRoom.getLastMessageId());
 
         // Mongo 더티체크 X 즉, 데이터 변경시 직접 저장을 해줘야 함.
@@ -165,8 +165,8 @@ public class ChatMessageService {
                                 "chat.room." + chatRoomId,
                                 ReadAckResponse.builder()
                                         .chatRoomId(chatRoomId)
-                                        .reader(reader.getMemberId())
-                                        .sender(lastMessage.getSenderId())
+                                        .readerId(reader.getMemberId())
+                                        .senderId(lastMessage.getSenderId())
                                         .lastReadMessageId(lastReadMessagePointer.getLastMessageId())
                                         .readDate(lastMessage.getSendDate())
                                         .build());

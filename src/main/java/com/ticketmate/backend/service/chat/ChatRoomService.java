@@ -124,7 +124,7 @@ public class ChatRoomService {
         validateRoomMember(room, member);
 
         List<ChatMessage> massageList = chatMessageRepository
-                .findByRoomIdOrderBySendDateAsc(chatRoomId);
+                .findByChatRoomIdOrderBySendDateAsc(chatRoomId);
 
         return massageList.stream().map(mongoMapper::toResponse).toList();
     }

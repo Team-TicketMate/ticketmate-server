@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 public class MongoMapper {
     public ChatMessageResponse toResponse(ChatMessage message) {
         return ChatMessageResponse.builder()
-                .messageId(message.getMessageId())
+                .messageId(message.getChatMessageId())
                 .senderId(message.getSenderId())
-                .chatRoomId(message.getRoomId())
+                .chatRoomId(message.getChatRoomId())
                 .senderNickname(message.getSenderNickName())
                 .message(message.getMessage())
-                .profileUrl(message.getSenderProfileImg())
+                .profileUrl(message.getSenderProfileUrl())
                 .isRead(message.isRead())
                 .sendDate(message.getSendDate())
                 .build();
