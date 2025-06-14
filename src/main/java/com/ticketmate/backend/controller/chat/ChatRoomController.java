@@ -9,6 +9,7 @@ import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.chat.ChatRoomService;
 import com.ticketmate.backend.util.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/chat-room")
 @Tag(
         name = "채팅방 관련 API",
         description = "1:1 채팅방 관련 API 제공"
@@ -27,16 +28,16 @@ import java.util.List;
 public class ChatRoomController implements ChatRoomControllerDocs {
     private final ChatRoomService chatRoomService;
     @Override
-    @GetMapping("/chat-rooms/list")
+    @GetMapping("/list")
     @LogMonitoringInvocation
     public ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-                                                                      @ModelAttribute ChatRoomFilteredRequest request) {
+                                                                      @ModelAttribute @Valid ChatRoomFilteredRequest request) {
         Member member = customOAuth2User.getMember();
         return ResponseEntity.ok(chatRoomService.getChatRoomList(member, request));
     }
 
     @Override
-    @GetMapping("/chat-room/{chat-room-id}")
+    @GetMapping("/{chat-room-id}")
     @LogMonitoringInvocation
     public ResponseEntity<List<ChatMessageResponse>> enterChatRoom(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                                                    @PathVariable("chat-room-id") String roomId) {
