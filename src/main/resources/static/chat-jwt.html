@@ -1,231 +1,218 @@
+<!-- ************************************************************
+   TicketMate – 1:1 Chat 테스트 클라이언트 (Refactoredv2, 2025‑06‑14)
+   --------------------------------------------------------------
+   * 백엔드 DTO 및 WebSocket 페이로드 변경 최종 반영
+   * 증상: "채팅방 리스트에 새 메시지가 실시간 반영되지 않음" 해결
+     - `sentAt` ISO 파싱 문제→`parseDate()` 개선 (공백→T 보정)
+     - 구독 콜백에서 미리보기·시간을 **항상** 갱신하도록 로직 단순화
+************************************************************* -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>WebSocket Chat Test</title>
+    <meta charset="UTF-8" />
+    <title>TicketMate – ChatRoom1‑1(Testv2)</title>
+
+    <!-- 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <style>
+        :root { --bubble-op:#e8f0ff; --bubble-me:#d1ffe5; }
+        body   { font-family:Arial,sans-serif; margin:2rem; }
+        /* 방 목록 */
+        #roomList{max-width:22rem;border:1px solid #ccc;padding:1rem;}
+        .room-item{padding:.6rem 0;border-bottom:1px solid #eee;cursor:pointer;}
+        .room-item:hover{background:#f3f7ff;}
+        .room-top{display:flex;justify-content:space-between;align-items:center;}
+        .room-name{font-weight:bold;}
+        .time{font-size:.72rem;color:#888;margin-left:.5rem;}
+        .badge{background:#ff3b30;color:#fff;border-radius:12px;padding:0 6px;font-size:.7rem;min-width:1.4rem;text-align:center;}
+        .preview{font-size:.78rem;color:#555;margin-top:.15rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        /* 채팅 영역 */
+        #chatSection{display:flex;flex-direction:column;gap:.5rem;max-width:32rem;}
+        #chatBox{height:300px;overflow-y:auto;display:flex;flex-direction:column;border:1px solid #ccc;padding:1rem;}
+        .msg{margin:.25rem 0;padding:.5rem .75rem;border-radius:1rem;max-width:70%;white-space:pre-wrap;}
+        .sender-op{background:var(--bubble-op);align-self:flex-start;border-top-left-radius:0;}
+        .sender-me{background:var(--bubble-me);align-self:flex-end;border-top-right-radius:0;}
+        .meta{font-size:.7rem;color:#555;margin-top:.2rem;display:flex;align-items:center;gap:.25rem;}
+        .unread-dot{width:7px;height:7px;background:#ff3b30;border-radius:50%;display:inline-block;}
+        .read-check{font-size:.8rem;color:#888;}
+    </style>
 </head>
 <body>
-<button id="logoutButton" style="display: none;">Logout</button>
-
 <div id="loginSection">
-    <button id="loginButton">Login</button>
-    <div id="loginError" style="color: red;"></div>
+    <button id="clientLoginButton">Client Login</button>
+    <button id="agentLoginButton">Agent Login</button>
 </div>
-<div id="chatSection" style="display: none;">
-    <input type="text" id="roomId" placeholder="Room ID">
-    <input type="text" id="message" placeholder="Type a message...">
-    <button id="sendButton">Send</button>
-    <div id="messages"></div>
+
+<div id="roomListSection" style="display:none;">
+    <h3>Chat Rooms</h3>
+    <div id="roomList"></div>
+</div>
+
+<div id="chatSection" style="display:none;">
+    <input id="roomId" readonly />
+    <div style="display:flex;gap:.5rem;">
+        <input id="message" placeholder="Type a message…" />
+        <button id="sendButton">Send</button>
+        <button id="logoutButton">Logout</button>
+    </div>
+    <div id="chatBox"></div>
 </div>
 
 <script>
-    const API_URL = 'https://api.ticketmate.site';
-    let stompClient = null;
-
-    // Token Management
-    const TokenManager = {
-        setAccessToken: (token) => sessionStorage.setItem('accessToken', token),
-        getAccessToken: () => sessionStorage.getItem('accessToken'),
-        clearTokens: () => {
-            sessionStorage.removeItem('accessToken');
-            document.cookie = 'refreshToken=; Max-Age=0; path=/; secure; samesite=none';
-        }
+    /* CONFIG */
+    const API    = 'http://localhost:8080';
+    const BEARER = true;
+    const TOKENS = {
+        client: 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlQG5hdmVyLmNvbSIsImNhdGVnb3J5IjoiYWNjZXNzIiwidXNlcm5hbWUiOiJleGFtcGxlQG5hdmVyLmNvbSIsIm1lbWJlcklkIjoiNmUzYTQxMWUtMmNjNS00NmVmLTliY2QtY2U0MDFkYmVkMzY1Iiwicm9sZSI6IlJPTEVfVEVTVCIsImlzcyI6IlRJQ0tFVF9NQVRFIiwiaWF0IjoxNzQ5NDY0MzgyLCJleHAiOjIxMDk0NjQzODJ9.gpUzai0TlvPDkpXS_JKYElOIfOrzeVBT8gC5LGFYLO7X0WzG3H6S1HYJazonv9vxt7EgEiZe1MdK_Oo3HmRr4A',
+        agent : 'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGExMjNtcGxlQG5hdmVyLmNvbSIsImNhdGVnb3J5IjoiYWNjZXNzIiwidXNlcm5hbWUiOiJleGExMjNtcGxlQG5hdmVyLmNvbSIsIm1lbWJlcklkIjoiMTc1MzBlMmMtMzI4MC00MmQ4LWI0MTgtOGM2ZTI3ZTdlNzZiIiwicm9sZSI6IlJPTEVfVEVTVCIsImlzcyI6IlRJQ0tFVF9NQVRFIiwiaWF0IjoxNzQ5NDY0NDA3LCJleHAiOjIxMDk0NjQ0MDd9.GTLFf7MVIgQ1M6d2VHKRUw8W86lLERZy9MBdEA4L8SrHTCClEuzHXgbBKjOJvtsaXRf2ZNT2QxzK_2S0ivUnRA'
     };
 
-    // API Request Wrapper
-    async function apiRequest(url, options = {}) {
-        const accessToken = TokenManager.getAccessToken();
-        if (accessToken) {
-            options.headers = {
-                ...options.headers,
-                'Authorization': "Bearer " + accessToken
+    /* 상태 */
+    let stomp = null;
+    let myId  = '';
+
+    const Token = {
+        set:t=>sessionStorage.setItem('at',t),
+        get:()=>sessionStorage.getItem('at'),
+        clear:()=>sessionStorage.removeItem('at')
+    };
+    const claims = ()=>{try{return JSON.parse(atob(Token.get().split('.')[1]));}catch{return {};}};
+
+    /* 날짜 헬퍼: 공백 → T 보정 */
+    const parseDate = s => {
+        if(!s||typeof s!=='string') return null;
+        const iso = s.includes('T') ? s : s.replace(' ', 'T');
+        const d = new Date(iso);
+        return isNaN(d) ? null : d;
+    };
+    const fmt = d => d ? d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) : '';
+
+    /* DTO ↔︎ 프론트 매핑 */
+    const mRoomId       = o=>o.roomId       ?? o.chatRoomId;
+    const mUnread       = o=>o.unread       ?? o.unReadMessageCount;
+    const mLastMsg      = o=>o.lastMessage  ?? o.lastChatMessage;
+    const mLastSendTime = o=>o.sentAt       ?? o.lastChatSendTime;
+
+    /* DOM 헬퍼 */
+    function ensureItem(id,name){
+        let el=document.querySelector(`.room-item[data-room-id="${id}"]`);
+        if(el) return el;
+        el=document.createElement('div');
+        el.className='room-item';
+        el.dataset.roomId=id;
+        el.innerHTML=`<div class="room-top"><span class="room-name">${name}</span><span class="time" data-room-id="${id}"></span><span class="badge" data-room-id="${id}" style="visibility:hidden"></span></div><div class="preview" data-room-id="${id}"></div>`;
+        el.onclick=()=>enterRoom(id);
+        document.getElementById('roomList').appendChild(el);
+        return el;
+    }
+    const upBadge=(id,n)=>{const b=document.querySelector(`.badge[data-room-id="${id}"]`);if(b){b.textContent=n||'';b.style.visibility=n?'visible':'hidden';}};
+    const upPrev =(id,t)=>{const p=document.querySelector(`.preview[data-room-id="${id}"]`);if(p)p.textContent=t||'';};
+    const upTime =(id,s)=>{const t=document.querySelector(`.time[data-room-id="${id}"]`);if(t)t.textContent=fmt(parseDate(s));};
+
+    /* 1) 방 목록 */
+    async function loadRooms(){
+        const res=await fetch(`${API}/api/chat-room/list?isPreOpen=ALL&pageNum=0`,{headers:{Authorization:BEARER?'Bearer '+Token.get():Token.get()}});
+        const rooms=(await res.json()).content||[];
+        document.getElementById('roomList').innerHTML='';
+        rooms.forEach(r=>{
+            const id=mRoomId(r);
+            ensureItem(id,r.chatRoomName);
+            upBadge(id,mUnread(r));
+            upPrev (id,mLastMsg(r));
+            upTime (id,mLastSendTime(r));
+        });
+        document.getElementById('roomListSection').style.display='block';
+    }
+
+    /* 2) 미읽음 WebSocket */
+    function connectUnread(){
+        if(stomp?.connected) return;
+        stomp=Stomp.over(new SockJS(`${API}/chat`));
+        stomp.connect({Authorization:BEARER?'Bearer '+Token.get():Token.get()},()=>{
+            ({memberId:myId}=claims());
+            stomp.subscribe(`/queue/unread.${myId}`,msg=>{
+                const dto=JSON.parse(msg.body);
+                const id = mRoomId(dto);
+                upBadge(id,mUnread(dto));
+                upPrev (id,mLastMsg(dto));   // ← 항상 호출(undef면 '')
+                upTime (id,mLastSendTime(dto));
+            });
+        });
+    }
+
+    /* 3) 방 입장 */
+    async function enterRoom(id){
+        document.getElementById('loginSection').style.display='none';
+        document.getElementById('roomListSection').style.display='none';
+        document.getElementById('chatSection').style.display='block';
+        document.getElementById('roomId').value=id;
+        upBadge(id,0);
+        await connectRoomWS(id);
+    }
+    function connectRoomWS(id){
+        return new Promise(res=>{
+            const ready=()=>{
+                stomp.subscribe(`/sub/chat.room.${id}`,m=>onPacket(JSON.parse(m.body),id));
+                loadHistory(id).then(sendAckVisible);
+                const box=document.getElementById('chatBox');
+                box.addEventListener('scroll',()=>{if(box.scrollTop+box.clientHeight>=box.scrollHeight-5)sendAckVisible();});
+                res();
             };
-        }
-
-        try {
-            const response = await fetch(url, options);
-            if (response.status === 401) {
-                const refreshed = await refreshToken();
-                if (refreshed) {
-                    return apiRequest(url, options);
-                } else {
-                    throw new Error('Authentication failed');
-                }
-            }
-            return response;
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+            if(stomp?.connected) ready();
+            else{connectUnread();const w=setInterval(()=>{if(stomp?.connected){clearInterval(w);ready();}},100);}
+        });
     }
 
-    // Token Refresh
-    async function refreshToken() {
-        try {
-            const response = await fetch(`${API_URL}/api/auth/reissue`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-            if (response.ok) {
-                console.log("[Refresh Token] : " + response.headers.get('Authorization'));
-
-                TokenManager.setAccessToken(response.headers.get('Authorization'));
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Token refresh failed:', error);
-            return false;
-        }
+    /* 히스토리 */
+    async function loadHistory(id){
+        const res=await fetch(`${API}/api/chat-room/${id}`,{headers:{Authorization:BEARER?'Bearer '+Token.get():Token.get()}});
+        const list=await res.json();
+        const box=document.getElementById('chatBox');box.innerHTML='';
+        list.forEach(p=>{const mine=p.senderId===myId;displayMsg(p,mine,mine?p.isRead:true);});
     }
 
-    // Login Function
-    async function login() {
-        // 필요한 로그인 파라미터를 FormData에 담습니다.
-        const formData = new FormData();
-        // 기본값으로 설정된 값들 (원하는 경우 입력폼으로 대체 가능)
-        formData.append('role', 'ROLE_TEST');
-        formData.append('socialPlatform', 'NAVER');
-        formData.append('memberType', 'CLIENT');
-        formData.append('accountStatus', 'ACTIVE_ACCOUNT');
-        formData.append('isFirstLogin', 'false');
-
-        try {
-            const response = await fetch(`${API_URL}/test/login`, {
-                method: 'POST',
-                credentials: 'include', // 쿠키 등 필요 시 포함
-                body: formData
-            });
-
-            if (response.ok) {
-                // 응답 본문에서 액세스 토큰을 읽어옵니다.
-                const token = await response.text();
-                console.log("login success, AT:", token);
-                TokenManager.setAccessToken(token);
-
-                showChatSection();
-                await connectWebSocket();
-            } else {
-                document.getElementById('loginError').textContent = 'Login failed';
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            document.getElementById('loginError').textContent = 'Login failed';
-        }
+    /* 실시간 패킷 */
+    function onPacket(p,roomId){
+        if(p.type==='READ_ACK'){if(p.readerId!==myId)markReadAll(p.lastReadMessageId);return;}
+        const mine=p.senderId===myId;displayMsg(p,mine,!mine);
+        upPrev(roomId,p.message);
+        upTime(roomId,p.sendDate);
     }
 
-    // Logout Function
-    async function logout() {
-        try {
-            await fetch(`${API_URL}/api/auth/logout`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': TokenManager.getAccessToken()
-                },
-                credentials: 'include'
-            });
-            TokenManager.clearTokens();
-            showLoginSection();
-            if (stompClient !== null) {
-                stompClient.disconnect();
-            }
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
+    /* 메시지 렌더링 */
+    function displayMsg(p,mine,read){
+        const box=document.getElementById('chatBox');
+        const div=document.createElement('div');div.className=`msg ${mine?'sender-me':'sender-op'}`;div.dataset.msgId=p.messageId;
+        div.innerHTML=`<span><b>${p.senderNickname}</b>: ${p.message}</span>`;
+        const meta=document.createElement('div');meta.className='meta';meta.textContent=fmt(parseDate(p.sendDate));
+        if(mine){if(!read)meta.innerHTML+='<span class="unread-dot"></span>';else meta.innerHTML+='<span class="read-check">✓</span>';}div.appendChild(meta);
+        box.appendChild(div);box.scrollTop=box.scrollHeight;
     }
 
-    // WebSocket Connection
-    async function connectWebSocket() {
-        try {
-            const url = await getSocketServerUrl();
-            console.log("Connecting to:", url);
-
-            const socket = new SockJS(url, null, { transports: ["websocket"] });
-            console.log(socket);
-
-            stompClient = Stomp.over(socket);
-
-            stompClient.debug = function(str) {
-                console.log(str);
-            };
-
-            const headers = {
-                Authorization: "Bearer "+ TokenManager.getAccessToken()
-            };
-            stompClient.connect(headers, onConnected, onError);
-        } catch (error) {
-            console.error('WebSocket connection error:', error);
-            showLoginSection();
-        }
+    /* 읽음 처리 */
+    function markReadAll(upto){
+        document.querySelectorAll('.msg.sender-me').forEach(m=>{m.querySelector('.unread-dot')?.remove();if(!m.querySelector('.read-check'))m.querySelector('.meta').innerHTML+='<span class="read-check">✓</span>';if(m.dataset.msgId===upto)return false;});
+    }
+    function sendAckVisible(){
+        const msgs=document.querySelectorAll('#chatBox .msg');if(!msgs.length)return;
+        stomp.send(`/pub/chat.read.${document.getElementById('roomId').value}`,{},JSON.stringify({lastReadMessageId:msgs[msgs.length-1].dataset.msgId,readDate:new Date().toISOString()}));
     }
 
-    // getSocketServerUrl: 이제 단순히 URL을 반환
-    async function getSocketServerUrl() {
-        return `${API_URL}/chat`;
+    /* 발송 */
+    function sendMsg(){
+        const txt=document.getElementById('message').value.trim();if(!txt)return;
+        stomp.send(`/pub/chat.message.${document.getElementById('roomId').value}`,{},JSON.stringify({message:txt}));
+        document.getElementById('message').value='';
     }
 
-    function onConnected(frame) {
-        console.log('Connected: ' + frame);
-        stompClient.subscribe('/sub/chat.room.1', onMessageReceived, {'auto-delete':true, 'durable':false, 'exclusive':false});
-        stompClient.subscribe('/user/queue/errors', onErrorReceived) ;
-
-    }
-    function onErrorReceived(message) {
-        const error = JSON.parse(message.body);
-        console.log('Received error:', error);
-    }
-
-    function onError(error) {
-        console.error('WebSocket error:', error);
-        if (error.headers && error.headers.message === 'Unauthorized') {
-            refreshToken().then(success => {
-                if (success) {
-                    connectWebSocket();
-                } else {
-                    showLoginSection();
-                }
-            });
-        }
-    }
-
-    function onMessageReceived(message) {
-        console.log('Received: ' + message);
-        showMessage(JSON.parse(message.body).content);
-    }
-
-    function sendMessage() {
-        const roomId = document.getElementById('roomId').value;
-        const content = document.getElementById('message').value;
-        stompClient.send("/pub/chat.message." + roomId, {'Authorization': TokenManager.getAccessToken()}, JSON.stringify({
-            'roomId': roomId,
-            'content': content
-        }));
-    }
-
-    function showMessage(message) {
-        const messageElement = document.createElement('div');
-        messageElement.appendChild(document.createTextNode(message));
-        document.getElementById('messages').appendChild(messageElement);
-    }
-
-    function showLoginSection() {
-        document.getElementById('loginSection').style.display = 'block';
-        document.getElementById('chatSection').style.display = 'none';
-        document.getElementById('logoutButton').style.display = 'none';
-    }
-
-    function showChatSection() {
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('chatSection').style.display = 'block';
-        document.getElementById('logoutButton').style.display = 'block';
-    }
-
-    // Event Listeners
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('loginButton').addEventListener('click', login);
-        document.getElementById('sendButton').addEventListener('click', sendMessage);
-        document.getElementById('logoutButton').addEventListener('click', logout);
+    /* 초기화 */
+    window.addEventListener('DOMContentLoaded',()=>{
+        document.getElementById('clientLoginButton').onclick=()=>{Token.set(TOKENS.client);loadRooms();connectUnread();};
+        document.getElementById('agentLoginButton').onclick =()=>{Token.set(TOKENS.agent );loadRooms();connectUnread();};
+        document.getElementById('sendButton').onclick  =sendMsg;
+        document.getElementById('logoutButton').onclick=()=>{stomp?.disconnect();Token.clear();location.reload();};
     });
 </script>
 </body>
