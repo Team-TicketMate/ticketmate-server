@@ -1,6 +1,7 @@
 package com.ticketmate.backend.service.chat;
 
 import com.ticketmate.backend.object.dto.chat.request.ChatMessageRequest;
+import com.ticketmate.backend.object.dto.chat.request.ReadAckRequest;
 import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.chat.response.ReadAckResponse;
 import com.ticketmate.backend.object.mongo.chat.ChatMessage;
@@ -47,7 +48,7 @@ public class ChatMessageService {
      * 채팅 메시지를 보내는 메서드입니다.
      */
     @Transactional
-    public void sendMessage(ChatMessageRequest request, Member sender, String roomId) {
+    public void sendMessage(String roomId, ChatMessageRequest request, Member sender) {
         // 메시지 발송
         ChatMessageResponse messageResponse = saveMessage(sender, request, roomId);
         rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + roomId, messageResponse);
@@ -118,8 +119,7 @@ public class ChatMessageService {
      * Read ACK 를 보냈을 때 호출된다.
      */
     @Transactional
-    public void acknowledgeRead(String roomId, Member reader,
-                                String lastMessageId, LocalDateTime clientReadAt) {
+    public void acknowledgeRead(ReadAckRequest ack, Member reader, String roomId) {
 
         log.debug("acknowledgeRead 메서드 동작");
 
@@ -132,11 +132,11 @@ public class ChatMessageService {
                         LastReadMessage.builder()
                                 .roomId(roomId)
                                 .memberId(reader.getMemberId())
-                                .lastMessageId(lastMessageId)
-                                .readAt(clientReadAt)
+                                .lastMessageId(ack.getUptoMessageId())
+                                .readAt(ack.getReadAt())
                                 .build()
                 );
-        lrm.updatePointer(lastMessageId, clientReadAt);
+        lrm.updatePointer(ack.getUptoMessageId(), ack.getReadAt());
         lastReadMessageRepository.save(lrm); // TTL(30일)
 
         // Redis 카운터 제거
@@ -157,7 +157,7 @@ public class ChatMessageService {
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        ChatMessage lastMessage = chatMessageRepository.findById(lastMessageId).orElseThrow(
+                        ChatMessage lastMessage = chatMessageRepository.findById(ack.getUptoMessageId()).orElseThrow(
                                 () -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND)
                         );
                         rabbitTemplate.convertAndSend(

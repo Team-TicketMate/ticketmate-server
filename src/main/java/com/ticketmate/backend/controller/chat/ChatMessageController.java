@@ -6,7 +6,6 @@ import com.ticketmate.backend.object.dto.chat.request.ReadAckRequest;
 import com.ticketmate.backend.object.postgres.Member.Member;
 import com.ticketmate.backend.service.chat.ChatMessageService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -14,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 @Controller
-@Slf4j
 @RequiredArgsConstructor
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
@@ -29,13 +27,13 @@ public class ChatMessageController {
                             @Payload ChatMessageRequest request,
                             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Member member = customOAuth2User.getMember();
-        chatMessageService.sendMessage(request, member, roomId);
+        chatMessageService.sendMessage(roomId, request, member);
     }
 
     @MessageMapping("chat.read.{roomId}")
     public void updateRead(@Payload ReadAckRequest ack, @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                            @DestinationVariable String roomId) {
         Member member = customOAuth2User.getMember();
-        chatMessageService.acknowledgeRead(roomId, member, ack.getUptoMessageId(), ack.getReadAt());
+        chatMessageService.acknowledgeRead(ack, member, roomId);
     }
 }
