@@ -164,13 +164,13 @@ public enum ErrorCode {
 
     // CHAT
 
-    CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST, "채팅방을 찾지 못했습니다."),
+    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾지 못했습니다."),
 
     ALREADY_EXIST_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 해당 콘서트, 대리인, 의뢰인 및 선예매/일반예매에 관한 채팅방이 존재합니다."),
 
-    MESSAGE_NOT_FOUND(HttpStatus.BAD_REQUEST, "메시지를 찾지 못했습니다."),
+    MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메시지를 찾지 못했습니다."),
 
-    NO_AUTH_TO_ROOM(HttpStatus.BAD_REQUEST, "해당 사용자는 이 채팅방에 들어갈 수 없습니다."),
+    NO_AUTH_TO_ROOM(HttpStatus.FORBIDDEN, "해당 사용자는 이 채팅방에 들어갈 수 없습니다."),
 
     ;
 
