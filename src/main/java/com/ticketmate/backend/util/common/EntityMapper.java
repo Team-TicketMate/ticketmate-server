@@ -7,11 +7,13 @@ import com.ticketmate.backend.object.dto.application.request.HopeAreaRequest;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.object.dto.application.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.object.dto.application.response.HopeAreaResponse;
+import com.ticketmate.backend.object.dto.chat.response.ChatMessageResponse;
 import com.ticketmate.backend.object.dto.concert.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.object.dto.concert.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.object.dto.concerthall.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.object.dto.fcm.response.FcmTokenSaveResponse;
+import com.ticketmate.backend.object.mongo.chat.ChatMessage;
 import com.ticketmate.backend.object.postgres.application.ApplicationForm;
 import com.ticketmate.backend.object.postgres.application.ApplicationFormDetail;
 import com.ticketmate.backend.object.postgres.application.HopeArea;
@@ -124,7 +126,17 @@ public interface EntityMapper {
     ======================================FCM======================================
      */
 
-
     // FcmToken -> FcmTokenSaveResponse
     FcmTokenSaveResponse toFcmTokenSaveResponse(FcmToken fcmToken);
+
+
+     /*
+    ======================================채팅 (Mongo)======================================
+     */
+
+    // ChatMessage(Mongo) → ChatMessageResponse(DTO)
+    @Mapping(source = "chatMessageId",   target = "messageId")
+    @Mapping(source = "senderNickName",  target = "senderNickname")
+    @Mapping(source = "senderProfileUrl",target = "profileUrl")
+    ChatMessageResponse toChatMessageResponse(ChatMessage message);
 }

@@ -12,7 +12,7 @@ import com.ticketmate.backend.repository.mongo.ChatMessageRepository;
 import com.ticketmate.backend.repository.mongo.ChatRoomRepository;
 import com.ticketmate.backend.repository.postgres.application.ApplicationFormRepository;
 import com.ticketmate.backend.repository.postgres.member.MemberRepository;
-import com.ticketmate.backend.util.common.MongoMapper;
+import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.ticketmate.backend.util.common.CommonUtil.opponentIdOf;
+import static com.ticketmate.backend.util.common.CommonUtil.*;
 import static com.ticketmate.backend.util.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 
 @Service
@@ -43,7 +43,7 @@ public class ChatRoomService {
     private final MemberRepository memberRepository;
     private final ApplicationFormRepository applicationFormRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final MongoMapper mongoMapper;
+    private final EntityMapper mapper;
     private final RedisTemplate<String, String> redisTemplate;
 
     /**
@@ -54,11 +54,9 @@ public class ChatRoomService {
         // 필터링 관련 필드값 세팅
         TicketOpenType preOpen = null;
 
-        String keyword = (request.getSearchKeyword() != null && request.getSearchKeyword() != "") ?
-                request.getSearchKeyword() : "";
+        String keyword = nvl(request.getSearchKeyword(), "");
 
-        Integer pageNumber = (request.getPageNumber() != null && request.getPageNumber() > 0) ?
-                request.getPageNumber() : 0;
+        int pageNumber = null2ZeroInt(request.getPageNumber());
 
         if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.PRE_OPEN)) {
             // 선예매만 필터링
@@ -126,7 +124,7 @@ public class ChatRoomService {
         List<ChatMessage> massageList = chatMessageRepository
                 .findByChatRoomIdOrderBySendDateAsc(chatRoomId);
 
-        return massageList.stream().map(mongoMapper::toResponse).toList();
+        return massageList.stream().map(mapper::toChatMessageResponse).toList();
     }
 
     /**

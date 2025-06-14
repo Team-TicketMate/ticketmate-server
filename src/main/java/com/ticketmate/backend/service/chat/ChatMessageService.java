@@ -40,7 +40,7 @@ public class ChatMessageService {
     private final LastReadMessageRepository lastReadMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final MongoMapper mongoMapper;
+    private final EntityMapper mapper;
     private final RedisTemplate<String, String> redisTemplate;
     private static final Duration TTL = Duration.ofDays(30);
     private static final String LAST_READ_MESSAGE_POINTER_KEY = "userLastRead:%s:%s";
@@ -112,7 +112,7 @@ public class ChatMessageService {
                     )
             );
         }
-        return mongoMapper.toResponse(message);
+        return mapper.toChatMessageResponse(message);
     }
 
     /**
