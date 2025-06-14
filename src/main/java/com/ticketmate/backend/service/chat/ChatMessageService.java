@@ -11,7 +11,7 @@ import com.ticketmate.backend.object.redis.LastReadMessage;
 import com.ticketmate.backend.repository.mongo.ChatMessageRepository;
 import com.ticketmate.backend.repository.mongo.ChatRoomRepository;
 import com.ticketmate.backend.repository.redis.LastReadMessageRepository;
-import com.ticketmate.backend.util.common.MongoMapper;
+import com.ticketmate.backend.util.common.EntityMapper;
 import com.ticketmate.backend.util.exception.CustomException;
 import com.ticketmate.backend.util.exception.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.ticketmate.backend.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
+import static com.ticketmate.backend.util.rabbit.RabbitMq.*;
 
 @Service
 @Slf4j
@@ -44,6 +44,7 @@ public class ChatMessageService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final Duration TTL = Duration.ofDays(30);
     private static final String LAST_READ_MESSAGE_POINTER_KEY = "userLastRead:%s:%s";
+    private static final String UN_READ_MESSAGE_COUNTER_KEY = "unRead:%s:%s";
 
     /**
      * 채팅 메시지를 보내는 메서드입니다.
@@ -55,9 +56,8 @@ public class ChatMessageService {
         rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + chatRoomId, messageResponse);
     }
 
-    @Transactional
-    public ChatMessageResponse saveMessage(Member sender, ChatMessageRequest request, String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+    private ChatMessageResponse saveMessage(Member sender, ChatMessageRequest request, String chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         ChatMessage message = ChatMessage.builder()
@@ -95,7 +95,7 @@ public class ChatMessageService {
         for (UUID target : List.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId())) {
             if (target.equals(sender.getMemberId())) continue;   // 발송자 제외
 
-            String key = "unRead:%s:%s".formatted(roomId, target);
+            String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, target);
             Long count = redisTemplate.opsForValue().increment(key);
             redisTemplate.expire(key, TTL);
 
@@ -103,9 +103,9 @@ public class ChatMessageService {
 
             rabbitTemplate.convertAndSend(
                     "",
-                    "unread." + target,
+                    UN_READ_ROUTING_KEY + target,
                     Map.of(
-                            "roomId",     roomId,
+                            "roomId",     chatRoomId,
                             "unread",     count,
                             "lastMessage", request.getMessage(),
                             "sentAt",      message.getSendDate().format(fmt)
@@ -142,13 +142,13 @@ public class ChatMessageService {
         lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
 
         // Redis 카운터 제거
-        String unReadRedisKey = "unRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
+        String unReadRedisKey = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, reader.getMemberId());
         redisTemplate.delete(unReadRedisKey);
 
         // 채팅방 리스트에 즉시 갱신하기 위한 코드
         rabbitTemplate.convertAndSend(
                 "",
-                "unread." + reader.getMemberId(),
+                UN_READ_ROUTING_KEY + reader.getMemberId(),
                 Map.of("roomId", chatRoomId, "unread", 0)
         );
 
@@ -164,7 +164,7 @@ public class ChatMessageService {
                         );
                         rabbitTemplate.convertAndSend(
                                 CHAT_EXCHANGE_NAME,
-                                "chat.room." + chatRoomId,
+                                CHAT_ROOM_ROUTING_KEY + chatRoomId,
                                 ReadAckResponse.builder()
                                         .chatRoomId(chatRoomId)
                                         .readerId(reader.getMemberId())
