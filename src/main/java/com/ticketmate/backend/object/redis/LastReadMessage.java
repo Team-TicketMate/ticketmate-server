@@ -17,22 +17,22 @@ import java.util.UUID;
 @Setter
 public class LastReadMessage {
     @Id
-    private String id; // "userLastRead:" + {roomId} + {memberId}
+    private String lastReadMessage; // "userLastRead:" + {roomId} + {memberId}
     private String lastMessageId;  // 마지막으로 **읽은** 메시지의 ID (마지막 메시지 X) [포인터용]
     @Indexed
-    private String roomId;
+    private String chatRoomId;
     @Indexed
     private UUID memberId;
-    private LocalDateTime readAt;  // 읽은 시각
+    private LocalDateTime readDate;  // 읽은 시각
 
     @Builder
-    public LastReadMessage(String roomId, UUID memberId,
-                           String lastMessageId, LocalDateTime readAt) {
-        this.id = "userLastRead:%s:%s".formatted(roomId, memberId);
-        this.roomId = roomId;
+    public LastReadMessage(String lastReadMessage, String chatRoomId, UUID memberId,
+                           String lastMessageId, LocalDateTime readDate) {
+        this.lastReadMessage = lastReadMessage;
+        this.chatRoomId = chatRoomId;
         this.memberId = memberId;
         this.lastMessageId = lastMessageId;
-        this.readAt = readAt;
+        this.readDate = readDate;
     }
 
     /** 새 포인터가 더 최신이면 갱신 */
@@ -40,7 +40,7 @@ public class LastReadMessage {
         if (this.lastMessageId == null ||
                 this.lastMessageId.compareTo(newMsgId) < 0) {
             this.lastMessageId = newMsgId;
-            this.readAt = at;
+            this.readDate = at;
         }
     }
 }

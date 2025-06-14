@@ -43,6 +43,7 @@ public class ChatMessageService {
     private final MongoMapper mongoMapper;
     private final RedisTemplate<String, String> redisTemplate;
     private static final Duration TTL = Duration.ofDays(30);
+    private static final String LAST_READ_MESSAGE_POINTER_KEY = "userLastRead:%s:%s";
 
     /**
      * 채팅 메시지를 보내는 메서드입니다.
@@ -124,16 +125,17 @@ public class ChatMessageService {
         log.debug("acknowledgeRead 메서드 동작");
 
         // Redis포인터 기본 키값 추출
-        String redisKey = "userLastRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
+        String redisKey = LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId());
 
         // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
         LastReadMessage lastReadMessagePointer = lastReadMessageRepository.findById(redisKey)
                 .orElseGet(() ->
                         LastReadMessage.builder()
-                                .roomId(chatRoomId)
+                                .lastReadMessage(LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId()))
+                                .chatRoomId(chatRoomId)
                                 .memberId(reader.getMemberId())
                                 .lastMessageId(ack.getLastReadMessageId())
-                                .readAt(ack.getReadDate())
+                                .readDate(ack.getReadDate())
                                 .build()
                 );
         lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), ack.getReadDate());
