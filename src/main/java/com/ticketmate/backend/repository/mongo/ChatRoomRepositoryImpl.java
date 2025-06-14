@@ -90,13 +90,13 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
         return ChatRoomListResponse.builder()
                 .unRead(unRead)
-                .roomId(room.getRoomId())
+                .chatRoomId(room.getRoomId())
                 .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
-                .isPreOpen(room.getPreOpen())
+                .ticketOpenType(room.getPreOpen())
                 .lastChatMessage(room.getLastMessage())
-                .concertImg(applicationForm.getConcert().getConcertThumbnailUrl())
+                .concertThumbnailUrl(applicationForm.getConcert().getConcertThumbnailUrl())
                 .lastChatSendTime(room.getLastMessageTime())
-                .profileImg(other.getProfileUrl())
+                .profileUrl(other.getProfileUrl())
                 .build();
     }
 }
