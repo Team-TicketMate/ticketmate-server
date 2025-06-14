@@ -127,17 +127,17 @@ public class ChatMessageService {
         String redisKey = "userLastRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
 
         // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
-        LastReadMessage lrm = lastReadMessageRepository.findById(redisKey)
+        LastReadMessage lastReadMessagePointer = lastReadMessageRepository.findById(redisKey)
                 .orElseGet(() ->
                         LastReadMessage.builder()
                                 .roomId(chatRoomId)
                                 .memberId(reader.getMemberId())
-                                .lastMessageId(ack.getUptoMessageId())
-                                .readAt(ack.getReadAt())
+                                .lastMessageId(ack.getLastReadMessageId())
+                                .readAt(ack.getReadDate())
                                 .build()
                 );
-        lrm.updatePointer(ack.getUptoMessageId(), ack.getReadAt());
-        lastReadMessageRepository.save(lrm); // TTL(30일)
+        lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), ack.getReadDate());
+        lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
 
         // Redis 카운터 제거
         String unReadRedisKey = "unRead:%s:%s".formatted(chatRoomId, reader.getMemberId());
@@ -157,7 +157,7 @@ public class ChatMessageService {
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        ChatMessage lastMessage = chatMessageRepository.findById(ack.getUptoMessageId()).orElseThrow(
+                        ChatMessage lastMessage = chatMessageRepository.findById(ack.getLastReadMessageId()).orElseThrow(
                                 () -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND)
                         );
                         rabbitTemplate.convertAndSend(
@@ -167,8 +167,8 @@ public class ChatMessageService {
                                         .chatRoomId(chatRoomId)
                                         .reader(reader.getMemberId())
                                         .sender(lastMessage.getSenderId())
-                                        .uptoMessageId(lrm.getLastMessageId())
-                                        .timestamp(lastMessage.getSendDate())
+                                        .lastReadMessageId(lastReadMessagePointer.getLastMessageId())
+                                        .readDate(lastMessage.getSendDate())
                                         .build());
                     }
                 });
