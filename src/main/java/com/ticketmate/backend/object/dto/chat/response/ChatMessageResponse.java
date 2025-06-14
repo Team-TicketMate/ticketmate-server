@@ -1,6 +1,8 @@
 package com.ticketmate.backend.object.dto.chat.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,18 +20,23 @@ public class ChatMessageResponse {
     private String message;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime sendDate;
-    private boolean isRead;  // 읽음 여부
+    @JsonIgnore
+    private boolean read;  // 읽음 여부
     private String profileUrl;  // 프사
 
+    @JsonProperty("isRead")
+    public boolean isRead() {
+        return read;
+    }
     @Builder
-    public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname, String message, LocalDateTime sendDate, boolean isRead, String profileUrl) {
+    public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname, String message, LocalDateTime sendDate, boolean read, String profileUrl) {
         this.chatRoomId = chatRoomId;
         this.messageId = messageId;
         this.senderId = senderId;
         this.senderNickname = senderNickname;
         this.message = message;
         this.sendDate = sendDate;
-        this.isRead = isRead;
+        this.read = read;
         this.profileUrl = profileUrl;
     }
 }

@@ -45,6 +45,7 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final EntityMapper mapper;
     private final RedisTemplate<String, String> redisTemplate;
+    private static final String UN_READ_MESSAGE_COUNTER_KEY = "unRead:%s:%s";
 
     /**
      * 사용자별 존재하는 채팅방 리스트를 불러오는 메서드입니다.
@@ -92,7 +93,7 @@ public class ChatRoomService {
 
         List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
             chatRoomList.forEach(r -> {
-                String redisKey = ("unRead:%s:%s").formatted(r.getChatRoomId(), member.getMemberId());
+                String redisKey = (UN_READ_MESSAGE_COUNTER_KEY).formatted(r.getChatRoomId(), member.getMemberId());
                 con.stringCommands().get(redisKey.getBytes());
             });
             return null;

@@ -25,7 +25,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -99,7 +98,7 @@ public class ChatMessageService {
             Long count = redisTemplate.opsForValue().increment(key);
             redisTemplate.expire(key, TTL);
 
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+//            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
             rabbitTemplate.convertAndSend(
                     "",
@@ -108,7 +107,7 @@ public class ChatMessageService {
                             "roomId",     chatRoomId,
                             "unread",     count,
                             "lastMessage", request.getMessage(),
-                            "sentAt",      message.getSendDate().format(fmt)
+                            "sentAt",      message.getSendDate()
                     )
             );
         }
@@ -131,13 +130,14 @@ public class ChatMessageService {
         LastReadMessage lastReadMessagePointer = lastReadMessageRepository.findById(redisKey)
                 .orElseGet(() ->
                         LastReadMessage.builder()
-                                .lastReadMessage(LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId()))
+                                .lastReadMessage(redisKey)
                                 .chatRoomId(chatRoomId)
                                 .memberId(reader.getMemberId())
                                 .lastMessageId(ack.getLastReadMessageId())
                                 .readDate(ack.getReadDate())
                                 .build()
                 );
+
         lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), ack.getReadDate());
         lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
 
@@ -152,7 +152,9 @@ public class ChatMessageService {
                 Map.of("roomId", chatRoomId, "unread", 0)
         );
 
-        chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
+        long updatedMessage = chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
+        log.debug("'읽음' 처리된 메시지 개수  = {}", updatedMessage);
+
 
         // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
         TransactionSynchronizationManager.registerSynchronization(

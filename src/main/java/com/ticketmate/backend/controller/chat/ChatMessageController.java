@@ -23,7 +23,7 @@ public class ChatMessageController {
      * @param request (메시지 DTO)
      */
     @MessageMapping("chat.message.{roomId}")
-    public void sendMessage(@DestinationVariable String chatRoomId,
+    public void sendMessage(@DestinationVariable("roomId") String chatRoomId,
                             @Payload ChatMessageRequest request,
                             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Member member = customOAuth2User.getMember();
@@ -32,7 +32,7 @@ public class ChatMessageController {
 
     @MessageMapping("chat.read.{roomId}")
     public void updateRead(@Payload ReadAckRequest ack, @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-                           @DestinationVariable String roomId) {
+                           @DestinationVariable("roomId") String roomId) {
         Member member = customOAuth2User.getMember();
         chatMessageService.acknowledgeRead(ack, member, roomId);
     }

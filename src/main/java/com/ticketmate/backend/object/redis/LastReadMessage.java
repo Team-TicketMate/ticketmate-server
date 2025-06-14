@@ -35,11 +35,10 @@ public class LastReadMessage {
         this.readDate = readDate;
     }
 
-    /** 새 포인터가 더 최신이면 갱신 */
-    public void updatePointer(String newMsgId, LocalDateTime at) {
-        if (this.lastMessageId == null ||
-                this.lastMessageId.compareTo(newMsgId) < 0) {
-            this.lastMessageId = newMsgId;
+    // 새 포인터가 더 최신이면 갱신
+    public void updatePointer(String newMessageId, LocalDateTime at) {
+        if (this.lastMessageId == null || this.lastMessageId.compareTo(newMessageId) < 0) {
+            this.lastMessageId = newMessageId;
             this.readDate = at;
         }
     }

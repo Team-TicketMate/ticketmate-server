@@ -135,8 +135,8 @@ public interface EntityMapper {
      */
 
     // ChatMessage(Mongo) → ChatMessageResponse(DTO)
-    @Mapping(source = "chatMessageId",   target = "messageId")
-    @Mapping(source = "senderNickName",  target = "senderNickname")
-    @Mapping(source = "senderProfileUrl",target = "profileUrl")
+    @Mapping(source = "chatMessageId",  target = "messageId")
+    @Mapping(source = "senderNickName", target = "senderNickname")
+    @Mapping(source = "senderProfileUrl", target = "profileUrl")
     ChatMessageResponse toChatMessageResponse(ChatMessage message);
 }
