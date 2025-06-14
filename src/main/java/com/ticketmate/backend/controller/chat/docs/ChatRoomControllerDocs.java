@@ -19,7 +19,7 @@ public interface ChatRoomControllerDocs {
 
                     ### 요청 파라미터
                     - **isPreOpen (PreOpenFilter)** : 선예매/일반예매 검색 카테고리 여부 [필수]
-                    - **pageSize (INTEGER)** : 요청 페이지 번호 [필수X]
+                    - **pageNumber (INTEGER)** : 요청 페이지 번호 [필수X]
                     - **searchKeyword (STRING)** : 검색키워드 [필수X]
                         
                     ### 반환값

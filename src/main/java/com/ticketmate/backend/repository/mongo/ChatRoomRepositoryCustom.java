@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Repository
 public interface ChatRoomRepositoryCustom {
-    Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNum);
+    Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNumber);
 
     ChatRoomListResponse toResponse(ChatRoom room, Member member,
                                     Map<UUID, ApplicationForm> applicationFormMap,

@@ -57,8 +57,8 @@ public class ChatRoomService {
         String keyword = (request.getSearchKeyword() != null && request.getSearchKeyword() != "") ?
                 request.getSearchKeyword() : "";
 
-        Integer pageNum = (request.getPageSize() != null && request.getPageSize() > 0) ?
-                request.getPageSize() : 0;
+        Integer pageNumber = (request.getPageNumber() != null && request.getPageNumber() > 0) ?
+                request.getPageNumber() : 0;
 
         if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.PRE_OPEN)) {
             // 선예매만 필터링
@@ -69,7 +69,7 @@ public class ChatRoomService {
         }
 
         // 채팅방 리스트 불러오기 (20개씩)
-        Page<ChatRoom> chatRoomList = chatRoomRepository.search(preOpen, keyword, member, pageNum);
+        Page<ChatRoom> chatRoomList = chatRoomRepository.search(preOpen, keyword, member, pageNumber);
 
         // 채팅방마다 존재하는 신청폼 Id 리스트에 저장
         List<UUID> applicationFormIdList = chatRoomList.stream()

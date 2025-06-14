@@ -33,7 +33,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
      * MongoDB 동적 쿼리 생성
      */
     @Override
-    public Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNum) {
+    public Page<ChatRoom> search(TicketOpenType preOpen, String keyword, Member member, Integer pageNumber) {
         log.debug("받아온 키워드 : {}", keyword);
         UUID memberId = member.getMemberId();
 
@@ -62,7 +62,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         // 마지막 채팅 메시지 시간 기준 내림차순 정렬 (6개씩)
         Query query = Query.query(criteria)
                 .with(Sort.by(Sort.Direction.DESC, "lastMessageTime"))
-                .skip((long) pageNum * PAGE_SIZE)
+                .skip((long) pageNumber * PAGE_SIZE)
                 .limit(PAGE_SIZE);
 
         List<ChatRoom> chatRoomList = mongoTemplate.find(query, ChatRoom.class);
@@ -72,7 +72,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         log.debug("Count로 조회된 채팅방 개수 : {}", totalCount);
 
         return new PageImpl<>(chatRoomList,
-                PageRequest.of(pageNum, PAGE_SIZE),
+                PageRequest.of(pageNumber, PAGE_SIZE),
                 totalCount);
     }
 
