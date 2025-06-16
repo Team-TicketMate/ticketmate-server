@@ -122,6 +122,7 @@ public class JwtUtil {
                 .subject(customOAuth2User.getUsername())
                 .claim("category", category)
                 .claim("username", customOAuth2User.getUsername())
+                .claim("memberId", customOAuth2User.getMemberId())
                 .claim("role", customOAuth2User.getMember().getRole())
                 .issuer(issuer)
                 .issuedAt(new Date(System.currentTimeMillis()))
