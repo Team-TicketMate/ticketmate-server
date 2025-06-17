@@ -1,49 +1,34 @@
 package com.ticketmate.backend.domain.admin.service;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
-
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
-import com.ticketmate.backend.global.file.constant.UploadType;
-import com.ticketmate.backend.domain.admin.dto.request.ConcertDateRequest;
-import com.ticketmate.backend.domain.admin.dto.request.ConcertHallInfoEditRequest;
-import com.ticketmate.backend.domain.admin.dto.request.ConcertHallInfoRequest;
-import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
-import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
-import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
-import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
-import com.ticketmate.backend.domain.admin.dto.request.TicketOpenDateRequest;
+import com.ticketmate.backend.domain.admin.dto.request.*;
 import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
+import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.domain.concerthall.domain.constant.City;
+import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
+import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
 import com.ticketmate.backend.domain.notification.service.FcmService;
-import com.ticketmate.backend.global.file.service.FileService;
-import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
+import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
+import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.file.constant.UploadType;
+import com.ticketmate.backend.global.file.service.FileService;
+import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -52,6 +37,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
+import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 
 @Service
 @RequiredArgsConstructor
@@ -499,12 +493,14 @@ public class AdminService {
       // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
       portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
-      // 알림 payload 설정
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
+      // FCM 토큰이 있는 회원에게만 알림을 발송합니다.
+      if (notificationUtil.existsFcmToken(clientId)) {
+        // 알림 payload 설정
+        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
-      // 알림 발송
-      fcmService.sendNotification(clientId, payload);
+        // 알림 발송
+        fcmService.sendNotification(clientId, payload);
+      }
     }
 
     return entityMapper.toPortfolioForAdminResponse(portfolio);
@@ -535,19 +531,24 @@ public class AdminService {
 
       portfolio.getMember().setMemberType(MemberType.AGENT);
 
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
+      if (notificationUtil.existsFcmToken(memberId)) {
+        NotificationPayloadRequest payload = notificationUtil
+                .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
 
-      fcmService.sendNotification(memberId, payload);
+        fcmService.sendNotification(memberId, payload);
+      }
     } else if (request.getPortfolioType().equals(PortfolioType.REJECTED)) {
       // 반려
       portfolio.setPortfolioType(PortfolioType.REJECTED);
       log.debug("포트폴리오: {} 반려완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
 
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.REJECTED, portfolio);
+      if (notificationUtil.existsFcmToken(memberId)) {
 
-      fcmService.sendNotification(memberId, payload);
+        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.REJECTED, portfolio);
+
+        fcmService.sendNotification(memberId, payload);
+      }
+
     } else {
       log.error("유효하지않은 PortfolioType이 요청되었습니다: {}", request.getPortfolioType());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
