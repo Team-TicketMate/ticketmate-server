@@ -4,15 +4,15 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
 import com.google.firebase.messaging.WebpushNotification;
-import com.ticketmate.backend.domain.notification.domain.dto.request.FcmTokenSaveRequest;
-import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.notification.domain.dto.request.FcmTokenSaveRequest;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
+import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.domain.notification.repository.FcmTokenRepository;
-import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class FcmService {
     FcmToken fcmToken = FcmToken.builder()
         .fcmToken(request.getFcmToken())
         .memberId(member.getMemberId())
-        .memberPlatform(request.getDeviceType())
+        .deviceType(request.getDeviceType())
         .build();
 
     // 같은 키(memberId-platform)에 대해 호출 시 기존 데이터가 자동으로 덮어써짐 (사용자의 기기마다 토큰값은 유일하게 설계)
