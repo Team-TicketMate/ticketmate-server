@@ -2,14 +2,14 @@ package com.ticketmate.backend.service.performance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ticketmate.backend.object.constants.ConcertType;
-import com.ticketmate.backend.object.constants.TicketReservationSite;
-import com.ticketmate.backend.object.dto.concert.request.ConcertFilteredRequest;
-import com.ticketmate.backend.object.dto.concert.response.ConcertFilteredResponse;
-import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
-import com.ticketmate.backend.repository.postgres.concert.ConcertRepositoryImpl;
-import com.ticketmate.backend.service.concert.ConcertService;
-import com.ticketmate.backend.service.test.TestService;
+import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
+import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
+import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryImpl;
+import com.ticketmate.backend.domain.concert.service.ConcertService;
+import com.ticketmate.backend.test.service.TestService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
