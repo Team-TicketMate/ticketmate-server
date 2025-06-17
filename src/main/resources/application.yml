@@ -29,3 +29,9 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
   swagger-ui:
     path: /docs/swagger
+
+chuseok22:
+  api-change-log:
+    enabled: true
+    entries-to-show: 10
+    date-format: "yyyy-MM-dd"
