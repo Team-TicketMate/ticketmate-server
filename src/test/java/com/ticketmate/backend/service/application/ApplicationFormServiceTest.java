@@ -2,13 +2,13 @@
 //
 //import com.ticketmate.backend.object.dto.application.request.ApplicationFormRequest;
 //import com.ticketmate.backend.object.dto.test.request.LoginRequest;
-//import com.ticketmate.backend.object.postgres.Member.Member;
-//import com.ticketmate.backend.object.postgres.concert.Concert;
-//import com.ticketmate.backend.object.postgres.concerthall.ConcertHall;
-//import com.ticketmate.backend.repository.postgres.concert.ConcertRepository;
-//import com.ticketmate.backend.repository.postgres.concerthall.ConcertHallRepository;
-//import com.ticketmate.backend.repository.postgres.member.MemberRepository;
-//import com.ticketmate.backend.service.test.TestService;
+//import com.ticketmate.backend.domain.member.domain.entity.Member;
+//import com.ticketmate.backend.domain.concert.domain.entity.Concert;
+//import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
+//import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
+//import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
+//import com.ticketmate.backend.domain.member.repository.MemberRepository;
+//import com.ticketmate.backend.test.service.TestService;
 //import lombok.extern.slf4j.Slf4j;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
@@ -21,10 +21,10 @@
 //import java.util.HashMap;
 //import java.util.Map;
 //
-//import static com.ticketmate.backend.object.constants.AccountStatus.ACTIVE_ACCOUNT;
-//import static com.ticketmate.backend.object.constants.MemberType.AGENT;
-//import static com.ticketmate.backend.object.constants.MemberType.CLIENT;
-//import static com.ticketmate.backend.object.constants.SocialPlatform.NAVER;
+//import static com.ticketmate.backend.domain.member.domain.constant.AccountStatus.ACTIVE_ACCOUNT;
+//import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AGENT;
+//import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
+//import static com.ticketmate.backend.domain.member.domain.constant.SocialPlatform.NAVER;
 //
 //@SpringBootTest
 //@ActiveProfiles("dev")
