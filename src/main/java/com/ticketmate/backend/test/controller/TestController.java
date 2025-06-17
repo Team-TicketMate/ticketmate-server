@@ -1,9 +1,9 @@
 package com.ticketmate.backend.test.controller;
 
+import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import com.ticketmate.backend.test.dto.request.LoginRequest;
 import com.ticketmate.backend.test.dto.response.LoginResponse;
 import com.ticketmate.backend.test.service.TestService;
-import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -40,10 +40,13 @@ public class TestController implements TestControllerDocs {
   @Override
   @PostMapping(value = "/member")
   @LogMonitoringInvocation
-  public ResponseEntity<CompletableFuture<Void>> generateMockMembers(
+  public CompletableFuture<ResponseEntity<String>> generateMockMembers(
       @RequestParam @Schema(defaultValue = "30") int count) {
-    testService.generateMemberMockDataAsync(count);
-    return ResponseEntity.ok().build();
+    return testService.generateMemberMockDataAsync(count)
+        .thenApply(v -> ResponseEntity.ok(count + "개의 회원 Mock 데이터 생성 완료"))
+        .exceptionally(ex -> {
+          throw new RuntimeException("회원 Mock 데이터 생성 실패: " + ex.getMessage());
+        });
   }
 
   @Override
@@ -57,36 +60,48 @@ public class TestController implements TestControllerDocs {
   @Override
   @PostMapping("/concert-hall")
   @LogMonitoringInvocation
-  public ResponseEntity<CompletableFuture<Void>> createConcertHallMockData(
+  public CompletableFuture<ResponseEntity<String>> createConcertHallMockData(
       @Schema(defaultValue = "30") Integer count) {
-    testService.createConcertHallMockData(count);
-    return ResponseEntity.ok().build();
+    return testService.createConcertHallMockData(count)
+        .thenApply(v -> ResponseEntity.ok(count + "개의 공연장 Mock 데이터 생성 완료"))
+        .exceptionally(ex -> {
+          throw new RuntimeException("공연장 Mock 데이터 생성 실패: " + ex.getMessage());
+        });
   }
 
   @Override
   @PostMapping("/concert")
   @LogMonitoringInvocation
-  public ResponseEntity<CompletableFuture<Void>> createConcertMockData(
+  public CompletableFuture<ResponseEntity<String>> createConcertMockData(
       @Schema(defaultValue = "30") Integer count) {
-    testService.generateConcertMockDataAsync(count);
-    return ResponseEntity.ok().build();
+    return testService.generateConcertMockDataAsync(count)
+        .thenApply(v -> ResponseEntity.ok(count + "개의 공연 Mock 데이터 생성 완료"))
+        .exceptionally(ex -> {
+          throw new RuntimeException("공연 Mock 데이터 생성 실패: " + ex.getMessage());
+        });
   }
 
   @Override
   @PostMapping("/application-form")
   @LogMonitoringInvocation
-  public ResponseEntity<CompletableFuture<Void>> createApplicationFormMockData(
+  public CompletableFuture<ResponseEntity<String>> createApplicationFormMockData(
       @Schema(defaultValue = "30") Integer count) {
-    testService.createApplicationMockData(count);
-    return ResponseEntity.ok().build();
+    return testService.generateApplicationFormMockDataAsync(count)
+        .thenApply(v -> ResponseEntity.ok(count + "개의 신청서 Mock 데이터 생성 완료"))
+        .exceptionally(ex -> {
+          throw new RuntimeException("신청서 Mock 데이터 생성 실패: " + ex.getMessage());
+        });
   }
 
   @Override
   @PostMapping("/portfolio")
   @LogMonitoringInvocation
-  public ResponseEntity<CompletableFuture<Void>> createPortfolioMockData(
+  public CompletableFuture<ResponseEntity<String>> createPortfolioMockData(
       @Schema(defaultValue = "30") Integer count) {
-    testService.generateMockPortfoliosAsync(count);
-    return ResponseEntity.ok().build();
+    return testService.generateMockPortfoliosAsync(count)
+        .thenApply(v -> ResponseEntity.ok(count + "개의 포트폴리오 Mock 데이터 생성 완료"))
+        .exceptionally(ex -> {
+          throw new RuntimeException("포트폴리오 Mock 데이터 생성 실패: " + ex.getMessage());
+        });
   }
 }

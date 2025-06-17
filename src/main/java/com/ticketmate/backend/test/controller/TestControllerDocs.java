@@ -1,5 +1,7 @@
 package com.ticketmate.backend.test.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.test.dto.request.LoginRequest;
 import com.ticketmate.backend.test.dto.response.LoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +32,14 @@ public interface TestControllerDocs {
   )
   ResponseEntity<LoginResponse> socialLogin(LoginRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-17",
+          author = "Chuseok22",
+          description = "회원 Mock 데이터 예외처리 로직 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      )
+  })
   @Operation(
       summary = "회원 Mock 데이터 생성",
       description = """
@@ -54,7 +64,7 @@ public interface TestControllerDocs {
           - `INVALID_MEMBER_ROLE_REQUEST (400)`: 테스트 전용 Role(ROLE_TEST, ROLE_TEST_ADMIN) 외의 값이 요청될 경우
           """
   )
-  ResponseEntity<CompletableFuture<Void>> generateMockMembers(int count);
+  CompletableFuture<ResponseEntity<String>> generateMockMembers(int count);
 
   @Operation(
       summary = "테스트 회원 삭제",
@@ -72,6 +82,14 @@ public interface TestControllerDocs {
   )
   ResponseEntity<Void> deleteTestMember();
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-17",
+          author = "Chuseok22",
+          description = "공연장 Mock 데이터 예외처리 로직 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      )
+  })
   @Operation(
       summary = "테스트 공연장 데이터 추가",
       description = """
@@ -87,8 +105,16 @@ public interface TestControllerDocs {
           
           """
   )
-  ResponseEntity<CompletableFuture<Void>> createConcertHallMockData(Integer count);
+  CompletableFuture<ResponseEntity<String>> createConcertHallMockData(Integer count);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-17",
+          author = "Chuseok22",
+          description = "공연 Mock 데이터 예외처리 로직 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      )
+  })
   @Operation(
       summary = "테스트 공연 데이터 추가",
       description = """
@@ -104,8 +130,16 @@ public interface TestControllerDocs {
           
           """
   )
-  ResponseEntity<CompletableFuture<Void>> createConcertMockData(Integer count);
+  CompletableFuture<ResponseEntity<String>> createConcertMockData(Integer count);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-17",
+          author = "Chuseok22",
+          description = "신청서 Mock 데이터 예외처리 로직 추가 & 배치, 멀티스레드 기능 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      )
+  })
   @Operation(
       summary = "테스트 신청서 데이터 추가",
       description = """
@@ -120,8 +154,16 @@ public interface TestControllerDocs {
           - 중복 데이터 생성에 따라 사용자가 원하는 개수보다 적은 데이터가 저장될 수 있습니다
           """
   )
-  ResponseEntity<CompletableFuture<Void>> createApplicationFormMockData(Integer count);
+  CompletableFuture<ResponseEntity<String>> createApplicationFormMockData(Integer count);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-17",
+          author = "Chuseok22",
+          description = "포트폴리오 Mock 데이터 예외처리 로직 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      )
+  })
   @Operation(
       summary = "포트폴리오 Mock 데이터 비동기 생성",
       description = """
@@ -142,5 +184,5 @@ public interface TestControllerDocs {
           - `INTERNAL_SERVER_ERROR (500)`: 포트폴리오 데이터 생성 또는 저장 중 서버 내부 오류가 발생한 경우
           """
   )
-  ResponseEntity<CompletableFuture<Void>> createPortfolioMockData(Integer count);
+  CompletableFuture<ResponseEntity<String>> createPortfolioMockData(Integer count);
 }
