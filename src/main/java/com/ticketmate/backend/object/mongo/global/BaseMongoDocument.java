@@ -12,9 +12,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 @NoArgsConstructor
 @SuperBuilder
 public abstract class BaseMongoDocument {
-    @CreatedDate
-    private java.time.LocalDateTime createdDate;
 
-    @LastModifiedDate
-    private java.time.LocalDateTime updatedDate;
+  @CreatedDate
+  private java.time.LocalDateTime createdDate;
+
+  @LastModifiedDate
+  private java.time.LocalDateTime updatedDate;
 }

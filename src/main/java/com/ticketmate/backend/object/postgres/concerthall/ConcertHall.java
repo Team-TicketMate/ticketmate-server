@@ -3,11 +3,20 @@ package com.ticketmate.backend.object.postgres.concerthall;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.object.constants.City;
 import com.ticketmate.backend.object.postgres.global.BasePostgresEntity;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
@@ -19,18 +28,18 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConcertHall extends BasePostgresEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
-    private UUID concertHallId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(nullable = false, updatable = false)
+  private UUID concertHallId;
 
-    @Column(nullable = false)
-    private String concertHallName; // 공연장 명
+  @Column(nullable = false)
+  private String concertHallName; // 공연장 명
 
-    private String address; // 주소
+  private String address; // 주소
 
-    @Enumerated(EnumType.STRING)
-    private City city; // 지역
+  @Enumerated(EnumType.STRING)
+  private City city; // 지역
 
-    private String webSiteUrl; // 사이트 URL
+  private String webSiteUrl; // 사이트 URL
 }

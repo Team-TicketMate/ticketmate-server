@@ -14,14 +14,14 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 @RequiredArgsConstructor
 public class CustomClientRegistrationRepository {
 
-    private final SocialClientRegistration socialClientRegistration;
+  private final SocialClientRegistration socialClientRegistration;
 
-    @Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
+  @Bean
+  public ClientRegistrationRepository clientRegistrationRepository() {
 
-        return new InMemoryClientRegistrationRepository(
-                socialClientRegistration.naverClientRegistration(),
-                socialClientRegistration.kakaoClientRegistration()
-        );
-    }
+    return new InMemoryClientRegistrationRepository(
+        socialClientRegistration.naverClientRegistration(),
+        socialClientRegistration.kakaoClientRegistration()
+    );
+  }
 }

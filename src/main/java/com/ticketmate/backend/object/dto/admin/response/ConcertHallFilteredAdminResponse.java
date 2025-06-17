@@ -1,9 +1,13 @@
 package com.ticketmate.backend.object.dto.admin.response;
 
 import com.ticketmate.backend.object.constants.City;
-import lombok.*;
-
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @ToString
 @AllArgsConstructor
@@ -13,9 +17,9 @@ import java.util.UUID;
 @Builder
 public class ConcertHallFilteredAdminResponse {
 
-    private UUID concertHallId;
-    private String concertHallName;
-    private String address;
-    private City city;
-    private String webSiteUrl;
+  private UUID concertHallId;
+  private String concertHallName;
+  private String address;
+  private City city;
+  private String webSiteUrl;
 }

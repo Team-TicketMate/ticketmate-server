@@ -21,18 +21,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/fcm")
 @Tag(
-        name = "FCM 관련 API",
-        description = "FCM 관련 API 제공"
+    name = "FCM 관련 API",
+    description = "FCM 관련 API 제공"
 )
 public class FcmController implements FcmControllerDocs {
-    private final FcmService fcmService;
-    @Override
-    @PostMapping(value = "")
-    @LogMonitoringInvocation
-    public ResponseEntity<FcmTokenSaveResponse> saveFcmToken(
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-            @RequestBody @Valid FcmTokenSaveRequest request) {
-        Member member = customOAuth2User.getMember();
-        return ResponseEntity.ok(fcmService.saveFcmToken(request,member));
-    }
+
+  private final FcmService fcmService;
+
+  @Override
+  @PostMapping(value = "")
+  @LogMonitoringInvocation
+  public ResponseEntity<FcmTokenSaveResponse> saveFcmToken(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @RequestBody @Valid FcmTokenSaveRequest request) {
+    Member member = customOAuth2User.getMember();
+    return ResponseEntity.ok(fcmService.saveFcmToken(request, member));
+  }
 }

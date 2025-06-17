@@ -15,16 +15,17 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatRoomFilteredRequest {
-    public enum PreOpenFilter {
-        ALL, PRE_OPEN, NORMAL
-    }
 
-    @Schema(defaultValue = "ALL")
-    private PreOpenFilter isPreOpen;  // 선예매 일반예매 (Enum 사용으로 null 방지)
-    @Min(value = 0, message = "페이지 번호는 최소 0부터 입니다.")
-    @Schema(defaultValue = "0")
-    private Integer pageNumber;  // 페이지 번호
-    @Schema(defaultValue = "")
-    @Size(max = 30, message = "검색어는 최대 30자 입니다.")
-    private String searchKeyword;  // 검색 키워드
+  @Schema(defaultValue = "ALL")
+  private PreOpenFilter isPreOpen;  // 선예매 일반예매 (Enum 사용으로 null 방지)
+  @Min(value = 0, message = "페이지 번호는 최소 0부터 입니다.")
+  @Schema(defaultValue = "0")
+  private Integer pageNumber;  // 페이지 번호
+  @Schema(defaultValue = "")
+  @Size(max = 30, message = "검색어는 최대 30자 입니다.")
+  private String searchKeyword;  // 검색 키워드
+
+  public enum PreOpenFilter {
+    ALL, PRE_OPEN, NORMAL
+  }
 }

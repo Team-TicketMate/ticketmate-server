@@ -6,8 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum MemberType {
-    AGENT("대리인"),
-    CLIENT("의뢰인");
+  AGENT("대리인"),
+  CLIENT("의뢰인");
 
-    private final String description;
+  private final String description;
 }

@@ -7,11 +7,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ConcertRepositoryCustom {
-    Page<ConcertFilteredResponse> filteredConcert(
-            String concertName,
-            String concertHallName,
-            ConcertType concertType,
-            TicketReservationSite ticketReservationSite,
-            Pageable pageable
-    );
+
+  Page<ConcertFilteredResponse> filteredConcert(
+      String concertName,
+      String concertHallName,
+      ConcertType concertType,
+      TicketReservationSite ticketReservationSite,
+      Pageable pageable
+  );
 }

@@ -16,43 +16,43 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SocialClientRegistration {
 
-    private final OAuth2ClientProperties properties;
+  private final OAuth2ClientProperties properties;
 
-    // 네이버
-    public ClientRegistration naverClientRegistration() {
-        OAuth2ClientProperties.Registration registration = properties.getRegistration().get("naver");
-        OAuth2ClientProperties.Provider provider = properties.getProvider().get("naver");
+  // 네이버
+  public ClientRegistration naverClientRegistration() {
+    OAuth2ClientProperties.Registration registration = properties.getRegistration().get("naver");
+    OAuth2ClientProperties.Provider provider = properties.getProvider().get("naver");
 
-        return ClientRegistration.withRegistrationId(registration.getClientName())
-                .clientId(registration.getClientId())
-                .clientSecret(registration.getClientSecret())
-                .redirectUri(registration.getRedirectUri())
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .scope(registration.getScope())
-                .authorizationUri(provider.getAuthorizationUri())
-                .tokenUri(provider.getTokenUri())
-                .userInfoUri(provider.getUserInfoUri())
-                .userNameAttributeName(provider.getUserNameAttribute())
-                .build();
-    }
+    return ClientRegistration.withRegistrationId(registration.getClientName())
+        .clientId(registration.getClientId())
+        .clientSecret(registration.getClientSecret())
+        .redirectUri(registration.getRedirectUri())
+        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        .scope(registration.getScope())
+        .authorizationUri(provider.getAuthorizationUri())
+        .tokenUri(provider.getTokenUri())
+        .userInfoUri(provider.getUserInfoUri())
+        .userNameAttributeName(provider.getUserNameAttribute())
+        .build();
+  }
 
 
-    // 카카오
-    public ClientRegistration kakaoClientRegistration() {
-        OAuth2ClientProperties.Registration registration = properties.getRegistration().get("kakao");
-        OAuth2ClientProperties.Provider provider = properties.getProvider().get("kakao");
+  // 카카오
+  public ClientRegistration kakaoClientRegistration() {
+    OAuth2ClientProperties.Registration registration = properties.getRegistration().get("kakao");
+    OAuth2ClientProperties.Provider provider = properties.getProvider().get("kakao");
 
-        return ClientRegistration.withRegistrationId(registration.getClientName())
-                .clientId(registration.getClientId())
-                .clientSecret(registration.getClientSecret())
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                .redirectUri(registration.getRedirectUri())
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .scope(registration.getScope())
-                .authorizationUri(provider.getAuthorizationUri())
-                .tokenUri(provider.getTokenUri())
-                .userInfoUri(provider.getUserInfoUri())
-                .userNameAttributeName(provider.getUserNameAttribute())
-                .build();
-    }
+    return ClientRegistration.withRegistrationId(registration.getClientName())
+        .clientId(registration.getClientId())
+        .clientSecret(registration.getClientSecret())
+        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+        .redirectUri(registration.getRedirectUri())
+        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        .scope(registration.getScope())
+        .authorizationUri(provider.getAuthorizationUri())
+        .tokenUri(provider.getTokenUri())
+        .userInfoUri(provider.getUserInfoUri())
+        .userNameAttributeName(provider.getUserNameAttribute())
+        .build();
+  }
 }

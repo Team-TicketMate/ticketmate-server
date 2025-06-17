@@ -5,11 +5,11 @@ import lombok.Getter;
 @Getter
 public enum UploadType {
 
-    MEMBER,
+  MEMBER,
 
-    CONCERT_HALL,
+  CONCERT_HALL,
 
-    CONCERT,
+  CONCERT,
 
-    PORTFOLIO;
+  PORTFOLIO;
 }
