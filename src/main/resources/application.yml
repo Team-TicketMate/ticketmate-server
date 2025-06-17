@@ -8,12 +8,12 @@ spring:
     hibernate:
       ddl-auto: update
     properties:
-        hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-          show_sql: true
-          format_sql: true
-          open-in-view: false
-          use_sql_comments: true
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        format_sql: true
+        open-in-view: false
+        use_sql_comments: true
   servlet:
     multipart:
       enabled: true # 파일 업로드 허용
@@ -29,3 +29,9 @@ springdoc:
   default-produces-media-type: application/json;charset=UTF-8
   swagger-ui:
     path: /docs/swagger
+
+chuseok22:
+  api-change-log:
+    enabled: true
+    entries-to-show: 10
+    date-format: "yyyy-MM-dd"

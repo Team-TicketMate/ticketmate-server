@@ -60,12 +60,6 @@ public class SecurityConfig {
             "http://192.168.*:*" // 192.168.0.0/16
     );
 
-    private static final List<String> PATTERN_ORIGINS = List.of(
-            "http://10.*:*",                // 10.0.0.0/8
-            "http://172.*:*",               // 172.16.0.0/12 전체 (16~31)
-            "http://192.168.*:*"            // 192.168.0.0/16
-    );
-
     /**
      * Security Filter Chain 설정
      */
