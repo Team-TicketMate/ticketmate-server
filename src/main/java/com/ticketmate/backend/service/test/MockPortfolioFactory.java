@@ -36,6 +36,7 @@ public class MockPortfolioFactory {
         Portfolio portfolio = Portfolio.builder()
                 .portfolioDescription(portfolioDescription)
                 .member(client)
+                .portfolioImgList(new ArrayList<>())
                 .portfolioType(koFaker.options().option(PortfolioType.class))
                 .build();
 

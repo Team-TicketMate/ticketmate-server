@@ -39,7 +39,7 @@ public class TestController implements TestControllerDocs {
     @LogMonitoringInvocation
     public ResponseEntity<CompletableFuture<Void>> generateMockMembers(
             @RequestParam @Schema(defaultValue = "30") int count) {
-        testService.generateMockMembersAsync(count);
+        testService.generateMemberMockDataAsync(count);
         return ResponseEntity.ok().build();
     }
 
@@ -65,7 +65,7 @@ public class TestController implements TestControllerDocs {
     @LogMonitoringInvocation
     public ResponseEntity<CompletableFuture<Void>> createConcertMockData(
             @Schema(defaultValue = "30") Integer count) {
-        testService.createConcertMockData(count);
+        testService.generateConcertMockDataAsync(count);
         return ResponseEntity.ok().build();
     }
 
