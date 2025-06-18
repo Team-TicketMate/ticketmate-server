@@ -2,27 +2,24 @@ package com.ticketmate.backend.domain.chat.domain.entity;
 
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.global.BaseMongoDocument;
-import java.time.LocalDateTime;
-import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "chat_room")
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Document
 // 대리인, 의뢰인, 콘서트, 선예매/일반예매 4가지 필드의 복합 인덱스 (4가지 조건이 갖춰진 데이터는 1개여야함)
 @CompoundIndex(
-    name = "uk_agent_client_concert_preopen",
+    name = "uk_agent_client_concert_ticketOpenType",
     def = "{'agentMemberId': 1, "
           + "'clientMemberId': 1, "
           + "'concertId': 1, "
-          + "'preOpen': 1}",
+          + "'ticketOpenType': 1}",
     unique = true
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
