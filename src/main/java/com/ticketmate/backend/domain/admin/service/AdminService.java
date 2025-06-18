@@ -40,17 +40,19 @@ import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -497,12 +499,14 @@ public class AdminService {
       // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
       portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
 
-      // 알림 payload 설정
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
+      // FCM 토큰이 있는 회원에게만 알림을 발송합니다.
+      if (notificationUtil.existsFcmToken(clientId)) {
+        // 알림 payload 설정
+        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
 
-      // 알림 발송
-      fcmService.sendNotification(clientId, payload);
+        // 알림 발송
+        fcmService.sendNotification(clientId, payload);
+      }
     }
 
     return entityMapper.toPortfolioForAdminResponse(portfolio);
@@ -533,19 +537,24 @@ public class AdminService {
 
       portfolio.getMember().setMemberType(MemberType.AGENT);
 
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
+      if (notificationUtil.existsFcmToken(memberId)) {
+        NotificationPayloadRequest payload = notificationUtil
+                .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
 
-      fcmService.sendNotification(memberId, payload);
+        fcmService.sendNotification(memberId, payload);
+      }
     } else if (request.getPortfolioType().equals(PortfolioType.REJECTED)) {
       // 반려
       portfolio.setPortfolioType(PortfolioType.REJECTED);
       log.debug("포트폴리오: {} 반려완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
 
-      NotificationPayloadRequest payload = notificationUtil
-          .portfolioNotification(PortfolioType.REJECTED, portfolio);
+      if (notificationUtil.existsFcmToken(memberId)) {
 
-      fcmService.sendNotification(memberId, payload);
+        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.REJECTED, portfolio);
+
+        fcmService.sendNotification(memberId, payload);
+      }
+
     } else {
       log.error("유효하지않은 PortfolioType이 요청되었습니다: {}", request.getPortfolioType());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);

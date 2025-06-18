@@ -1,9 +1,5 @@
 package com.ticketmate.backend.domain.applicationform.service;
 
-import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AGENT;
-import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
-import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
-
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormStatus;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
@@ -38,17 +34,22 @@ import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AGENT;
+import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
+import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
 
 @Service
 @Slf4j
@@ -333,11 +334,16 @@ public class ApplicationFormService {
     // 새로운 객체 저장 or Update
     rejectionReasonRepository.save(rejectionReason);
 
-    // 알림 전송용 payload, 회원객체 세팅
-    NotificationPayloadRequest payloadRequest = notificationUtil.rejectNotification(request.getApplicationFormRejectedType(), agent, memo);
     Member client = applicationForm.getClient();
 
-    fcmService.sendNotification(client.getMemberId(), payloadRequest);
+    if (notificationUtil.existsFcmToken(client.getMemberId())) {
+      // 알림 전송용 payload, 회원객체 세팅
+      NotificationPayloadRequest payloadRequest = notificationUtil
+              .rejectNotification(request.getApplicationFormRejectedType(), agent, memo);
+
+
+      fcmService.sendNotification(client.getMemberId(), payloadRequest);
+    }
   }
 
   /**
@@ -411,9 +417,12 @@ public class ApplicationFormService {
 
     chatRoomRepository.save(chatRoom);
 
-    // 알림전송 TODO : FCM 토큰이 없을시 분기처리
-    NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
-    fcmService.sendNotification(client.getMemberId(), payloadRequest);
+    // 알림전송
+    if (notificationUtil.existsFcmToken(client.getMemberId())) {
+      NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
+
+      fcmService.sendNotification(client.getMemberId(), payloadRequest);
+    }
 
     return chatRoom.getChatRoomId();
   }
