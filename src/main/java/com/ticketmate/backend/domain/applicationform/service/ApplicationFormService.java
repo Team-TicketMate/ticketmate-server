@@ -9,33 +9,34 @@ import com.ticketmate.backend.domain.applicationform.domain.constant.Application
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
-import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
 import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
+import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
+import com.ticketmate.backend.domain.applicationform.repository.RejectionReasonRepository;
+import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
+import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
-import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
-import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
-import com.ticketmate.backend.domain.applicationform.repository.RejectionReasonRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
-import com.ticketmate.backend.domain.notification.service.FcmService;
 import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
+import com.ticketmate.backend.domain.notification.service.FcmService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.global.util.common.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,9 +46,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -212,8 +211,8 @@ public class ApplicationFormService {
    *                agentId 대리인 PK
    *                concertId 콘서트 PK
    *                applicationStatus 신청서 상태
-   *                pageNumber 요청 페이지 번호 (기본 0)
-   *                pageSize 한 페이지 당 항목 수 (기본 30)
+   *                pageNumber 요청 페이지 번호 (기본 1)
+   *                pageSize 한 페이지 당 항목 수 (기본 10)
    *                sortField 정렬할 필드 (기본: created_date)
    *                sortDirection 정렬 방향 (기본: DESC)
    */
@@ -254,17 +253,13 @@ public class ApplicationFormService {
           });
     }
 
-    // 정렬 조건
-    Sort sort = Sort.by(
-        Sort.Direction.fromString(request.getSortDirection()),
-        request.getSortField()
-    );
-
-    // Pageable 객체 생성
-    Pageable pageable = PageRequest.of(
+    // Pageable 객체 생성 (PageableUtil 사용)
+    Pageable pageable = PageableUtil.createPageable(
         request.getPageNumber(),
         request.getPageSize(),
-        sort
+        request.getSortField(),
+        request.getSortDirection(),
+        "created_date", "request_count"
     );
 
     Page<ApplicationForm> applicationFormPage = applicationFormRepository

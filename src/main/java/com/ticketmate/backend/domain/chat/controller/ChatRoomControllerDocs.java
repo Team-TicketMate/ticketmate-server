@@ -1,9 +1,9 @@
 package com.ticketmate.backend.domain.chat.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -42,9 +42,9 @@ public interface ChatRoomControllerDocs {
           NORMAL("일반예매")
           
           ### 유의사항
-          - 페이징 처리는 페이지당 20개 데이터로 처리했습니다.
-          - 페이지 번호를 비우고 요청시 페이지 기본 '0' 으로 설정합니다. (첫페이지)
-          - 검색키워드가 없을 시 공백으로 설정합니다. (전체조회입니다.)                     
+          - 기본 페이징 처리는 페이지당 10개 데이터로 처리했습니다.
+          - pageNumber는 기본 1페이지로 설정됩니다. (첫페이지)
+          - 검색키워드가 없을 시 공백으로 설정합니다. (전체조회입니다.)
           """
   )
   ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(CustomOAuth2User customOAuth2User, ChatRoomFilteredRequest request);
