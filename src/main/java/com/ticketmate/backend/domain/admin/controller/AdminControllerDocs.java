@@ -9,10 +9,10 @@ import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequ
 import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -74,7 +74,7 @@ public interface AdminControllerDocs {
           DAEGU 27
           INCHEON 28
           GWANGJU 29
-          DAEJEON 30 
+          DAEJEON 30
           ULSAN 31
           SEJONG 36
           GYEONGGI 41
@@ -286,7 +286,7 @@ public interface AdminControllerDocs {
      */
 
   @Operation(
-      summary = "포트폴리오 리스트 조회",
+      summary = "포트폴리오 필터링 조회",
       description = """
           이 API는 관리자 인증이 필요합니다.
           
@@ -295,8 +295,8 @@ public interface AdminControllerDocs {
           - `nickname` (선택): 사용자 닉네임 (like 검색, 부분 일치 허용)
           - `name` (선택): 사용자 이름 (like 검색, 부분 일치 허용)
           - `portfolioType` (선택): 포트폴리오 타입
-          - `pageNumber` (선택, 기본값: 0): 페이지 번호 (0부터 시작)
-          - `pageSize` (선택, 기본값: 30): 페이지당 항목 수
+          - `pageNumber` (선택, 기본값: 1): 페이지 번호 (1부터 시작)
+          - `pageSize` (선택, 기본값: 10): 페이지당 항목 수
           - `sortField` (선택, 기본값: created_date): 정렬 기준 필드 (현재는 created_date만 지원)
           - `sortDirection` (선택, 기본값: DESC): 정렬 순서 (ASC 또는 DESC)
           
