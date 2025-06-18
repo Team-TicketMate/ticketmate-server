@@ -1,25 +1,25 @@
 package com.ticketmate.backend.domain.chat.service;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.null2ZeroInt;
+import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 import static com.ticketmate.backend.global.util.common.CommonUtil.opponentIdOf;
-import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
+import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.chat.repository.ChatMessageRepository;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
-import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
+import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
-import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.global.util.common.PageableUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class ChatRoomService {
   private final MemberRepository memberRepository;
   private final ApplicationFormRepository applicationFormRepository;
   private final ChatMessageRepository chatMessageRepository;
-  private final EntityMapper mapper;
+  private final EntityMapper entityMapper;
   private final RedisTemplate<String, String> redisTemplate;
 
   /**
@@ -59,7 +59,8 @@ public class ChatRoomService {
 
     String keyword = nvl(request.getSearchKeyword(), "");
 
-    int pageNumber = null2ZeroInt(request.getPageNumber());
+    // PageableUtil을 사용하여 1부터 시작하는 페이지 번호를 인덱스로 변환
+    int pageIndex = PageableUtil.convertToPageIndex(request.getPageNumber());
 
     if (request.getIsPreOpen().equals(ChatRoomFilteredRequest.PreOpenFilter.PRE_OPEN)) {
       // 선예매만 필터링
@@ -69,8 +70,8 @@ public class ChatRoomService {
       preOpen = TicketOpenType.GENERAL_OPEN;
     }
 
-    // 채팅방 리스트 불러오기 (20개씩)
-    Page<ChatRoom> chatRoomList = chatRoomRepository.search(preOpen, keyword, member, pageNumber);
+    // 채팅방 리스트 불러오기 (10개씩)
+    Page<ChatRoom> chatRoomList = chatRoomRepository.search(preOpen, keyword, member, pageIndex);
 
     // 채팅방마다 존재하는 신청폼 Id 리스트에 저장
     List<UUID> applicationFormIdList = chatRoomList.stream()
@@ -125,7 +126,7 @@ public class ChatRoomService {
     List<ChatMessage> massageList = chatMessageRepository
         .findByChatRoomIdOrderBySendDateAsc(chatRoomId);
 
-    return massageList.stream().map(mapper::toChatMessageResponse).toList();
+    return massageList.stream().map(entityMapper::toChatMessageResponse).toList();
   }
 
   /**

@@ -18,6 +18,7 @@ import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryImpl;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
 import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.global.util.common.PageableUtil;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
@@ -32,9 +33,7 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +55,7 @@ public class ConcertService {
    *                concertHallName
    *                concertType
    *                ticketReservationSite
-   *                pageNumber
+   *                pageNumber (1부터 시작)
    *                pageSize
    *                sortField
    *                sortDirection
@@ -70,15 +69,16 @@ public class ConcertService {
     ConcertType concertType = request.getConcertType() != null ? request.getConcertType() : null;
     TicketReservationSite ticketReservationSite = request.getTicketReservationSite() != null ? request.getTicketReservationSite() : null;
 
-    // 2. 정렬 조건
-    Sort sort = Sort.by(
-        Sort.Direction.fromString(request.getSortDirection()),
-        request.getSortField());
+    // 2. Pageable 생성 (PageableUtil 사용)
+    Pageable pageable = PageableUtil.createPageable(
+        request.getPageNumber(),
+        request.getPageSize(),
+        request.getSortField(),
+        request.getSortDirection(),
+        "created_date", "ticket_open_date"
+    );
 
-    // 3. Pageable 생성
-    Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), sort);
-
-    // 4. 데이터베이스 조회
+    // 3. 데이터베이스 조회
     return concertRepositoryImpl.filteredConcert(
         concertName,
         concertHallName,
