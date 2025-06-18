@@ -1,10 +1,10 @@
 package com.ticketmate.backend.global.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.config.SecurityUrls;
+import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.exception.ErrorResponse;
+import com.ticketmate.backend.global.util.auth.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

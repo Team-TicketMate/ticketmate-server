@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.constant;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +7,32 @@ import java.util.List;
  * Security 관련 URL 상수 관리
  */
 public class SecurityUrls {
+
+  /**
+   * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
+   */
+  public static final List<String> ALLOWED_ORIGINS = List.of(
+
+      // 3000번 포트
+      "https://ticketmate.site", // 프론트
+      "https://ticketmate-client.vercel.app", // 프론트 배포
+      "https://ticketmate-admin.vercel.app", // 프론트 관리자
+
+      "https://www.ticketmate.site", // 프론트 배포
+      "https://dev.ticketmate.site", // 프론트 test
+
+      // API
+      "https://api.ticketmate.site", // 메인 API 서버
+      "https://test.ticketmate.site", // 테스트 API 서버
+
+      // Local
+      "http://localhost:8080", // 로컬 API 서버
+      "http://localhost:3000", // 로컬 웹 서버
+
+      "http://10.*:*", // 10.0.0.0/8
+      "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
+      "http://192.168.*:*" // 192.168.0.0/16
+  );
 
   /**
    * 인증을 생략할 URL 패턴 목록
@@ -20,9 +46,6 @@ public class SecurityUrls {
 
       // TEST
       "/test/**", // 개발자용 테스트 api
-
-      // 썸네일 파일 TODO: 추후 url 매핑 관련 규칙 수정
-      "/concert/thumbnail/**", // 콘서트 썸네일 파일 경로
 
       // Swagger
       "/docs/**", // Swagger UI
