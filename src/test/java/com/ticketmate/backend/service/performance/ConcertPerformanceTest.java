@@ -61,7 +61,7 @@ public class ConcertPerformanceTest {
   @BeforeAll
   void warmUp() {
     ConcertFilteredRequest warmUpRequest = ConcertFilteredRequest.builder()
-        .pageNumber(0)
+        .pageNumber(1)
         .pageSize(1)
         .sortField("created_date")
         .sortDirection("DESC")

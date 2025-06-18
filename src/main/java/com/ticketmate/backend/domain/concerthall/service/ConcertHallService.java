@@ -9,16 +9,15 @@ import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHall
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.global.util.common.PageableUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +37,8 @@ public class ConcertHallService {
    *
    * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
    *                cityCode 지역 코드 (null 인 경우 필터링 제외)
-   *                pageNumber 요청 페이지 번호 (기본 0)
-   *                pageSize 한 페이지 당 항목 수 (기본 30)
+   *                pageNumber 요청 페이지 번호 (1부터 시작, 기본 1)
+   *                pageSize 한 페이지 당 항목 수 (기본 10)
    *                sortField 정렬할 필드 (기본: created_date)
    *                sortDirection 정렬 방향 (기본: DESC)
    */
@@ -63,16 +62,13 @@ public class ConcertHallService {
       city = enumToString(City.fromCityCode(request.getCityCode()));
     }
 
-    // 정렬 조건
-    Sort sort = Sort.by(
-        Sort.Direction.fromString(request.getSortDirection()),
-        request.getSortField());
-
-    // Pageable 객체 생성
-    Pageable pageable = PageRequest.of(
+    // Pageable 객체 생성 (PageableUtil 사용)
+    Pageable pageable = PageableUtil.createPageable(
         request.getPageNumber(),
         request.getPageSize(),
-        sort
+        request.getSortField(),
+        request.getSortDirection(),
+        "created_date"
     );
 
     return concertHallRepository

@@ -2,10 +2,10 @@ package com.ticketmate.backend.domain.applicationform.controller;
 
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -53,7 +53,7 @@ public interface ApplicationFormControllerDocs {
   @Operation(
       summary = "신청서 필터링 조회",
       description = """
-          다양한 조건으로 신청서 목록을 필터링하여 조회합니다.
+          신청서 목록을 필터링하여 조회합니다.
           
           ### 인증 필요
           
@@ -67,8 +67,8 @@ public interface ApplicationFormControllerDocs {
             - REJECTED: 거절
             - CANCELED: 취소
             - CANCELED_IN_PROCESS: 진행 취소
-          - **pageNumber** (Integer): 페이지 번호 [선택, 기본값 0]
-          - **pageSize** (Integer): 페이지 크기 [선택, 기본값 30]
+          - **pageNumber** (Integer): 페이지 번호 [선택, 기본값 1]
+          - **pageSize** (Integer): 페이지 크기 [선택, 기본값 10]
           - **sortField** (String): 정렬 기준 [선택, 기본값 created_date]
             - created_date: 생성일 기준
             - total_request_count: 요청 매수 기준
