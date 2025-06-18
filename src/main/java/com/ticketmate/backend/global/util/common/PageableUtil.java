@@ -1,5 +1,10 @@
 package com.ticketmate.backend.global.util.common;
 
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_PAGE_SIZE;
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_DIRECTION;
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_FIELD;
+import static com.ticketmate.backend.global.constant.PageableConstants.MAX_PAGE_SIZE;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -9,11 +14,6 @@ import org.springframework.data.domain.Sort;
  * 사용자는 1부터 시작하는 페이지 번호를 입력하고, 내부적으로 인덱스 기반으로 변환
  */
 public class PageableUtil {
-
-  public static final int MAX_PAGE_SIZE = 100;
-  public static final int DEFAULT_PAGE_SIZE = 10;
-  public static final String DEFAULT_SORT_FIELD = "created_date";
-  public static final String DEFAULT_SORT_DIRECTION = "DESC";
 
   /**
    * 사용자 입력 페이지 번호(1부터 시작)를 인덱스 기반으로 변환

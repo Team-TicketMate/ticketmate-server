@@ -7,7 +7,7 @@ import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListRespon
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.constant.PageableConstants;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,8 +63,8 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
     // 마지막 채팅 메시지 시간 기준 내림차순 정렬 (6개씩)
     Query query = Query.query(criteria)
         .with(Sort.by(Sort.Direction.DESC, "lastMessageTime"))
-        .skip((long) pageNumber * PageableUtil.DEFAULT_PAGE_SIZE)
-        .limit(PageableUtil.DEFAULT_PAGE_SIZE);
+        .skip((long) pageNumber * PageableConstants.DEFAULT_PAGE_SIZE)
+        .limit(PageableConstants.DEFAULT_PAGE_SIZE);
 
     List<ChatRoom> chatRoomList = mongoTemplate.find(query, ChatRoom.class);
     log.debug("조회된 채팅방 객체 개수 : {}", chatRoomList.size());
@@ -73,7 +73,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
     log.debug("Count로 조회된 채팅방 개수 : {}", totalCount);
 
     return new PageImpl<>(chatRoomList,
-        PageRequest.of(pageNumber, PageableUtil.DEFAULT_PAGE_SIZE),
+        PageRequest.of(pageNumber, PageableConstants.DEFAULT_PAGE_SIZE),
         totalCount);
   }
 
