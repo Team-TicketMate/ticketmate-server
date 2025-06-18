@@ -11,7 +11,6 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.domain.admin.dto.request.TicketOpenDateRequest;
-import com.ticketmate.backend.domain.admin.dto.request.*;
 import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
@@ -40,15 +39,6 @@ import com.ticketmate.backend.global.file.service.FileService;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.PageableUtil;
-import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.file.constant.UploadType;
-import com.ticketmate.backend.global.file.service.FileService;
-import com.ticketmate.backend.global.mapper.EntityMapper;
-import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +53,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 
 @Service
 @RequiredArgsConstructor

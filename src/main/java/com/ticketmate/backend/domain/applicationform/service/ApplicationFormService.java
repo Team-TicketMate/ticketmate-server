@@ -2,7 +2,6 @@ package com.ticketmate.backend.domain.applicationform.service;
 
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormStatus;
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.*;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
@@ -31,8 +30,6 @@ import com.ticketmate.backend.domain.notification.domain.dto.request.Notificatio
 import com.ticketmate.backend.domain.notification.service.FcmService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.mapper.EntityMapper;
-import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.PageableUtil;
