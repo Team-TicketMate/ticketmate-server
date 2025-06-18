@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.chat.repository;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.opponentIdOf;
+import static com.ticketmate.backend.domain.chat.service.ChatRoomService.opponentIdOf;
 
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;

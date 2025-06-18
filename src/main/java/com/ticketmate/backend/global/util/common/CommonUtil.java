@@ -1,9 +1,6 @@
 package com.ticketmate.backend.global.util.common;
 
-import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
 import java.util.List;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -63,19 +60,5 @@ public class CommonUtil {
    */
   public static String enumToString(Enum<?> enumValue) {
     return enumValue != null ? enumValue.name() : "";
-  }
-
-  /**
-   * 자신이 아닌 상대방의 id를 찾아주는 메서드입니다.
-   *
-   * @param room   채팅방 객체
-   * @param member 현재 사용자
-   * @return 상대방의 고유 ID
-   */
-  public static UUID opponentIdOf(ChatRoom room, Member member) {
-    // 여기서 member는 자기 자신입니다.
-    return room.getAgentMemberId().equals(member.getMemberId())
-        ? room.getClientMemberId()
-        : room.getAgentMemberId();
   }
 }
