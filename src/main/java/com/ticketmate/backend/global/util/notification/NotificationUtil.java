@@ -14,10 +14,6 @@ import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -31,17 +27,6 @@ import org.springframework.stereotype.Component;
 public class NotificationUtil {
 
   private final FcmTokenRepository fcmTokenRepository;
-
-  /**
-   * 알림을 발송할 대상의 FCM 토큰이 있는지 검증해주는 메서드입니다.
-   */
-  public boolean existsFcmToken(UUID memberId) {
-    log.debug("토큰 확인 로직");
-    boolean tokenExist = fcmTokenRepository.existsByMemberId(memberId);
-    log.debug("토큰 존재 여부 : {}", tokenExist);
-
-    return tokenExist;
-  }
 
   /**
    * 알림을 발송할 대상의 FCM 토큰이 있는지 검증해주는 메서드입니다.
