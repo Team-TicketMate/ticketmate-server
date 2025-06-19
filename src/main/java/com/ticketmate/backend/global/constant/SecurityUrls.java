@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Security 관련 URL 상수 관리
  */
-public class SecurityUrls {
+public final class SecurityUrls {
 
   /**
    * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
@@ -33,7 +33,6 @@ public class SecurityUrls {
       "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
       "http://192.168.*:*" // 192.168.0.0/16
   );
-
   /**
    * 인증을 생략할 URL 패턴 목록
    */
@@ -64,7 +63,6 @@ public class SecurityUrls {
       "/chat-jwt.html",
       "/chat-jwt-local2.html"
   );
-
   /**
    * 관리자 권한이 필요한 URL 패턴 목록
    */
@@ -73,4 +71,8 @@ public class SecurityUrls {
       "/admin/concert-hall/**",
       "/admin/portfolio/**"
   );
+
+  private SecurityUrls() {
+    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
+  }
 }
