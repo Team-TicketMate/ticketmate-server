@@ -1,5 +1,9 @@
 package com.ticketmate.backend.global.util.auth;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.ROOT_DOMAIN;
+
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import jakarta.servlet.http.Cookie;
@@ -13,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class CookieUtil {
 
-  private static final String ROOT_DOMAIN = "ticketmate.site";
   private final JwtUtil jwtUtil;
 
   /**
@@ -23,9 +26,9 @@ public class CookieUtil {
    */
   @Transactional
   public Cookie createCookie(String key, String token) {
-    if (key.equals("accessToken")) {
+    if (key.equals(ACCESS_TOKEN_KEY)) {
       return createAccessTokenCookie(token);
-    } else if (key.equals("refreshToken")) {
+    } else if (key.equals(REFRESH_TOKEN_KEY)) {
       return createRefreshTokenCookie(token);
     } else {
       log.error("잘못된 Cookie key가 요청됐습니다. 요청값: {}", key);
@@ -42,7 +45,7 @@ public class CookieUtil {
    */
   private Cookie createAccessTokenCookie(String accessToken) {
     log.debug("accessToken을 포함한 쿠키를 발급합니다.");
-    Cookie cookie = new Cookie("accessToken", accessToken);
+    Cookie cookie = new Cookie(ACCESS_TOKEN_KEY, accessToken);
     cookie.setHttpOnly(false);
     cookie.setSecure(true);
     cookie.setPath("/");
@@ -60,7 +63,7 @@ public class CookieUtil {
    */
   private Cookie createRefreshTokenCookie(String refreshToken) {
     log.debug("refreshToken을 포함한 쿠키를 발급합니다.");
-    Cookie cookie = new Cookie("refreshToken", refreshToken);
+    Cookie cookie = new Cookie(REFRESH_TOKEN_KEY, refreshToken);
     cookie.setHttpOnly(true);
     cookie.setSecure(true);
     cookie.setPath("/");

@@ -2,7 +2,7 @@ package com.ticketmate.backend.domain.concert.domain.dto.request;
 
 import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.constant.PageableConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,7 +34,7 @@ public class ConcertFilteredRequest {
   private Integer pageNumber; // 페이지 번호 (1부터 시작)
   @Schema(defaultValue = "10")
   @Min(value = 1, message = "페이지 당 데이터 최솟값은 1개 입니다.")
-  @Max(value = PageableUtil.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableUtil.MAX_PAGE_SIZE + "개 입니다.")
+  @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
   private Integer pageSize; // 페이지 사이즈
   @Schema(defaultValue = "created_date")
   @Pattern(regexp = "^(created_date|ticket_open_date)$")
@@ -46,8 +46,8 @@ public class ConcertFilteredRequest {
   // 기본값 할당 (1페이지 30개, 최신순)
   public ConcertFilteredRequest() {
     this.pageNumber = 1;
-    this.pageSize = PageableUtil.DEFAULT_PAGE_SIZE;
-    this.sortField = PageableUtil.DEFAULT_SORT_FIELD;
-    this.sortDirection = PageableUtil.DEFAULT_SORT_DIRECTION;
+    this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
+    this.sortField = PageableConstants.DEFAULT_SORT_FIELD;
+    this.sortDirection = PageableConstants.DEFAULT_SORT_DIRECTION;
   }
 }
