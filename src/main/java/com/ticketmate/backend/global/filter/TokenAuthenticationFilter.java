@@ -1,10 +1,12 @@
 package com.ticketmate.backend.global.filter;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.config.SecurityUrls;
+import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.exception.ErrorResponse;
+import com.ticketmate.backend.global.util.auth.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -63,7 +65,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
           token = bearerToken.substring(7).trim();
         } else {
           // Authorization 헤더에 토큰이 없는 경우 파라미터 확인
-          String paramToken = request.getParameter("accessToken");
+          String paramToken = request.getParameter(ACCESS_TOKEN_KEY);
           if (paramToken != null && !paramToken.isEmpty()) {
             token = paramToken;
           }

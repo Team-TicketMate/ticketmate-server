@@ -1,5 +1,10 @@
 package com.ticketmate.backend.global.util.auth;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_CATEGORY;
+import static com.ticketmate.backend.global.constant.AuthConstants.BLACKLIST_PREFIX;
+import static com.ticketmate.backend.global.constant.AuthConstants.BLACKLIST_VALUE;
+import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_CATEGORY;
+
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.service.CustomOAuth2UserService;
 import com.ticketmate.backend.global.exception.CustomException;
@@ -29,12 +34,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtUtil {
 
-  private static final String ACCESS_CATEGORY = "access";
-  private static final String REFRESH_CATEGORY = "refresh";
-  private static final String BLACKLIST_PREFIX = "BL:";
-  private static final String BLACKLIST_VALUE = "blacklist";
   private final CustomOAuth2UserService customOAuth2UserService;
   private final RedisTemplate<String, Object> redisTemplate;
+
   @Value("${jwt.secret-key}")
   private String secretKey;
   @Value("${jwt.access-exp-time}")

@@ -1,15 +1,10 @@
 package com.ticketmate.backend.global.util.common;
 
-import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
 import java.util.List;
-import java.util.UUID;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 공통 메서드
  */
-@Slf4j
 public class CommonUtil {
 
   /**
@@ -66,16 +61,26 @@ public class CommonUtil {
   }
 
   /**
-   * 자신이 아닌 상대방의 id를 찾아주는 메서드입니다.
-   *
-   * @param room   채팅방 객체
-   * @param member 현재 사용자
-   * @return 상대방의 고유 ID
+   * 특수문자 제거
+   * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 제거합니다
    */
-  public static UUID opponentIdOf(ChatRoom room, Member member) {
-    // 여기서 member는 자기 자신입니다.
-    return room.getAgentMemberId().equals(member.getMemberId())
-        ? room.getClientMemberId()
-        : room.getAgentMemberId();
+  public static String removeSpecialCharacters(String input) {
+    if (input == null) {
+      return "";
+    }
+    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
+    return input.replaceAll("[^\\p{Alnum}\\s]", "");
+  }
+
+  /**
+   * 특수문자 변환
+   * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 원하는 값으로 변환합니다.
+   */
+  public static String replaceSpecialCharacters(String input, String replacement) {
+    if (input == null) {
+      return "";
+    }
+    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
+    return input.replaceAll("[^\\p{Alnum}\\s]", replacement);
   }
 }

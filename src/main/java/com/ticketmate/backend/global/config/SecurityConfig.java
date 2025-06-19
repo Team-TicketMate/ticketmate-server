@@ -1,10 +1,13 @@
 package com.ticketmate.backend.global.config;
 
+import static com.ticketmate.backend.global.constant.SecurityUrls.ALLOWED_ORIGINS;
+
 import com.ticketmate.backend.domain.member.service.CustomOAuth2UserService;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
+import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.filter.CustomLogoutHandler;
 import com.ticketmate.backend.global.filter.CustomSuccessHandler;
 import com.ticketmate.backend.global.filter.TokenAuthenticationFilter;
+import com.ticketmate.backend.global.util.auth.JwtUtil;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,31 +30,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  /**
-   * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
-   */
-  private static final List<String> ALLOWED_ORIGINS = List.of(
-
-      // 3000번 포트
-      "https://ticketmate.site", // 프론트
-      "https://ticketmate-client.vercel.app", // 프론트 배포
-      "https://ticketmate-admin.vercel.app", // 프론트 관리자
-
-      "https://www.ticketmate.site", // 프론트 배포
-      "https://dev.ticketmate.site", // 프론트 test
-
-      // API
-      "https://api.ticketmate.site", // 메인 API 서버
-      "https://test.ticketmate.site", // 테스트 API 서버
-
-      // Local
-      "http://localhost:8080", // 로컬 API 서버
-      "http://localhost:3000", // 로컬 웹 서버
-
-      "http://10.*:*", // 10.0.0.0/8
-      "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
-      "http://192.168.*:*" // 192.168.0.0/16
-  );
   private final JwtUtil jwtUtil;
   private final CustomSuccessHandler customSuccessHandler;
   private final CustomOAuth2UserService customOAuth2UserService;

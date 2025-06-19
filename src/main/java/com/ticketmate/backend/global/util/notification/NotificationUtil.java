@@ -1,5 +1,8 @@
 package com.ticketmate.backend.global.util.notification;
 
+import static com.ticketmate.backend.global.constant.NotificationConstants.PLACE_HOLDER_NICK_NAME_KEY;
+import static com.ticketmate.backend.global.constant.NotificationConstants.PLACE_HOLDER_REJECT_OTHER_MEMO_KEY;
+
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.notification.domain.constant.ApplicationFormApproveNotification;
@@ -11,21 +14,19 @@ import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationUtil {
+
   private final FcmTokenRepository fcmTokenRepository;
-  private static final String PLACE_HOLDER_NICK_NAME_KEY = "nickname";
-  private static final String PLACE_HOLDER_REJECT_OTHER_MEMO = "otherReject";
 
   /**
    * 알림을 발송할 대상의 FCM 토큰이 있는지 검증해주는 메서드입니다.
@@ -87,7 +88,7 @@ public class NotificationUtil {
     // '기타' 거절 사유일 때 메모 messageBody에 세팅
     if (!memo.equals("none")) {
       Map<String, String> placeHolderForOtherMemo = new HashMap<>();
-      placeHolderForOtherMemo.put(PLACE_HOLDER_REJECT_OTHER_MEMO, memo);
+      placeHolderForOtherMemo.put(PLACE_HOLDER_REJECT_OTHER_MEMO_KEY, memo);
       String body = type.formatMessage(placeHolderForOtherMemo);
 
       return NotificationPayloadRequest.builder()
