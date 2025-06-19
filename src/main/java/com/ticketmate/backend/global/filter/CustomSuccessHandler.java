@@ -1,10 +1,14 @@
 package com.ticketmate.backend.global.filter;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
+import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
+
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.util.auth.CookieUtil;
+import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,7 +26,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  private static final String REFRESH_PREFIX = "RT:";
   private final JwtUtil jwtUtil;
   private final RedisTemplate<String, Object> redisTemplate;
   private final CookieUtil cookieUtil;
@@ -46,15 +49,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     // RefreshToken을 Redisd에 저장 (key: RT:memberId)
     redisTemplate.opsForValue().set(
-        REFRESH_PREFIX + customOAuth2User.getMemberId(),
+        REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(),
         refreshToken,
         jwtUtil.getRefreshExpirationTime(),
         TimeUnit.MILLISECONDS
     );
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(cookieUtil.createCookie("accessToken", accessToken));
-    response.addCookie(cookieUtil.createCookie("refreshToken", refreshToken));
+    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken));
+    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken));
 
     // 로그인 성공 후 메인 페이지로 리다이렉트
     try {
