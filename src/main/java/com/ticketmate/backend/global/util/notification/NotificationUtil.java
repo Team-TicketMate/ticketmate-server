@@ -10,15 +10,40 @@ import com.ticketmate.backend.domain.notification.domain.constant.ApplicationFor
 import com.ticketmate.backend.domain.notification.domain.constant.PortfolioNotificationType;
 import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.notification.repository.FcmTokenRepository;
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class NotificationUtil {
+
+  private final FcmTokenRepository fcmTokenRepository;
+  private static final String PLACE_HOLDER_NICK_NAME_KEY = "nickname";
+  private static final String PLACE_HOLDER_REJECT_OTHER_MEMO = "otherReject";
+
+  /**
+   * 알림을 발송할 대상의 FCM 토큰이 있는지 검증해주는 메서드입니다.
+   */
+  public boolean existsFcmToken(UUID memberId) {
+    log.debug("토큰 확인 로직");
+    boolean tokenExist = fcmTokenRepository.existsByMemberId(memberId);
+    log.debug("토큰 존재 여부 : {}", tokenExist);
+
+    return tokenExist;
+  }
 
   /**
    * 포트폴리오 관련 알림내용을 만들어주는 메서드입니다.
