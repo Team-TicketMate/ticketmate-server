@@ -1,6 +1,8 @@
 package com.ticketmate.backend.global.filter;
 
 import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.HEADER_AUTHORIZATION;
+import static com.ticketmate.backend.global.constant.AuthConstants.TOKEN_PREFIX;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmate.backend.global.constant.SecurityUrls;
@@ -50,18 +52,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     try {
       String token = null;
-      String bearerToken = request.getHeader("Authorization");
+      String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
       // 토큰 추출: 요청 타입에 따라 헤더 또는 파라미터에서 토큰 추출
       if (isApiRequest) {
         log.debug("일반 API 요청입니다.");
         // API 요청 : Authorization 헤더에서 "Bearer " 토큰 추출
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
           token = bearerToken.substring(7).trim(); // "Bearer " 제거
         }
       } else if (isAdminPageRequest) {
         log.debug("관리자 페이지 요청입니다.");
         // 관리자 페이지 요청: Authorization 헤더 우선 확인
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
           token = bearerToken.substring(7).trim();
         } else {
           // Authorization 헤더에 토큰이 없는 경우 파라미터 확인
