@@ -38,7 +38,7 @@ public class PortfolioFilteredRequest {
   @Pattern(regexp = "^(ASC|DESC)$")
   private String sortDirection;
 
-  // 기본값 할당 (1페이지 30개, 최신순)
+  // 기본값 할당 (1페이지 10개, 최신순)
   public PortfolioFilteredRequest() {
     this.pageNumber = 1;
     this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
