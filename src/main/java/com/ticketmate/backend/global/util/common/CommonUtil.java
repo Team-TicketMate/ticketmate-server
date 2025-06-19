@@ -1,12 +1,10 @@
 package com.ticketmate.backend.global.util.common;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 공통 메서드
  */
-@Slf4j
 public class CommonUtil {
 
   /**
@@ -60,5 +58,29 @@ public class CommonUtil {
    */
   public static String enumToString(Enum<?> enumValue) {
     return enumValue != null ? enumValue.name() : "";
+  }
+
+  /**
+   * 특수문자 제거
+   * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 제거합니다
+   */
+  public static String removeSpecialCharacters(String input) {
+    if (input == null) {
+      return "";
+    }
+    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
+    return input.replaceAll("[^\\p{Alnum}\\s]", "");
+  }
+
+  /**
+   * 특수문자 변환
+   * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 원하는 값으로 변환합니다.
+   */
+  public static String replaceSpecialCharacters(String input, String replacement) {
+    if (input == null) {
+      return "";
+    }
+    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
+    return input.replaceAll("[^\\p{Alnum}\\s]", replacement);
   }
 }
