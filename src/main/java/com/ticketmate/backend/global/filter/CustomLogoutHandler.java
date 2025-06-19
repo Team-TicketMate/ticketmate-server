@@ -1,7 +1,9 @@
 package com.ticketmate.backend.global.filter;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.HEADER_AUTHORIZATION;
 import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
 import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.TOKEN_PREFIX;
 
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
@@ -32,9 +34,9 @@ public class CustomLogoutHandler implements LogoutHandler {
   public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
     // 1. 요청 헤더에서 엑세스 토큰 추출
-    String authHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader(HEADER_AUTHORIZATION);
     String accessToken = null;
-    if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
+    if (StringUtils.hasText(authHeader) && authHeader.startsWith(TOKEN_PREFIX)) {
       accessToken = authHeader.substring(7);
     }
 
