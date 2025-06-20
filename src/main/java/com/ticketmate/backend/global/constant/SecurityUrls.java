@@ -2,15 +2,13 @@ package com.ticketmate.backend.global.constant;
 
 import java.util.Arrays;
 import java.util.List;
+import lombok.experimental.UtilityClass;
 
 /**
  * Security 관련 URL 상수 관리
  */
+@UtilityClass
 public final class SecurityUrls {
-
-  private SecurityUrls() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
 
   /**
    * 허용된 CORS Origin 목록 (고정 도메인 - 정확한 매칭)
