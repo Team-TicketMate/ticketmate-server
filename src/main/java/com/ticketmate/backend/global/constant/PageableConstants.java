@@ -5,10 +5,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class PageableConstants {
 
-  private PageableConstants() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
-
   // PageableUtil
   public static final int MAX_PAGE_SIZE = 100;
   public static final int DEFAULT_PAGE_SIZE = 10;
