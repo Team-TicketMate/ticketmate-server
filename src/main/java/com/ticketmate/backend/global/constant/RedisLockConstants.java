@@ -1,10 +1,9 @@
 package com.ticketmate.backend.global.constant;
 
-public final class RedisLockConstants {
+import lombok.experimental.UtilityClass;
 
-  private RedisLockConstants() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
+@UtilityClass
+public final class RedisLockConstants {
 
   // Redis Lock
   public static final Long WAIT_TIME = 5L; // Lock 획득을 위한 대기 시간

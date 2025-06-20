@@ -1,10 +1,9 @@
 package com.ticketmate.backend.global.constant;
 
-public final class SwaggerConstants {
+import lombok.experimental.UtilityClass;
 
-  private SwaggerConstants() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
+@UtilityClass
+public final class SwaggerConstants {
 
   // Swagger
   public static final String WEB_SITE_URL = "https://www.ticketmate.site";
