@@ -1,12 +1,16 @@
 package com.ticketmate.backend.domain.member.service;
 
+import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
+import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
+
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.util.auth.CookieUtil;
+import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class MemberService {
 
-  private static final String REFRESH_PREFIX = "RT:";
   private final JwtUtil jwtUtil;
   private final RedisTemplate<String, Object> redisTemplate;
   private final CookieUtil cookieUtil;
@@ -64,7 +67,7 @@ public class MemberService {
     String newRefreshToken = jwtUtil.createRefreshToken(customOAuth2User);
 
     // 기존 refreshToken 삭제
-    if (redisTemplate.delete(REFRESH_PREFIX + customOAuth2User.getMemberId())) {
+    if (redisTemplate.delete(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId())) {
       log.debug("기존 리프레시 토큰 삭제: {}", customOAuth2User.getMemberId());
     } else {
       log.warn("리프레시 토큰 삭제에 실패했습니다: {}", customOAuth2User.getMemberId());
@@ -73,7 +76,7 @@ public class MemberService {
     // refreshToken 저장
     // RefreshToken을 Redisd에 저장 (key: RT:memberId)
     redisTemplate.opsForValue().set(
-        REFRESH_PREFIX + customOAuth2User.getMemberId(),
+        REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(),
         newRefreshToken,
         jwtUtil.getRefreshExpirationTime(),
         TimeUnit.MILLISECONDS
@@ -81,8 +84,8 @@ public class MemberService {
     log.debug("refreshToken 재발급 및 저장 성공");
 
     // 쿠키에 refreshToken 추가
-    response.addCookie(cookieUtil.createCookie("accessToken", newAccessToken));
-    response.addCookie(cookieUtil.createCookie("refreshToken", newRefreshToken));
+    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken));
+    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN_KEY, newRefreshToken));
   }
 
   /**

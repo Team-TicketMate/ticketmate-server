@@ -44,7 +44,7 @@ public enum ErrorCode {
 
   // MEMBER
 
-  DUPLICATE_USERNAME(HttpStatus.BAD_REQUEST, "이미 가입된 이메일입니다"),
+  DUPLICATE_USERNAME(HttpStatus.CONFLICT, "이미 가입된 이메일입니다"),
 
   MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."),
 
@@ -56,7 +56,7 @@ public enum ErrorCode {
 
   CONCERT_NOT_FOUND(HttpStatus.BAD_REQUEST, "콘서트를 찾을 수 없습니다."),
 
-  DUPLICATE_CONCERT_NAME(HttpStatus.BAD_REQUEST, "중복된 공연 제목입니다."),
+  DUPLICATE_CONCERT_NAME(HttpStatus.CONFLICT, "중복된 공연 제목입니다."),
 
   INVALID_RANGE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 범위가 입력되었습니다."),
 
@@ -74,7 +74,7 @@ public enum ErrorCode {
 
   INVALID_CONCERT_DATE(HttpStatus.BAD_REQUEST, "잘못된 공연일자입니다."),
 
-  DUPLICATE_CONCERT_DATE(HttpStatus.BAD_REQUEST, "중복된 공연일자입니다."),
+  DUPLICATE_CONCERT_DATE(HttpStatus.CONFLICT, "중복된 공연일자입니다."),
 
   TICKET_OPEN_DATE_NOT_FOUND(HttpStatus.NOT_FOUND, "티켓 오픈일을 찾을 수 없습니다."),
 
@@ -86,7 +86,7 @@ public enum ErrorCode {
 
   CONCERT_HALL_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 공연장 정보를 찾을 수 없습니다."),
 
-  DUPLICATE_CONCERT_HALL_NAME(HttpStatus.BAD_REQUEST, "중복된 공연장 이름입니다."),
+  DUPLICATE_CONCERT_HALL_NAME(HttpStatus.CONFLICT, "중복된 공연장 이름입니다."),
 
   CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다."),
 
@@ -120,11 +120,11 @@ public enum ErrorCode {
 
   // PORTFOLIO
 
+  PORTFOLIO_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "포트폴리오 업로드에 실패했습니다"),
+
   PORTFOLIO_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 포트폴리오를 찾을 수 없습니다."),
 
-  PORTFOLIO_IMG_BLACK(HttpStatus.BAD_REQUEST, "자신을 소개할 수 있는 포트폴리오 이미지를 첨부해주세요."),
-
-  PORTFOLIO_IMG_MAX_COUNT_EXCEEDED(HttpStatus.BAD_REQUEST, "포트폴리오 등록을 위한 이미지는 최대 20장입니다."),
+  INVALID_PORTFOLIO_IMG_COUNT(HttpStatus.BAD_REQUEST, "포트폴리오 이미지 첨부파일은 최소 1개, 최대 10개까지 등록 가능합니다"),
 
   INVALID_PORTFOLIO_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 포트폴리오 타입 입니다."),
 
@@ -140,11 +140,11 @@ public enum ErrorCode {
 
   HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 10개까지만 등록 가능합니다."),
 
-  PRIORITY_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "요청한 순위가 이미 설정되어있습니다."),
+  PRIORITY_ALREADY_EXISTS(HttpStatus.CONFLICT, "요청한 순위가 이미 설정되어있습니다."),
 
-  DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.BAD_REQUEST, "중복된 신청서 요청입니다."),
+  DUPLICATE_APPLICATION_FROM_REQUEST(HttpStatus.CONFLICT, "중복된 신청서 요청입니다."),
 
-  ALREADY_ACCEPTED_APPLICATION_FROM(HttpStatus.BAD_REQUEST, "이미 수락된 신청서입니다."),
+  ALREADY_ACCEPTED_APPLICATION_FROM(HttpStatus.CONFLICT, "이미 수락된 신청서입니다."),
 
   INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
 
@@ -152,7 +152,7 @@ public enum ErrorCode {
 
   APPLICATION_FORM_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "신청서 세부사항 값을 찾을 수 없습니다."),
 
-  DUPLICATE_APPLICATION_FORM_DETAIL(HttpStatus.BAD_REQUEST, "중복된 신청서 세부사항입니다."),
+  DUPLICATE_APPLICATION_FORM_DETAIL(HttpStatus.CONFLICT, "중복된 신청서 세부사항입니다."),
 
   // NOTIFICATION
 
@@ -166,7 +166,7 @@ public enum ErrorCode {
 
   CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾지 못했습니다."),
 
-  ALREADY_EXIST_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 해당 콘서트, 대리인, 의뢰인 및 선예매/일반예매에 관한 채팅방이 존재합니다."),
+  ALREADY_EXIST_CHAT_ROOM(HttpStatus.CONFLICT, "이미 해당 콘서트, 대리인, 의뢰인 및 선예매/일반예매에 관한 채팅방이 존재합니다."),
 
   MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메시지를 찾지 못했습니다."),
 
