@@ -124,7 +124,7 @@ public enum ErrorCode {
 
   PORTFOLIO_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당 포트폴리오를 찾을 수 없습니다."),
 
-  INVALID_PORTFOLIO_IMG_COUNT(HttpStatus.BAD_REQUEST, "포트폴리오 이미지 첨부파일은 최소 1개, 최대 10개까지 등록 가능합니다"),
+  INVALID_PORTFOLIO_IMG_COUNT(HttpStatus.BAD_REQUEST, "포트폴리오 이미지 첨부파일은 최소 1개, 최대 20개까지 등록 가능합니다"),
 
   INVALID_PORTFOLIO_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 포트폴리오 타입 입니다."),
 
