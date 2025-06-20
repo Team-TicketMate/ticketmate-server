@@ -25,7 +25,7 @@ public class ConcertFilteredRequest {
   @Schema(defaultValue = "인스파이어 아레나")
   private String concertHallName; // 공연장
   @Schema(defaultValue = "CONCERT")
-  private ConcertType ConcertType; // 공연 카테고리
+  private ConcertType concertType; // 공연 카테고리
   @Schema(defaultValue = "INTERPARK_TICKET")
   private TicketReservationSite ticketReservationSite; // 예매처
   @Schema(defaultValue = "1")

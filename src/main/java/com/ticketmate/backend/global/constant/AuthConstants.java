@@ -1,10 +1,9 @@
 package com.ticketmate.backend.global.constant;
 
-public final class AuthConstants {
+import lombok.experimental.UtilityClass;
 
-  private AuthConstants() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
+@UtilityClass
+public final class AuthConstants {
 
   // Auth
   public static final String TOKEN_PREFIX = "Bearer ";

@@ -1,10 +1,9 @@
 package com.ticketmate.backend.global.constant;
 
-public final class PageableConstants {
+import lombok.experimental.UtilityClass;
 
-  private PageableConstants() {
-    throw new UnsupportedOperationException("이 유틸리티 클래스는 인스턴스화할 수 없습니다.");
-  }
+@UtilityClass
+public final class PageableConstants {
 
   // PageableUtil
   public static final int MAX_PAGE_SIZE = 100;

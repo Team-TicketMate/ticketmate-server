@@ -3,20 +3,21 @@ package com.ticketmate.backend.domain.portfolio.service;
 import static com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio.MAX_IMG_COUNT;
 
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
-import com.ticketmate.backend.global.file.constant.UploadType;
-import com.ticketmate.backend.domain.portfolio.domain.dto.request.PortfolioRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.member.service.MemberService;
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
+import com.ticketmate.backend.domain.portfolio.domain.dto.request.PortfolioRequest;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
-import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.global.file.service.FileService;
-import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.file.constant.UploadType;
+import com.ticketmate.backend.global.file.service.FileService;
+import com.ticketmate.backend.global.util.common.CommonUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,35 +37,22 @@ public class PortfolioService {
   /**
    * 포트폴리오 업로드
    *
-   * @param request publicRelations
-   * @return 생성된 포트폴리오에 대한 고유한 UUID
+   * @param request portfolioDescription 자기소개
+   *                portfolioImgList 첨부파일 이미지 리스트
    */
   @Transactional
   public UUID uploadPortfolio(PortfolioRequest request, Member client) {
 
-    // 요청값 검증
-    validatePortfolioRequest(request, client);
-
-    // 포트폴리오 엔티티 생성
-    Portfolio portfolio = createPortfolio(request, client);
-
-    if (!CommonUtil.nullOrEmpty(request.getPortfolioImgList())) {
-      processPortfolioImgList(portfolio, request.getPortfolioImgList());
-    }
-
-    return portfolioRepository.save(portfolio).getPortfolioId();
-  }
-
-  /**
-   * 포트폴리오 요청 검증
-   */
-  private void validatePortfolioRequest(PortfolioRequest request, Member client) {
+    // 검증
     memberService.validateMemberType(client, MemberType.CLIENT);
+    validatePortfolioImgCount(request.getPortfolioImgList());
 
-    if (request.getPortfolioImgList().size() > MAX_IMG_COUNT) {
-      log.error("포트폴리오 이미지 첨부파일 개수가 {}를 초과했습니다. 첨부파일 개수: {}", MAX_IMG_COUNT, request.getPortfolioImgList().size());
-      throw new CustomException(ErrorCode.PORTFOLIO_IMG_MAX_COUNT_EXCEEDED);
-    }
+    return Optional.of(request)
+        .map(req -> createPortfolio(req, client)) // dto 기반 Portfolio 엔티티 생성
+        .map(portfolio -> processPortfolioImgList(portfolio, request.getPortfolioImgList()))
+        .map(portfolioRepository::save)
+        .map(Portfolio::getPortfolioId)
+        .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_UPLOAD_ERROR));
   }
 
   /**
@@ -82,36 +70,41 @@ public class PortfolioService {
   /**
    * 포트폴리오 이미지 처리
    */
-  private void processPortfolioImgList(Portfolio portfolio, List<MultipartFile> imgList) {
+  private Portfolio processPortfolioImgList(Portfolio portfolio, List<MultipartFile> imgList) {
     List<String> filePathList = new ArrayList<>();
-    int uploadCount = 0;
 
     try {
-      for (MultipartFile file : imgList) {
-        String filePath = fileService.uploadFile(file, UploadType.PORTFOLIO);
-        filePathList.add(filePath);
-
-        PortfolioImg portfolioImg = PortfolioImg.builder()
-            .portfolio(portfolio)
-            .filePath(filePath)
-            .build();
-
-        portfolio.addImg(portfolioImg);
-        uploadCount++;
-      }
-      log.debug("총 저장된 포트폴리오 이미지 파일 개수: {}", uploadCount);
+      imgList.stream()
+          .map(file -> fileService.uploadFile(file, UploadType.PORTFOLIO)) // 파일 업로드 -> filePath 반환
+          .peek(filePathList::add) // rollback 용도로 list에 저장
+          .map(filePath -> createPortfolioImg(portfolio, filePath)) // filePath -> PortfolioImg 생성
+          .forEach(portfolio::addImg); // 양방향 연관관계 처리
+      log.debug("총 저장된 포트폴리오 이미지 파일 개수: {}", imgList.size());
+      return portfolio;
     } catch (Exception e) {
-      log.error("포트폴리오 이미지 업로드 중 오류 발생, 이미 업로드 된 {} 개 파일 삭제", filePathList.size());
+      log.error("포트폴리오 이미지 업로드 중 오류 발생: {}, 이미 업로드 된 {} 개 파일 삭제", e.getMessage(), filePathList.size());
+      filePathList.forEach(fileService::deleteFile);
+      throw new CustomException(ErrorCode.PORTFOLIO_UPLOAD_ERROR);
+    }
+  }
 
-      // 이미 업로드 된 파일들 모두 삭제
-      for (String filePath : filePathList) {
-        try {
-          fileService.deleteFile(filePath);
-        } catch (Exception exception) {
-          log.error("롤백 중 파일 삭제 실패: {}, 오류: {}", filePath, exception.getMessage());
-        }
-      }
-      throw e;
+  /**
+   * 포트폴리오 이미지 엔티티 생성
+   */
+  private PortfolioImg createPortfolioImg(Portfolio portfolio, String filePath) {
+    return PortfolioImg.builder()
+        .portfolio(portfolio)
+        .filePath(filePath)
+        .build();
+  }
+
+  /**
+   * 요청된 첨부파일 개수 검증 (1~20개)
+   */
+  private void validatePortfolioImgCount(List<MultipartFile> imgList) {
+    if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > MAX_IMG_COUNT) {
+      log.error("포트폴리오 이미지 첨부파일은 최소 1개 최대 20개까지 등록가능합니다. 요청개수: {}", imgList.size());
+      throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }
   }
 }
