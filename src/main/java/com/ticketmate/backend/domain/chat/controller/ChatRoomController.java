@@ -48,7 +48,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   }
 
   @Override
-  @GetMapping("/{chat-room-id}/applicationForm")
+  @GetMapping("/{chat-room-id}/application-form")
   @LogMonitoringInvocation
   public ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                                                                      @PathVariable("chat-room-id") String chatRoomId) {
