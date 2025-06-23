@@ -49,7 +49,7 @@ public class MemberService {
 
     // refreshToken 저장
     // RefreshToken을 Redisd에 저장 (key: RT:memberId)
-    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), refreshToken);
+    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), newRefreshToken);
 
     // 쿠키에 accessToken, refreshToken 추가
     response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken, jwtUtil.getAccessExpirationTimeInSeconds()));
