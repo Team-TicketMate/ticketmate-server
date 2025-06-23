@@ -152,11 +152,11 @@ public class ChatRoomService {
   }
 
   /**
-   * 자신이 아닌 상대방의 id를 찾아주는 메서드입니다.
+   * Returns the UUID of the chat room participant who is not the given member.
    *
-   * @param room   채팅방 객체
-   * @param member 현재 사용자
-   * @return 상대방의 고유 ID
+   * @param room   the chat room entity
+   * @param member the member whose opponent's ID is to be found
+   * @return the UUID of the other participant in the chat room
    */
   public static UUID opponentIdOf(ChatRoom room, Member member) {
     // 여기서 member는 자기 자신입니다.
@@ -167,9 +167,14 @@ public class ChatRoomService {
 
 
   /**
+   * Retrieves the filtered application form information associated with a specific chat room for a given member.
    *
-   * @param chatRoomId  채팅방 고유 ID
-   * @return  현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
+   * Validates that the member is a participant in the chat room and returns the corresponding application form details.
+   *
+   * @param member the member requesting the application form information
+   * @param chatRoomId the unique identifier of the chat room
+   * @return the filtered response containing application form information linked to the chat room
+   * @throws CustomException if the chat room or application form is not found, or if the member is not authorized
    */
   @Transactional(readOnly = true)
   public ApplicationFormFilteredResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {

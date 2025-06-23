@@ -15,6 +15,12 @@ import java.util.List;
 
 public interface ChatRoomControllerDocs {
 
+  /****
+   * Retrieves a paginated list of chat rooms filtered by ticket booking category and optional search criteria.
+   *
+   * @param request Contains filtering options such as ticket open type, page number, and search keyword.
+   * @return A ResponseEntity containing a page of chat room summaries, including room details, last message, images, ticket open type, and unread message count.
+   */
   @Operation(
       summary = "채팅방 리스트업",
       description = """
@@ -53,6 +59,12 @@ public interface ChatRoomControllerDocs {
   )
   ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(CustomOAuth2User customOAuth2User, ChatRoomFilteredRequest request);
 
+  /**
+   * Retrieves all chat messages exchanged in the specified chat room for the authenticated user.
+   *
+   * @param chatRoomId the unique identifier of the chat room to enter
+   * @return a response entity containing a list of chat message responses for the chat room
+   */
   @Operation(
       summary = "채팅방 입장",
       description = """
@@ -78,6 +90,12 @@ public interface ChatRoomControllerDocs {
   )
   ResponseEntity<List<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId);
 
+  /**
+   * Retrieves detailed application form information associated with a specific chat room.
+   *
+   * @param chatRoomId the unique identifier of the chat room
+   * @return a ResponseEntity containing the application form details for the specified chat room, including form metadata, status, ticket open type, and nested lists of performance and seating preferences
+   */
   @ApiChangeLogs({
           @ApiChangeLog(
                   date = "2025-06-23",

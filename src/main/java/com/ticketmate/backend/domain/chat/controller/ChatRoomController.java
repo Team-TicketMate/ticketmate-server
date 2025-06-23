@@ -38,6 +38,12 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     return ResponseEntity.ok(chatRoomService.getChatRoomList(member, request));
   }
 
+  /**
+   * Retrieves the list of chat messages for the specified chat room accessible to the authenticated user.
+   *
+   * @param chatRoomId the unique identifier of the chat room
+   * @return a response entity containing the list of chat messages for the chat room
+   */
   @Override
   @GetMapping("/{chat-room-id}")
   @LogMonitoringInvocation
@@ -47,6 +53,12 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     return ResponseEntity.ok(chatRoomService.getChatMessage(member, chatRoomId));
   }
 
+  /**
+   * Retrieves application form information associated with a specific chat room for the authenticated user.
+   *
+   * @param chatRoomId the unique identifier of the chat room
+   * @return a response entity containing the filtered application form information for the chat room
+   */
   @GetMapping("/{chat-room-id}/applicationForm")
   @LogMonitoringInvocation
   public ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
