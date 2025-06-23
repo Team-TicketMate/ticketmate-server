@@ -46,6 +46,9 @@ public class CookieUtil {
    * Cookie[]에서 특정 cookieName의 쿠키를 반환합니다
    */
   public Cookie extractedByCookieName(Cookie[] cookies, String cookieName) {
+    if (cookies == null) {
+      throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
+    }
     return Arrays.stream(cookies)
         .filter(cookie -> cookie.getName().equals(cookieName))
         .findFirst()
