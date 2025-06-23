@@ -18,7 +18,7 @@ public class AuthUtil {
    */
   public String extractAccessTokenFromRequest(HttpServletRequest request) {
     String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
-    return extractBearerToken(bearerToken);
+    return extractTokenWithoutBearer(bearerToken);
   }
 
   /**
@@ -31,7 +31,7 @@ public class AuthUtil {
   /**
    * "Bearer " 부분은 제거하고 순수 토큰을 획득합니다
    */
-  private String extractBearerToken(String bearerToken) {
+  private String extractTokenWithoutBearer(String bearerToken) {
     return Optional.ofNullable(bearerToken)
         .filter(token -> token.startsWith(TOKEN_PREFIX))
         .map(token -> token.substring(7).trim())
