@@ -1,13 +1,17 @@
 package com.ticketmate.backend.domain.chat.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 public interface ChatRoomControllerDocs {
 
@@ -72,5 +76,52 @@ public interface ChatRoomControllerDocs {
           - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
           """
   )
-  ResponseEntity<List<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String roomId);
+  ResponseEntity<List<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId);
+
+  @ApiChangeLogs({
+          @ApiChangeLog(
+                  date = "2025-06-23",
+                  author = "mr6208",
+                  description = "채팅방 신청서 조회 API 설계",
+                  issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/194"
+          )
+  })
+  @Operation(
+          summary = "채팅방 내부 신청서 조회",
+          description = """
+          
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+          
+          ### 반환 데이터
+          - ApplicationFormFilteredResponse: 현재 채팅방에서 진행중인 단일 신청서 정보
+            - applicationFormId: 신청서 PK
+            - clientId: 의뢰인 PK
+            - agentId: 대리인 PK
+            - concertId: 콘서트 PK
+            - openDate: 티켓 예매일
+            - applicationFormDetailResponseList: 신청서 세부사항 리스트
+            - applicationFormStatus: 신청서 상태
+            - ticketOpenType: 선예매/일반예매 타입
+            
+            
+          - applicationFormDetailResponseList: 현재 신청서에 적용된 N개의 회차들의 정보
+            - performanceDate: 공연 일자
+            - session: 회차
+            - requestCount: 요청 매수
+            - hopeAreaResponseList: 희망 구역 리스트
+            - requirement: 요청 사항
+            
+          - hopeAreaResponseList: 회차당 희망구역 리스트
+            - priority: 우선 순위 (1~10)
+            - location: 위치 (예: A구역, B구역)
+            - price: 가격
+          
+          ### 유의사항
+          - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
+          """
+  )
+  ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(CustomOAuth2User customOAuth2User, String chatRoomId);
 }
