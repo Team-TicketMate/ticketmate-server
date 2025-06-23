@@ -100,7 +100,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
       }
     } else { // 잘못된 토큰이 들어올 경우
-      throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
+      throw new CustomException(ErrorCode.INVALID_JWT_TOKEN);
     }
   }
 

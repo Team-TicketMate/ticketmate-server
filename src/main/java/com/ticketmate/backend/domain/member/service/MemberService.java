@@ -9,15 +9,13 @@ import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.util.auth.AuthUtil;
 import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final JwtUtil jwtUtil;
-  private final RedisTemplate<String, Object> redisTemplate;
-  private final CookieUtil cookieUtil;
 
   /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
@@ -37,55 +33,27 @@ public class MemberService {
   public void reissue(HttpServletRequest request, HttpServletResponse response) {
 
     log.debug("accessToken이 만료되어 재발급을 진행합니다.");
-    String refreshToken = null;
 
-    // 쿠키에서 리프레시 토큰 추출
-    Cookie[] cookies = request.getCookies();
-    if (cookies == null) {
-      log.error("쿠키가 존재하지 않습니다.");
-      throw new CustomException(ErrorCode.COOKIES_NOT_FOUND);
-    }
-    for (Cookie cookie : cookies) {
-      if (cookie.getName().equals("refreshToken")) {
-        refreshToken = cookie.getValue();
-        break;
-      }
-    }
-    // 리프레시 토큰이 없는 경우
-    if (refreshToken == null || refreshToken.isBlank()) {
-      log.error("쿠키에서 refreshToken을 찾을 수 없습니다.");
-      throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
-    }
+    // 쿠키에서 리프레시 토큰 추출 및 검증
+    String refreshToken = AuthUtil.extractRefreshTokenFromRequest(request);
 
-    // 해당 refreshToken이 유효한지 검증
-    validateRefreshToken(refreshToken);
+    // 사용자 정보 조회
+    CustomOAuth2User customOAuth2User = jwtUtil.getCustomOAuth2User(refreshToken);
 
-    // 새로운 accessToken, refreshToken 발급
-    CustomOAuth2User customOAuth2User = (CustomOAuth2User) jwtUtil
-        .getAuthentication(refreshToken).getPrincipal();
+    // 새로운 토큰 생성
     String newAccessToken = jwtUtil.createAccessToken(customOAuth2User);
     String newRefreshToken = jwtUtil.createRefreshToken(customOAuth2User);
 
     // 기존 refreshToken 삭제
-    if (redisTemplate.delete(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId())) {
-      log.debug("기존 리프레시 토큰 삭제: {}", customOAuth2User.getMemberId());
-    } else {
-      log.warn("리프레시 토큰 삭제에 실패했습니다: {}", customOAuth2User.getMemberId());
-    }
+    jwtUtil.deleteRefreshToken(refreshToken);
 
     // refreshToken 저장
     // RefreshToken을 Redisd에 저장 (key: RT:memberId)
-    redisTemplate.opsForValue().set(
-        REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(),
-        newRefreshToken,
-        jwtUtil.getRefreshExpirationTime(),
-        TimeUnit.MILLISECONDS
-    );
-    log.debug("refreshToken 재발급 및 저장 성공");
+    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), refreshToken);
 
-    // 쿠키에 refreshToken 추가
-    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken));
-    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN_KEY, newRefreshToken));
+    // 쿠키에 accessToken, refreshToken 추가
+    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken, jwtUtil.getAccessExpirationTimeInSeconds()));
+    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, newRefreshToken, jwtUtil.getRefreshExpirationTimeInSeconds()));
   }
 
   /**
@@ -98,23 +66,6 @@ public class MemberService {
     if (!member.getMemberType().equals(memberType)) {
       log.error("잘못된 MemberType 입니다.. 사용자 MemberType: {}", member.getMemberType());
       throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-    }
-  }
-
-  /**
-   * 요청된 리프레시 토큰이 유효한지 확인하고 유효하다면 해당 리프레시 토큰을 반환합니다.
-   */
-  private void validateRefreshToken(String token) {
-    if (jwtUtil.isExpired(token)) { // 리프레시 토큰 만료 여부 확인
-      log.error("refreshToken이 만료되었습니다.");
-      throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
-    }
-
-    // 토큰이 refresh인지 확인 (발급 시 페이로드에 명시)
-    String category = jwtUtil.getCategory(token);
-    if (!category.equals("refresh")) {
-      log.error("요청된 토큰이 refreshToken이 아닙니다. 요청된 토큰 카테고리: {}", category);
-      throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
     }
   }
 }
