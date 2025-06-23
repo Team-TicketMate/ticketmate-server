@@ -120,7 +120,8 @@ public interface ChatRoomControllerDocs {
             - price: 가격
           
           ### 유의사항
-          - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
+          - 선예매/일반예매 및 공연 기준 모두 각각의 채팅방에 존재합니다.
+          - 신청서의 정보에는 모든 **회차**가 포함됩니다. (1:N, 신청서 : 회차)
           """
   )
   ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(CustomOAuth2User customOAuth2User, String chatRoomId);
