@@ -2,28 +2,22 @@ package com.ticketmate.backend.domain.applicationform.controller;
 
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.applicationform.service.ApplicationFormService;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,10 +50,11 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   }
 
   @Override
-  @GetMapping("/{applicationFormId}")
+  @GetMapping("/{application-form-id}")
   @LogMonitoringInvocation
   public ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable UUID applicationFormId) {
+          @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+          @PathVariable(value = "application-form-id") UUID applicationFormId) {
     return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));
   }
 

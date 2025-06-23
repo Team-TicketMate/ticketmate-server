@@ -1,8 +1,6 @@
 package com.ticketmate.backend.domain.chat.service;
 
-import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
-
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
@@ -19,13 +17,6 @@ import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.PageableUtil;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,6 +25,15 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.ticketmate.backend.global.exception.ErrorCode.APPLICATION_FORM_NOT_FOUND;
+import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 
 @Service
 @RequiredArgsConstructor
@@ -163,5 +163,29 @@ public class ChatRoomService {
     return room.getAgentMemberId().equals(member.getMemberId())
         ? room.getClientMemberId()
         : room.getAgentMemberId();
+  }
+
+
+  /**
+   *
+   * @param chatRoomId  채팅방 고유 ID
+   * @return  현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
+   */
+  @Transactional(readOnly = true)
+  public ApplicationFormFilteredResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
+
+    // 요청된 채팅방 추출
+    ChatRoom chatRoom = chatRoomRepository
+            .findById(chatRoomId).orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+
+    // 현재 사용자 검증
+    validateRoomMember(chatRoom, member);
+
+    // 메서드 체이닝
+    return Optional.of(chatRoom)
+            .map(ChatRoom::getApplicationFormId)
+            .flatMap(applicationFormRepository::findById)
+            .map(entityMapper::toApplicationFormFilteredResponse)
+            .orElseThrow(() -> new CustomException(APPLICATION_FORM_NOT_FOUND));
   }
 }
