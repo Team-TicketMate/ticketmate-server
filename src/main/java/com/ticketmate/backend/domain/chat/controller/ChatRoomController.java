@@ -47,6 +47,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     return ResponseEntity.ok(chatRoomService.getChatMessage(member, chatRoomId));
   }
 
+  @Override
   @GetMapping("/{chat-room-id}/applicationForm")
   @LogMonitoringInvocation
   public ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
