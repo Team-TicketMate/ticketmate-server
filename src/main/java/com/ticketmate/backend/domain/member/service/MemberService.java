@@ -121,6 +121,7 @@ public class MemberService {
     }
   }
 
+  @Transactional(readOnly = true)
   public MemberResponse getMemberInfo(Member member){
     return entityMapper.toMemberResponse(member);
   }
