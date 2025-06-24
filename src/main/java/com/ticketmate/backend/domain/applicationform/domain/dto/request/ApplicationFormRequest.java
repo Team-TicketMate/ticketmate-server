@@ -20,11 +20,9 @@ import lombok.ToString;
 @Builder
 public class ApplicationFormRequest {
 
-  @NotNull(message = "대리인 PK 값을 입력해주세요")
   private UUID agentId; // 대리인 PK
 
-  @NotNull(message = "콘서트 PK 값을 입력해주세요")
-  private UUID concertId; // 콘서트 PK
+  private UUID concertId; // 공연 PK
 
   @NotEmpty(message = "공연일자 JSON을 입력하세요")
   private List<ApplicationFormDetailRequest> applicationFormDetailRequestList; // 신청서 공연회차 List
