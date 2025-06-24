@@ -1,5 +1,7 @@
 package com.ticketmate.backend.domain.member.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,6 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 public interface MemberControllerDocs {
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-24",
+          author = "Yooonjeong",
+          description = "회원 정보 조회 API 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/285"
+      )
+  })
   @Operation(
       summary = "내 정보 조회",
       description = """
