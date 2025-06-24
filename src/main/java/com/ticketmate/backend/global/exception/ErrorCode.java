@@ -142,7 +142,7 @@ public enum ErrorCode {
 
   ALREADY_ACCEPTED_APPLICATION_FROM(HttpStatus.CONFLICT, "이미 수락된 신청서입니다."),
 
-  INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
+  INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "잘못된 신청서 상태입니다."),
 
   APPLICATION_FORM_DETAIL_REQUIRED(HttpStatus.BAD_REQUEST, "신청서에는 최소 1개 이상의 공연일자가 포함되어야합니다."),
 
