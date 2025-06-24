@@ -12,6 +12,8 @@ import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfo
 import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
@@ -139,4 +141,12 @@ public interface EntityMapper {
   @Mapping(source = "senderNickName", target = "senderNickname")
   @Mapping(source = "senderProfileUrl", target = "profileUrl")
   ChatMessageResponse toChatMessageResponse(ChatMessage message);
+
+
+   /*
+    ======================================채팅 (Mongo)======================================
+     */
+
+  // Member -> MemberResponse (DTO)
+  MemberResponse toMemberResponse(Member member);
 }
