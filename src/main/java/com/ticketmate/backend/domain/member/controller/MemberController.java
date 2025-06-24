@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
     description = "회원 관련 API 제공"
 )
 @RequestMapping("/api/member")
-@Slf4j
 public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
@@ -28,7 +27,6 @@ public class MemberController implements MemberControllerDocs {
   @GetMapping
   @LogMonitoringInvocation
   public ResponseEntity<MemberResponse> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
-    log.debug("getMyPage Controller! Member ID = " + customOAuth2User.getMemberId());
     MemberResponse response = memberService.getMemberInfo(customOAuth2User.getMember());
     return ResponseEntity.ok().body(response);
   }

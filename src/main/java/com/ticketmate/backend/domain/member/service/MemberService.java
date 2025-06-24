@@ -122,7 +122,6 @@ public class MemberService {
   }
 
   public MemberResponse getMemberInfo(Member member){
-    log.debug("getMyPage! member id = " + member.getMemberId());
     return entityMapper.toMemberResponse(member);
   }
 }
