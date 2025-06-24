@@ -157,6 +157,8 @@ public interface ApplicationFormControllerDocs {
       description = """
           로그인된 의뢰인이 본인이 작성한 신청서의 세부 정보를 수정합니다.
           - **대리인**, **공연**, **선예매/일반예매** 구분은 변경 불가
+          - **신청서에 기존에 작성되었던 신청서 세부사항 정보를 모두 삭제 후 다시 저장합니다.**
+          - **기존 데이터가 모두 삭제되므로, 일부만 수정시에도 모든 데이터를 같이 요청해야합니다.**
           - 수정 가능한 신청서 상태: CANCELED, REJECTED, CANCELED_IN_PROCESS
           
           **요청 파라미터 (Path Variable)**
