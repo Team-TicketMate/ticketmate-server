@@ -1,5 +1,8 @@
 package com.ticketmate.backend.domain.applicationform.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
@@ -7,14 +10,23 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 public interface ApplicationFormControllerDocs {
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-24",
+          author = "Chuseok22",
+          description = "신청서 작성 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/332"
+      )
+  })
   @Operation(
-      summary = "대리 티켓팅 신청서 작성",
+      summary = "신청서 작성",
       description = """
           의뢰인이 대리인에게 티켓팅을 요청하기 위한 신청서를 작성합니다.
           
@@ -131,6 +143,64 @@ public interface ApplicationFormControllerDocs {
   ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-24",
+          author = "Chuseok22",
+          description = "신청서 수정 API 작성",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/332"
+      )
+  })
+  @Operation(
+      summary = "신청서 수정",
+      description = """
+          로그인된 의뢰인이 본인이 작성한 신청서의 세부 정보를 수정합니다.
+          - **대리인**, **공연**, **선예매/일반예매** 구분은 변경 불가
+          - 수정 가능한 신청서 상태: CANCELED, REJECTED, CANCELED_IN_PROCESS
+          
+          **요청 파라미터 (Path Variable)**
+          - `application-form-id` (UUID): 수정할 신청서 PK
+          
+          **요청 본문 (Request Body)**
+          ```json
+          [
+            {
+              "performanceDate": "2025-02-11T20:00:00",
+              "requestCount": 2,
+              "hopeAreaList": [
+                { "priority": 1, "location": "A구역", "price": 120000 }
+              ],
+              "requestDetails": "빠른 답변 부탁드립니다."
+            },
+            ...
+          ]
+          ```
+          - `List<ApplicationFormDetailRequest> applicationFormDetailRequestList`를 json 형태로 작성
+          - `performanceDate` (LocalDateTime, 필수): 공연 일자 (중복 불가)
+          - `requestCount` (Integer, 필수): 요청 매수 (최소 1장, 최대 공연별 최대 매수)
+          - `hopeAreaList` (List<HopeAreaRequest>, 선택): 희망 구역 리스트 (최대 10개)
+          - `requestDetails` (String, 선택): 요청사항
+          
+          **응답**
+          - HTTP 200 OK: 수정 성공 (응답 본문 없음)
+          
+          **예외 처리**
+          | 에러 코드                             | HTTP 상태 | 메시지                                      | 상황 설명                             |
+          |---------------------------------------|----------|---------------------------------------------|--------------------------------------|
+          | `APPLICATION_FORM_NOT_FOUND`          | 404      | "신청서를 찾을 수 없습니다."                | 해당 ID의 신청서가 없을 때           |
+          | `ACCESS_DENIED`                       | 403      | "접근이 거부되었습니다."                    | 본인 소유 신청서가 아닐 때           |
+          | `INVALID_APPLICATION_FORM_STATUS`     | 400      | "수정 불가능한 신청서 상태입니다."          | 상태가 PENDING/REJECTED 이외일 때    |
+          | `APPLICATION_FORM_DETAIL_REQUIRED`    | 400      | "신청서 상세정보가 필요합니다."             | 최소 1개 이상 세부정보 없을 때       |
+          | `INVALID_CONCERT_DATE`                | 400      | "유효하지 않은 공연일자입니다."             | 공연일자가 null 일 때                |
+          | `DUPLICATE_CONCERT_DATE`              | 400      | "중복된 공연일자가 존재합니다."             | 동일 공연일자가 2개 이상 전달될 때   |
+          | `TICKET_REQUEST_COUNT_EXCEED`         | 400      | "요청 매수가 허용 범위를 벗어났습니다."     | 매수 <1 또는 >maxCount 일 때         |
+          """
+  )
+  ResponseEntity<Void> editApplicationForm(
+      CustomOAuth2User customOAuth2User,
+      UUID applicationFormId,
+      List<ApplicationFormDetailRequest> applicationFormDetailRequestList);
 
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
