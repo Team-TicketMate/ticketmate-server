@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberResponse {
+public class MemberInfoResponse {
 
   // 이메일
   private String username;

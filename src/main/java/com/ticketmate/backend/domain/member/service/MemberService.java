@@ -6,7 +6,7 @@ import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN
 
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
@@ -122,7 +122,7 @@ public class MemberService {
   }
 
   @Transactional(readOnly = true)
-  public MemberResponse getMemberInfo(Member member){
-    return entityMapper.toMemberResponse(member);
+  public MemberInfoResponse getMemberInfo(Member member){
+    return entityMapper.toMemberInfoResponse(member);
   }
 }

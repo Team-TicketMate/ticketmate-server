@@ -3,7 +3,7 @@ package com.ticketmate.backend.domain.member.controller;
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -54,5 +54,5 @@ public interface MemberControllerDocs {
           - 인증 정보가 없거나 잘못된 경우에는 컨트롤러에 진입하지 않고 보안 필터에서 차단됩니다.
           """
   )
-  public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User);
+  public ResponseEntity<MemberInfoResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User);
 }

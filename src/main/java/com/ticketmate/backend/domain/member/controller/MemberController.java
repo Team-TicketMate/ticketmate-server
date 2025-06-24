@@ -1,12 +1,11 @@
 package com.ticketmate.backend.domain.member.controller;
 
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +26,7 @@ public class MemberController implements MemberControllerDocs {
   @Override
   @GetMapping
   @LogMonitoringInvocation
-  public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+  public ResponseEntity<MemberInfoResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
     return ResponseEntity.ok().body(memberService.getMemberInfo(customOAuth2User.getMember()));
   }
 }
