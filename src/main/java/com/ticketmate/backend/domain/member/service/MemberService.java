@@ -6,14 +6,18 @@ import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN
 
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,8 @@ public class MemberService {
   private final JwtUtil jwtUtil;
   private final RedisTemplate<String, Object> redisTemplate;
   private final CookieUtil cookieUtil;
+  private final EntityMapper entityMapper;
+  private final MemberRepository memberRepository;
 
   /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
@@ -116,5 +122,10 @@ public class MemberService {
       log.error("요청된 토큰이 refreshToken이 아닙니다. 요청된 토큰 카테고리: {}", category);
       throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
     }
+  }
+
+  public MemberResponse getMemberInfo(Member member){
+    log.debug("getMyPage! member id = " + member.getMemberId());
+    return entityMapper.toMemberResponse(member);
   }
 }
