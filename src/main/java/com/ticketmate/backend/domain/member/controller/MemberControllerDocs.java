@@ -44,5 +44,5 @@ public interface MemberControllerDocs {
           - 인증 정보가 없거나 잘못된 경우에는 컨트롤러에 진입하지 않고 보안 필터에서 차단됩니다.
           """
   )
-  public ResponseEntity<MemberResponse> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User);
+  public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User);
 }

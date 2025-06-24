@@ -24,10 +24,10 @@ public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
 
+  @Override
   @GetMapping
   @LogMonitoringInvocation
-  public ResponseEntity<MemberResponse> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
-    MemberResponse response = memberService.getMemberInfo(customOAuth2User.getMember());
-    return ResponseEntity.ok().body(response);
+  public ResponseEntity<MemberResponse> getMemberInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    return ResponseEntity.ok().body(memberService.getMemberInfo(customOAuth2User.getMember()));
   }
 }
