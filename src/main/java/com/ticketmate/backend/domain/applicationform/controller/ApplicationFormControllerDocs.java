@@ -192,7 +192,7 @@ public interface ApplicationFormControllerDocs {
           |---------------------------------------|----------|---------------------------------------------|--------------------------------------|
           | `APPLICATION_FORM_NOT_FOUND`          | 404      | "신청서를 찾을 수 없습니다."                | 해당 ID의 신청서가 없을 때           |
           | `ACCESS_DENIED`                       | 403      | "접근이 거부되었습니다."                    | 본인 소유 신청서가 아닐 때           |
-          | `INVALID_APPLICATION_FORM_STATUS`     | 400      | "수정 불가능한 신청서 상태입니다."          | 상태가 PENDING/REJECTED 이외일 때    |
+          | `INVALID_APPLICATION_FORM_STATUS`     | 400      | "수정 불가능한 신청서 상태입니다."          | 상태가 CANCELED, REJECTED, CANCELED_IN_PROCESS 이외일 때    |
           | `APPLICATION_FORM_DETAIL_REQUIRED`    | 400      | "신청서 상세정보가 필요합니다."             | 최소 1개 이상 세부정보 없을 때       |
           | `INVALID_CONCERT_DATE`                | 400      | "유효하지 않은 공연일자입니다."             | 공연일자가 null 일 때                |
           | `DUPLICATE_CONCERT_DATE`              | 400      | "중복된 공연일자가 존재합니다."             | 동일 공연일자가 2개 이상 전달될 때   |

@@ -44,7 +44,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @LogMonitoringInvocation
   public ResponseEntity<Void> saveApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @RequestBody ApplicationFormRequest request) {
+      @RequestBody @Valid ApplicationFormRequest request) {
     applicationFormService.createApplicationForm(request, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
@@ -73,7 +73,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   public ResponseEntity<Void> editApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
-      @RequestBody List<ApplicationFormDetailRequest> applicationFormDetailRequestList) {
+      @RequestBody @Valid List<ApplicationFormDetailRequest> applicationFormDetailRequestList) {
     applicationFormService.editApplicationForm(applicationFormId, applicationFormDetailRequestList, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
@@ -83,7 +83,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @LogMonitoringInvocation
   public void reject(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
-      @RequestBody ApplicationFormRejectRequest request) {
+      @RequestBody @Valid ApplicationFormRejectRequest request) {
     Member member = customOAuth2User.getMember();
     applicationFormService.rejectApplicationForm(applicationFormId, member, request);
   }
@@ -102,7 +102,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @LogMonitoringInvocation
   public ResponseEntity<Boolean> isDuplicateApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @RequestBody ApplicationFormDuplicateRequest request) {
+      @RequestBody @Valid ApplicationFormDuplicateRequest request) {
     Member client = customOAuth2User.getMember();
     return ResponseEntity.ok(applicationFormService.isDuplicateApplicationForm(client, request));
   }
