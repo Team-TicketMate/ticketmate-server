@@ -24,8 +24,8 @@ public class ApplicationFormRequest {
 
   private UUID concertId; // 공연 PK
 
-  @NotEmpty(message = "공연일자 JSON을 입력하세요")
-  private List<ApplicationFormDetailRequest> applicationFormDetailRequestList; // 신청서 공연회차 List
+  @NotEmpty(message = "신청서에는 최소 1개 이상의 신청서 세부사항이 포함되어야 합니다")
+  private List<ApplicationFormDetailRequest> applicationFormDetailRequestList; // 신청서 세부사항 List
 
   @NotNull(message = "선예매/일반예매 타입을 입력해주세요")
   private TicketOpenType ticketOpenType; // 선예매 여부
