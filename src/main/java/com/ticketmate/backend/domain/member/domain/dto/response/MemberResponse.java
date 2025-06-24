@@ -1,17 +1,6 @@
 package com.ticketmate.backend.domain.member.domain.dto.response;
 
-import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.constant.Role;
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
