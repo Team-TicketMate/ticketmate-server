@@ -8,7 +8,6 @@ import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.dto.response.MemberResponse;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -17,7 +16,6 @@ import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +32,6 @@ public class MemberService {
   private final RedisTemplate<String, Object> redisTemplate;
   private final CookieUtil cookieUtil;
   private final EntityMapper entityMapper;
-  private final MemberRepository memberRepository;
 
   /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
