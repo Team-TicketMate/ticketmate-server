@@ -1,15 +1,16 @@
 <!-- ************************************************************
-   TicketMate – 1 : 1 Chat 테스트 클라이언트 (Refactored v3.3, 2025‑06‑23)
+   TicketMate – 1 : 1 Chat 테스트 클라이언트 (Refactored v3.4, 2025‑06‑24)
    --------------------------------------------------------------
    * 신청서 패널 한국어 라벨 & 토글 버튼 한국어화 완료
    * renderApplicationForm() 한국어 필드 라벨 적용
    * 코드 전체 들여쓰기 정리
+   * 채팅방 리스트에 선예매/일반예매 표시 추가 (ticketOpenType 기반)
 ************************************************************* -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>TicketMate – 채팅방 1‑1 (v3.3)</title>
+  <title>TicketMate – 채팅방 1‑1 (v3.4)</title>
 
   <!-- 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
@@ -68,6 +69,28 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    /* 📌 예매 타입 표시 */
+    .ticket-type {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+    .ticket-type.pre-open {
+      background: #4CAF50;
+      color: white;
+    }
+    .ticket-type.general-open {
+      background: #2196F3;
+      color: white;
+    }
+    .room-info {
+      display: flex;
+      align-items: center;
+      margin-top: 0.15rem;
     }
 
     /* ====== 채팅 + 신청서 ====== */
@@ -243,11 +266,27 @@
   const mUnread = (o) => o.unread ?? o.unReadMessageCount;
   const mLastMsg = (o) => o.lastMessage ?? o.lastChatMessage;
   const mLastSendTime = (o) => o.sentAt ?? o.lastChatSendTime;
+  const mTicketOpenType = (o) => o.ticketOpenType;
+
+  /* 📌 예매 타입 한글 변환 및 CSS 클래스 반환 */
+  const getTicketTypeInfo = (ticketOpenType) => {
+    switch (ticketOpenType) {
+      case "PRE_OPEN":
+        return { text: "선예매", className: "pre-open" };
+      case "GENERAL_OPEN":
+        return { text: "일반예매", className: "general-open" };
+      default:
+        return { text: "미정", className: "unknown" };
+    }
+  };
 
   /* ---------- DOM 헬퍼 ---------- */
-  function ensureItem(id, name) {
+  function ensureItem(id, name, ticketOpenType) {
     let el = document.querySelector(`.room-item[data-room-id="${id}"]`);
     if (el) return el;
+
+    const ticketTypeInfo = getTicketTypeInfo(ticketOpenType);
+
     el = document.createElement("div");
     el.className = "room-item";
     el.dataset.roomId = id;
@@ -257,12 +296,16 @@
             <span class="time" data-room-id="${id}"></span>
             <span class="badge" data-room-id="${id}" style="visibility:hidden"></span>
           </div>
-          <div class="preview" data-room-id="${id}"></div>
+          <div class="room-info">
+            <div class="preview" data-room-id="${id}"></div>
+            <span class="ticket-type ${ticketTypeInfo.className}">${ticketTypeInfo.text}</span>
+          </div>
         `;
     el.onclick = () => enterRoom(id);
     document.getElementById("roomList").appendChild(el);
     return el;
   }
+
   const upBadge = (id, n) => {
     const b = document.querySelector(`.badge[data-room-id="${id}"]`);
     if (b) {
@@ -282,14 +325,15 @@
   /* ---------- 1) 방 목록 ---------- */
   async function loadRooms() {
     const res = await fetch(
-            `${API}/api/chat-room/list?isPreOpen=ALL&pageNum=0`,
+            `${API}/api/chat-room/list?&pageNum=0`,
             { headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() } }
     );
     const rooms = (await res.json()).content || [];
     document.getElementById("roomList").innerHTML = "";
     rooms.forEach((r) => {
       const id = mRoomId(r);
-      ensureItem(id, r.chatRoomName);
+      const ticketOpenType = mTicketOpenType(r);
+      ensureItem(id, r.chatRoomName, ticketOpenType);
       upBadge(id, mUnread(r));
       upPrev(id, mLastMsg(r));
       upTime(id, mLastSendTime(r));
@@ -375,7 +419,7 @@
   /* ---------- 5) 신청서 정보 ---------- */
   async function loadApplicationForm(roomId) {
     try {
-      const res = await fetch(`${API}/api/chat-room/${roomId}/applicationForm`, {
+      const res = await fetch(`${API}/api/chat-room/${roomId}/application-form`, {
         headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
       });
       if (!res.ok) throw new Error(res.status);
