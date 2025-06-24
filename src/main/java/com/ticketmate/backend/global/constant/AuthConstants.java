@@ -17,8 +17,11 @@ public final class AuthConstants {
   // JwtUtil
   public static final String ACCESS_CATEGORY = "access";
   public static final String REFRESH_CATEGORY = "refresh";
-  public static final String BLACKLIST_PREFIX = "BL:";
-  public static final String BLACKLIST_VALUE = "blacklist";
   public static final String REDIS_REFRESH_KEY_PREFIX = "RT:";
 
+  // API
+  public static final String API_RESPONSE_PREFIX = "/api/";
+  public static final String ADMIN_RESPONSE_PREFIX = "/admin/";
+  public static final String LOGOUT_URL = "/api/auth/logout";
+  public static final String LOGOUT_SUCCESS_URL = "/";
 }

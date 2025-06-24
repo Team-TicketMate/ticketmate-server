@@ -12,7 +12,6 @@ import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +27,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
   private final JwtUtil jwtUtil;
   private final RedisTemplate<String, Object> redisTemplate;
-  private final CookieUtil cookieUtil;
   @Value("${spring.security.app.redirect-uri.dev}")
   private String devRedirectUri;
 
@@ -47,17 +45,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     log.debug("accessToken = {}", accessToken);
     log.debug("refreshToken = {}", refreshToken);
 
-    // RefreshToken을 Redisd에 저장 (key: RT:memberId)
-    redisTemplate.opsForValue().set(
-        REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(),
-        refreshToken,
-        jwtUtil.getRefreshExpirationTime(),
-        TimeUnit.MILLISECONDS
-    );
+    // RefreshToken을 Redis에 저장 (key: RT:memberId)
+    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), refreshToken);
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(cookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken));
-    response.addCookie(cookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken));
+    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtUtil.getAccessExpirationTimeInSeconds()));
+    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken, jwtUtil.getRefreshExpirationTimeInSeconds()));
 
     // 로그인 성공 후 메인 페이지로 리다이렉트
     try {

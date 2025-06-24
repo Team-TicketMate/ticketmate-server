@@ -1,14 +1,13 @@
 package com.ticketmate.backend.global.filter;
 
-import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.HEADER_AUTHORIZATION;
-import static com.ticketmate.backend.global.constant.AuthConstants.TOKEN_PREFIX;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketmate.backend.global.constant.AuthConstants;
 import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.exception.ErrorResponse;
+import com.ticketmate.backend.global.util.auth.AuthUtil;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
+import com.ticketmate.backend.global.util.common.CommonUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -39,6 +37,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     String uri = request.getRequestURI();
     log.debug("요청된 URI: {}", uri);
+    ApiRequestType apiRequestType = determineApiRequestType(uri);
 
     // 화이트리스트 체크 : 화이트리스트 경로면 필터링 건너뜀
     if (isWhitelistedPath(uri)) {
@@ -46,81 +45,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 요청 타입 구분 : API 요청/관리자 페이지 요청
-    boolean isApiRequest = uri.startsWith("/api/");
-    boolean isAdminPageRequest = uri.startsWith("/admin/");
-
     try {
-      String token = null;
-      String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
-      // 토큰 추출: 요청 타입에 따라 헤더 또는 파라미터에서 토큰 추출
-      if (isApiRequest) {
-        log.debug("일반 API 요청입니다.");
-        // API 요청 : Authorization 헤더에서 "Bearer " 토큰 추출
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-          token = bearerToken.substring(7).trim(); // "Bearer " 제거
-        }
-      } else if (isAdminPageRequest) {
-        log.debug("관리자 페이지 요청입니다.");
-        // 관리자 페이지 요청: Authorization 헤더 우선 확인
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-          token = bearerToken.substring(7).trim();
-        } else {
-          // Authorization 헤더에 토큰이 없는 경우 파라미터 확인
-          String paramToken = request.getParameter(ACCESS_TOKEN_KEY);
-          if (paramToken != null && !paramToken.isEmpty()) {
-            token = paramToken;
-          }
-        }
-      }
+      String token = AuthUtil.extractAccessTokenFromRequest(request);
 
       // 토큰 검증: 토큰이 유효하면 인증 설정
-      if (token != null && jwtUtil.validateToken(token)) {
-        Authentication authentication = jwtUtil.getAuthentication(token);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
-        if (isAdminPageRequest && !hasAdminRole(authentication) && !hasTestAdminRole(authentication)) {
-          log.error("관리자 권한이 없습니다. 로그인페이지로 리다이렉트합니다.");
-          response.sendRedirect("/login");
-          return;
-        }
-
-        // 인증 성공
-        filterChain.doFilter(request, response);
+      if (jwtUtil.isValidToken(token)) {
+        handleValidToken(request, response, filterChain, token, apiRequestType);
         return;
       }
-
-      // 토큰이 없거나 유효하지 않은 경우
-      if (isApiRequest) {
-        // 토큰 없음
-        if (token == null) {
-          log.error("토큰이 존재하지 않습니다.");
-          sendErrorResponse(response, ErrorCode.MISSING_AUTH_TOKEN);
-        } else { // 유효하지 않은 토큰
-          log.error("토큰이 유효하지 않습니다.");
-          sendErrorResponse(response, ErrorCode.INVALID_ACCESS_TOKEN);
-        }
-        return; // 필터 체인 진행하지 않음
-      } else if (isAdminPageRequest) {
-        // 관리자 페이지: 로그인 페이지로 리다이렉트
-        log.error("관리자 페이지 요청 시, 토큰이 없거나 유효하지 않습니다.");
-        response.sendRedirect("/login");
-        return;
-      }
+      handleInvalidToken(response, token);
     } catch (ExpiredJwtException e) {
       log.error("토큰 만료: {}", e.getMessage());
-      // 토큰 만료 예외 처리
-      if (isApiRequest) {
-        sendErrorResponse(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
-      } else {
-        response.sendRedirect("/login");
-      }
-      return;
+      sendErrorResponse(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
     }
-
-    // 필터 체인 계속 진행
-    filterChain.doFilter(request, response);
   }
 
   /**
@@ -128,7 +65,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    *
    * @param response  HttpServletResponse 객체
    * @param errorCode 발생한 에러코드
-   * @throws IOException
    */
   private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -139,6 +75,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(response.getWriter(), errorResponse);
+  }
+
+  /**
+   * URI에 따른 요청 타입을 결정합니다
+   */
+  private ApiRequestType determineApiRequestType(String uri) {
+    if (uri.startsWith(AuthConstants.API_RESPONSE_PREFIX)) {
+      return ApiRequestType.API;
+    } else if (uri.startsWith(AuthConstants.ADMIN_RESPONSE_PREFIX)) {
+      return ApiRequestType.ADMIN;
+    }
+    return ApiRequestType.OTHER;
   }
 
   /**
@@ -155,20 +103,59 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   /**
    * 관리자 권한 확인
    *
-   * @param authentication 인증 정보
+   * @param token JWT
    * @return 관리자 권한 여부
    */
-  private boolean hasAdminRole(Authentication authentication) {
-    return authentication.getAuthorities().stream()
-        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+  private boolean hasAdminRole(String token) {
+    return jwtUtil.getRole(token).equals("ROLE_ADMIN");
   }
 
   /**
    * 테스트 계정 확인
    * TODO: 추후 삭제
    */
-  private boolean hasTestAdminRole(Authentication authentication) {
-    return authentication.getAuthorities().stream()
-        .anyMatch(auth -> auth.getAuthority().equals("ROLE_TEST_ADMIN"));
+  private boolean hasTestAdminRole(String token) {
+    return jwtUtil.getRole(token).equals("ROLE_TEST_ADMIN");
+  }
+
+  /**
+   * 유효한 토큰 처리
+   */
+  private void handleValidToken(HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain filterChain,
+      String token,
+      ApiRequestType apiRequestType) throws IOException, ServletException {
+    SecurityContextHolder.getContext().setAuthentication(jwtUtil.getAuthentication(token));
+
+    // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
+    if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
+      log.error("관리자 권한이 없습니다.");
+      sendErrorResponse(response, ErrorCode.ACCESS_DENIED);
+      return;
+    }
+
+    // 인증 성공
+    filterChain.doFilter(request, response);
+  }
+
+  /**
+   * 유효하지 않은 토큰 처리
+   */
+  private void handleInvalidToken(HttpServletResponse response, String token) throws IOException {
+    if (CommonUtil.nvl(token, "").isEmpty()) { // 토큰 없음
+      log.error("토큰이 존재하지 않습니다.");
+      sendErrorResponse(response, ErrorCode.MISSING_AUTH_TOKEN);
+    } else { // 유효하지 않은 토큰
+      log.error("토큰이 유효하지 않습니다.");
+      sendErrorResponse(response, ErrorCode.INVALID_JWT_TOKEN);
+    }
+  }
+
+  /**
+   * 요청 타입
+   */
+  private enum ApiRequestType {
+    API, ADMIN, OTHER
   }
 }
