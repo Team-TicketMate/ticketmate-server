@@ -3,6 +3,7 @@ package com.ticketmate.backend.domain.applicationform.service;
 import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AGENT;
 import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
 import static com.ticketmate.backend.global.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
+import static com.ticketmate.backend.global.constant.ApplicationFormConstants.EDITABLE_APPLICATION_FORM_STATUS;
 import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
 
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
@@ -192,21 +193,31 @@ public class ApplicationFormService {
   }
 
   /**
-   * 신청서 수정
+   * 신청서 수정 (대리인, 공연, 선예매/일반예매 변경불가)
    *
-   * @param applicationFormId      신청서 PK
-   * @param client                 의뢰인 (신청서 작성자)
-   * @param applicationFormRequest applicationFormDetailRequestList 신청서 공연회차 List
-   *                               ticketOpenType 선예매 / 일반예매
+   * @param applicationFormId                신청서 PK
+   * @param applicationFormDetailRequestList 신청서 상세정보 List
+   * @param client                           의뢰인 (신청서 작성자)
    */
   @Transactional
-  public void editApplicationForm(UUID applicationFormId, ApplicationFormRequest applicationFormRequest, Member client) {
+  public void editApplicationForm(UUID applicationFormId, List<ApplicationFormDetailRequest> applicationFormDetailRequestList, Member client) {
 
-    // 이미 작성된 신청서 확인
-    ApplicationForm applicationForm = applicationFormRepository.findById(applicationFormId)
-        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+    // 작성된 신청서 확인
+    ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
+    // 의뢰인 검증
+    memberService.validateMemberType(client, CLIENT);
 
+    // 신청서 수정 가능 여부 검증
+    validateCanEditApplicationForm(applicationForm, client);
+
+    // 기존 신청서 세부사항 삭제
+    applicationForm.getApplicationFormDetailList().clear();
+
+    // 신청서 세부사항 추가
+    processApplicationFormDetailRequestList(applicationForm, applicationFormDetailRequestList, applicationForm.getTicketOpenDate());
+
+    applicationFormRepository.save(applicationForm);
   }
 
   /**
@@ -498,6 +509,27 @@ public class ApplicationFormService {
       log.error("대리 신청 매수는 최소 {}장, 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
           APPLICATION_FORM_MIN_REQUEST_COUNT, requestMaxCount, request.getRequestCount());
       throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
+    }
+  }
+
+  /**
+   * 신청서 수정 가능 상태 검증
+   *
+   * @param applicationform 신청서
+   * @param client          수정하려는 의뢰인
+   */
+  private void validateCanEditApplicationForm(ApplicationForm applicationform, Member client) {
+    // 본인 소유 신청서 검증
+    if (!applicationform.getClient().getMemberId().equals(client.getMemberId())) {
+      log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청자: {}",
+          applicationform.getClient().getMemberId(), client.getMemberId());
+      throw new CustomException(ErrorCode.ACCESS_DENIED);
+    }
+
+    // 신청서 상태에 따른 수정 가능 여부 검증
+    if (!EDITABLE_APPLICATION_FORM_STATUS.contains(applicationform.getApplicationFormStatus())) {
+      log.error("수정 불가 상태의 신청서입니다. 신청서 상태: {}", applicationform.getApplicationFormStatus());
+      throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
     }
   }
 }
