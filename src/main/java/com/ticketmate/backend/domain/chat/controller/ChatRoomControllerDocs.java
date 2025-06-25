@@ -15,6 +15,14 @@ import java.util.List;
 
 public interface ChatRoomControllerDocs {
 
+  @ApiChangeLogs({
+          @ApiChangeLog(
+                  date = "2025-06-24",
+                  author = "mr6208",
+                  description = "채팅방 리스트업 API 리팩토링",
+                  issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/338"
+          )
+  })
   @Operation(
       summary = "채팅방 리스트업",
       description = """
@@ -22,7 +30,7 @@ public interface ChatRoomControllerDocs {
           이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
-          - **isPreOpen (PreOpenFilter)** : 선예매/일반예매 검색 카테고리 여부 [필수]
+          - **ticketOpenType (TicketOpenType)** : 선예매/일반예매 검색 카테고리 여부 [필수X]
           - **pageNumber (INTEGER)** : 요청 페이지 번호 [필수X]
           - **searchKeyword (STRING)** : 검색키워드 [필수X]
           
@@ -37,15 +45,14 @@ public interface ChatRoomControllerDocs {
           - **unRead** : 읽지 않은 메시지 카운트
           
           ### 사용 방법
-          `PreOpenFilter`
-          
-          ALL("선예매/일반예매 전체조회")
+          `TicketOpenType`
           
           PRE_OPEN("선예매")
           
-          NORMAL("일반예매")
+          GENERAL_OPEN("일반예매")
           
           ### 유의사항
+          - TicketOpenType파라미터를 공백 혹은 NULL로 요청 시 채팅방을 전체조회합니다.
           - 기본 페이징 처리는 페이지당 10개 데이터로 처리했습니다.
           - pageNumber는 기본 1페이지로 설정됩니다. (첫페이지)
           - 검색키워드가 없을 시 공백으로 설정합니다. (전체조회입니다.)
