@@ -217,6 +217,8 @@ public class ApplicationFormService {
     // 신청서 세부사항 추가
     processApplicationFormDetailRequestList(applicationForm, applicationFormDetailRequestList, applicationForm.getTicketOpenDate());
 
+    // 신청서 상태 "PENDING" 변경
+    applicationForm.setApplicationFormStatus(ApplicationFormStatus.PENDING);
     applicationFormRepository.save(applicationForm);
   }
 
