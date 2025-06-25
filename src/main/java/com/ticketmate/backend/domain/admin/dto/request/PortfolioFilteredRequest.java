@@ -20,20 +20,27 @@ import lombok.ToString;
 public class PortfolioFilteredRequest {
 
   private String username; // 사용자 이메일
+
   private String nickname; // 사용자 닉네임
+
   private String name; // 사용자 이름
+
   private PortfolioType portfolioType; // 포트폴리오 타입
+
   @Schema(defaultValue = "1")
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
   @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
   private Integer pageNumber; // 페이지 번호 (1부터 시작)
+
   @Schema(defaultValue = "10")
   @Min(value = 1, message = "페이지 당 데이터 최솟값은 1개 입니다.")
   @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
   private Integer pageSize; // 페이지 사이즈
+
   @Schema(defaultValue = "created_date")
   @Pattern(regexp = "^(created_date)$")
   private String sortField; // 정렬 조건
+
   @Schema(defaultValue = "DESC")
   @Pattern(regexp = "^(ASC|DESC)$")
   private String sortDirection;

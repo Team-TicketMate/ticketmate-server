@@ -10,6 +10,7 @@ import com.ticketmate.backend.domain.applicationform.domain.constant.Application
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormStatus;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormEditRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
@@ -195,12 +196,12 @@ public class ApplicationFormService {
   /**
    * 신청서 수정 (대리인, 공연, 선예매/일반예매 변경불가)
    *
-   * @param applicationFormId                신청서 PK
-   * @param applicationFormDetailRequestList 신청서 상세정보 List
-   * @param client                           의뢰인 (신청서 작성자)
+   * @param applicationFormId 신청서 PK
+   * @param editRequest       신청서 수정 DTO
+   * @param client            의뢰인 (신청서 작성자)
    */
   @Transactional
-  public void editApplicationForm(UUID applicationFormId, List<ApplicationFormDetailRequest> applicationFormDetailRequestList, Member client) {
+  public void editApplicationForm(UUID applicationFormId, ApplicationFormEditRequest editRequest, Member client) {
 
     // 작성된 신청서 확인
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
@@ -215,7 +216,7 @@ public class ApplicationFormService {
     applicationForm.getApplicationFormDetailList().clear();
 
     // 신청서 세부사항 추가
-    processApplicationFormDetailRequestList(applicationForm, applicationFormDetailRequestList, applicationForm.getTicketOpenDate());
+    processApplicationFormDetailRequestList(applicationForm, editRequest.getApplicationFormDetailRequestList(), applicationForm.getTicketOpenDate());
 
     // 신청서 상태 "PENDING" 변경
     applicationForm.setApplicationFormStatus(ApplicationFormStatus.PENDING);

@@ -3,12 +3,12 @@ package com.ticketmate.backend.domain.applicationform.domain.dto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.global.constant.ApplicationFormConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,8 +36,9 @@ public class ApplicationFormDetailRequest {
   @Schema(defaultValue = "1")
   private Integer requestCount; // 요청매수
 
+  @Valid
   @Size(max = 10, message = "희망 구역은 최대 10개까지 등록 가능합니다.")
-  private List<HopeAreaRequest> hopeAreaList = new ArrayList<>(); // 희망구역 리스트
+  private List<HopeAreaRequest> hopeAreaList; // 희망구역 리스트
 
   @Schema(defaultValue = "꼭 잡아주세요...!!")
   private String requestDetails; // 요청사항
