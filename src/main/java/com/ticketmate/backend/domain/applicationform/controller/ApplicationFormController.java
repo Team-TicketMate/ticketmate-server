@@ -73,7 +73,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   public ResponseEntity<Void> editApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
-      @RequestBody @Valid List<ApplicationFormDetailRequest> applicationFormDetailRequestList) {
+      @RequestBody List<ApplicationFormDetailRequest> applicationFormDetailRequestList) {
     applicationFormService.editApplicationForm(applicationFormId, applicationFormDetailRequestList, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
