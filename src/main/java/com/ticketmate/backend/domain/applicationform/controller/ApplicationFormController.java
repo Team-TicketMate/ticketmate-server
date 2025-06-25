@@ -1,7 +1,7 @@
 package com.ticketmate.backend.domain.applicationform.controller;
 
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormEditRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
@@ -12,7 +12,6 @@ import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -54,7 +53,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @LogMonitoringInvocation
   public ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @ModelAttribute ApplicationFormFilteredRequest request) {
+      @ModelAttribute @Valid ApplicationFormFilteredRequest request) {
     return ResponseEntity.ok(applicationFormService.filteredApplicationForm(request));
   }
 
@@ -73,8 +72,8 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   public ResponseEntity<Void> editApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
-      @RequestBody List<ApplicationFormDetailRequest> applicationFormDetailRequestList) {
-    applicationFormService.editApplicationForm(applicationFormId, applicationFormDetailRequestList, customOAuth2User.getMember());
+      @RequestBody @Valid ApplicationFormEditRequest applicationFormEditRequest) {
+    applicationFormService.editApplicationForm(applicationFormId, applicationFormEditRequest, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
 
