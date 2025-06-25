@@ -1,8 +1,9 @@
 package com.ticketmate.backend.global.constant;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Arrays;
 import java.util.List;
-import lombok.experimental.UtilityClass;
 
 /**
  * Security 관련 URL 상수 관리
@@ -30,6 +31,8 @@ public final class SecurityUrls {
       // Local
       "http://localhost:8080", // 로컬 API 서버
       "http://localhost:3000", // 로컬 웹 서버
+      "http://localhost:3001", // 채팅 테스트 전용 로컬 웹 서버
+
 
       "http://10.*:*", // 10.0.0.0/8
       "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
@@ -63,7 +66,8 @@ public final class SecurityUrls {
 
       // 채팅 test용 정적 리소스
       "/chat-jwt.html",
-      "/chat-jwt-local2.html"
+      "/chat-jwt-local2.html",
+      "/chat-jwt-local3.html"
   );
   /**
    * 관리자 권한이 필요한 URL 패턴 목록
