@@ -165,17 +165,39 @@ public interface ApplicationFormControllerDocs {
           
           **요청 본문 (Request Body)**
           ```json
-          [
-            {
-              "performanceDate": "2025-02-11T20:00:00",
-              "requestCount": 2,
-              "hopeAreaList": [
-                { "priority": 1, "location": "A구역", "price": 120000 }
-              ],
-              "requestDetails": "빠른 답변 부탁드립니다."
-            },
-            ...
-          ]
+          {
+            "applicationFormDetailRequestList": [
+              {
+                "performanceDate": "2025-06-30T19:00:00",
+                "requestCount": 2,
+                "hopeAreaList": [
+                  {
+                    "priority": 1,
+                    "location": "A구역",
+                    "price": 150000
+                  },
+                  {
+                    "priority": 2,
+                    "location": "B구역",
+                    "price": 100000
+                  }
+                ],
+                "requestDetails": "가까운 좌석으로 부탁드립니다."
+              },
+              {
+                "performanceDate": "2025-07-01T20:00:00",
+                "requestCount": 1,
+                "hopeAreaList": [
+                  {
+                    "priority": 1,
+                    "location": "C구역",
+                    "price": 120000
+                  }
+                ],
+                "requestDetails": "무대 오른쪽 앞줄이면 좋겠습니다."
+              }
+            ]
+          }
           ```
           - `ApplicationFormEditRequest applicationFormEditRequest`를 json 형태로 작성
           - `performanceDate` (LocalDateTime, 필수): 공연 일자 (중복 불가)
