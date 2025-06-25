@@ -7,6 +7,7 @@ import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.auth.AuthUtil;
@@ -14,6 +15,7 @@ import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final JwtUtil jwtUtil;
+  private final MemberRepository memberRepository;
 
   /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
@@ -67,5 +70,18 @@ public class MemberService {
       log.error("잘못된 MemberType 입니다.. 사용자 MemberType: {}", member.getMemberType());
       throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
     }
+  }
+
+  /**
+   * memberId에 해당하는 회원 반환
+   *
+   * @param memberId 회원 PK
+   */
+  public Member findMemberById(UUID memberId) {
+    return memberRepository.findById(memberId)
+        .orElseThrow(() -> {
+          log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
+          return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        });
   }
 }
