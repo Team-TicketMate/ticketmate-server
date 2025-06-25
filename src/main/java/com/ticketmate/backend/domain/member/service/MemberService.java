@@ -6,10 +6,12 @@ import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN
 
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.auth.AuthUtil;
 import com.ticketmate.backend.global.util.auth.CookieUtil;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final JwtUtil jwtUtil;
+  private final EntityMapper entityMapper;
   private final MemberRepository memberRepository;
 
   /**
@@ -83,5 +86,10 @@ public class MemberService {
           log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
+  }
+
+  @Transactional(readOnly = true)
+  public MemberInfoResponse getMemberInfo(Member member){
+    return entityMapper.toMemberInfoResponse(member);
   }
 }
