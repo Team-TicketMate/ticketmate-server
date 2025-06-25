@@ -2,15 +2,14 @@ package com.ticketmate.backend.domain.applicationform.controller;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormEditRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -178,7 +177,7 @@ public interface ApplicationFormControllerDocs {
             ...
           ]
           ```
-          - `List<ApplicationFormDetailRequest> applicationFormDetailRequestList`를 json 형태로 작성
+          - `ApplicationFormEditRequest applicationFormEditRequest`를 json 형태로 작성
           - `performanceDate` (LocalDateTime, 필수): 공연 일자 (중복 불가)
           - `requestCount` (Integer, 필수): 요청 매수 (최소 1장, 최대 공연별 최대 매수)
           - `hopeAreaList` (List<HopeAreaRequest>, 선택): 희망 구역 리스트 (최대 10개)
@@ -186,23 +185,12 @@ public interface ApplicationFormControllerDocs {
           
           **응답**
           - HTTP 200 OK: 수정 성공 (응답 본문 없음)
-          
-          **예외 처리**
-          | 에러 코드                             | HTTP 상태 | 메시지                                      | 상황 설명                             |
-          |---------------------------------------|----------|---------------------------------------------|--------------------------------------|
-          | `APPLICATION_FORM_NOT_FOUND`          | 404      | "신청서를 찾을 수 없습니다."                | 해당 ID의 신청서가 없을 때           |
-          | `ACCESS_DENIED`                       | 403      | "접근이 거부되었습니다."                    | 본인 소유 신청서가 아닐 때           |
-          | `INVALID_APPLICATION_FORM_STATUS`     | 400      | "수정 불가능한 신청서 상태입니다."          | 상태가 CANCELED, REJECTED, CANCELED_IN_PROCESS 이외일 때    |
-          | `APPLICATION_FORM_DETAIL_REQUIRED`    | 400      | "신청서 상세정보가 필요합니다."             | 최소 1개 이상 세부정보 없을 때       |
-          | `INVALID_CONCERT_DATE`                | 400      | "유효하지 않은 공연일자입니다."             | 공연일자가 null 일 때                |
-          | `DUPLICATE_CONCERT_DATE`              | 400      | "중복된 공연일자가 존재합니다."             | 동일 공연일자가 2개 이상 전달될 때   |
-          | `TICKET_REQUEST_COUNT_EXCEED`         | 400      | "요청 매수가 허용 범위를 벗어났습니다."     | 매수 <1 또는 >maxCount 일 때         |
           """
   )
   ResponseEntity<Void> editApplicationForm(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId,
-      List<ApplicationFormDetailRequest> applicationFormDetailRequestList);
+      ApplicationFormEditRequest applicationFormEditRequest);
 
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
