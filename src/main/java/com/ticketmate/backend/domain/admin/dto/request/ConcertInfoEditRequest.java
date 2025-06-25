@@ -3,6 +3,7 @@ package com.ticketmate.backend.domain.admin.dto.request;
 import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,9 @@ public class ConcertInfoEditRequest {
   @Schema(defaultValue = "INTERPARK_TICKET")
   private TicketReservationSite ticketReservationSite; // 예매 사이트
 
+  @Valid
   private List<ConcertDateRequest> concertDateRequestList; // 공연 날짜 DTO
 
+  @Valid
   private List<TicketOpenDateRequest> ticketOpenDateRequestList; // 티켓 오픈일 DTO
 }

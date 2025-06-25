@@ -1,8 +1,7 @@
 package com.ticketmate.backend.global.util.auth;
 
 import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_CATEGORY;
-import static com.ticketmate.backend.global.constant.AuthConstants.BLACKLIST_PREFIX;
-import static com.ticketmate.backend.global.constant.AuthConstants.BLACKLIST_VALUE;
+import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
 import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_CATEGORY;
 
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
@@ -19,6 +18,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
@@ -48,43 +48,43 @@ public class JwtUtil {
 
   // 토큰에서 username 파싱
   public String getUsername(String token) {
-    return Jwts.parser()
-        .verifyWith(getSignKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .get("username", String.class);
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(claims -> claims.get("username", String.class))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
   // 토큰에서 role 파싱
   public String getRole(String token) {
-    return Jwts.parser()
-        .verifyWith(getSignKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .get("role", String.class);
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(claims -> claims.get("role", String.class))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
+  }
+
+  // 토큰에서 memberId 파싱
+  public String getMemberId(String token) {
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(claims -> claims.get("memberId", String.class))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
   // 토큰 만료 여부 확인
   public Boolean isExpired(String token) {
-    return Jwts.parser()
-        .verifyWith(getSignKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .getExpiration()
-        .before(new Date());
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(Claims::getExpiration)
+        .map(date -> date.before(new Date()))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
   // Access/Refresh 토큰 여부
   public String getCategory(String token) {
-    return Jwts.parser()
-        .verifyWith(getSignKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload()
-        .get("category", String.class);
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(claims -> claims.get("category", String.class))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
   /**
@@ -137,16 +137,12 @@ public class JwtUtil {
    * @param token 검증할 JWT 토큰
    * @return 유효 여부
    */
-  public boolean validateToken(String token) throws ExpiredJwtException {
+  public boolean isValidToken(String token) throws ExpiredJwtException {
     try {
       Jwts.parser()
           .verifyWith(getSignKey())
           .build()
           .parseSignedClaims(token);
-      if (isTokenBlacklisted(token)) {
-        log.error("엑세스 토큰이 블랙리스트에 등록되어있습니다. 요청된 토큰: {}", token);
-        throw new CustomException(ErrorCode.TOKEN_BLACKLISTED);
-      }
       log.debug("JWT 토큰이 유효합니다.");
       return true;
     } catch (ExpiredJwtException e) {
@@ -198,29 +194,37 @@ public class JwtUtil {
    * token의 남은 유효기간(밀리초)를 반환합니다.
    */
   public long getRemainingValidationMilliSecond(String token) {
-    Claims claims = getClaims(token);
-    Date expiration = claims.getExpiration();
-    long nowMillis = System.currentTimeMillis();
-    long remaining = expiration.getTime() - nowMillis;
-    return remaining > 0 ? remaining : 0;
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(Claims::getExpiration)
+        .map(expiration -> expiration.getTime() - System.currentTimeMillis())
+        .filter(remaining -> remaining > 0)
+        .orElse(0L);
   }
 
   /**
-   * 엑세스 토큰 만료 시간 반환
-   *
-   * @return 엑세스 토큰 만료 시간 (밀리초 단위)
+   * 엑세스 토큰 만료 시간 반환 (밀리초 단위)
    */
-  public long getAccessExpirationTime() {
+  public long getAccessExpirationTimeInMilliseconds() {
     return accessTokenExpTime;
   }
 
   /**
-   * 리프레시 토큰 만료 시간 반환
-   *
-   * @return 리프레시 토큰 만료 시간 (밀리초 단위)
+   * 엑세스 토큰 만료 시간 반환 (초 단위)
    */
-  public long getRefreshExpirationTime() {
+  public long getAccessExpirationTimeInSeconds() {
+    return accessTokenExpTime / 1000;
+  }
+
+  /**
+   * 리프레시 토큰 만료 시간 반환 (밀리초 단위)
+   */
+  public long getRefreshExpirationTimeInMilliseconds() {
     return refreshTokenExpTime;
+  }
+
+  public long getRefreshExpirationTimeInSeconds() {
+    return refreshTokenExpTime / 1000;
   }
 
   /**
@@ -233,33 +237,56 @@ public class JwtUtil {
   }
 
   /**
+   * JWT 토큰에서 CustomOAuth2User 반환
+   *
+   * @param token JWT 토큰
+   * @return CustomOAuth2User
+   */
+  public CustomOAuth2User getCustomOAuth2User(String token) {
+    return Optional.of(token)
+        .map(this::getUsername)
+        .map(customOAuth2UserService::loadUserByUsername)
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
+  }
+
+  /**
    * JWT 토큰에서 Authentication 객체 생성
    *
    * @param token JWT 토큰
    * @return Authentication 객체
    */
   public Authentication getAuthentication(String token) {
-    Claims claims = getClaims(token);
-    String username = claims.getSubject();
-    log.debug("JWT에서 인증정보 파싱: username={}", username);
-    CustomOAuth2User customOAuth2User = customOAuth2UserService.loadUserByUsername(username);
-    return new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+    return Optional.of(token)
+        .map(this::getCustomOAuth2User)
+        .map(customOAuth2User -> new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities()))
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
-  // accessToken을 블랙리스트에 등록합니다
-  public void blacklistAccessToken(String accessToken) {
-    String key = BLACKLIST_PREFIX + accessToken;
+  /**
+   * RefreshToken Redis TTL 저장
+   *
+   * @param key          리프레시 토큰 키
+   * @param refreshToken 저장을 원하는 리프레시 토큰
+   */
+  public void saveRefreshToken(String key, String refreshToken) {
     redisTemplate.opsForValue().set(
         key,
-        BLACKLIST_VALUE,
-        getRemainingValidationMilliSecond(accessToken),
-        TimeUnit.MILLISECONDS);
-    log.debug("엑세스 토큰 블랙리스트 추가 완료: {}", accessToken);
+        refreshToken,
+        getRefreshExpirationTimeInMilliseconds(),
+        TimeUnit.MILLISECONDS
+    );
+    log.debug("새로운 리프레시 토큰 저장 성공");
   }
 
-  // 해당 토큰이 블랙리스트에 있는지 확인합니다
-  public Boolean isTokenBlacklisted(String accessToken) {
-    String key = BLACKLIST_PREFIX + accessToken;
-    return redisTemplate.hasKey(key);
+  /**
+   * Redis TTL 로 저장된 리프레시 토큰을 삭제합니다
+   *
+   * @param refreshToken 삭제를 원하는 리프레시 토큰
+   */
+  public void deleteRefreshToken(String refreshToken) {
+    Optional.of(refreshToken)
+        .map(this::getMemberId)
+        .map(memberId -> redisTemplate.delete(REDIS_REFRESH_KEY_PREFIX + memberId))
+        .ifPresent(deleted -> log.debug("리프레시 토큰 삭제 완료"));
   }
 }

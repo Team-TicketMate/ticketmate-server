@@ -22,17 +22,13 @@ public enum ErrorCode {
 
   MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다."),
 
-  INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 엑세스 토큰입니다."),
-
-  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
+  INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
 
   EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
 
   EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
 
   REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "리프레시 토큰을 찾을 수 없습니다."),
-
-  TOKEN_BLACKLISTED(HttpStatus.UNAUTHORIZED, "블랙리스트처리된 토큰이 요청되었습나다."),
 
   COOKIES_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠키가 존재하지 않습니다."),
 
@@ -146,7 +142,7 @@ public enum ErrorCode {
 
   ALREADY_ACCEPTED_APPLICATION_FROM(HttpStatus.CONFLICT, "이미 수락된 신청서입니다."),
 
-  INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "해당 신청서의 상태가 잘못됐습니다."),
+  INVALID_APPLICATION_FORM_STATUS(HttpStatus.BAD_REQUEST, "잘못된 신청서 상태입니다."),
 
   APPLICATION_FORM_DETAIL_REQUIRED(HttpStatus.BAD_REQUEST, "신청서에는 최소 1개 이상의 공연일자가 포함되어야합니다."),
 

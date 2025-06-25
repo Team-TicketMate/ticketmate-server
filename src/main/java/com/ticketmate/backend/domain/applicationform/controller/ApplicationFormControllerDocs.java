@@ -1,6 +1,9 @@
 package com.ticketmate.backend.domain.applicationform.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDuplicateRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormEditRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormFilteredRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
@@ -13,8 +16,16 @@ import org.springframework.http.ResponseEntity;
 
 public interface ApplicationFormControllerDocs {
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-24",
+          author = "Chuseok22",
+          description = "신청서 작성 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/332"
+      )
+  })
   @Operation(
-      summary = "대리 티켓팅 신청서 작성",
+      summary = "신청서 작성",
       description = """
           의뢰인이 대리인에게 티켓팅을 요청하기 위한 신청서를 작성합니다.
           
@@ -131,6 +142,77 @@ public interface ApplicationFormControllerDocs {
   ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-24",
+          author = "Chuseok22",
+          description = "신청서 수정 API 작성",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/332"
+      )
+  })
+  @Operation(
+      summary = "신청서 수정",
+      description = """
+          로그인된 의뢰인이 본인이 작성한 신청서의 세부 정보를 수정합니다.
+          - **대리인**, **공연**, **선예매/일반예매** 구분은 변경 불가
+          - **신청서에 기존에 작성되었던 신청서 세부사항 정보를 모두 삭제 후 다시 저장합니다.**
+          - **기존 데이터가 모두 삭제되므로, 일부만 수정시에도 모든 데이터를 같이 요청해야합니다.**
+          - 수정 가능한 신청서 상태: CANCELED, REJECTED, CANCELED_IN_PROCESS
+          
+          **요청 파라미터 (Path Variable)**
+          - `application-form-id` (UUID): 수정할 신청서 PK
+          
+          **요청 본문 (Request Body)**
+          ```json
+          {
+            "applicationFormDetailRequestList": [
+              {
+                "performanceDate": "2025-06-30T19:00:00",
+                "requestCount": 2,
+                "hopeAreaList": [
+                  {
+                    "priority": 1,
+                    "location": "A구역",
+                    "price": 150000
+                  },
+                  {
+                    "priority": 2,
+                    "location": "B구역",
+                    "price": 100000
+                  }
+                ],
+                "requestDetails": "가까운 좌석으로 부탁드립니다."
+              },
+              {
+                "performanceDate": "2025-07-01T20:00:00",
+                "requestCount": 1,
+                "hopeAreaList": [
+                  {
+                    "priority": 1,
+                    "location": "C구역",
+                    "price": 120000
+                  }
+                ],
+                "requestDetails": "무대 오른쪽 앞줄이면 좋겠습니다."
+              }
+            ]
+          }
+          ```
+          - `ApplicationFormEditRequest applicationFormEditRequest`를 json 형태로 작성
+          - `performanceDate` (LocalDateTime, 필수): 공연 일자 (중복 불가)
+          - `requestCount` (Integer, 필수): 요청 매수 (최소 1장, 최대 공연별 최대 매수)
+          - `hopeAreaList` (List<HopeAreaRequest>, 선택): 희망 구역 리스트 (최대 10개)
+          - `requestDetails` (String, 선택): 요청사항
+          
+          **응답**
+          - HTTP 200 OK: 수정 성공 (응답 본문 없음)
+          """
+  )
+  ResponseEntity<Void> editApplicationForm(
+      CustomOAuth2User customOAuth2User,
+      UUID applicationFormId,
+      ApplicationFormEditRequest applicationFormEditRequest);
 
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
