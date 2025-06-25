@@ -10,7 +10,6 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -203,7 +202,7 @@ public interface ApplicationFormControllerDocs {
   ResponseEntity<Void> editApplicationForm(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId,
-      @Valid List<ApplicationFormDetailRequest> applicationFormDetailRequestList);
+      List<ApplicationFormDetailRequest> applicationFormDetailRequestList);
 
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
