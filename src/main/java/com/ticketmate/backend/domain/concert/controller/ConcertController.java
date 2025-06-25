@@ -1,23 +1,20 @@
 package com.ticketmate.backend.domain.concert.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concert.service.ConcertService;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,11 +37,11 @@ public class ConcertController implements ConcertControllerDocs {
   }
 
   @Override
-  @GetMapping(value = "{concertId}")
+  @GetMapping(value = "{concert-id}")
   @LogMonitoringInvocation
   public ResponseEntity<ConcertInfoResponse> getConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("concertId") UUID concertId) {
+      @PathVariable(value = "concert-id") UUID concertId) {
     return ResponseEntity.ok(concertService.getConcertInfo(concertId));
   }
 }

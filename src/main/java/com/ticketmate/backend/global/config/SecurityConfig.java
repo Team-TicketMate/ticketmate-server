@@ -3,6 +3,7 @@ package com.ticketmate.backend.global.config;
 import static com.ticketmate.backend.global.constant.SecurityUrls.ALLOWED_ORIGINS;
 
 import com.ticketmate.backend.domain.member.service.CustomOAuth2UserService;
+import com.ticketmate.backend.global.constant.AuthConstants;
 import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.filter.CustomLogoutHandler;
 import com.ticketmate.backend.global.filter.CustomSuccessHandler;
@@ -56,9 +57,9 @@ public class SecurityConfig {
         )
         // 로그아웃
         .logout(logout -> logout
-            .logoutUrl("/logout") // "/logout" 경로로 접근 시 로그아웃
-            .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제, 블랙리스트)
-            .logoutSuccessUrl("/login") // 로그아웃 성공 후 로그인 창 이동
+            .logoutUrl(AuthConstants.LOGOUT_URL) // LOGOUT_URL 경로로 접근 시 로그아웃
+            .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제)
+            .logoutSuccessUrl(AuthConstants.LOGOUT_SUCCESS_URL) // 로그아웃 성공 후 페이지 이동
             .invalidateHttpSession(true)
         )
         // 세션 설정: STATELESS
