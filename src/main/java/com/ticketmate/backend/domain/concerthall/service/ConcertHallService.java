@@ -31,7 +31,7 @@ public class ConcertHallService {
 
   /**
    * 공연장 정보 필터링 로직
-   * <p>
+   *
    * 필터링 조건: 공연장 이름 (검색어), 도시
    * 정렬 조건: created_date
    *
@@ -85,5 +85,15 @@ public class ConcertHallService {
         .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
 
     return entityMapper.toConcertHallInfoResponse(concertHall);
+  }
+
+  /**
+   * 중복된 공연장 명 검증
+   */
+  public void validateDuplicateConcertHallName(String concertHallName) {
+    if (concertHallRepository.existsByConcertHallName(concertHallName)) {
+      log.error("중복된 공연장 이름입니다. 요청된 공연장 이름: {}", concertHallName);
+      throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
+    }
   }
 }

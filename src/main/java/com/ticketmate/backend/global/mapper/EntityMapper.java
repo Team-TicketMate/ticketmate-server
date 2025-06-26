@@ -1,30 +1,29 @@
 package com.ticketmate.backend.global.mapper;
 
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.HopeAreaResponse;
-import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
-import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
+import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
+import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
-import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,9 +43,6 @@ public interface EntityMapper {
 
   // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
   ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
-
-  // ConcertHall -> ConcertHallFilteredAdminResponse (엔티티 -> DTO)
-  ConcertHallFilteredAdminResponse toConcertHallFilteredAdminResponse(ConcertHall concertHall);
 
     /*
     ======================================공연======================================
