@@ -2,11 +2,12 @@ package com.ticketmate.backend.domain.chat.domain.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter

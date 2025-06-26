@@ -107,14 +107,19 @@ public class ChatRoomService {
    */
   @Transactional(readOnly = true)
   public List<ChatMessageResponse> getChatMessage(Member member, String chatRoomId) {
+    // 입장할 채팅방 조회
     ChatRoom room = chatRoomRepository.findById(chatRoomId)
         .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+
+    // 채팅방 내부 참가자 유효성 검증
     validateRoomMember(room, member);
 
-    List<ChatMessage> massageList = chatMessageRepository
+    // 메시지 불러오기
+    List<ChatMessage> messageList = chatMessageRepository
         .findByChatRoomIdOrderBySendDateAsc(chatRoomId);
 
-    return massageList.stream().map(entityMapper::toChatMessageResponse).toList();
+    // DTO 매핑
+    return messageList.stream().map(message -> entityMapper.toChatMessageResponse(message, member.getMemberId())).toList();
   }
 
   /**
