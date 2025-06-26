@@ -31,7 +31,7 @@ public class ConcertHallService {
 
   /**
    * 공연장 정보 필터링 로직
-   *
+   * <p>
    * 필터링 조건: 공연장 이름 (검색어), 도시
    * 정렬 조건: created_date
    *
@@ -85,6 +85,20 @@ public class ConcertHallService {
         .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
 
     return entityMapper.toConcertHallInfoResponse(concertHall);
+  }
+
+  /**
+   * DB에서 concertHallId에 해당하는 공연장을 찾고 반환합니다
+   *
+   * @param concertHallId 공연장 PK
+   * @return ConcertHall
+   */
+  public ConcertHall findConcertHallById(UUID concertHallId) {
+    return concertHallRepository.findById(concertHallId)
+        .orElseThrow(() -> {
+          log.error("공연장을 찾을 수 없습니다. 요청PK: {}", concertHallId);
+          return new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND);
+        });
   }
 
   /**

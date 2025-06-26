@@ -43,6 +43,7 @@ import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -408,9 +409,17 @@ public class AdminService {
    */
   @Transactional
   public void editConcertHallInfo(UUID concertHallId, ConcertHallInfoEditRequest request) {
-    ConcertHall concertHall = concertHallRepository.findById(concertHallId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+    Optional.of(concertHallId)
+        .map(concertHallService::findConcertHallById)
+        .map(concertHall -> editConcertHallEntity(concertHall, request))
+        .map(concertHallRepository::save)
+        .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_SAVE_ERROR));
+  }
 
+  /**
+   * 사용자가 요청한 정보에 따라 공연장 정보를 수정합니다
+   */
+  private ConcertHall editConcertHallEntity(ConcertHall concertHall, ConcertHallInfoEditRequest request) {
     // 정보 업데이트
     if (!nvl(request.getConcertHallName(), "").isEmpty()) {
       log.debug("새로운 공연장 명: {}", request.getConcertHallName());
@@ -427,8 +436,7 @@ public class AdminService {
       log.debug("새로운 웹사이트 URL: {}", request.getWebSiteUrl());
       concertHall.setWebSiteUrl(request.getWebSiteUrl());
     }
-
-    concertHallRepository.save(concertHall);
+    return concertHall;
   }
 
     /*
