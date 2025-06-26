@@ -1,6 +1,7 @@
 package com.ticketmate.backend.domain.member.domain.dto.response;
 
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberInfoResponse {
+
+  // 회원 PK
+  private UUID memberId;
 
   // 이메일
   private String username;

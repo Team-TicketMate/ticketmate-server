@@ -33,6 +33,15 @@ public class MemberService {
   private final MemberRepository memberRepository;
 
   /**
+   * JWT 기반 회원정보 조회
+   * @param member @AuthenticationPrincipal 을 통한 인증된 회원 정보
+   */
+  @Transactional(readOnly = true)
+  public MemberInfoResponse getMemberInfo(Member member){
+    return entityMapper.toMemberInfoResponse(member);
+  }
+
+  /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다
    */
   @Transactional
@@ -86,10 +95,5 @@ public class MemberService {
           log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
-  }
-
-  @Transactional(readOnly = true)
-  public MemberInfoResponse getMemberInfo(Member member){
-    return entityMapper.toMemberInfoResponse(member);
   }
 }
