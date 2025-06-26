@@ -394,8 +394,6 @@ public class AdminService {
   public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
 
     Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
-
-    // 엔티티를 DTO로 변환하여 Page 객체로 매핑
     return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
   }
 
