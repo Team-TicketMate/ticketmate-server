@@ -31,7 +31,7 @@ public class ConcertHallService {
 
   /**
    * 공연장 정보 필터링 로직
-   * <p>
+   *
    * 필터링 조건: 공연장 이름 (검색어), 도시
    * 정렬 조건: created_date
    *
@@ -80,11 +80,7 @@ public class ConcertHallService {
    */
   @Transactional(readOnly = true)
   public ConcertHallInfoResponse getConcertHallInfo(UUID concertHallId) {
-
-    ConcertHall concertHall = concertHallRepository.findById(concertHallId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
-
-    return entityMapper.toConcertHallInfoResponse(concertHall);
+    return entityMapper.toConcertHallInfoResponse(findConcertHallById(concertHallId));
   }
 
   /**

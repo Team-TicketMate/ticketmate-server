@@ -21,8 +21,6 @@ import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
@@ -376,25 +374,6 @@ public class AdminService {
         .build());
     log.debug("[공연장 저장 성공] 공연장명: {}, 주소: {}, 지역: {}, 웹사이트: {}",
         concertHall.getConcertHallName(), concertHall.getAddress(), concertHall.getCity().getFullName(), concertHall.getWebSiteUrl());
-  }
-
-  /**
-   * 공연장 정보 필터링 로직
-   * 필터링 조건: 공연장 이름 (검색어), 도시
-   * 정렬 조건: created_date
-   *
-   * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
-   *                cityCode 지역 코드 (null 인 경우 필터링 제외)
-   *                pageNumber 요청 페이지 번호 (기본 1)
-   *                pageSize 한 페이지 당 항목 수 (기본 10)
-   *                sortField 정렬할 필드 (기본: created_date)
-   *                sortDirection 정렬 방향 (기본: DESC)
-   */
-  @Transactional(readOnly = true)
-  public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
-
-    Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
-    return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
   }
 
   /**
