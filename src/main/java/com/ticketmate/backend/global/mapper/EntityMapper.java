@@ -25,11 +25,13 @@ import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface EntityMapper {
@@ -132,11 +134,14 @@ public interface EntityMapper {
     ======================================채팅 (Mongo)======================================
      */
 
-  // ChatMessage(Mongo) → ChatMessageResponse(DTO)
-  @Mapping(source = "chatMessageId", target = "messageId")
-  @Mapping(source = "senderNickName", target = "senderNickname")
-  @Mapping(source = "senderProfileUrl", target = "profileUrl")
-  ChatMessageResponse toChatMessageResponse(ChatMessage message);
+  /**
+   * ChatMessage(Mongo) → ChatMessageResponse(DTO)
+   */
+  @Mapping(source = "message.chatMessageId", target = "messageId")
+  @Mapping(source = "message.senderNickName", target = "senderNickname")
+  @Mapping(source = "message.senderProfileUrl", target = "profileUrl")
+  @Mapping(target = "mine", expression = "java(message.getSenderId().equals(currentMemberId))")
+  ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId);
 
 
    /*
