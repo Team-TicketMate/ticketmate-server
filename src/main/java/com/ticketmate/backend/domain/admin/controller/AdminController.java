@@ -6,15 +6,15 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.admin.service.AdminService;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.domain.admin.service.AdminService;
 import com.ticketmate.backend.domain.concert.service.ConcertService;
+import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -63,7 +63,7 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @GetMapping(value = "/concert-hall")
   @LogMonitoringInvocation
-  public ResponseEntity<Page<ConcertHallFilteredAdminResponse>> filteredConcertHall(
+  public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid ConcertHallFilteredRequest request) {
     return ResponseEntity.ok(adminService.filteredConcertHall(request));

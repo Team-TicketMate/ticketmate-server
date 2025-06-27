@@ -1,17 +1,19 @@
 package com.ticketmate.backend.domain.admin.controller;
 
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertHallInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
@@ -45,6 +47,14 @@ public interface AdminControllerDocs {
       CustomOAuth2User customOAuth2User,
       ConcertHallInfoRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-06-26",
+          author = "Chuseok22",
+          description = "관리자 공연장 필터링 조회 API 반환값 변경",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/334"
+      )
+  })
   @Operation(
       summary = "공연장 정보 필터링",
       description = """
@@ -92,7 +102,7 @@ public interface AdminControllerDocs {
           - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
           """
   )
-  ResponseEntity<Page<ConcertHallFilteredAdminResponse>> filteredConcertHall(
+  ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
       CustomOAuth2User customOAuth2User,
       ConcertHallFilteredRequest request);
 
