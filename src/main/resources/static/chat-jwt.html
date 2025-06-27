@@ -1,7 +1,7 @@
 <!-- ************************************************************
    TicketMate – 1 : 1 Chat 테스트 클라이언트 (Refactored v3.5, 2025‑06‑26)
    --------------------------------------------------------------
-   * 서버의 myMessage 플래그 기반으로 메시지 구분 자동화
+   * 서버의 mine 플래그 기반으로 메시지 구분 자동화
    * 변경된 브로드캐스트 변수명 매핑 (chatRoomId, unReadMessageCount 등)
    * WebSocket 구독 경로를 사용자별 개별 라우팅으로 변경
    * 코드 전체 들여쓰기 및 주석 정리
@@ -483,9 +483,9 @@
     const box = document.getElementById("chatBox");
     box.innerHTML = "";
 
-    // 🔥 서버의 myMessage 플래그 사용으로 변경
+    // 🔥 서버의 mine 플래그 사용으로 변경
     list.forEach((p) => {
-      displayMsg(p, p.myMessage, true); // 히스토리는 모두 읽음 처리
+      displayMsg(p, p.mine, true); // 히스토리는 모두 읽음 처리
     });
 
     sendAckVisible(); // 읽음 확인 전송
@@ -560,8 +560,8 @@
       return;
     }
 
-    // 🔥 서버의 myMessage 플래그 사용
-    displayMsg(p, p.myMessage, !p.myMessage); // 상대방 메시지는 읽음 처리
+    // 🔥 서버의 mine 플래그 사용
+    displayMsg(p, p.mine, !p.mine); // 상대방 메시지는 읽음 처리
 
     // 방 목록 UI 업데이트
     upPrev(roomId, p.message);
@@ -569,12 +569,12 @@
   }
 
   // 메시지 DOM 렌더링
-  function displayMsg(p, isMyMessage, isRead) {
+  function displayMsg(p, isMine, isRead) {
     const box = document.getElementById("chatBox");
     const div = document.createElement("div");
 
-    // 🔥 서버의 myMessage 플래그로 스타일 결정
-    div.className = `msg ${isMyMessage ? "sender-me" : "sender-op"}`;
+    // 🔥 서버의 mine 플래그로 스타일 결정
+    div.className = `msg ${isMine ? "sender-me" : "sender-op"}`;
     div.dataset.msgId = p.messageId;
 
     // XSS 보호: textContent 사용
@@ -591,7 +591,7 @@
     meta.textContent = fmtTime(parseDate(p.sendDate));
 
     // 내 메시지인 경우 읽음 상태 표시
-    if (isMyMessage) {
+    if (isMine) {
       if (!isRead) {
         meta.innerHTML += '<span class="unread-dot"></span>';
       } else {
