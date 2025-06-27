@@ -24,11 +24,11 @@ public class ChatMessageResponse {
   @JsonIgnore
   private boolean read;  // 읽음 여부
   private String profileUrl;  // 프사
-  private boolean myMessage;  // 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
+  private boolean mine;  // 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
 
   @Builder
   public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname,
-                             String message, LocalDateTime sendDate, boolean read, String profileUrl, boolean myMessage) {
+                             String message, LocalDateTime sendDate, boolean read, String profileUrl, boolean mine) {
     this.chatRoomId = chatRoomId;
     this.messageId = messageId;
     this.senderId = senderId;
@@ -37,7 +37,7 @@ public class ChatMessageResponse {
     this.sendDate = sendDate;
     this.read = read;
     this.profileUrl = profileUrl;
-    this.myMessage = myMessage;
+    this.mine = mine;
   }
 
   @JsonProperty("isRead")

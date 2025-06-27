@@ -144,7 +144,7 @@ public interface EntityMapper {
   @Mapping(source = "message.chatMessageId", target = "messageId")
   @Mapping(source = "message.senderNickName", target = "senderNickname")
   @Mapping(source = "message.senderProfileUrl", target = "profileUrl")
-  @Mapping(target = "myMessage", expression = "java(message.getSenderId().equals(currentMemberId))")
+  @Mapping(target = "mine", expression = "java(message.getSenderId().equals(currentMemberId))")
   ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId);
 
 
