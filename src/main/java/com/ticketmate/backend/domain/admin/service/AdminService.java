@@ -11,7 +11,6 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.domain.admin.dto.request.TicketOpenDateRequest;
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
@@ -23,6 +22,7 @@ import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
@@ -40,18 +40,18 @@ import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -366,24 +366,16 @@ public class AdminService {
   public void saveConcertHallInfo(ConcertHallInfoRequest request) {
 
     // 중복된 공연장이름 검증
-    if (concertHallRepository.existsByConcertHallName(request.getConcertHallName())) {
-      log.error("중복된 공연장 이름입니다. 요청된 공연장 이름: {}", request.getConcertHallName());
-      throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
-    }
+    concertHallService.validateDuplicateConcertHallName(request.getConcertHallName());
 
-    City city = null;
-    // 요청된 주소에 맞는 지역코드 할당
-    if (!nvl(request.getAddress(), "").isEmpty()) {
-      city = City.fromAddress(request.getAddress());
-    }
-
-    log.debug("공연장 정보 저장: {}", request.getConcertHallName());
-    concertHallRepository.save(ConcertHall.builder()
+    ConcertHall concertHall = concertHallRepository.save(ConcertHall.builder()
         .concertHallName(request.getConcertHallName())
-        .address(request.getAddress())
-        .city(city)
+        .address(request.getAddress()) // 요청된 주소에 따른 지역코드 할당 (없는경우 null)
+        .city(City.fromAddress(request.getAddress()))
         .webSiteUrl(request.getWebSiteUrl())
         .build());
+    log.debug("[공연장 저장 성공] 공연장명: {}, 주소: {}, 지역: {}, 웹사이트: {}",
+        concertHall.getConcertHallName(), concertHall.getAddress(), concertHall.getCity().getFullName(), concertHall.getWebSiteUrl());
   }
 
   /**
@@ -399,12 +391,10 @@ public class AdminService {
    *                sortDirection 정렬 방향 (기본: DESC)
    */
   @Transactional(readOnly = true)
-  public Page<ConcertHallFilteredAdminResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
+  public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
 
     Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
-
-    // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-    return concertHallPage.map(entityMapper::toConcertHallFilteredAdminResponse);
+    return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
   }
 
   /**
@@ -417,9 +407,17 @@ public class AdminService {
    */
   @Transactional
   public void editConcertHallInfo(UUID concertHallId, ConcertHallInfoEditRequest request) {
-    ConcertHall concertHall = concertHallRepository.findById(concertHallId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND));
+    Optional.of(concertHallId)
+        .map(concertHallService::findConcertHallById)
+        .map(concertHall -> editConcertHallEntity(concertHall, request))
+        .map(concertHallRepository::save)
+        .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_HALL_SAVE_ERROR));
+  }
 
+  /**
+   * 사용자가 요청한 정보에 따라 공연장 정보를 수정합니다
+   */
+  private ConcertHall editConcertHallEntity(ConcertHall concertHall, ConcertHallInfoEditRequest request) {
     // 정보 업데이트
     if (!nvl(request.getConcertHallName(), "").isEmpty()) {
       log.debug("새로운 공연장 명: {}", request.getConcertHallName());
@@ -436,8 +434,7 @@ public class AdminService {
       log.debug("새로운 웹사이트 URL: {}", request.getWebSiteUrl());
       concertHall.setWebSiteUrl(request.getWebSiteUrl());
     }
-
-    concertHallRepository.save(concertHall);
+    return concertHall;
   }
 
     /*
@@ -539,7 +536,7 @@ public class AdminService {
 
       if (notificationUtil.existsFcmToken(memberId)) {
         NotificationPayloadRequest payload = notificationUtil
-                .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
+            .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
 
         fcmService.sendNotification(memberId, payload);
       }

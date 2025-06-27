@@ -1,6 +1,5 @@
 package com.ticketmate.backend.global.mapper;
 
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
@@ -46,9 +45,6 @@ public interface EntityMapper {
 
   // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
   ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
-
-  // ConcertHall -> ConcertHallFilteredAdminResponse (엔티티 -> DTO)
-  ConcertHallFilteredAdminResponse toConcertHallFilteredAdminResponse(ConcertHall concertHall);
 
     /*
     ======================================공연======================================

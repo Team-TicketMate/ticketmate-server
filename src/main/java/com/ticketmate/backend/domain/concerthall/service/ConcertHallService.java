@@ -86,4 +86,28 @@ public class ConcertHallService {
 
     return entityMapper.toConcertHallInfoResponse(concertHall);
   }
+
+  /**
+   * DB에서 concertHallId에 해당하는 공연장을 찾고 반환합니다
+   *
+   * @param concertHallId 공연장 PK
+   * @return ConcertHall
+   */
+  public ConcertHall findConcertHallById(UUID concertHallId) {
+    return concertHallRepository.findById(concertHallId)
+        .orElseThrow(() -> {
+          log.error("공연장을 찾을 수 없습니다. 요청PK: {}", concertHallId);
+          return new CustomException(ErrorCode.CONCERT_HALL_NOT_FOUND);
+        });
+  }
+
+  /**
+   * 중복된 공연장 명 검증
+   */
+  public void validateDuplicateConcertHallName(String concertHallName) {
+    if (concertHallRepository.existsByConcertHallName(concertHallName)) {
+      log.error("중복된 공연장 이름입니다. 요청된 공연장 이름: {}", concertHallName);
+      throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
+    }
+  }
 }
