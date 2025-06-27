@@ -71,6 +71,12 @@ public interface ChatRoomControllerDocs {
                   author = "mr6208",
                   description = "채팅방 입장 DTO 필드 추가",
                   issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/363"
+          ),
+          @ApiChangeLog(
+                  date = "2025-06-27",
+                  author = "mr6208",
+                  description = "명세 바뀐 DTO 필드명 추가 갱신",
+                  issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/363"
           )
   })
   @Operation(
@@ -91,7 +97,7 @@ public interface ChatRoomControllerDocs {
           - **sendDate** : 채팅을 보낸 시간
           - **read** : 채팅의 읽음 여부
           - **profileUrl** : 채팅을 보낸 사용자의 프로필 사진
-          - **myMessage** : 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
+          - **mine** : 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
           
           ### 유의사항
           - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
