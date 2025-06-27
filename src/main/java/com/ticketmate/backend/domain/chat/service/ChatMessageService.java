@@ -1,29 +1,19 @@
 package com.ticketmate.backend.domain.chat.service;
 
-import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
-import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_ROOM_ROUTING_KEY;
-import static com.ticketmate.backend.global.util.rabbit.RabbitMq.UN_READ_ROUTING_KEY;
-
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ReadAckRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ReadAckResponse;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.chat.domain.entity.LastReadMessage;
 import com.ticketmate.backend.domain.chat.repository.ChatMessageRepository;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.chat.repository.LastReadMessageRepository;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
 import jakarta.transaction.Transactional;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -31,6 +21,18 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
+import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
+import static com.ticketmate.backend.global.util.rabbit.RabbitMq.UN_READ_ROUTING_KEY;
 
 @Service
 @Slf4j
@@ -52,14 +54,26 @@ public class ChatMessageService {
    */
   @Transactional
   public void sendMessage(String chatRoomId, ChatMessageRequest request, Member sender) {
+
+    // 메시지를 보낼 채팅방 조회
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+
     // 메시지 발송
-    ChatMessageResponse messageResponse = saveMessage(sender, request, chatRoomId);
-    rabbitTemplate.convertAndSend(CHAT_EXCHANGE_NAME, "chat.room." + chatRoomId, messageResponse);
+    ChatMessage chatMessage = saveMessage(sender, request, chatRoom);
+
+    // 채팅방 두 참가자(자신 및 상대)에게 각각 1회씩 전송
+    Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId())
+            .forEach(currentMemberId -> {
+              ChatMessageResponse chatMessageResponse = mapper.toChatMessageResponse(chatMessage, currentMemberId);
+
+              rabbitTemplate.convertAndSend(
+                      CHAT_EXCHANGE_NAME,
+                      "chat.room." + chatRoomId + ".user." + currentMemberId, chatMessageResponse);
+            });
   }
 
-  private ChatMessageResponse saveMessage(Member sender, ChatMessageRequest request, String chatRoomId) {
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+  private ChatMessage saveMessage(Member sender, ChatMessageRequest request, ChatRoom chatRoom) {
 
     ChatMessage message = ChatMessage.builder()
         .message(request.getMessage())
@@ -98,24 +112,22 @@ public class ChatMessageService {
         continue;   // 발송자 제외
       }
 
-      String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, target);
+      String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoom.getChatRoomId(), target);
       Long count = redisTemplate.opsForValue().increment(key);
       redisTemplate.expire(key, TTL);
-
-//            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
       rabbitTemplate.convertAndSend(
           "",
           UN_READ_ROUTING_KEY + target,
           Map.of(
-              "roomId", chatRoomId,
-              "unread", count,
+              "chatRoomId", chatRoom.getChatRoomId(),
+              "unReadMessageCount", count,
               "lastMessage", request.getMessage(),
-              "sentAt", message.getSendDate()
+              "sendDate", message.getSendDate()
           )
       );
     }
-    return mapper.toChatMessageResponse(message);
+    return message;
   }
 
   /**
@@ -153,31 +165,39 @@ public class ChatMessageService {
     rabbitTemplate.convertAndSend(
         "",
         UN_READ_ROUTING_KEY + reader.getMemberId(),
-        Map.of("roomId", chatRoomId, "unread", 0)
+        Map.of("chatRoomId", chatRoomId, "unReadMessageCount", 0)
     );
+
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
 
     long updatedMessage = chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
     log.debug("'읽음' 처리된 메시지 개수  = {}", updatedMessage);
 
     // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
+
     TransactionSynchronizationManager.registerSynchronization(
-        new TransactionSynchronization() {
-          @Override
-          public void afterCommit() {
-            ChatMessage lastMessage = chatMessageRepository.findById(ack.getLastReadMessageId()).orElseThrow(
-                () -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND)
-            );
-            rabbitTemplate.convertAndSend(
-                CHAT_EXCHANGE_NAME,
-                CHAT_ROOM_ROUTING_KEY + chatRoomId,
-                ReadAckResponse.builder()
-                    .chatRoomId(chatRoomId)
-                    .readerId(reader.getMemberId())
-                    .senderId(lastMessage.getSenderId())
-                    .lastReadMessageId(lastReadMessagePointer.getLastMessageId())
-                    .readDate(lastMessage.getSendDate())
-                    .build());
-          }
-        });
+            new TransactionSynchronization() {
+              @Override
+              public void afterCommit() {
+
+                ChatMessage last = chatMessageRepository.findById(ack.getLastReadMessageId())
+                        .orElseThrow(() -> new CustomException(MESSAGE_NOT_FOUND));
+
+                ReadAckResponse readAckResponse = ReadAckResponse.builder()
+                        .chatRoomId(chatRoomId)
+                        .readerId(reader.getMemberId())
+                        .senderId(last.getSenderId())
+                        .lastReadMessageId(ack.getLastReadMessageId())
+                        .readDate(last.getSendDate())
+                        .build();
+
+                Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId()).
+                        filter(currentMemberId -> !currentMemberId.equals(reader.getMemberId()))
+                        .forEach(currentMemberId -> rabbitTemplate.convertAndSend(
+                                CHAT_EXCHANGE_NAME,
+                                "chat.room." + chatRoomId + ".user." + currentMemberId, readAckResponse));
+              }
+            });
   }
 }

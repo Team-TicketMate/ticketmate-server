@@ -21,6 +21,12 @@ public interface ChatRoomControllerDocs {
                   author = "mr6208",
                   description = "채팅방 리스트업 API 리팩토링",
                   issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/338"
+          ),
+          @ApiChangeLog(
+                  date = "2025-06-25",
+                  author = "mr6208",
+                  description = "채팅방 리스트업 API 응답 데이터 명세 변경",
+                  issueUrl = "Discord를 이용해 알게된 HotFix..."
           )
   })
   @Operation(
@@ -39,10 +45,10 @@ public interface ChatRoomControllerDocs {
           - **chatRoomName** : 채팅방 이름 (상대방 닉네임)
           - **lastChatMessage** : 마지막 채팅 내용
           - **lastChatSendTime** : 마지막 채팅 시간
-          - **concertThumbnailUrl** : 상대방 프로필 이미지
-          - **concertImg** : 콘서트 썸네일 이미지
+          - **profileUrl** : 상대방 프로필 이미지
+          - **concertThumbnailUrl** : 콘서트 썸네일 이미지
           - **ticketOpenType** : 선예매/일반예매 구분
-          - **unRead** : 읽지 않은 메시지 카운트
+          - **unReadMessageCount** : 읽지 않은 메시지 카운트
           
           ### 사용 방법
           `TicketOpenType`
@@ -59,7 +65,14 @@ public interface ChatRoomControllerDocs {
           """
   )
   ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(CustomOAuth2User customOAuth2User, ChatRoomFilteredRequest request);
-
+  @ApiChangeLogs({
+          @ApiChangeLog(
+                  date = "2025-06-26",
+                  author = "mr6208",
+                  description = "채팅방 입장 DTO 필드 추가",
+                  issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/363"
+          )
+  })
   @Operation(
       summary = "채팅방 입장",
       description = """
@@ -76,8 +89,9 @@ public interface ChatRoomControllerDocs {
           - **senderNickname** : 채팅 메시지를 보낸 사용자 닉네임
           - **message** : 메시지 정보
           - **sendDate** : 채팅을 보낸 시간
-          - **isRead** : 채팅의 읽음 여부
+          - **read** : 채팅의 읽음 여부
           - **profileUrl** : 채팅을 보낸 사용자의 프로필 사진
+          - **myMessage** : 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
           
           ### 유의사항
           - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
