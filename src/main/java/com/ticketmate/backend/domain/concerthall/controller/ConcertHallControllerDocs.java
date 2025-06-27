@@ -1,7 +1,5 @@
 package com.ticketmate.backend.domain.concerthall.controller;
 
-import com.chuseok22.apichangelog.annotation.ApiChangeLog;
-import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
@@ -13,14 +11,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface ConcertHallControllerDocs {
 
-  @ApiChangeLogs({
-      @ApiChangeLog(
-          date = "2025-06-26",
-          author = "Chuseok22",
-          description = "관리자/사용자 공연장 조회 API 통일",
-          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/334"
-      )
-  })
   @Operation(
       summary = "공연장 정보 필터링",
       description = """
