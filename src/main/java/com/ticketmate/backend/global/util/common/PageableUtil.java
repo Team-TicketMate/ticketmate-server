@@ -1,13 +1,10 @@
 package com.ticketmate.backend.global.util.common;
 
-import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_PAGE_SIZE;
-import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_DIRECTION;
-import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_FIELD;
-import static com.ticketmate.backend.global.constant.PageableConstants.MAX_PAGE_SIZE;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import static com.ticketmate.backend.global.constant.PageableConstants.*;
 
 /**
  * 페이지네이션을 중앙에서 관리하는 유틸리티 클래스
@@ -37,6 +34,20 @@ public class PageableUtil {
   public static int validatePageSize(Integer pageSize) {
     if (pageSize == null || pageSize < 1) {
       return DEFAULT_PAGE_SIZE;
+    }
+    return Math.min(pageSize, MAX_PAGE_SIZE); // 최대값 제한
+  }
+
+  /**
+   * 페이지 크기 검증 및 기본값 설정 (기본 페이지 크기 검증 메서드 오버로딩)
+   *
+   * @param pageSize 사용자 입력 페이지 크기
+   * @param defaultPageSize 도메인별 기본 페이지 크기(ex: 채팅메시지의 경우 20)
+   * @return 검증된 페이지 크기
+   */
+  public static int validatePageSize(Integer pageSize, int defaultPageSize) {
+    if (pageSize == null || pageSize < 1) {
+      return defaultPageSize;
     }
     return Math.min(pageSize, MAX_PAGE_SIZE); // 최대값 제한
   }
@@ -111,6 +122,34 @@ public class PageableUtil {
     Sort sort = Sort.by(Sort.Direction.fromString(validatedSortDirection), validatedSortField);
 
     return PageRequest.of(pageIndex, validatedPageSize, sort);
+  }
+
+  /**
+   * Pageable 객체 생성 (사용자 입력 페이지 번호를 인덱스로 변환) [위 기본 메서드 오버로딩]
+   *
+   * @param pageNumber        사용자 입력 페이지 번호 (1부터 시작)
+   * @param pageSize          페이지 크기
+   * @param defaultPageSize   도메인별 페이지 사이즈
+   * @param sortField         정렬 필드
+   * @param sortDirection     정렬 방향
+   * @param allowedSortFields 허용된 정렬 필드들
+   * @return Pageable 객체
+   */
+  public static Pageable createPageable(
+          Integer pageNumber,
+          Integer pageSize,
+          int defaultPageSize,
+          String sortField,
+          String sortDirection,
+          String... allowedSortFields) {
+
+    int pageIndex = convertToPageIndex(pageNumber);
+    int validatedSize = validatePageSize(pageSize, defaultPageSize);
+    String validatedField = validateSortField(sortField, allowedSortFields);
+    String validatedDir   = validateSortDirection(sortDirection);
+
+    Sort sort = Sort.by(Sort.Direction.fromString(validatedDir), validatedField);
+    return PageRequest.of(pageIndex, validatedSize, sort);
   }
 
   /**
