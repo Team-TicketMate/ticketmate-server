@@ -1,6 +1,7 @@
 package com.ticketmate.backend.domain.chat.controller;
 
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
@@ -12,11 +13,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,10 +41,13 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @Override
   @GetMapping("/{chat-room-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<List<ChatMessageResponse>> enterChatRoom(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("chat-room-id") String chatRoomId) {
+  public ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(
+          @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+          @PathVariable("chat-room-id") String chatRoomId,
+          @Valid @ModelAttribute ChatMessageFilteredRequest request) {
+
     Member member = customOAuth2User.getMember();
-    return ResponseEntity.ok(chatRoomService.getChatMessage(member, chatRoomId));
+    return ResponseEntity.ok(chatRoomService.getChatMessage(member, chatRoomId, request));
   }
 
   @Override

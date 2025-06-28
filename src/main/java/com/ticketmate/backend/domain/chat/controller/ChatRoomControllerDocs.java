@@ -3,15 +3,15 @@ package com.ticketmate.backend.domain.chat.controller;
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 public interface ChatRoomControllerDocs {
 
@@ -77,16 +77,27 @@ public interface ChatRoomControllerDocs {
                   author = "mr6208",
                   description = "명세 바뀐 DTO 필드명 추가 갱신",
                   issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/363"
+          ),
+          @ApiChangeLog(
+                  date = "2025-06-27",
+                  author = "mr6208",
+                  description = "채팅 메시지 페이지네이션",
+                  issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/370"
           )
   })
   @Operation(
-      summary = "채팅방 입장",
+      summary = "채팅방 입장 및 채팅 메시지 페이지네이션",
       description = """
           
           이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
           - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+          
+          - ChatMessageFilteredRequest
+            - **pageNumber (int)** : 요청할 페이지 번호 [필수X]
+            - **pageSize (int)** : 요청할 페이지 사이즈 [필수X]
+          
           
           ### 반환값 [LIST]
           - **chatRoomId** : 채팅방 고유 ID
@@ -100,10 +111,16 @@ public interface ChatRoomControllerDocs {
           - **mine** : 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
           
           ### 유의사항
-          - 채팅방 입장시 현재까지 진행된 모든 채팅을 위의 반환값의 배열 형태로 반환합니다.
+          - 채팅방 입장시 가장 최근에 전송된 메시지 20개를 페이지 형태로 반환합니다 (Slice)
+          - pageNumber의 기본값은 '1' 입니다.
+          - pageSize의 기본값은 '20' 입니다.
+          - 페이지네이션 파라미터를 Null 형태로 전송 할 경우, 기본값으로 pageNumger는 1, pageSize는 20으로 설정되어 응답합니다.
+          - 기존 Page타입과 달리 Slice를 이용해 클라이언트는 first, last 플래그 변수를 보고 무한 스크롤 구현이 가능합니다.
+          - first 가 true일 경우 -> 첫번째 페이지
+          - last 가 true일 경우 -> 마지막 페이지 (다음 데이터는 없음)
           """
   )
-  ResponseEntity<List<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId);
+  ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId, ChatMessageFilteredRequest request);
 
   @ApiChangeLogs({
           @ApiChangeLog(
