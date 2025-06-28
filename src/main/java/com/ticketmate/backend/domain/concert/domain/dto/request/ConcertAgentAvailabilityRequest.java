@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ConcertAgentAvailabilityRequest {
   @NotNull(message = "concertId는 필수입니다.")
-  @Schema(defaultValue = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+  @Schema(defaultValue = "d11a7778-6e53-4235-855c-96288f8eeac5")
   private UUID concertId;
 
   @Schema(defaultValue = "true")
