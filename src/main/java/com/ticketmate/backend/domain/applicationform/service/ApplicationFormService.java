@@ -387,7 +387,7 @@ public class ApplicationFormService {
   private ApplicationForm findApplicationFormById(UUID applicationFormId) {
     return applicationFormRepository.findById(applicationFormId)
         .orElseThrow(() -> {
-              log.error("신청폼 조회에 실패했습니다.");
+              log.error("신청서를 찾을 수 없습니다. 요청PK: {}", applicationFormId);
               return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
             }
         );

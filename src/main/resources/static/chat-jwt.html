@@ -1,16 +1,15 @@
 <!-- ************************************************************
-   TicketMate – 1 : 1 Chat 테스트 클라이언트 (Refactored v3.4, 2025‑06‑24)
+   TicketMate – 1 : 1 Chat 테스트 클라이언트 (Infinite‑Scrollv4.0, 2025‑06‑27)
    --------------------------------------------------------------
-   * 신청서 패널 한국어 라벨 & 토글 버튼 한국어화 완료
-   * renderApplicationForm() 한국어 필드 라벨 적용
-   * 코드 전체 들여쓰기 정리
-   * 채팅방 리스트에 선예매/일반예매 표시 추가 (ticketOpenType 기반)
+   * Slice 기반 페이징(기본 20개) & 무한 스크롤 ↑ 구현
+   * first / last 플래그로 이전 페이지 존재 여부 판단
+   * 최신 메시지가 항상 맨 아래(오래된 → 최신)로 렌더링
 ************************************************************* -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>TicketMate – 채팅방 1‑1 (v3.4)</title>
+  <title>TicketMate – 채팅방1‑1(v4.0)</title>
 
   <!-- 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
@@ -21,167 +20,42 @@
       --bubble-op: #e8f0ff;
       --bubble-me: #d1ffe5;
     }
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-    }
+    body { font-family: Arial,sans-serif; margin:2rem; }
 
     /* ====== 방 목록 ====== */
-    #roomList {
-      max-width: 22rem;
-      border: 1px solid #ccc;
-      padding: 1rem;
-    }
-    .room-item {
-      padding: 0.6rem 0;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-    }
-    .room-item:hover {
-      background: #f3f7ff;
-    }
-    .room-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .room-name {
-      font-weight: bold;
-    }
-    .time {
-      font-size: 0.72rem;
-      color: #888;
-      margin-left: 0.5rem;
-    }
-    .badge {
-      background: #ff3b30;
-      color: #fff;
-      border-radius: 12px;
-      padding: 0 6px;
-      font-size: 0.7rem;
-      min-width: 1.4rem;
-      text-align: center;
-    }
-    .preview {
-      font-size: 0.78rem;
-      color: #555;
-      margin-top: 0.15rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    #roomList { max-width:22rem; border:1px solid #ccc; padding:1rem; }
+    .room-item { padding:0.6rem 0; border-bottom:1px solid #eee; cursor:pointer; }
+    .room-item:hover { background:#f3f7ff; }
+    .room-top { display:flex; justify-content:space-between; align-items:center; }
+    .room-name { font-weight:bold; }
+    .time { font-size:0.72rem; color:#888; margin-left:0.5rem; }
+    .badge { background:#ff3b30; color:#fff; border-radius:12px; padding:0 6px; font-size:0.7rem; min-width:1.4rem; text-align:center; }
+    .preview { font-size:0.78rem; color:#555; margin-top:0.15rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
     /* 📌 예매 타입 표시 */
-    .ticket-type {
-      font-size: 0.7rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      margin-left: 0.5rem;
-    }
-    .ticket-type.pre-open {
-      background: #4CAF50;
-      color: white;
-    }
-    .ticket-type.general-open {
-      background: #2196F3;
-      color: white;
-    }
-    .room-info {
-      display: flex;
-      align-items: center;
-      margin-top: 0.15rem;
-    }
+    .ticket-type { font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:8px; font-weight:bold; margin-left:0.5rem; }
+    .ticket-type.pre-open { background:#4CAF50; color:white; }
+    .ticket-type.general-open { background:#2196F3; color:white; }
+    .room-info { display:flex; align-items:center; margin-top:0.15rem; }
 
     /* ====== 채팅 + 신청서 ====== */
-    #chatContainer {
-      display: flex;
-      gap: 1rem;
-      max-width: 60rem;
-    }
-    #chatSection {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex: 1;
-    }
-    #chatBox {
-      height: 300px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #ccc;
-      padding: 1rem;
-    }
-    .msg {
-      margin: 0.25rem 0;
-      padding: 0.5rem 0.75rem;
-      border-radius: 1rem;
-      max-width: 70%;
-      white-space: pre-wrap;
-    }
-    .sender-op {
-      background: var(--bubble-op);
-      align-self: flex-start;
-      border-top-left-radius: 0;
-    }
-    .sender-me {
-      background: var(--bubble-me);
-      align-self: flex-end;
-      border-top-right-radius: 0;
-    }
-    .meta {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 0.2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    .unread-dot {
-      width: 7px;
-      height: 7px;
-      background: #ff3b30;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .read-check {
-      font-size: 0.8rem;
-      color: #888;
-    }
+    #chatContainer { display:flex; gap:1rem; max-width:60rem; }
+    #chatSection { display:flex; flex-direction:column; gap:0.5rem; flex:1; }
+    #chatBox { height:300px; overflow-y:auto; display:flex; flex-direction:column; border:1px solid #ccc; padding:1rem; }
+    .msg { margin:0.25rem 0; padding:0.5rem 0.75rem; border-radius:1rem; max-width:70%; white-space:pre-wrap; }
+    .sender-op { background:var(--bubble-op); align-self:flex-start; border-top-left-radius:0; }
+    .sender-me { background:var(--bubble-me); align-self:flex-end; border-top-right-radius:0; }
+    .meta { font-size:0.7rem; color:#555; margin-top:0.2rem; display:flex; align-items:center; gap:0.25rem; }
+    .unread-dot { width:7px; height:7px; background:#ff3b30; border-radius:50%; display:inline-block; }
+    .read-check { font-size:0.8rem; color:#888; }
 
     /* 📌 신청서 패널 */
-    #formInfoSection {
-      width: 20rem;
-      border: 1px solid #ccc;
-      padding: 1rem;
-      overflow-y: auto;
-      display: none;
-    }
-    #formInfoSection h4 {
-      margin: 0.2rem 0 0.6rem;
-      font-size: 1rem;
-    }
-    .form-field {
-      margin: 0.25rem 0;
-      font-size: 0.85rem;
-    }
-    .detail-box {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      border: 1px solid #eee;
-      border-radius: 0.5rem;
-    }
-    .detail-box h5 {
-      margin: 0.1rem 0 0.3rem;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-    .hope-list {
-      margin: 0.2rem 0 0 0.8rem;
-      font-size: 0.78rem;
-      list-style: square;
-    }
+    #formInfoSection { width:20rem; border:1px solid #ccc; padding:1rem; overflow-y:auto; display:none; }
+    #formInfoSection h4 { margin:0.2rem 0 0.6rem; font-size:1rem; }
+    .form-field { margin:0.25rem 0; font-size:0.85rem; }
+    .detail-box { margin:0.5rem 0; padding:0.5rem; border:1px solid #eee; border-radius:0.5rem; }
+    .detail-box h5 { margin:0.1rem 0 0.3rem; font-size:0.8rem; font-weight:bold; }
+    .hope-list { margin:0.2rem 0 0 0.8rem; font-size:0.78rem; list-style:square; }
   </style>
 </head>
 <body>
@@ -190,17 +64,17 @@
   <button id="agentLoginButton">대리인 로그인</button>
 </div>
 
-<div id="roomListSection" style="display: none">
+<div id="roomListSection" style="display:none">
   <h3>채팅방 목록</h3>
   <div id="roomList"></div>
 </div>
 
 <!-- 📌 채팅+신청서 컨테이너 -->
-<div id="chatContainer" style="display: none">
+<div id="chatContainer" style="display:none">
   <!-- ===== 채팅 영역 ===== -->
   <div id="chatSection">
     <input id="roomId" readonly />
-    <div style="display: flex; gap: 0.5rem">
+    <div style="display:flex; gap:0.5rem">
       <input id="message" placeholder="메시지를 입력하세요…" />
       <button id="sendButton">전송</button>
       <button id="toggleFormButton">신청서 보기</button>
@@ -217,7 +91,10 @@
 </div>
 
 <script>
-  /* CONFIG */
+  /* ===============================================
+   * CONFIG & CONSTANTS
+   =============================================== */
+
   const API = "https://api.ticketmate.site";
   const BEARER = true;
   const TOKENS = {
@@ -225,16 +102,30 @@
     agent: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXsl5DsnbTsoITtirhAbmF2ZXIuY29tODE0IiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2MheyXkOydtOyghO2KuEBuYXZlci5jb204MTQiLCJtZW1iZXJJZCI6IjU1OWNjZTgyLTllNzctNDhmNS04NzU1LWMwODJjNzU2NWY0NiIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MDg1NjM0NCwiZXhwIjoxNzUzNDQ4MzQ0fQ.zFU-nlotLY8DnhFk_ZfiJ4UyduNpsIsZXOOuTPWwSyftLtLT_LxN649fhZ0bFU_V",
   };
 
-  /* 상태 */
+  /* ===============================================
+   * GLOBAL STATE
+   =============================================== */
   let stomp = null;
   let myId = "";
-  let formLoaded = false; // 📌 신청서 캐시 상태
+  let formLoaded = false;
+  const PAGE_SIZE = 20;           // Slice 기본 크기
 
+  let currentRoomId = null;      // 접속 중인 채팅방 ID
+  let currentPage = 0;           // 0부터 시작 (DESC 정렬 기준 최신 페이지)
+  let lastPageReached = false;   // slice.last === true 시점
+  let loadingOlder = false;      // 중복 로딩 방지
+
+  /* ===============================================
+   * UTILITY FUNCTIONS
+   =============================================== */
+  // 토큰 관리
   const Token = {
     set: (t) => sessionStorage.setItem("at", t),
     get: () => sessionStorage.getItem("at"),
     clear: () => sessionStorage.removeItem("at"),
   };
+
+  // JWT 토큰에서 클레임 추출
   const claims = () => {
     try {
       return JSON.parse(atob(Token.get().split(".")[1]));
@@ -243,13 +134,15 @@
     }
   };
 
-  /* 날짜 헬퍼 */
+  // 날짜 파싱 및 포맷팅
   const parseDate = (s) => {
     if (!s || typeof s !== "string") return null;
     return new Date(s.includes("T") ? s : s.replace(" ", "T"));
   };
+
   const fmtTime = (d) =>
           d ? d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "";
+
   const fmtDateTime = (d) =>
           d
                   ? d.toLocaleString("ko-KR", {
@@ -261,14 +154,29 @@
                   })
                   : "";
 
-  /* DTO ↔︎ 프론트 매핑 */
-  const mRoomId = (o) => o.roomId ?? o.chatRoomId;
-  const mUnread = (o) => o.unread ?? o.unReadMessageCount;
+  /* ===============================================
+   * DTO 매핑·UI 헬퍼 (기존 그대로)
+   =============================================== */
+  // 채팅방 ID 매핑 (roomId -> chatRoomId 우선)
+  const mRoomId = (o) => o.chatRoomId ?? o.roomId;
+
+  // 미읽음 메시지 수 매핑 (unReadMessageCount 우선)
+  const mUnread = (o) => o.unReadMessageCount ?? o.unread;
+
+  // 마지막 메시지 매핑
   const mLastMsg = (o) => o.lastMessage ?? o.lastChatMessage;
-  const mLastSendTime = (o) => o.sentAt ?? o.lastChatSendTime;
+
+  // 마지막 전송 시간 매핑
+  const mLastSendTime = (o) => o.sentAt ?? o.lastChatSendTime ?? o.sendDate;
+
+  // 예매 타입 매핑
   const mTicketOpenType = (o) => o.ticketOpenType;
 
-  /* 📌 예매 타입 한글 변환 및 CSS 클래스 반환 */
+  /* ===============================================
+   * UI HELPER FUNCTIONS
+   =============================================== */
+
+  // 예매 타입 한글 변환 및 CSS 클래스 반환
   const getTicketTypeInfo = (ticketOpenType) => {
     switch (ticketOpenType) {
       case "PRE_OPEN":
@@ -280,7 +188,7 @@
     }
   };
 
-  /* ---------- DOM 헬퍼 ---------- */
+  // 채팅방 아이템 DOM 생성 또는 조회
   function ensureItem(id, name, ticketOpenType) {
     let el = document.querySelector(`.room-item[data-room-id="${id}"]`);
     if (el) return el;
@@ -291,21 +199,22 @@
     el.className = "room-item";
     el.dataset.roomId = id;
     el.innerHTML = `
-          <div class="room-top">
-            <span class="room-name">${name}</span>
-            <span class="time" data-room-id="${id}"></span>
-            <span class="badge" data-room-id="${id}" style="visibility:hidden"></span>
-          </div>
-          <div class="room-info">
-            <div class="preview" data-room-id="${id}"></div>
-            <span class="ticket-type ${ticketTypeInfo.className}">${ticketTypeInfo.text}</span>
-          </div>
+            <div class="room-top">
+                <span class="room-name">${name}</span>
+                <span class="time" data-room-id="${id}"></span>
+                <span class="badge" data-room-id="${id}" style="visibility:hidden"></span>
+            </div>
+            <div class="room-info">
+                <div class="preview" data-room-id="${id}"></div>
+                <span class="ticket-type ${ticketTypeInfo.className}">${ticketTypeInfo.text}</span>
+            </div>
         `;
     el.onclick = () => enterRoom(id);
     document.getElementById("roomList").appendChild(el);
     return el;
   }
 
+  // 미읽음 배지 업데이트
   const upBadge = (id, n) => {
     const b = document.querySelector(`.badge[data-room-id="${id}"]`);
     if (b) {
@@ -313,23 +222,35 @@
       b.style.visibility = n ? "visible" : "hidden";
     }
   };
+
+  // 미리보기 텍스트 업데이트
   const upPrev = (id, t) => {
     const p = document.querySelector(`.preview[data-room-id="${id}"]`);
     if (p) p.textContent = t || "";
   };
+
+  // 시간 표시 업데이트
   const upTime = (id, s) => {
     const t = document.querySelector(`.time[data-room-id="${id}"]`);
     if (t) t.textContent = fmtTime(parseDate(s));
   };
 
-  /* ---------- 1) 방 목록 ---------- */
+  /* ===============================================
+   * API 통신 함수들
+   =============================================== */
+
+  // 채팅방 목록 불러오기
   async function loadRooms() {
     const res = await fetch(
             `${API}/api/chat-room/list?&pageNum=0`,
             { headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() } }
     );
     const rooms = (await res.json()).content || [];
+
+    // 방 목록 DOM 초기화
     document.getElementById("roomList").innerHTML = "";
+
+    // 각 방에 대해 UI 업데이트
     rooms.forEach((r) => {
       const id = mRoomId(r);
       const ticketOpenType = mTicketOpenType(r);
@@ -338,20 +259,31 @@
       upPrev(id, mLastMsg(r));
       upTime(id, mLastSendTime(r));
     });
+
     document.getElementById("roomListSection").style.display = "block";
   }
 
-  /* ---------- 2) 미읽음 WebSocket ---------- */
+  /* ===============================================
+   * WEBSOCKET 연결 및 관리
+   =============================================== */
+
+  // 미읽음 메시지 알림용 WebSocket 연결
   function connectUnread() {
     if (stomp?.connected) return;
+
     stomp = Stomp.over(new SockJS(`${API}/chat`));
     stomp.connect(
             { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
             () => {
+              // 사용자 ID 추출
               ({ memberId: myId } = claims());
+
+              // 미읽음 메시지 알림 구독
               stomp.subscribe(`/queue/unread.${myId}`, (msg) => {
                 const dto = JSON.parse(msg.body);
                 const id = mRoomId(dto);
+
+                // UI 업데이트 (변경된 필드명 사용)
                 upBadge(id, mUnread(dto));
                 upPrev(id, mLastMsg(dto));
                 upTime(id, mLastSendTime(dto));
@@ -360,36 +292,30 @@
     );
   }
 
-  /* ---------- 3) 방 입장 ---------- */
-  async function enterRoom(id) {
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("roomListSection").style.display = "none";
-    document.getElementById("chatContainer").style.display = "flex";
-
-    document.getElementById("roomId").value = id;
-    upBadge(id, 0);
-
-    // 패널 초기화
-    formLoaded = false;
-    document.getElementById("formInfoSection").style.display = "none";
-    document.getElementById("toggleFormButton").textContent = "신청서 보기";
-
-    await connectRoomWS(id);
-    await loadHistory(id);
-  }
-
+  // 채팅방 입장 및 실시간 메시지 구독
   function connectRoomWS(id) {
     return new Promise((res) => {
       const ready = () => {
-        stomp.subscribe(`/sub/chat.room.${id}`, (m) => onPacket(JSON.parse(m.body), id));
+        // 🔥 변경된 구독 경로: 사용자별 개별 라우팅
+        stomp.subscribe(
+                `/exchange/chat.exchange/chat.room.${id}.user.${myId}`,
+                (m) => onPacket(JSON.parse(m.body), id)
+        );
+
+        // 스크롤 이벤트로 읽음 확인 전송
         const box = document.getElementById("chatBox");
         box.addEventListener("scroll", () => {
-          if (box.scrollTop + box.clientHeight >= box.scrollHeight - 5) sendAckVisible();
+          if (box.scrollTop + box.clientHeight >= box.scrollHeight - 5) {
+            sendAckVisible();
+          }
         });
         res();
       };
-      if (stomp?.connected) ready();
-      else {
+
+      // WebSocket 연결 상태 확인 후 구독
+      if (stomp?.connected) {
+        ready();
+      } else {
         connectUnread();
         const w = setInterval(() => {
           if (stomp?.connected) {
@@ -401,22 +327,85 @@
     });
   }
 
-  /* ---------- 4) 히스토리 ---------- */
-  async function loadHistory(id) {
-    const res = await fetch(`${API}/api/chat-room/${id}`, {
-      headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
-    });
-    const list = await res.json();
-    const box = document.getElementById("chatBox");
-    box.innerHTML = "";
-    list.forEach((p) => {
-      const mine = p.senderId === myId;
-      displayMsg(p, mine, mine ? p.isRead : true);
-    });
-    sendAckVisible();
+  /* ===============================================
+   * 채팅방 입장 및 메시지 처리
+   =============================================== */
+  async function enterRoom(id) {
+    // UI 세팅
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("roomListSection").style.display = "none";
+    document.getElementById("chatContainer").style.display = "flex";
+
+    document.getElementById("roomId").value = id;
+    upBadge(id, 0);
+
+    formLoaded = false;
+    document.getElementById("formInfoSection").style.display = "none";
+    document.getElementById("toggleFormButton").textContent = "신청서 보기";
+
+    currentRoomId = id;
+    currentPage = 0;
+    lastPageReached = false;
+
+    await connectRoomWS(id);
+    await loadSlice(id, currentPage, true);  // 최신 20개 로드
   }
 
-  /* ---------- 5) 신청서 정보 ---------- */
+  // Slice 로드 (page: 0,1,2… / sort: DESC) → 화면에 오름차순으로 렌더링
+  async function loadSlice(roomId, page, initialLoad = false) {
+    if (loadingOlder) return;
+    loadingOlder = true;
+
+    const url = `${API}/api/chat-room/${roomId}` +
+            `?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`; // 1‑base
+
+    const res = await fetch(url, {
+      headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
+    });
+    if (!res.ok) { loadingOlder = false; return; }
+
+    const slice = await res.json();
+    const list = slice.content || [];
+
+    // 서버는 DESC 정렬(최신→오래된)으로 내려주므로 역순으로 뒤집어 오래된→최신 정렬
+    list.reverse();
+
+    const box = document.getElementById("chatBox");
+
+    if (initialLoad) box.innerHTML = ""; // 첫 로드일 때 초기화
+
+    // 기존 스크롤 위치 저장 (이전 메시지 불러오기용)
+    const prevHeight = box.scrollHeight;
+
+    // older 메시지는 prepend, 최신 20개는 append
+    list.forEach((p) => {
+      const isMine = p.mine;
+      const isRead = p.read ?? p.isRead ?? (initialLoad ? true : !p.mine);
+      displayMsg(p, isMine, isRead, !initialLoad /*prepend?*/);
+    });
+
+    if (initialLoad) {
+      box.scrollTop = box.scrollHeight; // 최신으로 이동
+    } else {
+      // 스크롤 위치 유지 (prepend로 인해 내려간 만큼 보정)
+      box.scrollTop = box.scrollHeight - prevHeight;
+    }
+
+    // 다음 페이지 계산
+    if (!slice.last) {
+      currentPage += 1;
+    } else {
+      lastPageReached = true;
+    }
+
+    loadingOlder = false;
+  }
+
+  /* ===============================================
+   * 신청서 정보 관리
+   =============================================== */
+
+  // 신청서 정보 불러오기
   async function loadApplicationForm(roomId) {
     try {
       const res = await fetch(`${API}/api/chat-room/${roomId}/application-form`, {
@@ -431,61 +420,53 @@
     }
   }
 
+  // 신청서 정보 렌더링
   function renderApplicationForm(info) {
     const box = document.getElementById("formInfo");
     box.innerHTML = `
-          <div class="form-field"><b>상태:</b> ${info.applicationFormStatus}</div>
-          <div class="form-field"><b>예매 구분:</b> ${info.ticketOpenType}</div>
-          <div class="form-field"><b>예매일:</b> ${fmtDateTime(parseDate(info.openDate))}</div>
-          ${info.applicationFormDetailResponseList
+            <div class="form-field"><b>상태:</b> ${info.applicationFormStatus}</div>
+            <div class="form-field"><b>예매 구분:</b> ${info.ticketOpenType}</div>
+            <div class="form-field"><b>예매일:</b> ${fmtDateTime(parseDate(info.openDate))}</div>
+            ${info.applicationFormDetailResponseList
             .map(
                     (d, i) => `
-            <div class="detail-box">
-              <h5>세부사항 #${i + 1}</h5>
-              <div><b>공연 일시:</b> ${fmtDateTime(parseDate(d.performanceDate))}</div>
-              <div><b>회차:</b> ${d.session}</div>
-              <div><b>요청 매수:</b> ${d.requestCount}</div>
-              ${d.hopeAreaResponseList?.length
+                <div class="detail-box">
+                    <h5>세부사항 #${i + 1}</h5>
+                    <div><b>공연 일시:</b> ${fmtDateTime(parseDate(d.performanceDate))}</div>
+                    <div><b>회차:</b> ${d.session}</div>
+                    <div><b>요청 매수:</b> ${d.requestCount}</div>
+                    ${d.hopeAreaResponseList?.length
                             ? `
-                  <div><b>희망 구역:</b></div>
-                  <ul class="hope-list">
-                    ${d.hopeAreaResponseList
+                        <div><b>희망 구역:</b></div>
+                        <ul class="hope-list">
+                            ${d.hopeAreaResponseList
                                     .map(
                                             (h) => `
-                      <li>
-                        (${h.priority}) ${h.location} – ₩${h.price.toLocaleString()}
-                      </li>`
+                                <li>
+                                    (${h.priority}) ${h.location} – ₩${h.price.toLocaleString()}
+                                </li>`
                                     )
                                     .join("")}
-                  </ul>`
+                        </ul>`
                             : ""}
-              ${d.requirement ? `<div><i>${d.requirement}</i></div>` : ""}
-            </div>`
+                    ${d.requirement ? `<div><i>${d.requirement}</i></div>` : ""}
+                </div>`
             )
             .join("")}
         `;
   }
 
-  /* ---------- 6) 실시간 패킷 ---------- */
-  function onPacket(p, roomId) {
-    if (p.type === "READ_ACK") {
-      if (p.readerId !== myId) markReadAll(p.lastReadMessageId);
-      return;
-    }
-    const mine = p.senderId === myId;
-    displayMsg(p, mine, !mine);
-    upPrev(roomId, p.message);
-    upTime(roomId, p.sendDate);
-  }
-
-  /* 메시지 렌더링 */
-  function displayMsg(p, mine, read) {
+  /* ===============================================
+   * 실시간 메시지 처리 및 렌더링 함수
+   =============================================== */
+  // displayMsg 수정 → prepend 지원
+  function displayMsg(p, isMine, isRead, prepend = false) {
     const box = document.getElementById("chatBox");
     const div = document.createElement("div");
-    div.className = `msg ${mine ? "sender-me" : "sender-op"}`;
+
+    div.className = `msg ${isMine ? "sender-me" : "sender-op"}`;
     div.dataset.msgId = p.messageId;
 
-    // XSS 보호: textContent 사용
     const spanNick = document.createElement("b");
     spanNick.textContent = p.senderNickname + ": ";
     const spanMsg = document.createElement("span");
@@ -496,28 +477,68 @@
     const meta = document.createElement("div");
     meta.className = "meta";
     meta.textContent = fmtTime(parseDate(p.sendDate));
-    if (mine) {
-      if (!read) meta.innerHTML += '<span class="unread-dot"></span>';
-      else meta.innerHTML += '<span class="read-check">✓</span>';
+
+    if (isMine) {
+      meta.innerHTML += isRead
+              ? '<span class="read-check">✓</span>'
+              : '<span class="unread-dot"></span>';
     }
     div.appendChild(meta);
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+
+    if (prepend) {
+      box.prepend(div);          // 과거 메시지
+    } else {
+      box.appendChild(div);      // 새 메시지
+      box.scrollTop = box.scrollHeight;  // ★ 항상 맨 아래로 이동
+    }
   }
 
-  /* 읽음 처리 */
+  // onPacket / markReadAll / sendAckVisible / sendMsg (기존 로직 그대로)
+
+  /* ===============================================
+* 실시간 메시지 처리
+=============================================== */
+
+  // 실시간 패킷 처리
+  function onPacket(p, roomId) {
+    // 읽음 확인 패킷 처리
+    if (p.type === "READ_ACK") {
+      if (p.readerId !== myId) {
+        markReadAll(p.lastReadMessageId);
+      }
+      return;
+    }
+
+    // 🔥 서버의 mine 플래그 사용
+    displayMsg(p, p.mine, !p.mine); // 상대방 메시지는 읽음 처리
+
+    // 방 목록 UI 업데이트
+    upPrev(roomId, p.message);
+    upTime(roomId, p.sendDate);
+  }
+
+  // 읽음 처리 UI 업데이트
   function markReadAll(upto) {
     const msgs = document.querySelectorAll(".msg.sender-me");
     for (const m of msgs) {
+      // 미읽음 점 제거
       m.querySelector(".unread-dot")?.remove();
-      if (!m.querySelector(".read-check"))
+
+      // 읽음 체크 추가
+      if (!m.querySelector(".read-check")) {
         m.querySelector(".meta").innerHTML += '<span class="read-check">✓</span>';
+      }
+
+      // 해당 메시지까지만 처리
       if (m.dataset.msgId === upto) break;
     }
   }
+
+  // 읽음 확인 전송
   function sendAckVisible() {
     const msgs = document.querySelectorAll("#chatBox .msg");
     if (!msgs.length) return;
+
     stomp.send(
             `/pub/chat.read.${document.getElementById("roomId").value}`,
             {},
@@ -528,10 +549,11 @@
     );
   }
 
-  /* 발송 */
+  // 메시지 전송
   function sendMsg() {
     const txt = document.getElementById("message").value.trim();
     if (!txt) return;
+
     stomp.send(
             `/pub/chat.message.${document.getElementById("roomId").value}`,
             {},
@@ -540,40 +562,55 @@
     document.getElementById("message").value = "";
   }
 
-  /* ---------- 초기화 ---------- */
+
+  /* ===============================================
+   * 스크롤 이벤트 – 무한 스크롤 & 읽음 확인
+   =============================================== */
+  function attachScrollEvents() {
+    const box = document.getElementById("chatBox");
+    box.addEventListener("scroll", async () => {
+      // 맨 위 도달 → 이전 Slice 로드
+      if (box.scrollTop === 0 && !lastPageReached && !loadingOlder) {
+        await loadSlice(currentRoomId, currentPage);
+      }
+
+      // 맨 아래 5px 이내 → 읽음 확인 전송
+      if (box.scrollTop + box.clientHeight >= box.scrollHeight - 5) {
+        sendAckVisible();
+      }
+    });
+  }
+
+  /* ===============================================
+   * 초기화 및 이벤트 리스너
+   =============================================== */
   window.addEventListener("DOMContentLoaded", () => {
+    // 로그인 버튼
     document.getElementById("clientLoginButton").onclick = () => {
-      Token.set(TOKENS.client);
-      loadRooms();
-      connectUnread();
-    };
+      Token.set(TOKENS.client); loadRooms(); connectUnread(); };
     document.getElementById("agentLoginButton").onclick = () => {
-      Token.set(TOKENS.agent);
-      loadRooms();
-      connectUnread();
-    };
+      Token.set(TOKENS.agent); loadRooms(); connectUnread(); };
+
+    // 채팅 관련 버튼
     document.getElementById("sendButton").onclick = sendMsg;
     document.getElementById("logoutButton").onclick = () => {
-      stomp?.disconnect();
-      Token.clear();
-      location.reload();
-    };
+      stomp?.disconnect(); Token.clear(); location.reload(); };
 
-    // 신청서 토글 버튼
     document.getElementById("toggleFormButton").onclick = async () => {
       const panel = document.getElementById("formInfoSection");
+      const btn = document.getElementById("toggleFormButton");
       if (panel.style.display === "none" || panel.style.display === "") {
-        if (!formLoaded) {
-          await loadApplicationForm(document.getElementById("roomId").value);
-          formLoaded = true;
-        }
-        panel.style.display = "block";
-        document.getElementById("toggleFormButton").textContent = "신청서 숨기기";
-      } else {
-        panel.style.display = "none";
-        document.getElementById("toggleFormButton").textContent = "신청서 보기";
-      }
+        if (!formLoaded) { await loadApplicationForm(currentRoomId); formLoaded = true; }
+        panel.style.display = "block"; btn.textContent = "신청서 숨기기";
+      } else { panel.style.display = "none"; btn.textContent = "신청서 보기"; }
     };
+
+    document.getElementById("message").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMsg();
+    });
+
+    // 스크롤 이벤트 바인드
+    attachScrollEvents();
   });
 </script>
 </body>

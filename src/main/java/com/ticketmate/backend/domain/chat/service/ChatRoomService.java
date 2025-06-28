@@ -3,15 +3,16 @@ package com.ticketmate.backend.domain.chat.service;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
+import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
-import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.chat.repository.ChatMessageRepository;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
+import com.ticketmate.backend.global.constant.PageableConstants;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -20,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -106,15 +109,27 @@ public class ChatRoomService {
    * 현재 진행한 채팅 메시지 불러오는 메서드
    */
   @Transactional(readOnly = true)
-  public List<ChatMessageResponse> getChatMessage(Member member, String chatRoomId) {
+  public Slice<ChatMessageResponse> getChatMessage(Member member, String chatRoomId, ChatMessageFilteredRequest request) {
+    // 입장할 채팅방 조회
     ChatRoom room = chatRoomRepository.findById(chatRoomId)
         .orElseThrow(() -> new CustomException(CHAT_ROOM_NOT_FOUND));
+
+    // 채팅방 내부 참가자 유효성 검증
     validateRoomMember(room, member);
 
-    List<ChatMessage> massageList = chatMessageRepository
-        .findByChatRoomIdOrderBySendDateAsc(chatRoomId);
+    // 채팅메시지 전용 페이지네이션 객체 생성
+    Pageable pageable = PageableUtil.createPageable(
+            request.getPageNumber(),
+            request.getPageSize(),
+            PageableConstants.CHAT_MESSAGE_DEFAULT_PAGE_SIZE,  // 채팅 메시지는 기본값 "20"
+            "sendDate",
+            "DESC",
+            "sendDate"
+    );
 
-    return massageList.stream().map(entityMapper::toChatMessageResponse).toList();
+    return chatMessageRepository
+            .findByChatRoomId(chatRoomId, pageable)
+            .map(chatMessage -> entityMapper.toChatMessageResponse(chatMessage, member.getMemberId()));
   }
 
   /**

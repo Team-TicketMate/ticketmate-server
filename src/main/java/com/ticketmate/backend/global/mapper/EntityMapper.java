@@ -1,6 +1,5 @@
 package com.ticketmate.backend.global.mapper;
 
-import com.ticketmate.backend.domain.admin.dto.response.ConcertHallFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
@@ -8,7 +7,6 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.response.Applica
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.HopeAreaResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
@@ -23,15 +21,17 @@ import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
+import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
-import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface EntityMapper {
@@ -45,9 +45,6 @@ public interface EntityMapper {
 
   // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
   ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
-
-  // ConcertHall -> ConcertHallFilteredAdminResponse (엔티티 -> DTO)
-  ConcertHallFilteredAdminResponse toConcertHallFilteredAdminResponse(ConcertHall concertHall);
 
     /*
     ======================================공연======================================
@@ -137,11 +134,14 @@ public interface EntityMapper {
     ======================================채팅 (Mongo)======================================
      */
 
-  // ChatMessage(Mongo) → ChatMessageResponse(DTO)
-  @Mapping(source = "chatMessageId", target = "messageId")
-  @Mapping(source = "senderNickName", target = "senderNickname")
-  @Mapping(source = "senderProfileUrl", target = "profileUrl")
-  ChatMessageResponse toChatMessageResponse(ChatMessage message);
+  /**
+   * ChatMessage(Mongo) → ChatMessageResponse(DTO)
+   */
+  @Mapping(source = "message.chatMessageId", target = "messageId")
+  @Mapping(source = "message.senderNickName", target = "senderNickname")
+  @Mapping(source = "message.senderProfileUrl", target = "profileUrl")
+  @Mapping(target = "mine", expression = "java(message.getSenderId().equals(currentMemberId))")
+  ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId);
 
 
    /*
@@ -150,8 +150,4 @@ public interface EntityMapper {
 
   // Member -> MemberInfoResponse (DTO)
   MemberInfoResponse toMemberInfoResponse(Member member);
-
-  // Member -> ConcertAcceptingAgentInfo (DTO)
-  @Mapping(source = "memberId", target = "agentId")
-  ConcertAcceptingAgentInfo toAgentInfoResponse(Member member);
 }
