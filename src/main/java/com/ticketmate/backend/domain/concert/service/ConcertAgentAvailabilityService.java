@@ -29,13 +29,11 @@ public class ConcertAgentAvailabilityService {
   public void setAcceptingOption(ConcertAgentOptionRequest request){
     Concert concert = concertService.findConcertById(request.getConcertId());
     Member agent = memberService.findMemberById(request.getAgentId());
-    TicketOpenType ticketOpenType = request.getTicketOpenType();
 
     ConcertAgentAvailability concertAgentOption = concertAgentOptionRepository
-        .findByConcertAndTicketOpenTypeAndAgent(concert, ticketOpenType, agent)
+        .findByConcertAndAgent(concert, agent)
         .orElse(ConcertAgentAvailability.builder()
                 .concert(concert)
-                .ticketOpenType(ticketOpenType)
                 .agent(agent)
                 .build());
 
@@ -48,15 +46,5 @@ public class ConcertAgentAvailabilityService {
     return concertAgentOptionRepository
         .findAcceptingAgentByConcert(concertId)
         .stream().map(entityMapper::toAgentInfoResponse).toList();
-  }
-
-  @Transactional(readOnly = true)
-  public Set<TicketOpenType> findAcceptingTicketOpenType(UUID concertId, UUID agentId){
-    Concert concert = concertService.findConcertById(concertId);
-    Member agent = memberService.findMemberById(agentId);
-
-    return concertAgentOptionRepository.findAllByConcertAndAgent(concert, agent)
-        .stream().map(ConcertAgentAvailability::getTicketOpenType)
-        .collect(Collectors.toSet());
   }
 }

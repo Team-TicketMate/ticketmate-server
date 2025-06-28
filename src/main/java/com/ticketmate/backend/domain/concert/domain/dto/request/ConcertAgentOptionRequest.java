@@ -18,7 +18,5 @@ public class ConcertAgentOptionRequest {
 
   private UUID agentId;
 
-  private TicketOpenType ticketOpenType;
-
   private boolean accepting;
 }

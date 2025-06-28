@@ -13,13 +13,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ConcertAgentAvailabilityRepository extends JpaRepository<ConcertAgentAvailability, UUID> {
-  Optional<ConcertAgentAvailability> findByConcertAndTicketOpenTypeAndAgent(Concert concert, TicketOpenType ticketOpenType, Member agent);
+  Optional<ConcertAgentAvailability> findByConcertAndAgent(Concert concert, Member agent);
 
   @Query("SELECT DISTINCT ca.agent "
          + "FROM ConcertAgentAvailability ca "
          + "WHERE ca.concert.concertId = :concertId "
-         + "AND ca.isAccepting = true")
+         + "AND ca.accepting = true")
   List<Member> findAcceptingAgentByConcert(@Param("concertId") UUID concertId);
-
-  List<ConcertAgentAvailability> findAllByConcertAndAgent(Concert concert, Member agent);
 }

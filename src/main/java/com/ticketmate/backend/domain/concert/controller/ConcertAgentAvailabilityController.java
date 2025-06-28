@@ -32,9 +32,4 @@ public class ConcertAgentAvailabilityController {
   public ResponseEntity<List<ConcertAcceptingAgentInfo>> getAcceptingAgents(@PathVariable(value = "concert-id") UUID concertId){
     return ResponseEntity.ok().body(concertAgentOptionService.findAcceptingAgentByConcert(concertId));
   }
-
-  @GetMapping("/{concert-id}/agents/{agent-id}/types")
-  public ResponseEntity<Set<TicketOpenType>> getAcceptingTicketOpenTypes(@PathVariable(value = "concert-id") UUID concertId, @PathVariable(value = "agent-id") UUID agentId){
-    return ResponseEntity.ok().body(concertAgentOptionService.findAcceptingTicketOpenType(concertId, agentId));
-  }
 }

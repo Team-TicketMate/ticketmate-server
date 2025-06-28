@@ -37,13 +37,10 @@ public class ConcertAgentAvailability {
   @JoinColumn(name = "concert_id")
   private Concert concert;
 
-  @Enumerated(EnumType.STRING)
-  private TicketOpenType ticketOpenType;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "agent_id")
   private Member agent;
 
   @Builder.Default
-  private boolean isAccepting = true;
+  private boolean accepting = true;
 }
