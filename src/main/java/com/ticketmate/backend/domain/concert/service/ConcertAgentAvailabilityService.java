@@ -6,8 +6,6 @@ import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.global.mapper.EntityMapper;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConcertAgentAvailabilityService {
   private final ConcertAgentAvailabilityRepository concertAgentOptionRepository;
   private final ConcertService concertService;
-  private final MemberService memberService;
-  private final EntityMapper entityMapper;
 
   @Transactional
-  public void setAcceptingOption(ConcertAgentAvailabilityRequest request){
+  public void setAcceptingOption(Member agent, ConcertAgentAvailabilityRequest request){
     Concert concert = concertService.findConcertById(request.getConcertId());
-    Member agent = memberService.findMemberById(request.getAgentId());
 
     ConcertAgentAvailability availability  = concertAgentOptionRepository
         .findByConcertAndAgent(concert, agent)

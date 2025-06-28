@@ -4,10 +4,13 @@ import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -29,7 +32,6 @@ public interface ConcertAgentAvailabilityControllerDocs {
 
             ### 요청 파라미터
             - **concertId** (UUID): 공연 식별자 [필수]
-            - **agentId** (UUID): 대리인 식별자 [필수]
             - **accepting** (boolean): 수락 여부 [선택 (누락 시 false)]
             - **introduction** (String): 소개 문구 [선택]
 
@@ -42,7 +44,6 @@ public interface ConcertAgentAvailabilityControllerDocs {
             - Validation 실패 시 400 Bad Request가 반환됩니다.
 
             ### 주요 오류 코드
-            - **MEMBER_NOT_FOUND**: 회원을 찾을 수 없음
             - **CONCERT_NOT_FOUND**: 콘서트를 찾을 수 없음
             - **MISSING_AUTH_TOKEN**: 요청에 액세스 토큰이 포함되어 있지 않음
             - **INVALID_ACCESS_TOKEN**: 액세스 토큰이 유효하지 않음
@@ -53,7 +54,8 @@ public interface ConcertAgentAvailabilityControllerDocs {
             - 인증 정보가 없거나 잘못된 경우 보안 필터에서 차단됩니다.
           """
   )
-  public ResponseEntity<Void> setAcceptingOption(@RequestBody ConcertAgentAvailabilityRequest request);
+  public ResponseEntity<Void> setAcceptingOption(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+                                              @Valid @RequestBody ConcertAgentAvailabilityRequest request);
 
   @ApiChangeLogs({
       @ApiChangeLog(
