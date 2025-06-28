@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.response.Applica
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.HopeAreaResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
@@ -149,4 +150,8 @@ public interface EntityMapper {
 
   // Member -> MemberInfoResponse (DTO)
   MemberInfoResponse toMemberInfoResponse(Member member);
+
+  // Member -> ConcertAcceptingAgentInfo (DTO)
+  @Mapping(source = "memberId", target = "agentId")
+  ConcertAcceptingAgentInfo toAgentInfoResponse(Member member);
 }
