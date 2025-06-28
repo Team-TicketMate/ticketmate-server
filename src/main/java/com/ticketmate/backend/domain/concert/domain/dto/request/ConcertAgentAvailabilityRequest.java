@@ -20,7 +20,6 @@ public class ConcertAgentAvailabilityRequest {
   @NotNull(message = "agentId는 필수입니다.")
   private UUID agentId;
 
-  @NotNull(message = "accepting 여부는 필수입니다.")
   private boolean accepting;
 
   private String introduction;
