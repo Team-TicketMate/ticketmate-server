@@ -1,11 +1,9 @@
 package com.ticketmate.backend.domain.concert.controller;
 
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentOptionRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.service.ConcertAgentAvailabilityService;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,7 @@ public class ConcertAgentAvailabilityController {
   private final ConcertAgentAvailabilityService concertAgentOptionService;
 
   @PostMapping
-  public ResponseEntity<Void> setAcceptingOption(@RequestBody ConcertAgentOptionRequest request){
+  public ResponseEntity<Void> setAcceptingOption(@RequestBody ConcertAgentAvailabilityRequest request){
     concertAgentOptionService.setAcceptingOption(request);
     return ResponseEntity.ok().build();
   }

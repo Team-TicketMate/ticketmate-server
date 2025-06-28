@@ -1,11 +1,8 @@
 package com.ticketmate.backend.domain.concert.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,4 +40,6 @@ public class ConcertAgentAvailability {
 
   @Builder.Default
   private boolean accepting = true;
+
+  private String introduction;
 }

@@ -18,4 +18,6 @@ public class ConcertAcceptingAgentInfo {
   private String nickname;
 
   private String profileUrl;
+
+  private String introduction;
 }

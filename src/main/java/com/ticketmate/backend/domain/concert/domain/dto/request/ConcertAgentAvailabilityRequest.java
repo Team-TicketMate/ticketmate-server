@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.concert.domain.dto.request;
 
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,10 +13,15 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConcertAgentOptionRequest {
+public class ConcertAgentAvailabilityRequest {
+  @NotNull(message = "concertId는 필수입니다.")
   private UUID concertId;
 
+  @NotNull(message = "agentId는 필수입니다.")
   private UUID agentId;
 
+  @NotNull(message = "accepting 여부는 필수입니다.")
   private boolean accepting;
+
+  private String introduction;
 }

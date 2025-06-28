@@ -1,7 +1,7 @@
 package com.ticketmate.backend.domain.concert.repository;
 
 
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
@@ -15,9 +15,11 @@ import org.springframework.data.repository.query.Param;
 public interface ConcertAgentAvailabilityRepository extends JpaRepository<ConcertAgentAvailability, UUID> {
   Optional<ConcertAgentAvailability> findByConcertAndAgent(Concert concert, Member agent);
 
-  @Query("SELECT DISTINCT ca.agent "
+  @Query("SELECT new com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo("
+         + "ca.agent.memberId, ca.agent.nickname, ca.agent.profileUrl, "
+         + "COALESCE(ca.introduction, '')) "
          + "FROM ConcertAgentAvailability ca "
          + "WHERE ca.concert.concertId = :concertId "
          + "AND ca.accepting = true")
-  List<Member> findAcceptingAgentByConcert(@Param("concertId") UUID concertId);
+  List<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(@Param("concertId") UUID concertId);
 }
