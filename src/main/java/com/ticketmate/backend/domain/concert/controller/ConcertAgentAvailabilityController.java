@@ -3,7 +3,7 @@ package com.ticketmate.backend.domain.concert.controller;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentOptionRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
-import com.ticketmate.backend.domain.concert.service.ConcertAgentOptionService;
+import com.ticketmate.backend.domain.concert.service.ConcertAgentAvailabilityService;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/concert-agent-option")
-public class ConcertAgentOptionController {
-  private final ConcertAgentOptionService concertAgentOptionService;
+@RequestMapping("/api/concert-agent-availability")
+public class ConcertAgentAvailabilityController {
+  private final ConcertAgentAvailabilityService concertAgentOptionService;
 
-  @PostMapping("/requestability")
+  @PostMapping
   public ResponseEntity<Void> setAcceptingOption(@RequestBody ConcertAgentOptionRequest request){
     concertAgentOptionService.setAcceptingOption(request);
     return ResponseEntity.ok().build();

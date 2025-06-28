@@ -4,8 +4,8 @@ import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentOptionRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentOption;
-import com.ticketmate.backend.domain.concert.repository.ConcertAgentOptionRepository;
+import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ConcertAgentOptionService {
-  private final ConcertAgentOptionRepository concertAgentOptionRepository;
+public class ConcertAgentAvailabilityService {
+  private final ConcertAgentAvailabilityRepository concertAgentOptionRepository;
   private final ConcertService concertService;
   private final MemberService memberService;
   private final EntityMapper entityMapper;
@@ -31,9 +31,9 @@ public class ConcertAgentOptionService {
     Member agent = memberService.findMemberById(request.getAgentId());
     TicketOpenType ticketOpenType = request.getTicketOpenType();
 
-    ConcertAgentOption concertAgentOption = concertAgentOptionRepository
+    ConcertAgentAvailability concertAgentOption = concertAgentOptionRepository
         .findByConcertAndTicketOpenTypeAndAgent(concert, ticketOpenType, agent)
-        .orElse(ConcertAgentOption.builder()
+        .orElse(ConcertAgentAvailability.builder()
                 .concert(concert)
                 .ticketOpenType(ticketOpenType)
                 .agent(agent)
@@ -56,7 +56,7 @@ public class ConcertAgentOptionService {
     Member agent = memberService.findMemberById(agentId);
 
     return concertAgentOptionRepository.findAllByConcertAndAgent(concert, agent)
-        .stream().map(ConcertAgentOption::getTicketOpenType)
+        .stream().map(ConcertAgentAvailability::getTicketOpenType)
         .collect(Collectors.toSet());
   }
 }

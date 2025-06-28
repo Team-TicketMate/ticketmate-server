@@ -28,7 +28,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class ConcertAgentOption {
+public class ConcertAgentAvailability {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID concertAgentOptionId;
