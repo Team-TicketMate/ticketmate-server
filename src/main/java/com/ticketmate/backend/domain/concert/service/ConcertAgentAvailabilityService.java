@@ -1,14 +1,17 @@
 package com.ticketmate.backend.domain.concert.service;
 
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import java.util.List;
+import com.ticketmate.backend.global.util.common.PageableUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +39,16 @@ public class ConcertAgentAvailabilityService {
   }
 
   @Transactional(readOnly = true)
-  public List<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId){
-    return concertAgentOptionRepository.findAcceptingAgentByConcert(concertId);
+  public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentRequest request){
+    Pageable pageable = PageableUtil.createPageable(
+        request.getPageNumber(),
+        request.getPageSize(),
+        "createdDate",
+        "ASC",
+        "createdDate"
+    );  // TODO: 정렬 기준 정해지면 추후 변경
+
+    return concertAgentOptionRepository.findAcceptingAgentByConcert(concertId, pageable);
+
   }
 }

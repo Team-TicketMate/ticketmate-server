@@ -5,9 +5,10 @@ import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptin
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,5 +22,5 @@ public interface ConcertAgentAvailabilityRepository extends JpaRepository<Concer
          + "FROM ConcertAgentAvailability ca "
          + "WHERE ca.concert.concertId = :concertId "
          + "AND ca.accepting = true")
-  List<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(@Param("concertId") UUID concertId);
+  Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(@Param("concertId") UUID concertId, Pageable pageable);
 }

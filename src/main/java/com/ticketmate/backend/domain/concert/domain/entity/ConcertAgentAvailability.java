@@ -2,6 +2,7 @@ package com.ticketmate.backend.domain.concert.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.global.BasePostgresEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -25,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class ConcertAgentAvailability {
+public class ConcertAgentAvailability extends BasePostgresEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID concertAgentOptionId;
