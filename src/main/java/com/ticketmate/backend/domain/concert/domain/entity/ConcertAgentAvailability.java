@@ -32,11 +32,9 @@ public class ConcertAgentAvailability extends BasePostgresEntity {
   private UUID concertAgentOptionId;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "concert_id")
   private Concert concert;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "agent_id")
   private Member agent;
 
   @Builder.Default
