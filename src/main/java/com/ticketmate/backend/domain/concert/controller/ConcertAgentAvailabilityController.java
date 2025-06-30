@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
     description = "공연별 대리인 수락 관련 API 제공"
 )
 public class ConcertAgentAvailabilityController implements ConcertAgentAvailabilityControllerDocs {
-  private final ConcertAgentAvailabilityService concertAgentOptionService;
+  private final ConcertAgentAvailabilityService concertAgentAvailabilityService;
 
   @Override
   @PostMapping
   public ResponseEntity<Void> setAcceptingOption(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                                 @Valid @RequestBody ConcertAgentAvailabilityRequest request){
-    concertAgentOptionService.setAcceptingOption(customOAuth2User.getMember(), request);
+    concertAgentAvailabilityService.setAcceptingOption(customOAuth2User.getMember(), request);
     return ResponseEntity.ok().build();
   }
 
@@ -42,6 +42,6 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
   @GetMapping("/{concert-id}/agents")
   public ResponseEntity<Slice<ConcertAcceptingAgentInfo>> getAcceptingAgents(@PathVariable(value = "concert-id") UUID concertId,
                                                                             @ModelAttribute @Valid ConcertAcceptingAgentRequest request){
-    return ResponseEntity.ok().body(concertAgentOptionService.findAcceptingAgentByConcert(concertId, request));
+    return ResponseEntity.ok().body(concertAgentAvailabilityService.findAcceptingAgentByConcert(concertId, request));
   }
 }

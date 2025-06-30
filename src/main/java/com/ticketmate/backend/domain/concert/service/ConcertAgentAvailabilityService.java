@@ -18,14 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ConcertAgentAvailabilityService {
-  private final ConcertAgentAvailabilityRepository concertAgentOptionRepository;
+  private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
   private final ConcertService concertService;
 
   @Transactional
   public void setAcceptingOption(Member agent, ConcertAgentAvailabilityRequest request){
     Concert concert = concertService.findConcertById(request.getConcertId());
 
-    ConcertAgentAvailability availability  = concertAgentOptionRepository
+    ConcertAgentAvailability availability  = concertAgentAvailabilityRepository
         .findByConcertAndAgent(concert, agent)
         .orElse(ConcertAgentAvailability.builder()
                 .concert(concert)
@@ -34,7 +34,7 @@ public class ConcertAgentAvailabilityService {
 
     availability.updateAcceptingStatus(request.getAccepting(), request.getAccepting() ? request.getIntroduction() : null);
 
-    concertAgentOptionRepository.save(availability);
+    concertAgentAvailabilityRepository.save(availability);
   }
 
   @Transactional(readOnly = true)
@@ -47,7 +47,7 @@ public class ConcertAgentAvailabilityService {
         "createdDate"
     );  // TODO: 정렬 기준 정해지면 추후 변경
 
-    return concertAgentOptionRepository.findAcceptingAgentByConcert(concertId, pageable);
+    return concertAgentAvailabilityRepository.findAcceptingAgentByConcert(concertId, pageable);
 
   }
 }
