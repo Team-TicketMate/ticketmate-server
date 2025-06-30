@@ -32,8 +32,7 @@ public class ConcertAgentAvailabilityService {
                 .agent(agent)
                 .build());
 
-    availability.setAccepting(request.isAccepting());
-    availability.setIntroduction(request.isAccepting() ? request.getIntroduction() : null);
+    availability.updateAcceptingStatus(request.getAccepting(), request.getAccepting() ? request.getIntroduction() : null);
 
     concertAgentOptionRepository.save(availability);
   }

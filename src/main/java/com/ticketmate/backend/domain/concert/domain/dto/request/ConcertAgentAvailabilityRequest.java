@@ -20,7 +20,7 @@ public class ConcertAgentAvailabilityRequest {
   private UUID concertId;
 
   @Schema(defaultValue = "true")
-  private boolean accepting;
+  private Boolean accepting = true;
 
   @Schema(defaultValue = "안녕하세요 저에게 맡겨주세요 !!!")
   private String introduction;

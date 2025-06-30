@@ -41,4 +41,9 @@ public class ConcertAgentAvailability extends BasePostgresEntity {
   private boolean accepting = true;
 
   private String introduction;
+
+  public void updateAcceptingStatus(boolean accepting, String introduction) {
+    this.accepting = accepting;
+    this.introduction = accepting ? introduction : null;
+  }
 }
