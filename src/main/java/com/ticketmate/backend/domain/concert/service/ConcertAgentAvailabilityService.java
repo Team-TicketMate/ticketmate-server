@@ -26,7 +26,7 @@ public class ConcertAgentAvailabilityService {
     Concert concert = concertService.findConcertById(request.getConcertId());
 
     ConcertAgentAvailability availability  = concertAgentAvailabilityRepository
-        .findByConcertAndAgent(concert, agent)
+        .findByConcertConcertIdAndAgentMemberId(concert.getConcertId(), agent.getMemberId())
         .orElse(ConcertAgentAvailability.builder()
                 .concert(concert)
                 .agent(agent)
