@@ -1,11 +1,18 @@
 package com.ticketmate.backend.global.util.common;
 
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * 공통 메서드
  */
 public class CommonUtil {
+
+  // 모든 유니코드 글자 + 숫자 + 공백 허용
+  private static final Pattern SPECIAL_CHARS = Pattern.compile("[^\\p{L}\\p{N}\\s]");
 
   /**
    * null 문자 처리 -> str1이 null 인 경우 str2 반환
@@ -64,23 +71,34 @@ public class CommonUtil {
    * 특수문자 제거
    * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 제거합니다
    */
-  public static String removeSpecialCharacters(String input) {
-    if (input == null) {
-      return "";
-    }
-    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
-    return input.replaceAll("[^\\p{Alnum}\\s]", "");
+  public static String normalizeAndRemoveSpecialCharacters(String input) {
+    return normalize(input, "");
   }
 
   /**
    * 특수문자 변환
    * 영숫자 (a-z, A-Z, 0-9)와 공백을 제외한 모든 값을 원하는 값으로 변환합니다.
    */
-  public static String replaceSpecialCharacters(String input, String replacement) {
-    if (input == null) {
-      return "";
-    }
-    // [^\\p{Alnum}\\s] : 영숫자와 공백이 아닌 모든 문자 매칭
-    return input.replaceAll("[^\\p{Alnum}\\s]", replacement);
+  public static String normalizeAndReplaceSpecialCharacters(String input, String replacement) {
+    return normalize(input, replacement);
+  }
+
+  /**
+   * Unicode 정규화
+   * 텍스트 내 모든 특수문자 (문자(letter), 숫자(number), 공백 제외) 제거/치환
+   * 연속 공백 -> 단일 공백
+   * trim()
+   *
+   * @param input              정규화 할 문자열
+   * @param specialReplacement 특수문자를 치환할 문자열 (제거 시 "" 입력, 치환 시 원하는 문자열 입력)
+   * @return 정규화 된 문자열
+   */
+  private static String normalize(String input, String specialReplacement) {
+    return Optional.ofNullable(input)
+        .filter(s -> !s.isBlank())
+        .map(s -> Normalizer.normalize(s, Form.NFKC)) // Unicode 정규화
+        .map(s -> SPECIAL_CHARS.matcher(s).replaceAll(specialReplacement)) // 특수문자 제거/치환
+        .map(s -> s.replaceAll("\\s+", " ").trim()) // 공백 정리 & trim
+        .orElse("");
   }
 }
