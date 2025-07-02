@@ -224,6 +224,27 @@ public class ApplicationFormService {
   }
 
   /**
+   * '의뢰인' 본인이 신청한 신청서 취소
+   *
+   * @param applicationFormId 취소하려는 신청서 PK
+   * @param client            의뢰인
+   */
+  public void cancelApplicationForm(UUID applicationFormId, Member client) {
+    // 현재 회원이 '의뢰인' 인지 검증
+    memberService.validateMemberType(client, CLIENT);
+
+    // 작성된 신청서 확인
+    ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+
+    // 신청서 취소 가능 여부 검증
+    validateCanCancelApplicationForm(applicationForm, client);
+
+    // 신청서 상태 "CANCELED" 변경
+    applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED);
+    applicationFormRepository.save(applicationForm);
+  }
+
+  /**
    * '대리인'의 신청서 거절
    *
    * @param applicationFormId 신청서 PK
@@ -518,21 +539,47 @@ public class ApplicationFormService {
   /**
    * 신청서 수정 가능 상태 검증
    *
-   * @param applicationform 신청서
+   * @param applicationForm 신청서
    * @param client          수정하려는 의뢰인
    */
-  private void validateCanEditApplicationForm(ApplicationForm applicationform, Member client) {
-    // 본인 소유 신청서 검증
-    if (!applicationform.getClient().getMemberId().equals(client.getMemberId())) {
-      log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청자: {}",
-          applicationform.getClient().getMemberId(), client.getMemberId());
-      throw new CustomException(ErrorCode.ACCESS_DENIED);
-    }
+  private void validateCanEditApplicationForm(ApplicationForm applicationForm, Member client) {
+    validateApplicationFormOwner(applicationForm, client);
 
     // 신청서 상태에 따른 수정 가능 여부 검증
-    if (!EDITABLE_APPLICATION_FORM_STATUS.contains(applicationform.getApplicationFormStatus())) {
-      log.error("수정 불가 상태의 신청서입니다. 신청서 상태: {}", applicationform.getApplicationFormStatus());
+    if (!EDITABLE_APPLICATION_FORM_STATUS.contains(applicationForm.getApplicationFormStatus())) {
+      log.error("수정 불가 상태의 신청서입니다. 신청서 상태: {}", applicationForm.getApplicationFormStatus());
       throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+    }
+  }
+
+  /**
+   * 신청서 취소 가능 상태 검증
+   *
+   * @param applicationForm 신청서
+   * @param client          취소하려는 의뢰인
+   */
+  private void validateCanCancelApplicationForm(ApplicationForm applicationForm, Member client) {
+    validateApplicationFormOwner(applicationForm, client);
+
+    // 신청서 상태에 따른 취소 가능 여부 검증 (대기 상태인 경우만 의뢰인 취소 가능)
+    if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.PENDING)) {
+      log.error("취소 불가 상태의 신청서입니다. 신청서 상태: {}", applicationForm.getApplicationFormStatus());
+      throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+    }
+  }
+
+  /**
+   * 신청서 소유자 검증
+   *
+   * @param applicationForm 신청서
+   * @param client          의뢰인
+   */
+  private void validateApplicationFormOwner(ApplicationForm applicationForm, Member client) {
+    // 본인 소유 신청서 검증
+    if (!applicationForm.getClient().getMemberId().equals(client.getMemberId())) {
+      log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청자: {}",
+          applicationForm.getClient().getMemberId(), client.getMemberId());
+      throw new CustomException(ErrorCode.ACCESS_DENIED);
     }
   }
 }

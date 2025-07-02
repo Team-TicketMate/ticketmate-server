@@ -78,6 +78,16 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   }
 
   @Override
+  @PostMapping("/cancel/{application-form-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> cancelApplicationForm(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @PathVariable(value = "application-form-id") UUID applicationFormId) {
+    applicationFormService.cancelApplicationForm(applicationFormId, customOAuth2User.getMember());
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
   @PutMapping("/expressions/{application-form-id}/reject")
   @LogMonitoringInvocation
   public void reject(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
