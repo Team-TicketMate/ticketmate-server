@@ -36,7 +36,7 @@ jobs:
       # embedding.json 파일을 빌드 전에 생성
       - name: Create embedding.json from secret
         run: |
-          echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" > ./src/main/resoruces/ticketmate-embedding.json
+          echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" > ./src/main/resources/ticketmate-embedding.json
 
       # oauth2.yml 파일을 빌드 전에 생성
       - name: Create oauth2.yml from secret
