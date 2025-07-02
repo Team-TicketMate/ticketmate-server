@@ -214,6 +214,34 @@ public interface ApplicationFormControllerDocs {
       UUID applicationFormId,
       ApplicationFormEditRequest applicationFormEditRequest);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-02",
+          author = "Chuseok22",
+          description = "신청서 취소 API 작성",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/287"
+      )
+  })
+  @Operation(
+      summary = "신청서 취소",
+      description = """
+          로그인된 의뢰인이 본인이 작성한 신청서를 취소합니다.
+          - 취소 가능한 신청서 상태: PENDING
+          
+          **요청 파라미터 (Path Variable)**
+          - `application-form-id` (UUID): 취소할 신청서 PK
+          
+          **요청 본문 (Request Body)**
+          `없음`
+          
+          **응답**
+          - HTTP 200 OK: 취소 성공 (응답 본문 없음)
+          """
+  )
+  ResponseEntity<Void> cancelApplicationForm(
+      CustomOAuth2User customOAuth2User,
+      UUID applicationFormId);
+
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
       description = """
