@@ -31,7 +31,12 @@ jobs:
       # firebase 서비스워커 파일을 빌드 전에 생성
       - name: Create firebase-messaging-sw.js from secret
         run: |
-          echo "${{ secrets.FIREBASE_MESSAGING_SW_JS }}" > ./src/main/resources/static/firebase-messaging-sw.js          
+          echo "${{ secrets.FIREBASE_MESSAGING_SW_JS }}" > ./src/main/resources/static/firebase-messaging-sw.js     
+
+      # embedding.json 파일을 빌드 전에 생성
+      - name: Create embedding.json from secret
+        run: |
+          echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" > ./src/main/resoruces/ticketmate-embedding.json
 
       # oauth2.yml 파일을 빌드 전에 생성
       - name: Create oauth2.yml from secret
