@@ -45,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         .setAutoStartup(true)
         .setTcpClient(client)  // RabbitMQ와 연결할 클라이언트
         .setRelayHost(host)  // // RabbitMQ 서버 주소
-        .setRelayPort(stompPort)  // RabbitMQ 포트(5672), STOMP(61613)
+        .setRelayPort(stompPort)
         .setClientLogin(username)  // 계정
         .setClientPasscode(password);  // 비빌번호
 

@@ -22,13 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static com.ticketmate.backend.global.constant.ChatConstants.*;
 import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
 import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
 import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
@@ -39,9 +40,6 @@ import static com.ticketmate.backend.global.util.rabbit.RabbitMq.UN_READ_ROUTING
 @RequiredArgsConstructor
 public class ChatMessageService {
 
-  private static final Duration TTL = Duration.ofDays(30);
-  private static final String LAST_READ_MESSAGE_POINTER_KEY = "userLastRead:%s:%s";
-  private static final String UN_READ_MESSAGE_COUNTER_KEY = "unRead:%s:%s";
   private final RabbitTemplate rabbitTemplate;
   private final LastReadMessageRepository lastReadMessageRepository;
   private final ChatRoomRepository chatRoomRepository;
@@ -116,16 +114,18 @@ public class ChatMessageService {
       Long count = redisTemplate.opsForValue().increment(key);
       redisTemplate.expire(key, TTL);
 
+      String formattedSendDate = formattingSendDate(message.getSendDate());
+
       rabbitTemplate.convertAndSend(
-          "",
-          UN_READ_ROUTING_KEY + target,
-          Map.of(
-              "chatRoomId", chatRoom.getChatRoomId(),
-              "unReadMessageCount", count,
-              "lastMessage", request.getMessage(),
-              "sendDate", message.getSendDate()
-          )
-      );
+              "",
+              UN_READ_ROUTING_KEY + target,
+              Map.of(
+                      "chatRoomId", chatRoom.getChatRoomId(),
+                      "unReadMessageCount", count,
+                      "lastMessage", request.getMessage(),
+                      "sendDate", formattedSendDate,
+                      "lastMessageId", message.getChatMessageId()
+              ));
     }
     return message;
   }
@@ -139,20 +139,7 @@ public class ChatMessageService {
 
     log.debug("acknowledgeRead 메서드 동작");
 
-    // Redis포인터 기본 키값 추출
-    String redisKey = LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId());
-
-    // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
-    LastReadMessage lastReadMessagePointer = lastReadMessageRepository.findById(redisKey)
-        .orElseGet(() ->
-            LastReadMessage.builder()
-                .lastReadMessage(redisKey)
-                .chatRoomId(chatRoomId)
-                .memberId(reader.getMemberId())
-                .lastMessageId(ack.getLastReadMessageId())
-                .readDate(ack.getReadDate())
-                .build()
-        );
+    LastReadMessage lastReadMessagePointer = findLastReadMessage(ack, chatRoomId, reader);
 
     lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), ack.getReadDate());
     lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
@@ -163,9 +150,11 @@ public class ChatMessageService {
 
     // 채팅방 리스트에 즉시 갱신하기 위한 코드
     rabbitTemplate.convertAndSend(
-        "",
-        UN_READ_ROUTING_KEY + reader.getMemberId(),
-        Map.of("chatRoomId", chatRoomId, "unReadMessageCount", 0)
+            "",
+            UN_READ_ROUTING_KEY + reader.getMemberId(),
+            Map.of("chatRoomId", chatRoomId,
+                    "unReadMessageCount", 0,
+                    "lastMessageId", ack.getLastReadMessageId())
     );
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -175,7 +164,6 @@ public class ChatMessageService {
     log.debug("'읽음' 처리된 메시지 개수  = {}", updatedMessage);
 
     // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
-
     TransactionSynchronizationManager.registerSynchronization(
             new TransactionSynchronization() {
               @Override
@@ -199,5 +187,28 @@ public class ChatMessageService {
                                 "chat.room." + chatRoomId + ".user." + currentMemberId, readAckResponse));
               }
             });
+  }
+
+  private LastReadMessage findLastReadMessage(ReadAckRequest ack, String chatRoomId, Member reader) {
+
+    // Redis포인터 기본 키값 추출
+    String redisKey = LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId());
+
+    // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
+    return lastReadMessageRepository.findById(redisKey)
+            .orElseGet(() ->
+                    LastReadMessage.builder()
+                            .lastReadMessage(redisKey)
+                            .chatRoomId(chatRoomId)
+                            .memberId(reader.getMemberId())
+                            .lastMessageId(ack.getLastReadMessageId())
+                            .readDate(ack.getReadDate())
+                            .build()
+            );
+  }
+
+  private String formattingSendDate(LocalDateTime dateTime) {
+    return dateTime.truncatedTo(ChronoUnit.SECONDS)
+            .format(ISO_SEC);
   }
 }
