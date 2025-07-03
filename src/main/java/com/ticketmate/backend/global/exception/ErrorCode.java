@@ -156,9 +156,11 @@ public enum ErrorCode {
 
   FCM_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "fcm 토큰 획득에 실패했습니다."),
 
-  // EXPRESSIONS
+  // REJECTION_REASON
 
   INVALID_MEMO_REQUEST(HttpStatus.BAD_REQUEST, "기타 거절사유의 메모는 2글자 이상이여야합니다."),
+
+  REJECTION_REASON_NOT_FOUND(HttpStatus.NOT_FOUND, "신청서의 거절 사유를 찾을 수 없습니다."),
 
   // CHAT
 

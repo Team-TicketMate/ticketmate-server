@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
@@ -139,7 +140,7 @@ public interface ApplicationFormControllerDocs {
           - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
           """
   )
-  ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
+  ResponseEntity<ApplicationFormFilteredResponse> getApplicationFormInfo(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
 
@@ -154,6 +155,9 @@ public interface ApplicationFormControllerDocs {
   @Operation(
       summary = "신청서 수정",
       description = """
+          ### 인증 필요
+          - '의뢰인'만 가능합니다
+          
           로그인된 의뢰인이 본인이 작성한 신청서의 세부 정보를 수정합니다.
           - **대리인**, **공연**, **선예매/일반예매** 구분은 변경 불가
           - **신청서에 기존에 작성되었던 신청서 세부사항 정보를 모두 삭제 후 다시 저장합니다.**
@@ -216,6 +220,12 @@ public interface ApplicationFormControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-07-03",
+          author = "Chuseok22",
+          description = "신청서 취소 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/287"
+      ),
+      @ApiChangeLog(
           date = "2025-07-02",
           author = "Chuseok22",
           description = "신청서 취소 API 작성",
@@ -242,6 +252,14 @@ public interface ApplicationFormControllerDocs {
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-03",
+          author = "Chuseok22",
+          description = "신청서 거절 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/287"
+      )
+  })
   @Operation(
       summary = "대리 티켓팅 신청서 거절",
       description = """
@@ -261,6 +279,8 @@ public interface ApplicationFormControllerDocs {
           - INVALID_MEMBER_TYPE: 부적절한 회원 타입 (대리인이 아님)
           - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
           - INVALID_MEMO_REQUEST: 유효하지 않은 메모 (기타 사유인데 메모가 2자 미만)
+          - ACCESS_DENIED: 접근이 거부되었습니다. (해당 대리인에게 작성된 신청서가 아닌경우)
+          - INVALID_APPLICATION_FORM_STATUS: 잘못된 신청서 상태입니다.
           
           ### ApplicationRejectedType
           
@@ -278,10 +298,18 @@ public interface ApplicationFormControllerDocs {
           - 거절 사유가 OTHER이 아닐 시에는 otherMemo는 공백처리해서 주시면 됩니다.
           """
   )
-  void reject(
+  ResponseEntity<Void> rejectApplicationForm(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId, ApplicationFormRejectRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-03",
+          author = "Chuseok22",
+          description = "신청서 수락 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/287"
+      )
+  })
   @Operation(
       summary = "대리 티켓팅 신청서 수락",
       description = """
@@ -340,4 +368,30 @@ public interface ApplicationFormControllerDocs {
       CustomOAuth2User customOAuth2User,
       ApplicationFormDuplicateRequest request
   );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-03",
+          author = "Chuseok22",
+          description = "신청서 거절 사유 조회 API 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/378"
+      )
+  })
+  @Operation(
+      summary = "신청서 거절 사유 조회 API",
+      description = """
+          클라이언트에서 전달한 신청서 ID(applicationFormId)를 기반으로 해당 신청서에 대한 거절 사유 정보를 조회합니다.
+          
+          ### 인증 필요
+          
+          ### 경로 변수
+          - **application-form-id** (UUID): 신청서 PK [필수]
+          
+          ### 반환 데이터
+          - **applicationFormRejectedType**: 거절 사유 타입
+          - **otherMemo**: 기타 메모 (applicationFormRejectedType이 "OTHER" 인 경우에만 작성됩니다)
+          """
+  )
+  ResponseEntity<RejectionReasonResponse> getRejectionReason(
+      CustomOAuth2User customOAuth2User, UUID applicationFormId);
 }
