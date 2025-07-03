@@ -22,14 +22,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/application")
+@RequestMapping("/api/application-form")
 @Tag(
     name = "신청서 관련 API",
     description = "대리 티켓팅 신청서 관련 API 제공"
@@ -67,7 +66,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   }
 
   @Override
-  @PatchMapping("/{application-form-id}")
+  @PatchMapping("/{application-form-id}/edit")
   @LogMonitoringInvocation
   public ResponseEntity<Void> editApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
@@ -78,7 +77,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   }
 
   @Override
-  @PostMapping("/cancel/{application-form-id}")
+  @PatchMapping("/{application-form-id}/cancel")
   @LogMonitoringInvocation
   public ResponseEntity<Void> cancelApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
@@ -88,22 +87,23 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   }
 
   @Override
-  @PutMapping("/expressions/{application-form-id}/reject")
+  @PatchMapping("/{application-form-id}/reject")
   @LogMonitoringInvocation
-  public void reject(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+  public ResponseEntity<Void> rejectApplicationForm(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
       @RequestBody @Valid ApplicationFormRejectRequest request) {
-    Member member = customOAuth2User.getMember();
-    applicationFormService.rejectApplicationForm(applicationFormId, member, request);
+    applicationFormService.rejectApplicationForm(applicationFormId, customOAuth2User.getMember(), request);
+    return ResponseEntity.ok().build();
   }
 
   @Override
-  @PutMapping("/expressions/{application-form-id}/approve")
+  @PatchMapping("/{application-form-id}/accept")
   @LogMonitoringInvocation
-  public ResponseEntity<String> approve(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+  public ResponseEntity<String> approve(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
-    Member member = customOAuth2User.getMember();
-    return ResponseEntity.ok(applicationFormService.acceptedApplicationForm(applicationFormId, member));
+    return ResponseEntity.ok(applicationFormService.acceptedApplicationForm(applicationFormId, customOAuth2User.getMember()));
   }
 
   @Override
