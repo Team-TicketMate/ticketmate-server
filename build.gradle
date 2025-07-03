@@ -129,6 +129,15 @@ dependencies {
 
     // Chuseok22 Api Change Log
     implementation 'com.chuseok22:ApiChangeLog:1.0.1'
+
+    // Google Gen AI (Vertex AI) 클라이언트
+    implementation 'com.google.genai:google-genai:1.6.0'
+
+    // JSON 으로부터 ServiceAccountCredentials 로딩
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+
+    // Hibernate Vector 모듈 활성화
+    implementation 'org.hibernate.orm:hibernate-vector:6.4.0.Final'
 }
 
 tasks.named('test') {

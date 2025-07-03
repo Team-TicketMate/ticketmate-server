@@ -71,6 +71,9 @@ Thumbs.db
 /src/main/resources/ticketmate-firebase-key.json
 /src/main/resources/static/firebase-messaging-sw.js
 
+### Vertex AI ###
+/src/main/resources/ticketmate-embedding.json
+
 ### CICD ###
 # FIXME: 초기세팅 이후 주석 해제
 #/.github/workflows
