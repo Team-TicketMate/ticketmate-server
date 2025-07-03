@@ -34,10 +34,11 @@ public class MemberService {
 
   /**
    * JWT 기반 회원정보 조회
+   *
    * @param member @AuthenticationPrincipal 을 통한 인증된 회원 정보
    */
   @Transactional(readOnly = true)
-  public MemberInfoResponse getMemberInfo(Member member){
+  public MemberInfoResponse getMemberInfo(Member member) {
     return entityMapper.toMemberInfoResponse(member);
   }
 
