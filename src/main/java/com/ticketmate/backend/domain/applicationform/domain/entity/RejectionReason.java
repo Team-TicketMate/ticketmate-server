@@ -35,11 +35,12 @@ public class RejectionReason extends BasePostgresEntity {
   @Column(updatable = false, nullable = false)
   private UUID rejectionReasonId;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  private ApplicationForm applicationForm;
+
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private ApplicationFormRejectedType applicationFormRejectedType;
 
   private String otherMemo; // 'applicationRejectedType' 이 '기타'일시 대리자가 작성 할 메모
-
-  @OneToOne(fetch = FetchType.LAZY)
-  private ApplicationForm applicationForm;
 }

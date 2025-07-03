@@ -6,6 +6,7 @@ import static com.ticketmate.backend.global.constant.ApplicationFormConstants.AP
 import static com.ticketmate.backend.global.constant.ApplicationFormConstants.EDITABLE_APPLICATION_FORM_STATUS;
 import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
 
+import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormAction;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormStatus;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormDetailRequest;
@@ -19,9 +20,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.response.Applica
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
-import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
-import com.ticketmate.backend.domain.applicationform.repository.RejectionReasonRepository;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
@@ -59,7 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ApplicationFormService {
 
-  private final RejectionReasonRepository rejectionReasonRepository;
   private final ApplicationFormRepository applicationFormRepository;
   private final NotificationUtil notificationUtil;
   private final FcmService fcmService;
@@ -69,6 +67,7 @@ public class ApplicationFormService {
   private final EntityMapper entityMapper;
   private final ChatRoomRepository chatRoomRepository;
   private final ConcertService concertService;
+  private final RejectionReasonService rejectionReasonService;
 
   /**
    * 대리인를 지정하여 공연 신청 폼을 작성합니다
@@ -206,11 +205,8 @@ public class ApplicationFormService {
     // 작성된 신청서 확인
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
-    // 의뢰인 검증
-    memberService.validateMemberType(client, CLIENT);
-
-    // 신청서 수정 가능 여부 검증
-    validateCanEditApplicationForm(applicationForm, client);
+    // '수정' 가능여부 검증
+    validateApplicationFormAction(applicationForm, client, ApplicationFormAction.EDIT);
 
     // 기존 신청서 세부사항 삭제
     applicationForm.getApplicationFormDetailList().clear();
@@ -229,15 +225,14 @@ public class ApplicationFormService {
    * @param applicationFormId 취소하려는 신청서 PK
    * @param client            의뢰인
    */
+  @Transactional
   public void cancelApplicationForm(UUID applicationFormId, Member client) {
-    // 현재 회원이 '의뢰인' 인지 검증
-    memberService.validateMemberType(client, CLIENT);
 
     // 작성된 신청서 확인
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
-    // 신청서 취소 가능 여부 검증
-    validateCanCancelApplicationForm(applicationForm, client);
+    // '취소' 가능여부 검증
+    validateApplicationFormAction(applicationForm, client, ApplicationFormAction.CANCEL);
 
     // 신청서 상태 "CANCELED" 변경
     applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED);
@@ -254,50 +249,24 @@ public class ApplicationFormService {
    */
   @Transactional
   public void rejectApplicationForm(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
-    // 현재 회원이 '대리인' 인지 검증
-    memberService.validateMemberType(agent, AGENT);
 
-    // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
-    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
-        && request.getOtherMemo().length() < 2) {
-      throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
-    }
+    // 거절 사유 및 메모 검증
+    validateOtherMemo(request);
 
     // DB에서 신청서 조회
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
-    // 메모 default 세팅 or '기타' 사유의 메모 세팅
-    String memo = request.getApplicationFormRejectedType() == ApplicationFormRejectedType.OTHER
-        ? request.getOtherMemo() : "none";
+    // '거절' 가능여부 검증
+    validateApplicationFormAction(applicationForm, agent, ApplicationFormAction.REJECT);
 
-    // 이미 거절당했던 신청 폼인지 확인 후 거절사유 객체 세팅
-    RejectionReason rejectionReason = rejectionReasonRepository.findByApplicationForm(applicationForm)
-        .orElseGet(() -> {
-          log.debug("기존 거절사유에 대한 도메인이 없습니다.");
-          return RejectionReason.builder()
-              .applicationForm(applicationForm)
-              .build();
-        });
-
+    // 신청서 상태 "REJECTED" 변경
     applicationForm.setApplicationFormStatus(ApplicationFormStatus.REJECTED);
-    log.debug("신청서 상태 거절변경 : {}", applicationForm.getApplicationFormStatus());
+    applicationFormRepository.save(applicationForm);
 
-    // 거절사유, 메모 세팅
-    rejectionReason.setApplicationFormRejectedType(request.getApplicationFormRejectedType());
-    rejectionReason.setOtherMemo(memo);
+    // 거절 사유 저장 or 업데이트
+    rejectionReasonService.saveOrUpdateRejectionReason(applicationForm, request);
 
-    // 새로운 객체 저장 or Update
-    rejectionReasonRepository.save(rejectionReason);
-
-    Member client = applicationForm.getClient();
-
-    if (notificationUtil.existsFcmToken(client.getMemberId())) {
-      // 알림 전송용 payload, 회원객체 세팅
-      NotificationPayloadRequest payloadRequest = notificationUtil
-          .rejectNotification(request.getApplicationFormRejectedType(), agent, memo);
-
-      fcmService.sendNotification(client.getMemberId(), payloadRequest);
-    }
+    // TODO: 의뢰인에게 신청서 거절 알림 발송 필요 (추후 알림로직 개편 후 작성예정)
   }
 
   /**
@@ -309,43 +278,21 @@ public class ApplicationFormService {
    */
   @Transactional
   public String acceptedApplicationForm(UUID applicationFormId, Member agent) {
-    // 현재 회원이 '대리인' 인지 검증
-    memberService.validateMemberType(agent, AGENT);
 
+    // DB에서 신청서 조회
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
-    Member client = applicationForm.getClient();
+    // '수락' 가능여부 검증
+    validateApplicationFormAction(applicationForm, agent, ApplicationFormAction.ACCEPT);
 
-    // 승인하는 대리인이 의뢰인이 신청한 대리인이 정말 맞는지
-    if (!applicationForm.getAgent().getMemberId().equals(agent.getMemberId())) {
-      throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-    }
-
-    // 신청서는 현재 "대기" 상태의 신청서만 승인 받을 수 있습니다.
-    if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.PENDING)) {
-      throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
-    }
-
+    // TODO: 아래 로직 수정필요 -> 알림, 채팅 리팩토링 진행 시 수정
     /**
      * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 수락 자체가 불가합니다.
      * 채팅방은 공연당 하나씩 생성합니다.
      * 선예매/일반예매는 각각 다른 공연으로 취급되어 한 공연당 2개의 채팅방이 존재할 수 있습니다.
      */
 
-    // 신청서가 수락상태인지 검증
-    boolean applicationFormExist = applicationFormRepository
-        .existsByConcertConcertIdAndClientMemberIdAndTicketOpenTypeAndApplicationFormStatus(applicationForm.getConcert().getConcertId(),
-            client.getMemberId(), applicationForm.getTicketOpenType(), ApplicationFormStatus.ACCEPTED);
-
-    // 이미 수락된 신청서인지
-    if (applicationFormExist) {
-      throw new CustomException(ErrorCode.ALREADY_ACCEPTED_APPLICATION_FROM);
-    }
-
-    // 신청서 상태 승인 변경
-    applicationForm.setApplicationFormStatus(ApplicationFormStatus.ACCEPTED);
-    log.debug("신청서 상태 승인변경 : {}", applicationForm.getApplicationFormStatus());
-
+    Member client = applicationForm.getClient();
     // 신청서의 콘서트, 의뢰인, 대리인, 선예매/일반예매 필드를 참조해 이미 채팅방이 존재하는지 판별
     boolean chatRoomExist = chatRoomRepository
         .existsByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(agent.getMemberId(), client.getMemberId(),
@@ -469,6 +416,7 @@ public class ApplicationFormService {
     return applicationFormDetail;
   }
 
+
   /**
    * 신청서 세부사항 요청 처리
    */
@@ -537,34 +485,51 @@ public class ApplicationFormService {
   }
 
   /**
-   * 신청서 수정 가능 상태 검증
+   * 액션에 따른 검증
    *
    * @param applicationForm 신청서
-   * @param client          수정하려는 의뢰인
+   * @param member          로그인된 사용자
+   * @param action          신청서 상태를 변경하려는 액션
    */
-  private void validateCanEditApplicationForm(ApplicationForm applicationForm, Member client) {
-    validateApplicationFormOwner(applicationForm, client);
-
-    // 신청서 상태에 따른 수정 가능 여부 검증
-    if (!EDITABLE_APPLICATION_FORM_STATUS.contains(applicationForm.getApplicationFormStatus())) {
-      log.error("수정 불가 상태의 신청서입니다. 신청서 상태: {}", applicationForm.getApplicationFormStatus());
-      throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+  private void validateApplicationFormAction(ApplicationForm applicationForm, Member member, ApplicationFormAction action) {
+    switch (action) {
+      case EDIT, CANCEL -> { // '수정', '취소'를 하려는 경우 (의뢰인만 가능)
+        memberService.validateMemberType(member, CLIENT); // 의뢰인 검증
+        validateApplicationFormOwner(applicationForm, member); // 본인 소유 신청서 검증
+        validateApplicationFormStatus(applicationForm, action); // 신청서 상태 검증
+      }
+      case REJECT, ACCEPT -> { // '거절', '수락'을 하려는 경우 (대리인만 가능)
+        memberService.validateMemberType(member, AGENT); // 대리인 검증
+        validateAgentForApplicationForm(applicationForm, member); // 요청받은 신청서인지 검증
+        validateApplicationFormStatus(applicationForm, action); // 신청서 상태 검증
+      }
     }
   }
 
   /**
-   * 신청서 취소 가능 상태 검증
+   * 신청서 변경 가능 상태 검증
+   * [수정]: '취소', '진행취소', '거절' 상태의 신청서만 가능
+   * [취소, 거절, 수락]: '대기' 상태의 신청서만 가능
    *
    * @param applicationForm 신청서
-   * @param client          취소하려는 의뢰인
+   * @param action          신청서 상태를 변경하려는 액션
    */
-  private void validateCanCancelApplicationForm(ApplicationForm applicationForm, Member client) {
-    validateApplicationFormOwner(applicationForm, client);
+  private void validateApplicationFormStatus(ApplicationForm applicationForm, ApplicationFormAction action) {
+    ApplicationFormStatus currentStatus = applicationForm.getApplicationFormStatus();
 
-    // 신청서 상태에 따른 취소 가능 여부 검증 (대기 상태인 경우만 의뢰인 취소 가능)
-    if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.PENDING)) {
-      log.error("취소 불가 상태의 신청서입니다. 신청서 상태: {}", applicationForm.getApplicationFormStatus());
-      throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+    switch (action) {
+      case EDIT -> {
+        if (!EDITABLE_APPLICATION_FORM_STATUS.contains(currentStatus)) {
+          log.error("수정 불가 상태의 신청서입니다. 신청서 상태: {}", currentStatus);
+          throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+        }
+      }
+      case CANCEL, REJECT, ACCEPT -> {
+        if (!currentStatus.equals(ApplicationFormStatus.PENDING)) {
+          log.error("{} 불가 상태의 신청서입니다. 신청서 상태: {}", action.getDescription(), currentStatus);
+          throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
+        }
+      }
     }
   }
 
@@ -572,14 +537,43 @@ public class ApplicationFormService {
    * 신청서 소유자 검증
    *
    * @param applicationForm 신청서
-   * @param client          의뢰인
+   * @param client          요청된 의뢰인
    */
   private void validateApplicationFormOwner(ApplicationForm applicationForm, Member client) {
     // 본인 소유 신청서 검증
     if (!applicationForm.getClient().getMemberId().equals(client.getMemberId())) {
-      log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청자: {}",
+      log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청된 의뢰인: {}",
           applicationForm.getClient().getMemberId(), client.getMemberId());
       throw new CustomException(ErrorCode.ACCESS_DENIED);
+    }
+  }
+
+  /**
+   * 해당 대리인에게 작성된 신청서가 맞는지 검증
+   *
+   * @param applicationForm 신청서
+   * @param agent           요청받은 대리인
+   */
+  private void validateAgentForApplicationForm(ApplicationForm applicationForm, Member agent) {
+    // 신청서가 해당 대리인에게 작성되었는지 검증
+    if (!applicationForm.getAgent().getMemberId().equals(agent.getMemberId())) {
+      log.error("요청받은 대리인만 신청서 수락/거절이 가능합니다. 신청서 대상 대리인: {}, 요청된 대리인: {}",
+          applicationForm.getAgent().getMemberId(), agent.getMemberId());
+      throw new CustomException(ErrorCode.ACCESS_DENIED);
+    }
+  }
+
+  /**
+   * 거절 사유 검증
+   *
+   * @param request 거절 사유 및 메모
+   */
+  private void validateOtherMemo(ApplicationFormRejectRequest request) {
+    // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
+    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
+        && request.getOtherMemo().length() < 2) {
+      log.error("거절사유: {}, 요청된 메모: {}", request.getApplicationFormRejectedType(), request.getOtherMemo());
+      throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
     }
   }
 }
