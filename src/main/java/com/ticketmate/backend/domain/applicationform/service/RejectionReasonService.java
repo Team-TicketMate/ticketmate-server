@@ -1,9 +1,14 @@
 package com.ticketmate.backend.domain.applicationform.service;
 
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
 import com.ticketmate.backend.domain.applicationform.repository.RejectionReasonRepository;
+import com.ticketmate.backend.global.exception.CustomException;
+import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.mapper.EntityMapper;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RejectionReasonService {
 
   private final RejectionReasonRepository rejectionReasonRepository;
+  private final EntityMapper entityMapper;
 
   /**
    * 신청서 거절 사유(RejectionReason) 저장 or 업데이트
@@ -28,6 +34,19 @@ public class RejectionReasonService {
     return rejectionReasonRepository.findByApplicationFormApplicationFormId(applicationForm.getApplicationFormId())
         .map(existingReason -> updateRejectionReason(existingReason, request))
         .orElseGet(() -> createRejectionReason(applicationForm, request));
+  }
+
+  /**
+   * 신청서 거절 사유(RejectionReason) 조회
+   *
+   * @param applicationFormId 신청서 PK
+   */
+  @Transactional(readOnly = true)
+  public RejectionReasonResponse getRejectionReasonInfo(UUID applicationFormId) {
+    return rejectionReasonRepository
+        .findByApplicationFormApplicationFormId(applicationFormId)
+        .map(entityMapper::toRejectionReasonResponse)
+        .orElseThrow(() -> new CustomException(ErrorCode.REJECTION_REASON_NOT_FOUND));
   }
 
   /**
