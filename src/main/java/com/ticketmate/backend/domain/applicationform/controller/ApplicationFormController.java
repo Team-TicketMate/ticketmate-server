@@ -6,7 +6,9 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.applicationform.service.ApplicationFormService;
+import com.ticketmate.backend.domain.applicationform.service.RejectionReasonService;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApplicationFormController implements ApplicationFormControllerDocs {
 
   private final ApplicationFormService applicationFormService;
+  private final RejectionReasonService rejectionReasonService;
 
   @Override
   @PostMapping("")
@@ -59,7 +62,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @Override
   @GetMapping("/{application-form-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
+  public ResponseEntity<ApplicationFormFilteredResponse> getApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
     return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));
@@ -114,5 +117,14 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
       @RequestBody @Valid ApplicationFormDuplicateRequest request) {
     Member client = customOAuth2User.getMember();
     return ResponseEntity.ok(applicationFormService.isDuplicateApplicationForm(client, request));
+  }
+
+  @Override
+  @GetMapping("/{application-form-id}/rejection-reason")
+  @LogMonitoringInvocation
+  public ResponseEntity<RejectionReasonResponse> getRejectionReason(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @PathVariable(value = "application-form-id") UUID applicationFormId) {
+    return ResponseEntity.ok(rejectionReasonService.getRejectionReasonInfo(applicationFormId));
   }
 }
