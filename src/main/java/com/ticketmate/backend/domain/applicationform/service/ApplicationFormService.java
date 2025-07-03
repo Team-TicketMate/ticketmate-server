@@ -4,7 +4,6 @@ import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AG
 import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
 import static com.ticketmate.backend.global.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
 import static com.ticketmate.backend.global.constant.ApplicationFormConstants.EDITABLE_APPLICATION_FORM_STATUS;
-import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
 
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormAction;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormRejectedType;
@@ -44,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -123,39 +123,23 @@ public class ApplicationFormService {
   @Transactional(readOnly = true)
   public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
 
-    UUID clientId = request.getClientId();
-    UUID agentId = request.getAgentId();
-    UUID concertId = request.getConcertId();
-    String applicationStatus = enumToString(request.getApplicationFormStatus());
-
     // clientId가 입력된 경우 의뢰인 검증
-    if (clientId != null) {
-      Member client = memberRepository.findById(request.getClientId())
-          .orElseThrow(() -> new CustomException(ErrorCode.INVALID_MEMBER_TYPE));
-      if (!client.getMemberType().equals(CLIENT)) {
-        log.error("요청된 의뢰인 MemberType에 오류가 있습니다.");
-        throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-      }
-    }
+    Optional.ofNullable(request.getClientId())
+        .ifPresent(clientId -> {
+          Member client = memberService.findMemberById(clientId);
+          memberService.validateMemberType(client, CLIENT);
+        });
 
     // agentId가 입력된 경우 대리인 검증
-    if (agentId != null) {
-      Member agent = memberRepository.findById(request.getAgentId())
-          .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-      if (!agent.getMemberType().equals(AGENT)) {
-        log.error("요청된 대리자 MemberType에 오류가 있습니다.");
-        throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
-      }
-    }
+    Optional.ofNullable(request.getAgentId())
+        .ifPresent(agentId -> {
+          Member agent = memberService.findMemberById(agentId);
+          memberService.validateMemberType(agent, AGENT);
+        });
 
     // concertId가 입력된 경우 콘서트 검증
-    if (concertId != null) {
-      concertRepository.findById(request.getConcertId())
-          .orElseThrow(() -> {
-            log.error("요청된 값에 해당하는 콘서트를 찾을 수 없습니다.");
-            return new CustomException(ErrorCode.CONCERT_NOT_FOUND);
-          });
-    }
+    Optional.ofNullable(request.getConcertId())
+        .ifPresent(concertService::findConcertById);
 
     // Pageable 객체 생성 (PageableUtil 사용)
     Pageable pageable = PageableUtil.createPageable(
@@ -168,10 +152,10 @@ public class ApplicationFormService {
 
     Page<ApplicationForm> applicationFormPage = applicationFormRepository
         .filteredApplicationForm(
-            clientId,
-            agentId,
-            concertId,
-            applicationStatus,
+            request.getClientId(),
+            request.getAgentId(),
+            request.getConcertId(),
+            CommonUtil.enumToString(request.getApplicationFormStatus()),
             pageable
         );
 
