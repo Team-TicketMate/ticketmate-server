@@ -14,6 +14,7 @@
   <!-- 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 
   <style>
     :root {
@@ -98,8 +99,8 @@
   const API = "https://api.ticketmate.site";
   const BEARER = true;
   const TOKENS = {
-    client: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXtgbTrnbzsnbTslrjtirhAbmF2ZXIuY29tNTkzIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2Mhe2BtOudvOydtOyWuO2KuEBuYXZlci5jb201OTMiLCJtZW1iZXJJZCI6IjYzNDAwOTJjLTRmNGItNDg2ZS04NDNmLTlkYWJhYWI4MjMyMSIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MDg1NjMyNSwiZXhwIjoxNzUzNDQ4MzI1fQ.FvixQYy6ZebRuRfFc3Xwcx4ffLuLASHVx0wpohCzCyw5-hsoCDPrX3iFkk6JFiTu",
-    agent: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXsl5DsnbTsoITtirhAbmF2ZXIuY29tODE0IiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2MheyXkOydtOyghO2KuEBuYXZlci5jb204MTQiLCJtZW1iZXJJZCI6IjU1OWNjZTgyLTllNzctNDhmNS04NzU1LWMwODJjNzU2NWY0NiIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MDg1NjM0NCwiZXhwIjoxNzUzNDQ4MzQ0fQ.zFU-nlotLY8DnhFk_ZfiJ4UyduNpsIsZXOOuTPWwSyftLtLT_LxN649fhZ0bFU_V",
+    client: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlQG5hdmVyLmNvbSIsImNhdGVnb3J5IjoiYWNjZXNzIiwidXNlcm5hbWUiOiJleGFtcGxlQG5hdmVyLmNvbSIsIm1lbWJlcklkIjoiNmUzYTQxMWUtMmNjNS00NmVmLTliY2QtY2U0MDFkYmVkMzY1Iiwicm9sZSI6IlJPTEVfVEVTVCIsImlzcyI6IlRJQ0tFVF9NQVRFIiwiaWF0IjoxNzQ5NDY0MzgyLCJleHAiOjIxMDk0NjQzODJ9.gpUzai0TlvPDkpXS_JKYElOIfOrzeVBT8gC5LGFYLO7X0WzG3H6S1HYJazonv9vxt7EgEiZe1MdK_Oo3HmRr4A",
+    agent: "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGExMjNtcGxlQG5hdmVyLmNvbSIsImNhdGVnb3J5IjoiYWNjZXNzIiwidXNlcm5hbWUiOiJleGExMjNtcGxlQG5hdmVyLmNvbSIsIm1lbWJlcklkIjoiMTc1MzBlMmMtMzI4MC00MmQ4LWI0MTgtOGM2ZTI3ZTdlNzZiIiwicm9sZSI6IlJPTEVfVEVTVCIsImlzcyI6IlRJQ0tFVF9NQVRFIiwiaWF0IjoxNzQ5NDY0NDA3LCJleHAiOjIxMDk0NjQ0MDd9.GTLFf7MVIgQ1M6d2VHKRUw8W86lLERZy9MBdEA4L8SrHTCClEuzHXgbBKjOJvtsaXRf2ZNT2QxzK_2S0ivUnRA",
   };
 
   /* ===============================================
@@ -544,7 +545,7 @@
             {},
             JSON.stringify({
               lastReadMessageId: msgs[msgs.length - 1].dataset.msgId,
-              readDate: new Date().toISOString(),
+              readDate: dayjs().format("YYYY-MM-DDTHH:mm:ss"), // ← 더 간단!
             })
     );
   }
