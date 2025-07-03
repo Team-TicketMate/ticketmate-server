@@ -550,10 +550,11 @@ public class ApplicationFormService {
    */
   private void validateOtherMemo(ApplicationFormRejectRequest request) {
     // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
-    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
-        && request.getOtherMemo().length() < 2) {
-      log.error("거절사유: {}, 요청된 메모: {}", request.getApplicationFormRejectedType(), request.getOtherMemo());
-      throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
+    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)) {
+      if (CommonUtil.nvl(request.getOtherMemo(), "").isEmpty() || request.getOtherMemo().length() < 2) {
+        log.error("거절사유가 OTHER인 경우 메모는 2글자 이상 작성해야합니다. 요청된 메모: {}", request.getOtherMemo());
+        throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
+      }
     }
   }
 }
