@@ -6,6 +6,8 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeArea
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.HopeAreaResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
+import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
@@ -120,6 +122,12 @@ public interface EntityMapper {
   @Mapping(source = "ticketOpenDate.openDate", target = "openDate")
   @Mapping(source = "applicationFormDetailList", target = "applicationFormDetailResponseList")
   ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
+
+     /*
+    ======================================거절 사유======================================
+     */
+  // RejectionReason -> RejectionReasonResponse (엔티티 -> DTO)
+  RejectionReasonResponse toRejectionReasonResponse(RejectionReason rejectionReason);
   
   
     /*

@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
@@ -139,7 +140,7 @@ public interface ApplicationFormControllerDocs {
           - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
           """
   )
-  ResponseEntity<ApplicationFormFilteredResponse> applicationFormInfo(
+  ResponseEntity<ApplicationFormFilteredResponse> getApplicationFormInfo(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
 
@@ -367,4 +368,30 @@ public interface ApplicationFormControllerDocs {
       CustomOAuth2User customOAuth2User,
       ApplicationFormDuplicateRequest request
   );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-03",
+          author = "Chuseok22",
+          description = "신청서 거절 사유 조회 API 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/378"
+      )
+  })
+  @Operation(
+      summary = "신청서 거절 사유 조회 API",
+      description = """
+          클라이언트에서 전달한 신청서 ID(applicationFormId)를 기반으로 해당 신청서에 대한 거절 사유 정보를 조회합니다.
+          
+          ### 인증 필요
+          
+          ### 경로 변수
+          - **application-form-id** (UUID): 신청서 PK [필수]
+          
+          ### 반환 데이터
+          - **applicationFormRejectedType**: 거절 사유 타입
+          - **otherMemo**: 기타 메모 (applicationFormRejectedType이 "OTHER" 인 경우에만 작성됩니다)
+          """
+  )
+  ResponseEntity<RejectionReasonResponse> getRejectionReason(
+      CustomOAuth2User customOAuth2User, UUID applicationFormId);
 }

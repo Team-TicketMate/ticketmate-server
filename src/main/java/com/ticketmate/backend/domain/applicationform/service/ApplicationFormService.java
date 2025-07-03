@@ -26,10 +26,8 @@ import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
-import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.service.ConcertService;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
 import com.ticketmate.backend.domain.notification.service.FcmService;
@@ -62,8 +60,6 @@ public class ApplicationFormService {
   private final NotificationUtil notificationUtil;
   private final FcmService fcmService;
   private final MemberService memberService;
-  private final MemberRepository memberRepository;
-  private final ConcertRepository concertRepository;
   private final EntityMapper entityMapper;
   private final ChatRoomRepository chatRoomRepository;
   private final ConcertService concertService;
@@ -554,10 +550,11 @@ public class ApplicationFormService {
    */
   private void validateOtherMemo(ApplicationFormRejectRequest request) {
     // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
-    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)
-        && request.getOtherMemo().length() < 2) {
-      log.error("거절사유: {}, 요청된 메모: {}", request.getApplicationFormRejectedType(), request.getOtherMemo());
-      throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
+    if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)) {
+      if (CommonUtil.nvl(request.getOtherMemo(), "").isEmpty() || request.getOtherMemo().length() < 2) {
+        log.error("거절사유가 OTHER인 경우 메모는 2글자 이상 작성해야합니다. 요청된 메모: {}", request.getOtherMemo());
+        throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
+      }
     }
   }
 }
