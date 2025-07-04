@@ -38,7 +38,7 @@ import com.ticketmate.backend.global.file.constant.UploadType;
 import com.ticketmate.backend.global.file.service.FileService;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.Comparator;
