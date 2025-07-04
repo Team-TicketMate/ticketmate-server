@@ -7,7 +7,7 @@ import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

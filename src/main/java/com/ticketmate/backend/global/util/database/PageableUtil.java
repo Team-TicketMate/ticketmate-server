@@ -1,15 +1,20 @@
-package com.ticketmate.backend.global.util.common;
+package com.ticketmate.backend.global.util.database;
 
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_PAGE_SIZE;
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_DIRECTION;
+import static com.ticketmate.backend.global.constant.PageableConstants.DEFAULT_SORT_FIELD;
+import static com.ticketmate.backend.global.constant.PageableConstants.MAX_PAGE_SIZE;
+
+import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import static com.ticketmate.backend.global.constant.PageableConstants.*;
 
 /**
  * 페이지네이션을 중앙에서 관리하는 유틸리티 클래스
  * 사용자는 1부터 시작하는 페이지 번호를 입력하고, 내부적으로 인덱스 기반으로 변환
  */
+@UtilityClass
 public class PageableUtil {
 
   /**
@@ -18,7 +23,7 @@ public class PageableUtil {
    * @param pageNumber 사용자 입력 페이지 번호 (1부터 시작)
    * @return 인덱스 기반 페이지 번호 (0부터 시작)
    */
-  public static int convertToPageIndex(Integer pageNumber) {
+  public int convertToPageIndex(Integer pageNumber) {
     if (pageNumber == null || pageNumber < 1) {
       return 0; // 기본값은 첫 번째 페이지 (인덱스 0)
     }
@@ -31,7 +36,7 @@ public class PageableUtil {
    * @param pageSize 사용자 입력 페이지 크기
    * @return 검증된 페이지 크기
    */
-  public static int validatePageSize(Integer pageSize) {
+  public int validatePageSize(Integer pageSize) {
     if (pageSize == null || pageSize < 1) {
       return DEFAULT_PAGE_SIZE;
     }
@@ -41,11 +46,11 @@ public class PageableUtil {
   /**
    * 페이지 크기 검증 및 기본값 설정 (기본 페이지 크기 검증 메서드 오버로딩)
    *
-   * @param pageSize 사용자 입력 페이지 크기
+   * @param pageSize        사용자 입력 페이지 크기
    * @param defaultPageSize 도메인별 기본 페이지 크기(ex: 채팅메시지의 경우 20)
    * @return 검증된 페이지 크기
    */
-  public static int validatePageSize(Integer pageSize, int defaultPageSize) {
+  public int validatePageSize(Integer pageSize, int defaultPageSize) {
     if (pageSize == null || pageSize < 1) {
       return defaultPageSize;
     }
@@ -59,7 +64,7 @@ public class PageableUtil {
    * @param allowedFields 허용된 정렬 필드들
    * @return 검증된 정렬 필드
    */
-  public static String validateSortField(String sortField, String... allowedFields) {
+  public String validateSortField(String sortField, String... allowedFields) {
     if (sortField == null || sortField.trim().isEmpty()) {
       return DEFAULT_SORT_FIELD;
     }
@@ -85,7 +90,7 @@ public class PageableUtil {
    * @param sortDirection 사용자 입력 정렬 방향
    * @return 검증된 정렬 방향
    */
-  public static String validateSortDirection(String sortDirection) {
+  public String validateSortDirection(String sortDirection) {
     if (sortDirection == null || sortDirection.trim().isEmpty()) {
       return DEFAULT_SORT_DIRECTION;
     }
@@ -107,7 +112,7 @@ public class PageableUtil {
    * @param allowedSortFields 허용된 정렬 필드들
    * @return Pageable 객체
    */
-  public static Pageable createPageable(
+  public Pageable createPageable(
       Integer pageNumber,
       Integer pageSize,
       String sortField,
@@ -135,18 +140,18 @@ public class PageableUtil {
    * @param allowedSortFields 허용된 정렬 필드들
    * @return Pageable 객체
    */
-  public static Pageable createPageable(
-          Integer pageNumber,
-          Integer pageSize,
-          int defaultPageSize,
-          String sortField,
-          String sortDirection,
-          String... allowedSortFields) {
+  public Pageable createPageable(
+      Integer pageNumber,
+      Integer pageSize,
+      int defaultPageSize,
+      String sortField,
+      String sortDirection,
+      String... allowedSortFields) {
 
     int pageIndex = convertToPageIndex(pageNumber);
     int validatedSize = validatePageSize(pageSize, defaultPageSize);
     String validatedField = validateSortField(sortField, allowedSortFields);
-    String validatedDir   = validateSortDirection(sortDirection);
+    String validatedDir = validateSortDirection(sortDirection);
 
     Sort sort = Sort.by(Sort.Direction.fromString(validatedDir), validatedField);
     return PageRequest.of(pageIndex, validatedSize, sort);
@@ -157,7 +162,7 @@ public class PageableUtil {
    *
    * @return 기본 Pageable 객체
    */
-  public static Pageable createDefaultPageable() {
+  public Pageable createDefaultPageable() {
     return createPageable(1, DEFAULT_PAGE_SIZE, DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION);
   }
 } 

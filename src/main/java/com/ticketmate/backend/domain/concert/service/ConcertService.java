@@ -21,7 +21,7 @@ import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
