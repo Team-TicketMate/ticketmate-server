@@ -20,6 +20,7 @@ import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFo
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
+import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepositoryCustom;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
@@ -35,7 +36,7 @@ import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationFormService {
 
   private final ApplicationFormRepository applicationFormRepository;
+  private final ApplicationFormRepositoryCustom applicationFormRepositoryCustom;
   private final NotificationUtil notificationUtil;
   private final FcmService fcmService;
   private final MemberService memberService;
@@ -113,7 +115,7 @@ public class ApplicationFormService {
    *                applicationStatus 신청서 상태
    *                pageNumber 요청 페이지 번호 (기본 1)
    *                pageSize 한 페이지 당 항목 수 (기본 10)
-   *                sortField 정렬할 필드 (기본: created_date)
+   *                sortField 정렬할 필드 (기본: createdDate)
    *                sortDirection 정렬 방향 (기본: DESC)
    */
   @Transactional(readOnly = true)
@@ -143,20 +145,18 @@ public class ApplicationFormService {
         request.getPageSize(),
         request.getSortField(),
         request.getSortDirection(),
-        "created_date", "request_count"
+        "createdDate", "requestCount"
     );
 
-    Page<ApplicationForm> applicationFormPage = applicationFormRepository
+    // DB 조회
+    return applicationFormRepositoryCustom
         .filteredApplicationForm(
             request.getClientId(),
             request.getAgentId(),
             request.getConcertId(),
-            CommonUtil.enumToString(request.getApplicationFormStatus()),
+            request.getApplicationFormStatusSet(),
             pageable
         );
-
-    // 엔티티를 DTO로 변환하여 Page 객체로 매핑
-    return applicationFormPage.map(entityMapper::toApplicationFormFilteredResponse);
   }
 
   /**

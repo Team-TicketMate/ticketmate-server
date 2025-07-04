@@ -12,7 +12,7 @@ import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositor
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
-import com.ticketmate.backend.global.util.common.PageableUtil;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

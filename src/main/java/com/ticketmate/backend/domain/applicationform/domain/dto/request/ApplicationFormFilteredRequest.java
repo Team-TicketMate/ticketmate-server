@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +27,7 @@ public class ApplicationFormFilteredRequest {
 
   private UUID concertId; // 공연 PK
 
-  @Schema(defaultValue = "PENDING")
-  private ApplicationFormStatus applicationFormStatus; // 신청서 상태
+  private Set<ApplicationFormStatus> applicationFormStatusSet; // 신청서 상태 Set<>
 
   @Schema(defaultValue = "1")
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
@@ -40,7 +40,7 @@ public class ApplicationFormFilteredRequest {
   private Integer pageSize; // 페이지 사이즈
 
   @Schema(defaultValue = "created_date")
-  @Pattern(regexp = "^(created_date|request_count)$")
+  @Pattern(regexp = "^(createdDate|requestCount)$")
   private String sortField; // 정렬 조건 (생성일, 매수)
 
   @Schema(defaultValue = "DESC")

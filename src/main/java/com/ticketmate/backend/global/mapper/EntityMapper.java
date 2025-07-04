@@ -7,40 +7,39 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.response.Applica
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.HopeAreaResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
-import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
-import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
-import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
+import com.ticketmate.backend.domain.applicationform.domain.entity.RejectionReason;
+import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.domain.chat.domain.entity.ChatMessage;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertDateInfoResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
+import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
 import com.ticketmate.backend.global.util.common.CommonUtil;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 @Mapper(componentModel = "spring")
 public interface EntityMapper {
 
-    /*
-    ======================================공연장======================================
-     */
+  /*
+  ======================================공연장======================================
+   */
 
   // ConcertHall -> ConcertHallFilteredResponse (엔티티 -> DTO)
   ConcertHallFilteredResponse toConcertHallFilteredResponse(ConcertHall concertHall);
@@ -48,9 +47,9 @@ public interface EntityMapper {
   // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
   ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
 
-    /*
-    ======================================공연======================================
-     */
+  /*
+  ======================================공연======================================
+   */
 
   // Concert -> ConcertFilteredResponse (엔티티 -> DTO)
 
@@ -61,9 +60,9 @@ public interface EntityMapper {
   List<TicketOpenDateInfoResponse> toTicketOpenDateInfoResponseList(List<TicketOpenDate> ticketOpenDateList);
 
 
-    /*
-    ======================================포트폴리오======================================
-     */
+  /*
+  ======================================포트폴리오======================================
+   */
 
   // Portfolio -> PortfolioFilteredAdminResponse (엔티티 -> DTO)
   @Mapping(source = "member.memberId", target = "memberId")
@@ -93,9 +92,9 @@ public interface EntityMapper {
   }
   
 
-    /*
-    ======================================신청서======================================
-     */
+  /*
+  ======================================신청서======================================
+   */
 
   // List<HopeAreaRequest> -> List<HopeArea> (DTO 리스트 -> 엔티티 리스트)
   List<HopeArea> toHopeAreaList(List<HopeAreaRequest> hopeAreaRequestList);
@@ -116,31 +115,31 @@ public interface EntityMapper {
   List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList);
 
   // ApplicationForm -> ApplicationFormFilteredResponse (엔티티 -> DTO)
-  @Mapping(source = "client.memberId", target = "clientId")
-  @Mapping(source = "agent.memberId", target = "agentId")
-  @Mapping(source = "concert.concertId", target = "concertId")
-  @Mapping(source = "ticketOpenDate.openDate", target = "openDate")
-  @Mapping(source = "applicationFormDetailList", target = "applicationFormDetailResponseList")
+  @Mapping(source = "concert.concertName", target = "concertName")
+  @Mapping(source = "concert.concertThumbnailUrl", target = "concertThumbnailUrl")
+  @Mapping(source = "agent.nickname", target = "agentNickname")
+  @Mapping(source = "client.nickname", target = "clientNickname")
+  @Mapping(source = "updatedDate", target = "submittedDate")
   ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationForm applicationForm);
 
-     /*
-    ======================================거절 사유======================================
-     */
+  /*
+  ======================================거절 사유======================================
+   */
   // RejectionReason -> RejectionReasonResponse (엔티티 -> DTO)
   RejectionReasonResponse toRejectionReasonResponse(RejectionReason rejectionReason);
   
   
-    /*
-    ======================================FCM======================================
-     */
+  /*
+  ======================================FCM======================================
+   */
 
   // FcmToken -> FcmTokenSaveResponse
   FcmTokenSaveResponse toFcmTokenSaveResponse(FcmToken fcmToken);
 
 
-     /*
-    ======================================채팅 (Mongo)======================================
-     */
+  /*
+  ======================================채팅 (Mongo)======================================
+   */
 
   /**
    * ChatMessage(Mongo) → ChatMessageResponse(DTO)
@@ -152,9 +151,9 @@ public interface EntityMapper {
   ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId);
 
 
-   /*
-    ======================================사용자======================================
-     */
+  /*
+  ======================================사용자======================================
+   */
 
   // Member -> MemberInfoResponse (DTO)
   MemberInfoResponse toMemberInfoResponse(Member member);
