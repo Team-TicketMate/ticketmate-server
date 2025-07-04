@@ -62,44 +62,52 @@ public interface ApplicationFormControllerDocs {
       CustomOAuth2User customOAuth2User,
       ApplicationFormRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-04",
+          author = "Chuseok22",
+          description = "신청서 필터링 조회 반환값 변경",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/388"
+      )
+  })
   @Operation(
       summary = "신청서 필터링 조회",
       description = """
-          신청서 목록을 필터링하여 조회합니다.
-          
-          ### 인증 필요
+          다양한 필터링 옵션을 제공하여 신청서 목록을 페이징 조회합니다.
           
           ### 요청 파라미터
-          - **clientId** (UUID): 의뢰인 PK [선택, 생략 시 모든 의뢰인]
-          - **agentId** (UUID): 대리인 PK [선택, 생략 시 모든 대리인]
-          - **concertId** (UUID): 공연 PK [선택, 생략 시 모든 공연]
-          - **applicationFormStatus** (Enum): 신청서 상태 [선택]
-            - PENDING: 대기
-            - ACCEPTED: 승인
-            - REJECTED: 거절
-            - CANCELED: 취소
-            - CANCELED_IN_PROCESS: 진행 취소
-          - **pageNumber** (Integer): 페이지 번호 [선택, 기본값 1]
-          - **pageSize** (Integer): 페이지 크기 [선택, 기본값 10]
-          - **sortField** (String): 정렬 기준 [선택, 기본값 created_date]
-            - created_date: 생성일 기준
-            - total_request_count: 요청 매수 기준
-          - **sortDirection** (String): 정렬 방향 [선택, 기본값 DESC]
-            - ASC: 오름차순
-            - DESC: 내림차순
+          - `clientId` (UUID, optional): 의뢰인 PK
+          - `agentId` (UUID, optional): 대리인 PK
+          - `concertId` (UUID, optional): 공연 PK
+          - `applicationFormStatusSet` (Set<ApplicationFormStatus>, optional): 조회할 신청서 상태 목록
+          - `pageNumber` (Integer, optional, default = 1): 조회할 페이지 번호 (1부터 시작)
+          - `pageSize` (Integer, optional, default = 10): 한 페이지당 데이터 개수
+          - `sortField` (String, optional, default = "createdDate"): 정렬 필드 (`createdDate`, `requestCount`)
+          - `sortDirection` (String, optional, default = "DESC"): 정렬 방향 (`ASC`, `DESC`)
           
-          ### 반환 데이터
-          - Page<ApplicationFormFilteredResponse>: 페이지네이션된 신청서 목록
-            - content: 신청서 정보 배열
-            - totalElements: 전체 항목 수
-            - totalPages: 전체 페이지 수
-            - number: 현재 페이지 번호
-            - size: 페이지 크기
+          ### 응답 데이터
+          - HTTP 200
+          - `Page<ApplicationFormFilteredResponse>` 형태의 페이징 결과
+            - `content`: 신청서 객체 리스트
+            - `pageable`: 요청된 페이지 정보
+            - `totalElements`: 전체 조회 건수
           
-          ### 주요 오류 코드
-          - INVALID_MEMBER_TYPE: 부적절한 회원 타입
-          - MEMBER_NOT_FOUND: 존재하지 않는 회원
-          - CONCERT_NOT_FOUND: 존재하지 않는 공연
+          #### ApplicationFormFilteredResponse 필드
+          - `applicationFormId` (UUID): 신청서 PK
+          - `concertName` (String): 공연 제목
+          - `concertThumbnailUrl` (String): 공연 썸네일 URL
+          - `agentNickname` (String): 대리인 닉네임
+          - `clientNickname` (String): 의뢰인 닉네임
+          - `submittedDate` (String, yyyy-MM-dd'T'HH:mm:ss): 신청 일시 (Asia/Seoul)
+          - `applicationFormStatus` (ApplicationFormStatus): 신청서 상태
+          - `ticketOpenType` (TicketOpenType): 선·일반 예매 타입
+          
+          ### 사용 방법 & 유의사항
+          1. 모든 필터링 파라미터는 선택 사항이며, 미입력 시 해당 조건은 전체 조회됩니다.
+          2. `pageNumber`와 `pageSize`는 1 이상의 정수만 허용됩니다.
+          3. `sortField`에는 `"createdDate"` 또는 `"requestCount"`만 입력 가능합니다.
+          4. `sortDirection`에는 `"ASC"` 또는 `"DESC"`만 입력 가능합니다.
+          5. 잘못된 파라미터 값(형식, 범위 위반 등)을 보내면 400 Bad Request가 반환됩니다.
           """
   )
   ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
