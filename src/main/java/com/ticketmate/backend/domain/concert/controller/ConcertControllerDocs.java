@@ -1,9 +1,11 @@
 package com.ticketmate.backend.domain.concert.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,14 @@ import org.springframework.http.ResponseEntity;
 
 public interface ConcertControllerDocs {
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      )
+  })
   @Operation(
       summary = "공연 정보 필터링",
       description = """
@@ -35,7 +45,7 @@ public interface ConcertControllerDocs {
           - ticketReservationSite: 티켓 예매처 사이트에 해당하는 공연을 반환합니다
           
           `정렬 조건`
-          - sortField: created_date(기본값), ticket_open_date
+          - sortField: CREATED_DATE(기본값), TICKET_OPEN_DATE
           - sortDirection: DESC(기본값), ASC
           
           `ConcertType`
@@ -57,7 +67,7 @@ public interface ConcertControllerDocs {
           
           ### 유의사항
           - concertName, concertHallName, concertType, ticketReservationSite 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-          - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다.
+          - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다. (UPPER_CASE)
           """
   )
   ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(

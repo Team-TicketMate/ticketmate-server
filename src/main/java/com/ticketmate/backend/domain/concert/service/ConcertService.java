@@ -1,8 +1,5 @@
 package com.ticketmate.backend.domain.concert.service;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
-
-import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
@@ -15,13 +12,12 @@ import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
-import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryImpl;
+import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.database.PageableUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +41,7 @@ public class ConcertService {
   private final ConcertRepository concertRepository;
   private final ConcertDateRepository concertDateRepository;
   private final TicketOpenDateRepository ticketOpenDateRepository;
-  private final ConcertRepositoryImpl concertRepositoryImpl;
+  private final ConcertRepositoryCustom concertRepositoryCustom;
   private final EntityMapper entityMapper;
 
   /**
@@ -58,34 +53,17 @@ public class ConcertService {
    *                ticketReservationSite
    *                pageNumber (1부터 시작)
    *                pageSize
-   *                sortField
+   *                sortField (ConcertSortField.java)
    *                sortDirection
    */
   @Transactional(readOnly = true)
   public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
-
-    // 1. 요청 값 확인
-    String concertName = nvl(request.getConcertName(), "");
-    String concertHallName = nvl(request.getConcertHallName(), "");
-    ConcertType concertType = request.getConcertType() != null ? request.getConcertType() : null;
-    TicketReservationSite ticketReservationSite = request.getTicketReservationSite() != null ? request.getTicketReservationSite() : null;
-
-    // 2. Pageable 생성 (PageableUtil 사용)
-    Pageable pageable = PageableUtil.createPageable(
-        request.getPageNumber(),
-        request.getPageSize(),
-        request.getSortField(),
-        request.getSortDirection(),
-        "created_date", "ticket_open_date"
-    );
-
-    // 3. 데이터베이스 조회
-    return concertRepositoryImpl.filteredConcert(
-        concertName,
-        concertHallName,
-        concertType,
-        ticketReservationSite,
-        pageable
+    return concertRepositoryCustom.filteredConcert(
+        request.getConcertName(),
+        request.getConcertHallName(),
+        request.getConcertType(),
+        request.getTicketReservationSite(),
+        request.toPageable()
     );
   }
 
