@@ -49,6 +49,12 @@ public interface AdminControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      ),
+      @ApiChangeLog(
           date = "2025-06-26",
           author = "Chuseok22",
           description = "관리자 공연장 필터링 조회 API 반환값 변경",
@@ -75,7 +81,7 @@ public interface AdminControllerDocs {
           - cityCode: 지역 코드에 해당하는 공연장을 반환합니다
           
           `정렬 조건`
-          - sortField: created_date(기본값)
+          - sortField: CREATED_DATE(기본값)
           - sortDirection: ASC, DESC(기본값)
           
           `City`
@@ -99,7 +105,7 @@ public interface AdminControllerDocs {
           
           ### 유의사항
           - concertHallName, cityCode 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-          - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
+          - sortField, sortType은 해당하는 문자열만 입력 가능합니다. (UPPER_CASE)
           """
   )
   ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
@@ -203,6 +209,14 @@ public interface AdminControllerDocs {
       CustomOAuth2User customOAuth2User,
       ConcertInfoRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      )
+  })
   @Operation(
       summary = "공연 정보 필터링",
       description = """
@@ -227,7 +241,7 @@ public interface AdminControllerDocs {
           - ticketReservationSite: 티켓 예매처 사이트에 해당하는 공연을 반환합니다
           
           `정렬 조건`
-          - sortField: created_date(기본값), ticket_open_date
+          - sortField: CREATED_DATE(기본값), TICKET_OPEN_DATE
           - sortDirection: DESC(기본값), ASC
           
           `ConcertType`
@@ -249,7 +263,7 @@ public interface AdminControllerDocs {
           
           ### 유의사항
           - concertName, concertHallName, concertType, ticketReservationSite 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-          - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다.
+          - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다. (UPPER_CASE)
           """
   )
   ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
@@ -295,6 +309,14 @@ public interface AdminControllerDocs {
     ======================================포트폴리오======================================
      */
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      )
+  })
   @Operation(
       summary = "포트폴리오 필터링 조회",
       description = """
@@ -307,7 +329,7 @@ public interface AdminControllerDocs {
           - `portfolioType` (선택): 포트폴리오 타입
           - `pageNumber` (선택, 기본값: 1): 페이지 번호 (1부터 시작)
           - `pageSize` (선택, 기본값: 10): 페이지당 항목 수
-          - `sortField` (선택, 기본값: created_date): 정렬 기준 필드 (현재는 created_date만 지원)
+          - `sortField` (선택, 기본값: CREATED_DATE): 정렬 기준 필드 (현재는 CREATED_DATE 지원)
           - `sortDirection` (선택, 기본값: DESC): 정렬 순서 (ASC 또는 DESC)
           
           ## 응답 데이터
@@ -344,7 +366,7 @@ public interface AdminControllerDocs {
           ## 사용 방법 & 유의 사항
           - 본 API는 관리자 권한이 있는 사용자만 호출할 수 있습니다.
           - 필터링 조건은 모두 선택사항이며, 하나 이상을 입력하지 않으면 전체 리스트가 조회됩니다.
-          - 정렬 기준은 현재 `created_date`만 지원합니다.
+          - 정렬 기준은 현재 `CREATED_DATE`만 지원합니다. (UPPER_CASE)
           - 검색 시 입력된 문자열이 포함된 사용자만 조회됩니다 (like 검색).
           """
   )
