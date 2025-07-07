@@ -241,27 +241,31 @@
    =============================================== */
 
   // 채팅방 목록 불러오기
-  async function loadRooms() {
+  async function loadRooms({ pageNumber = 1, ticketOpenType = '', searchKeyword = '' } = {}) {
+    const qs = new URLSearchParams({ pageNumber });
+    if (ticketOpenType) qs.append('ticketOpenType', ticketOpenType);
+    if (searchKeyword)  qs.append('searchKeyword',  searchKeyword);
+
     const res = await fetch(
-            `${API}/api/chat-room/list?&pageNum=0`,
-            { headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() } }
+            `${API}/api/chat-room?` + qs.toString(),
+            { headers: { Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get() } }
     );
-    const rooms = (await res.json()).content || [];
+    const { content: rooms = [] } = await res.json();
 
-    // 방 목록 DOM 초기화
-    document.getElementById("roomList").innerHTML = "";
+    // 방 목록 초기화 + 렌더링
+    const listEl = document.getElementById('roomList');
+    listEl.innerHTML = '';
+    rooms.forEach(r => {
+      const id   = mRoomId(r);
+      const type = mTicketOpenType(r);
 
-    // 각 방에 대해 UI 업데이트
-    rooms.forEach((r) => {
-      const id = mRoomId(r);
-      const ticketOpenType = mTicketOpenType(r);
-      ensureItem(id, r.chatRoomName, ticketOpenType);
+      ensureItem(id, r.chatRoomName, type);
       upBadge(id, mUnread(r));
       upPrev(id, mLastMsg(r));
       upTime(id, mLastSendTime(r));
     });
 
-    document.getElementById("roomListSection").style.display = "block";
+    document.getElementById('roomListSection').style.display = 'block';
   }
 
   /* ===============================================
@@ -587,10 +591,17 @@
    =============================================== */
   window.addEventListener("DOMContentLoaded", () => {
     // 로그인 버튼
-    document.getElementById("clientLoginButton").onclick = () => {
-      Token.set(TOKENS.client); loadRooms(); connectUnread(); };
-    document.getElementById("agentLoginButton").onclick = () => {
-      Token.set(TOKENS.agent); loadRooms(); connectUnread(); };
+    document.getElementById('clientLoginButton').onclick = () => {
+      Token.set(TOKENS.client);
+      loadRooms();          // pageNumber 기본 1
+      connectUnread();
+    };
+
+    document.getElementById('agentLoginButton').onclick = () => {
+      Token.set(TOKENS.agent);
+      loadRooms();
+      connectUnread();
+    };
 
     // 채팅 관련 버튼
     document.getElementById("sendButton").onclick = sendMsg;
