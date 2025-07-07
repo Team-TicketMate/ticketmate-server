@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,7 +66,7 @@ public class AdminController implements AdminControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid ConcertHallFilteredRequest request) {
+      @ParameterObject @Valid ConcertHallFilteredRequest request) {
     return ResponseEntity.ok(adminService.filteredConcertHall(request));
   }
 
@@ -98,7 +99,7 @@ public class AdminController implements AdminControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid ConcertFilteredRequest request) {
+      @ParameterObject @Valid ConcertFilteredRequest request) {
     return ResponseEntity.ok(concertService.filteredConcert(request));
   }
 
@@ -121,7 +122,7 @@ public class AdminController implements AdminControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Page<PortfolioFilteredAdminResponse>> filteredPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @ModelAttribute PortfolioFilteredRequest request) {
+      @ParameterObject @Valid PortfolioFilteredRequest request) {
     return ResponseEntity.ok(adminService.filteredPortfolio(request));
   }
 

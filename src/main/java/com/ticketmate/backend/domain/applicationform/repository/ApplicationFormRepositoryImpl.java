@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.domain.applicationform.domain.constant.ApplicationFormStatus;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.QApplicationForm;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcert;
 import com.ticketmate.backend.domain.member.domain.entity.QMember;
@@ -69,7 +70,7 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
     QueryDslUtil.applySorting(
         contentQuery,
         pageable,
-        ApplicationFormFilteredResponse.class,
+        ApplicationForm.class,
         applicationForm.getMetadata().getName()
     );
 

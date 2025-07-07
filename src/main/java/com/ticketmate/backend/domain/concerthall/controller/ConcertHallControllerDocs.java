@@ -1,9 +1,11 @@
 package com.ticketmate.backend.domain.concerthall.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
+import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,14 @@ import org.springframework.http.ResponseEntity;
 
 public interface ConcertHallControllerDocs {
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      )
+  })
   @Operation(
       summary = "공연장 정보 필터링",
       description = """
@@ -31,7 +41,7 @@ public interface ConcertHallControllerDocs {
           - cityCode: 지역 코드에 해당하는 공연장을 반환합니다
           
           `정렬 조건`
-          - sortField: created_date(기본값)
+          - sortField: CREATED_DATE(기본값)
           - sortDirection: ASC, DESC(기본값)
           
           `City`
@@ -55,7 +65,7 @@ public interface ConcertHallControllerDocs {
           
           ### 유의사항
           - concertHallName, cityCode 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
-          - sortField, sortType은 해당하는 문자열만 입력 가능합니다.
+          - sortField, sortType은 해당하는 문자열만 입력 가능합니다. (UPPER_CASE)
           """
   )
   ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(

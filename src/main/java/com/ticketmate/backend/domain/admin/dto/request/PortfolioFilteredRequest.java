@@ -1,16 +1,20 @@
 package com.ticketmate.backend.domain.admin.dto.request;
 
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioSortField;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.global.constant.PageableConstants;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @ToString
 @AllArgsConstructor
@@ -37,19 +41,25 @@ public class PortfolioFilteredRequest {
   @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
   private Integer pageSize; // 페이지 사이즈
 
-  @Schema(defaultValue = "created_date")
-  @Pattern(regexp = "^(created_date)$")
-  private String sortField; // 정렬 조건
+  private PortfolioSortField sortField;
 
-  @Schema(defaultValue = "DESC")
-  @Pattern(regexp = "^(ASC|DESC)$")
-  private String sortDirection;
+  private Sort.Direction sortDirection;
 
   // 기본값 할당 (1페이지 10개, 최신순)
   public PortfolioFilteredRequest() {
     this.pageNumber = 1;
     this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
-    this.sortField = PageableConstants.DEFAULT_SORT_FIELD;
-    this.sortDirection = PageableConstants.DEFAULT_SORT_DIRECTION;
+    this.sortField = PortfolioSortField.CREATED_DATE;
+    this.sortDirection = Direction.DESC;
+  }
+
+  public Pageable toPageable() {
+    return PageableUtil.createPageable(
+        pageNumber,
+        pageSize,
+        PageableConstants.DEFAULT_PAGE_SIZE,
+        sortField,
+        sortDirection
+    );
   }
 }

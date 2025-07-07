@@ -36,19 +36,16 @@ import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.database.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,42 +117,13 @@ public class ApplicationFormService {
    */
   @Transactional(readOnly = true)
   public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
-
-    // clientId가 입력된 경우 의뢰인 검증
-    Optional.ofNullable(request.getClientId())
-        .ifPresent(clientId -> {
-          Member client = memberService.findMemberById(clientId);
-          memberService.validateMemberType(client, CLIENT);
-        });
-
-    // agentId가 입력된 경우 대리인 검증
-    Optional.ofNullable(request.getAgentId())
-        .ifPresent(agentId -> {
-          Member agent = memberService.findMemberById(agentId);
-          memberService.validateMemberType(agent, AGENT);
-        });
-
-    // concertId가 입력된 경우 콘서트 검증
-    Optional.ofNullable(request.getConcertId())
-        .ifPresent(concertService::findConcertById);
-
-    // Pageable 객체 생성 (PageableUtil 사용)
-    Pageable pageable = PageableUtil.createPageable(
-        request.getPageNumber(),
-        request.getPageSize(),
-        request.getSortField(),
-        request.getSortDirection(),
-        "createdDate", "requestCount"
-    );
-
-    // DB 조회
     return applicationFormRepositoryCustom
         .filteredApplicationForm(
             request.getClientId(),
             request.getAgentId(),
             request.getConcertId(),
             request.getApplicationFormStatusSet(),
-            pageable
+            request.toPageable()
         );
   }
 

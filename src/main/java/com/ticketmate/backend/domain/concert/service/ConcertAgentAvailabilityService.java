@@ -7,7 +7,6 @@ import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.util.database.PageableUtil;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -39,13 +38,7 @@ public class ConcertAgentAvailabilityService {
 
   @Transactional(readOnly = true)
   public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentRequest request){
-    Pageable pageable = PageableUtil.createPageable(
-        request.getPageNumber(),
-        request.getPageSize(),
-        "createdDate",
-        "ASC",
-        "createdDate"
-    );  // TODO: 정렬 기준 정해지면 추후 변경
+    Pageable pageable = request.toPageable(); // TODO: 정렬 기준 정해지면 추후 변경
 
     return concertAgentAvailabilityRepository.findAcceptingAgentByConcert(concertId, pageable);
 
