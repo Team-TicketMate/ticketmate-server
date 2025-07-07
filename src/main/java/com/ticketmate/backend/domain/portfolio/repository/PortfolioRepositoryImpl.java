@@ -61,7 +61,7 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
             portfolio.updatedDate
         ))
         .from(portfolio)
-        .innerJoin(member)
+        .innerJoin(portfolio.member, member)
         .where(whereClause);
 
     // applySorting 동적 정렬 적용
