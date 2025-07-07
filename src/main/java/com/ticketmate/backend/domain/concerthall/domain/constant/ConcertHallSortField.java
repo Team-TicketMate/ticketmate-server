@@ -23,7 +23,7 @@ public enum ConcertHallSortField implements SortField {
    * 만약 {"sortField": "ticketOpenDate"}와 같이 카멜케이스로 들어와도 f.property와 비교하여 자동 매칭
    */
   @JsonCreator
-  public ConcertHallSortField from(String value) {
+  public static ConcertHallSortField from(String value) {
     return CommonUtil.stringToEnum(ConcertHallSortField.class, value);
   }
 }
