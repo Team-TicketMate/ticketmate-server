@@ -112,17 +112,18 @@ public class QueryDslUtil {
    * PathBuilder를 통해 프로퍼티명을 직접 참조
    * 각 엔티티별 공통 활용
    *
-   * @param <T>         엔티티 타입
+   * @param <D>         query의 projection(DTO) 타입
+   * @param <E>         정렬 대상이 되는 엔티티 타입
    * @param query       정렬할 JPAQuery
    * @param pageable    Spring Data Pageable
    * @param entityClass 엔티티 클래스
    * @param alias       QueryDSL 별명 (ex. "entity")
    */
-  public <T> void applySorting(JPAQuery<T> query, Pageable pageable, Class<T> entityClass, String alias) {
+  public <D, E> void applySorting(JPAQuery<D> query, Pageable pageable, Class<E> entityClass, String alias) {
     if (pageable.getSort().isEmpty()) {
       return;
     }
-    PathBuilder<T> builder = new PathBuilder<>(entityClass, alias);
+    PathBuilder<E> builder = new PathBuilder<>(entityClass, alias);
     for (Sort.Order order : pageable.getSort()) {
       String prop = order.getProperty();
       boolean asc = order.isAscending();

@@ -9,6 +9,7 @@ import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,7 +33,7 @@ public class ConcertController implements ConcertControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @ModelAttribute ConcertFilteredRequest request) {
+      @ParameterObject @Valid ConcertFilteredRequest request) {
     return ResponseEntity.ok(concertService.filteredConcert(request));
   }
 

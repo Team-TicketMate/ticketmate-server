@@ -1,6 +1,5 @@
 package com.ticketmate.backend.domain.concert.repository;
 
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -12,17 +11,16 @@ import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcert;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.QTicketOpenDate;
 import com.ticketmate.backend.domain.concerthall.domain.entity.QConcertHall;
+import com.ticketmate.backend.global.util.database.QueryDslUtil;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -54,14 +52,15 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     QTicketOpenDate ticketOpenDate = QTicketOpenDate.ticketOpenDate;
 
     // 동적 WHERE 절 조합
-    BooleanExpression whereClause = null; // 초기값 null
-    whereClause = combineWhereClause(whereClause, whereConcertName(concertName));
-    whereClause = combineWhereClause(whereClause, whereConcertHallName(concertHallName));
-    whereClause = combineWhereClause(whereClause, whereConcertType(concertType));
-    whereClause = combineWhereClause(whereClause, whereTicketReservationSite(ticketReservationSite));
+    BooleanExpression whereClause = QueryDslUtil.allOf(
+        QueryDslUtil.likeIgnoreCase(concert.concertName, concertName),
+        QueryDslUtil.likeIgnoreCase(concertHall.concertHallName, concertHallName),
+        QueryDslUtil.eqIfNotNull(concert.concertType, concertType),
+        QueryDslUtil.eqIfNotNull(concert.ticketReservationSite, ticketReservationSite)
+    );
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
-    JPAQuery<ConcertFilteredResponse> query = queryFactory
+    JPAQuery<ConcertFilteredResponse> contentQuery = queryFactory
         .select(Projections.constructor(ConcertFilteredResponse.class,
             concert.concertId,
             concert.concertName,
@@ -125,81 +124,21 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
             concert.seatingChartUrl
         );
 
-    // 정렬 적용
-    query.orderBy(getOrderSpecifier(concert, ticketOpenDate, pageable.getSort()));
+    // applySorting 동적 정렬 적용
+    QueryDslUtil.applySorting(
+        contentQuery,
+        pageable,
+        Concert.class,
+        concert.getMetadata().getName()
+    );
 
-    // 페이징 적용
-    List<ConcertFilteredResponse> content = query
-        .offset(pageable.getOffset())
-        .limit(pageable.getPageSize())
-        .fetch();
-
-    // Count Query 최적화 (필요한 조인만 사용)
-    Long total = queryFactory
-        .select(concert.concertId.countDistinct())
+    // countQuery 생성
+    JPAQuery<Long> countQuery = queryFactory
+        .select(concert.count())
         .from(concert)
         .leftJoin(concert.concertHall, concertHall)
-        .where(whereClause)
-        .fetchOne();
+        .where(whereClause);
 
-    total = total == null ? 0 : total;
-
-    return new PageImpl<>(content, pageable, total);
-  }
-
-  /**
-   * WHERE 절 조합 메서드
-   * base절과 additional절을 AND 로 조합
-   *
-   * @param baseClause       기존 WHERE 절
-   * @param additionalClause 추가 WHERE 절
-   * @return 조합된 최종 WHERE 절
-   */
-  private BooleanExpression combineWhereClause(BooleanExpression baseClause, BooleanExpression additionalClause) {
-    if (additionalClause == null) {
-      return baseClause; // 추가 조건이 없으면 기존 조건 유지
-    }
-    if (baseClause == null) {
-      return additionalClause; // 기존 조건이 없으면 추가 조건을 기본으로 설정
-    }
-    return baseClause.and(additionalClause); // 두 조건을 AND로 조합 후 반환
-  }
-
-  // 동적 WHERE 조건 메서드
-  private BooleanExpression whereConcertName(String concertName) {
-    return concertName.trim().isEmpty() ?
-        null : QConcert.concert.concertName.lower().like("%" + concertName.toLowerCase() + "%");
-  }
-
-  private BooleanExpression whereConcertHallName(String concertHallName) {
-    return concertHallName.trim().isEmpty() ?
-        null : QConcertHall.concertHall.concertHallName.lower().like("%" + concertHallName.toLowerCase() + "%");
-  }
-
-  private BooleanExpression whereConcertType(ConcertType concertType) {
-    return concertType == null ?
-        null : QConcert.concert.concertType.eq(concertType);
-  }
-
-  private BooleanExpression whereTicketReservationSite(TicketReservationSite ticketReservationSite) {
-    return ticketReservationSite == null ?
-        null : QConcert.concert.ticketReservationSite.eq(ticketReservationSite);
-  }
-
-  // 정렬 로직
-  private OrderSpecifier<?> getOrderSpecifier(QConcert concert, QTicketOpenDate ticketOpenDate, Sort sort) {
-    if (sort == null || sort.isEmpty()) {
-      return concert.createdDate.desc(); // 기본 정렬
-    }
-
-    Sort.Order order = sort.iterator().next(); // sort 내부에서 order 가져옴
-    String sortField = order.getProperty(); // sortField
-    boolean isAsc = order.isAscending(); // 오름차순 여부
-
-    return switch (sortField) {
-      case "created_date" -> isAsc ? concert.createdDate.asc() : concert.createdDate.desc(); // 시간순 or 최신순
-      case "ticket_open_date" -> isAsc ? ticketOpenDate.openDate.min().asc() : ticketOpenDate.openDate.min().desc(); // 티켓 오픈일 빠른순 or 느린순
-      default -> concert.createdDate.desc(); // 기본 정렬
-    };
+    return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);
   }
 }

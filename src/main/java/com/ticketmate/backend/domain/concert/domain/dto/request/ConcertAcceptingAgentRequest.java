@@ -1,20 +1,23 @@
 package com.ticketmate.backend.domain.concert.domain.dto.request;
 
+import com.ticketmate.backend.domain.concert.domain.constant.ConcertAgentAvailabilitySortField;
 import com.ticketmate.backend.global.constant.PageableConstants;
+import com.ticketmate.backend.global.util.database.PageableUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class ConcertAcceptingAgentRequest {
   @Schema(defaultValue = "1", nullable = true)
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
@@ -25,4 +28,25 @@ public class ConcertAcceptingAgentRequest {
   @Min(value = 1, message = "페이지 당 데이터 최솟값은 1개 입니다.")
   @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
   private Integer pageSize; // 페이지 사이즈
+
+  private ConcertAgentAvailabilitySortField sortField;
+
+  private Sort.Direction sortDirection;
+
+  public ConcertAcceptingAgentRequest() {
+    this.pageNumber = 1;
+    this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
+    this.sortField = ConcertAgentAvailabilitySortField.CREATED_DATE;
+    this.sortDirection = Direction.DESC;
+  }
+
+  public Pageable toPageable() {
+    return PageableUtil.createPageable(
+        pageNumber,
+        pageSize,
+        PageableConstants.DEFAULT_PAGE_SIZE,
+        sortField,
+        sortDirection
+    );
+  }
 }

@@ -64,6 +64,12 @@ public interface ApplicationFormControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-07-07",
+          author = "Chuseok22",
+          description = "SortField 정렬 필드 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      ),
+      @ApiChangeLog(
           date = "2025-07-04",
           author = "Chuseok22",
           description = "신청서 필터링 조회 반환값 변경",
@@ -82,7 +88,7 @@ public interface ApplicationFormControllerDocs {
           - `applicationFormStatusSet` (Set<ApplicationFormStatus>, optional): 조회할 신청서 상태 목록
           - `pageNumber` (Integer, optional, default = 1): 조회할 페이지 번호 (1부터 시작)
           - `pageSize` (Integer, optional, default = 10): 한 페이지당 데이터 개수
-          - `sortField` (String, optional, default = "createdDate"): 정렬 필드 (`createdDate`, `requestCount`)
+          - `sortField` (String, optional, default = "CREATED_DATE"): 정렬 필드 (`CREATED_DATE`, `REQUEST_COUNT`)
           - `sortDirection` (String, optional, default = "DESC"): 정렬 방향 (`ASC`, `DESC`)
           
           ### 응답 데이터
@@ -105,7 +111,7 @@ public interface ApplicationFormControllerDocs {
           ### 사용 방법 & 유의사항
           1. 모든 필터링 파라미터는 선택 사항이며, 미입력 시 해당 조건은 전체 조회됩니다.
           2. `pageNumber`와 `pageSize`는 1 이상의 정수만 허용됩니다.
-          3. `sortField`에는 `"createdDate"` 또는 `"requestCount"`만 입력 가능합니다.
+          3. `sortField`에는 `"CREATED_DATE"` 또는 `"REQUEST_COUNT"`만 입력 가능합니다. (UPPER_CASE)
           4. `sortDirection`에는 `"ASC"` 또는 `"DESC"`만 입력 가능합니다.
           5. 잘못된 파라미터 값(형식, 범위 위반 등)을 보내면 400 Bad Request가 반환됩니다.
           """

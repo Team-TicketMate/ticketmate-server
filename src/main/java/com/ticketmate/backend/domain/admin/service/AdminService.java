@@ -1,6 +1,5 @@
 package com.ticketmate.backend.domain.admin.service;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.enumToString;
 import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 
 import com.ticketmate.backend.domain.admin.dto.request.ConcertDateRequest;
@@ -19,12 +18,14 @@ import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
+import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
+import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositoryCustom;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
@@ -32,13 +33,13 @@ import com.ticketmate.backend.domain.notification.service.FcmService;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
+import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepositoryCustom;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.file.constant.UploadType;
 import com.ticketmate.backend.global.file.service.FileService;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.database.PageableUtil;
 import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -49,7 +50,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,10 +61,13 @@ public class AdminService {
 
   private final ConcertHallService concertHallService;
   private final ConcertHallRepository concertHallRepository;
+  private final ConcertHallRepositoryCustom concertHallRepositoryCustom;
   private final ConcertRepository concertRepository;
+  private final ConcertRepositoryCustom concertRepositoryCustom;
   private final ConcertDateRepository concertDateRepository;
   private final TicketOpenDateRepository ticketOpenDateRepository;
   private final PortfolioRepository portfolioRepository;
+  private final PortfolioRepositoryCustom portfolioRepositoryCustom;
   private final FileService fileService;
   private final EntityMapper entityMapper;
   private final FcmService fcmService;
@@ -387,14 +390,21 @@ public class AdminService {
    *                cityCode 지역 코드 (null 인 경우 필터링 제외)
    *                pageNumber 요청 페이지 번호 (기본 1)
    *                pageSize 한 페이지 당 항목 수 (기본 10)
-   *                sortField 정렬할 필드 (기본: created_date)
+   *                sortField 정렬할 필드 (기본: createdDate)
    *                sortDirection 정렬 방향 (기본: DESC)
    */
   @Transactional(readOnly = true)
   public Page<ConcertHallFilteredResponse> filteredConcertHall(ConcertHallFilteredRequest request) {
 
-    Page<ConcertHall> concertHallPage = concertHallService.getConcertHallPage(request);
-    return concertHallPage.map(entityMapper::toConcertHallFilteredResponse);
+    City city = request.getCityCode() != null
+        ? City.fromCityCode(request.getCityCode())
+        : null;
+
+    return concertHallRepositoryCustom.filteredConcertHall(
+        request.getConcertHallName(),
+        city,
+        request.toPageable()
+    );
   }
 
   /**
@@ -447,32 +457,13 @@ public class AdminService {
    */
   @Transactional(readOnly = true)
   public Page<PortfolioFilteredAdminResponse> filteredPortfolio(PortfolioFilteredRequest request) {
-
-    // 요청 값 확인
-    String username = nvl(request.getUsername(), "");
-    String nickname = nvl(request.getNickname(), "");
-    String name = nvl(request.getName(), "");
-    String portfolioType = enumToString(request.getPortfolioType());
-
-    // Pageable 생성 (PageableUtil 사용)
-    Pageable pageable = PageableUtil.createPageable(
-        request.getPageNumber(),
-        request.getPageSize(),
-        request.getSortField(),
-        request.getSortDirection(),
-        "created_date"
+    return portfolioRepositoryCustom.filteredPortfolio(
+        request.getUsername(),
+        request.getNickname(),
+        request.getName(),
+        request.getPortfolioType(),
+        request.toPageable()
     );
-
-    // 데이터베이스 조회
-    Page<Portfolio> portfolioPage = portfolioRepository.filteredPortfolio(
-        username,
-        nickname,
-        name,
-        portfolioType,
-        pageable
-    );
-
-    return portfolioPage.map(entityMapper::toPortfolioFilteredAdminResponse);
   }
 
   /**
