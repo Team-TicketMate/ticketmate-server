@@ -136,6 +136,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     JPAQuery<Long> countQuery = queryFactory
         .select(concert.count())
         .from(concert)
+        .leftJoin(concert.concertHall, concertHall)
         .where(whereClause);
 
     return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);
