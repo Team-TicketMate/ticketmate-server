@@ -52,6 +52,7 @@ public class ConcertInfoResponse {
                 .map(TicketOpenDateInfoResponse::from)
                 .collect(Collectors.toList())
         )
+        .ticketReservationSite(concert.getTicketReservationSite())
         .build();
   }
 }
