@@ -13,6 +13,8 @@ import com.ticketmate.backend.domain.admin.dto.request.TicketOpenDateRequest;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
@@ -149,6 +151,25 @@ public class AdminService {
         .collect(Collectors.toList());
     ticketOpenDateRepository.saveAll(ticketOpenDateList);
     log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+  }
+
+  /**
+   * 관리자 공연 필터링 조회
+   *
+   * @param request concertName 공연이름 [검색어]
+   *                concertHallName 공연장이름 [검색어]
+   *                concertType 공연 카테고리
+   *                ticketReservationSite 예매처
+   */
+  @Transactional(readOnly = true)
+  public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
+    return concertRepositoryCustom.filteredConcertForAdmin(
+        request.getConcertName(),
+        request.getConcertHallName(),
+        request.getConcertType(),
+        request.getTicketReservationSite(),
+        request.toPageable()
+    );
   }
 
   /**
