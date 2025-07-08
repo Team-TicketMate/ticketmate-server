@@ -83,7 +83,7 @@ public class MockApplicationFormFactory {
    * 신청서 세부사항 Mock 데이터를 생성합니다
    */
   private List<ApplicationFormDetail> createApplicationFormDetailList(Concert concert, TicketOpenType ticketOpenType) {
-    List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertId(concert.getConcertId());
+    List<ConcertDate> concertDateList = concertDateRepository.findAllByConcertConcertIdOrderByPerformanceDateAsc(concert.getConcertId());
     if (CommonUtil.nullOrEmpty(concertDateList)) {
       log.error("신청서 세부사항 Mock 데이터 생성 중 공연: {}에 해당하는 공연 날짜가 존재하지 않습니다.", concert.getConcertName());
       throw new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
