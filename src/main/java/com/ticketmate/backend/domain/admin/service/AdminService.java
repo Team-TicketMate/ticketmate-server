@@ -15,6 +15,7 @@ import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminRespons
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
@@ -22,6 +23,7 @@ import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.domain.concert.service.ConcertService;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
@@ -61,6 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AdminService {
 
+  private final ConcertService concertService;
   private final ConcertHallService concertHallService;
   private final ConcertHallRepository concertHallRepository;
   private final ConcertHallRepositoryCustom concertHallRepositoryCustom;
@@ -74,7 +77,6 @@ public class AdminService {
   private final EntityMapper entityMapper;
   private final FcmService fcmService;
   private final NotificationUtil notificationUtil;
-
 
     /*
     ======================================공연======================================
@@ -93,7 +95,7 @@ public class AdminService {
    *                ticketOpenDateRequests 티켓 오픈일 DTO List
    */
   @Transactional
-  public void saveConcertInfo(ConcertInfoRequest request) {
+  public void saveConcert(ConcertInfoRequest request) {
 
     // 1. 중복된 공연이름 검증
     validateConcertName(request.getConcertName());
@@ -169,6 +171,21 @@ public class AdminService {
         request.getConcertType(),
         request.getTicketReservationSite(),
         request.toPageable()
+    );
+  }
+
+  /**
+   * 관리자 공연 상세 조회
+   *
+   * @param concertId 공연PK
+   * @return 공연 상세 정보
+   */
+  @Transactional(readOnly = true)
+  public ConcertInfoResponse getConcertInfo(UUID concertId) {
+    return ConcertInfoResponse.of(
+        concertService.findConcertById(concertId),
+        concertDateRepository.findAllByConcertConcertIdOrderByPerformanceDateAsc(concertId),
+        ticketOpenDateRepository.findAllByConcertConcertId(concertId)
     );
   }
 
