@@ -45,11 +45,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -147,29 +144,16 @@ public class ApplicationFormService {
     // 신청서 조회
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
-    // 공연 상세정보 DTO (병렬처리)
-    CompletableFuture<ConcertInfoResponse> concertInfoFuture =
-        CompletableFuture.supplyAsync(() ->
-            concertService.getConcertInfo(applicationForm.getConcert().getConcertId())
-        );
+    // 공연 상세 조회
+    ConcertInfoResponse concertInfoResponse = concertService.getConcertInfo(applicationForm.getConcert().getConcertId());
 
-    // 신청서 상세정보 DTO (병렬처리)
-    CompletableFuture<List<ApplicationFormDetailResponse>> applicationFormDetailListFuture =
-        CompletableFuture.supplyAsync(() ->
-            getApplicationFormDetailResponseList(applicationFormId)
-        );
+    // 신청서 세부사항 조회
+    List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
 
-    try {
-      return ApplicationFormInfoResponse.builder()
-          .concertInfoResponse(concertInfoFuture.get())
-          .applicationFormDetailResponseList(applicationFormDetailListFuture.get())
-          .build();
-    } catch (InterruptedException | ExecutionException e) {
-      Thread.currentThread().interrupt();
-      log.error("신청서 상세 조회 병렬 처리 중 오류 발생: {}", e.getMessage());
-      throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-    }
-
+    return ApplicationFormInfoResponse.builder()
+        .concertInfoResponse(concertInfoResponse)
+        .applicationFormDetailResponseList(applicationFormDetailResponseList)
+        .build();
   }
 
   /**
@@ -361,10 +345,9 @@ public class ApplicationFormService {
    * @param applicationFormId 조회하려는 신청서 PK
    */
   private List<ApplicationFormDetailResponse> getApplicationFormDetailResponseList(UUID applicationFormId) {
-    return Optional.of(applicationFormId)
-        .map(applicationFormDetailRepositoryCustom::findAllApplicationFormDetailWithHopeAreaListByApplicationFormId)
-        .map(entityMapper::toApplicationFormDetailResponseList)
-        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_NOT_FOUND));
+    List<ApplicationFormDetail> applicationFormDetailList = applicationFormDetailRepositoryCustom
+        .findAllApplicationFormDetailWithHopeAreaListByApplicationFormId(applicationFormId);
+    return entityMapper.toApplicationFormDetailResponseList(applicationFormDetailList);
   }
 
   /**
