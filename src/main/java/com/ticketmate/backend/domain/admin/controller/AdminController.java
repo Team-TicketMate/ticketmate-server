@@ -11,7 +11,6 @@ import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminRespons
 import com.ticketmate.backend.domain.admin.service.AdminService;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
-import com.ticketmate.backend.domain.concert.service.ConcertService;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController implements AdminControllerDocs {
 
   private final AdminService adminService;
-  private final ConcertService concertService;
 
     /*
     ======================================공연장======================================
@@ -100,7 +98,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertFilteredRequest request) {
-    return ResponseEntity.ok(concertService.filteredConcert(request));
+    return ResponseEntity.ok(adminService.filteredConcert(request));
   }
 
   @Override
