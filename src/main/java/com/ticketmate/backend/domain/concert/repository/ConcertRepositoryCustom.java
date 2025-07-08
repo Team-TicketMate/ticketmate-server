@@ -15,4 +15,12 @@ public interface ConcertRepositoryCustom {
       TicketReservationSite ticketReservationSite,
       Pageable pageable
   );
+
+  Page<ConcertFilteredResponse> filteredConcertForAdmin(
+      String concertName,
+      String concertHallName,
+      ConcertType concertType,
+      TicketReservationSite ticketReservationSite,
+      Pageable pageable
+  );
 }

@@ -181,6 +181,11 @@ public class ConcertRepositorySubqueryImpl implements ConcertRepositoryCustom {
     return new PageImpl<>(content, pageable, total);
   }
 
+  @Override
+  public Page<ConcertFilteredResponse> filteredConcertForAdmin(String concertName, String concertHallName, ConcertType concertType, TicketReservationSite ticketReservationSite, Pageable pageable) {
+    return null;
+  }
+
   /**
    * WHERE 절 조합 메서드
    * base절과 additional절을 AND 로 조합

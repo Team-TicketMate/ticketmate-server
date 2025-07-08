@@ -211,6 +211,12 @@ public interface AdminControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-07-08",
+          author = "Chuseok22",
+          description = "관리자 공연 필터링 조회 (이미 지난 공연도 반환)",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/397"
+      ),
+      @ApiChangeLog(
           date = "2025-07-07",
           author = "Chuseok22",
           description = "SortField 정렬 필드 리팩토링",
