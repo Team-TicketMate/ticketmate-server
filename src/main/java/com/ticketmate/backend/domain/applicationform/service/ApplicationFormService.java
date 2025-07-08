@@ -15,15 +15,19 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
+import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormDetailRepositoryCustom;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepositoryCustom;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
@@ -41,8 +45,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -56,6 +63,7 @@ public class ApplicationFormService {
 
   private final ApplicationFormRepository applicationFormRepository;
   private final ApplicationFormRepositoryCustom applicationFormRepositoryCustom;
+  private final ApplicationFormDetailRepositoryCustom applicationFormDetailRepositoryCustom;
   private final NotificationUtil notificationUtil;
   private final FcmService fcmService;
   private final MemberService memberService;
@@ -134,10 +142,34 @@ public class ApplicationFormService {
    * @return 신청서 정보
    */
   @Transactional(readOnly = true)
-  public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
-    // 데이터베이스 조회
+  public ApplicationFormInfoResponse getApplicationFormInfo(UUID applicationFormId) {
+
+    // 신청서 조회
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
-    return entityMapper.toApplicationFormFilteredResponse(applicationForm);
+
+    // 공연 상세정보 DTO (병렬처리)
+    CompletableFuture<ConcertInfoResponse> concertInfoFuture =
+        CompletableFuture.supplyAsync(() ->
+            concertService.getConcertInfo(applicationForm.getConcert().getConcertId())
+        );
+
+    // 신청서 상세정보 DTO (병렬처리)
+    CompletableFuture<List<ApplicationFormDetailResponse>> applicationFormDetailListFuture =
+        CompletableFuture.supplyAsync(() ->
+            getApplicationFormDetailResponseList(applicationFormId)
+        );
+
+    try {
+      return ApplicationFormInfoResponse.builder()
+          .concertInfoResponse(concertInfoFuture.get())
+          .applicationFormDetailResponseList(applicationFormDetailListFuture.get())
+          .build();
+    } catch (InterruptedException | ExecutionException e) {
+      Thread.currentThread().interrupt();
+      log.error("신청서 상세 조회 병렬 처리 중 오류 발생: {}", e.getMessage());
+      throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
+
   }
 
   /**
@@ -321,6 +353,18 @@ public class ApplicationFormService {
     if (applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(clientId, agentId, concertId, ticketOpenType)) {
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
     }
+  }
+
+  /**
+   * DB에서 ApplicationFormDetail 엔티티를 조회해서 DTO로 변환
+   *
+   * @param applicationFormId 조회하려는 신청서 PK
+   */
+  private List<ApplicationFormDetailResponse> getApplicationFormDetailResponseList(UUID applicationFormId) {
+    return Optional.of(applicationFormId)
+        .map(applicationFormDetailRepositoryCustom::findAllApplicationFormDetailWithHopeAreaListByApplicationFormId)
+        .map(entityMapper::toApplicationFormDetailResponseList)
+        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_NOT_FOUND));
   }
 
   /**

@@ -28,7 +28,7 @@ public class ConcertInfoResponse {
   private String seatingChartUrl; // 좌석 배치도 url
   private ConcertType concertType; // 공연 카테고리
   private List<ConcertDateInfoResponse> concertDateInfoResponseList; // 공연일자 List
-  private List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponses; // 티켓 오픈일 List
+  private List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList; // 티켓 오픈일 List
   private TicketReservationSite ticketReservationSite; // 예매처
 
   public static ConcertInfoResponse of(Concert concert, List<ConcertDate> concertDateList, List<TicketOpenDate> ticketOpenDateList) {
@@ -47,7 +47,7 @@ public class ConcertInfoResponse {
                 .map(ConcertDateInfoResponse::from)
                 .collect(Collectors.toList())
         )
-        .ticketOpenDateInfoResponses(
+        .ticketOpenDateInfoResponseList(
             ticketOpenDateList.stream()
                 .map(TicketOpenDateInfoResponse::from)
                 .collect(Collectors.toList())

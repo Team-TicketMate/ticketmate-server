@@ -24,6 +24,14 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
 
   private final JPAQueryFactory queryFactory;
 
+  /**
+   * 신청서 필터링 조회
+   *
+   * @param clientId                 특정 의뢰인이 작성한 신청서
+   * @param agentId                  특정 대리인에게 작성된 신청서
+   * @param concertId                특정 공연에 대해 작성된 신청서
+   * @param applicationFormStatusSet 신청서 상태 Set (다중 선택 가능)
+   */
   @Override
   public Page<ApplicationFormFilteredResponse> filteredApplicationForm(
       UUID clientId,
