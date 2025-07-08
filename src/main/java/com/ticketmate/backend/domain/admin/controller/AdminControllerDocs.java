@@ -12,6 +12,7 @@ import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminRe
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
@@ -275,6 +276,52 @@ public interface AdminControllerDocs {
   ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       CustomOAuth2User customOAuth2User,
       ConcertFilteredRequest request);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-08",
+          author = "Chuseok22",
+          description = "관리자 공연 상세조회 API 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/397"
+      )
+  })
+  @Operation(
+      summary = "관리자 공연 상세조회 API",
+      description = """
+          
+          이 API는 관리자 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          - **concertId** (UUID): 공연PK (Path Variable) [필수]
+          
+          ### 사용 방법
+          - 공연 정보 조회를 원하는 공연의 PK를 요청합니다
+          
+          ### 응답 데이터
+          - **concertName** (String): 공연 이름
+          - **concertHallName** (String): 공연장 이름
+          - **concertThumbnailUrl** (String): 공연 썸네일 이미지 URL
+          - **seatingChartUrl** (String): 좌석 배치도 URL
+          - **concertType** (String): 공연 유형 (예: CONCERT, MUSICAL 등)
+          - **concertDateInfoResponse** (List): 공연 날짜 리스트
+              - **performanceDate** (LocalDateTime): 공연 시작 시간 (yyyy-MM-dd'T'HH:mm:ss)
+              - **session** (Integer): 회차
+          - **ticketOpenDateList** (List): 예매 오픈 날짜 리스트
+              - **openDate** (LocalDateTime): 티켓 오픈일
+              - **requestMaxCount** (Integer): 최대 예매 매수
+              - **isBankTransfer** (Boolean): 무통장 입금 여부
+              - **ticketOpenType** (Enum): 선예매, 일반예매 여부
+          - **ticketReservationSite** (String): 예매처 (예: INTERPARK_TICKET 등)
+          
+          ### 유의사항
+          - 관리자 공연 상세조회 API는 공연에 대한 모든 정보를 조회합니다
+          - 일반 사용자 공연 상세조회 API는 이미 티켓오픈일이 지난 공연은 반환해주지 않는 반면, 관리자 공연 상세조회 API는 이미 티켓오픈일이 지난 공연도 조회 가능합니다.
+          """
+  )
+  ResponseEntity<ConcertInfoResponse> getConcertInfo(
+      CustomOAuth2User customOAuth2User,
+      UUID concertId
+  );
 
   @Operation(
       summary = "공연 정보 수정",

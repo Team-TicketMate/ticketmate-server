@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ConcertDateRepository extends JpaRepository<ConcertDate, UUID> {
 
-  List<ConcertDate> findAllByConcertConcertId(UUID concertId);
+  // 공연 데이터 concertId로 조회 (공연날짜 오름차순 정렬)
+  List<ConcertDate> findAllByConcertConcertIdOrderByPerformanceDateAsc(UUID concertId);
 
   // 공연PK + 공연일자로 조회
   Optional<ConcertDate> findByConcertConcertIdAndPerformanceDate(UUID concertId, LocalDateTime performanceDate);
