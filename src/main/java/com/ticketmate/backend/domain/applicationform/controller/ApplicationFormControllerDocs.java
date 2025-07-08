@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -120,6 +121,14 @@ public interface ApplicationFormControllerDocs {
       CustomOAuth2User customOAuth2User,
       ApplicationFormFilteredRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-08",
+          author = "Chuseok22",
+          description = "신청서 상세 조회 반환값 수정",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/402"
+      )
+  })
   @Operation(
       summary = "대리 티켓팅 신청서 상세 조회",
       description = """
@@ -130,31 +139,38 @@ public interface ApplicationFormControllerDocs {
           ### 경로 변수
           - **applicationFormId** (UUID): 조회할 신청서 PK [필수]
           
-          ### 반환 데이터
-          - ApplicationFormFilteredResponse: 신청서 상세 정보
-            - applicationFormId: 신청서 ID
-            - clientId: 의뢰인 ID
-            - agentId: 대리인 ID
-            - concertId: 공연 ID
-            - openDate: 티켓 오픈일
-            - applicationFormDetailResponseList: 신청 회차 정보 목록
+          ### 반환 데이터 (ApplicationFormInfoResponse)
+          - **concertInfoResponse** (ConcertInfoResponse)
+            - concertName: 공연명
+            - concertHallName: 공연장 이름
+            - concertThumbnailUrl: 공연 썸네일 URL
+            - seatingChartUrl: 좌석 배치도 URL
+            - concertType: 공연 카테고리
+            - concertDateInfoResponseList: List<ConcertDateInfoResponse>
               - performanceDate: 공연 일시
               - session: 회차
-              - requestCount: 요청 매수
-              - hopeAreaResponseList: 희망 구역 목록
-                - priority: 우선순위
-                - location: 위치
-                - price: 가격
-              - requirement: 요청 사항
-            - totalRequestCount: 전체 요청 매수
-            - applicationFormStatus: 신청서 상태
-            - ticketOpenType: 선예매/일반예매 구분
+            - ticketOpenDateInfoResponseList: List<TicketOpenDateInfoResponse>
+              - openDate: 티켓 오픈일
+              - requestMaxCount: 최대 예매 매수
+              - isBankTransfer: 무통장 입금 여부
+              - ticketOpenType: 선예매/일반예매 구분
+            - ticketReservationSite: 예매처
+          
+          - **applicationFormDetailResponseList**: List<ApplicationFormDetailResponse>
+            - performanceDate: 공연 일시
+            - session: 회차
+            - requestCount: 요청 매수
+            - hopeAreaResponseList: List<HopeAreaResponse>
+              - priority: 우선순위
+              - location: 위치
+              - price: 가격
+            - requirement: 요청 사항
           
           ### 주요 오류 코드
           - APPLICATION_FORM_NOT_FOUND: 신청서를 찾을 수 없음
           """
   )
-  ResponseEntity<ApplicationFormFilteredResponse> getApplicationFormInfo(
+  ResponseEntity<ApplicationFormInfoResponse> getApplicationFormInfo(
       CustomOAuth2User customOAuth2User,
       UUID applicationFormId);
 

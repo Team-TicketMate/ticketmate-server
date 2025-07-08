@@ -6,6 +6,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.applicationform.service.ApplicationFormService;
 import com.ticketmate.backend.domain.applicationform.service.RejectionReasonService;
@@ -62,7 +63,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
   @Override
   @GetMapping("/{application-form-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<ApplicationFormFilteredResponse> getApplicationFormInfo(
+  public ResponseEntity<ApplicationFormInfoResponse> getApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
     return ResponseEntity.ok(applicationFormService.getApplicationFormInfo(applicationFormId));

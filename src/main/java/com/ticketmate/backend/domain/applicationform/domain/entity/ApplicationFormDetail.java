@@ -37,22 +37,28 @@ import lombok.extern.slf4j.Slf4j;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ApplicationFormDetail extends BasePostgresEntity {
 
-  private static final int HOPE_AREA_MAX_SIZE = 10;
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(updatable = false, nullable = false)
   private UUID applicationFormDetailId;
+
   @ManyToOne(fetch = FetchType.LAZY)
   private ApplicationForm applicationForm; // 신청서
+
   @ManyToOne(fetch = FetchType.LAZY)
   private ConcertDate concertDate; // 공연일자
+
   @Column(nullable = false)
   @Builder.Default
   private Integer requestCount = 1; // 요청 매수
+
   @Column(columnDefinition = "TEXT")
   private String requirement; // 요청 사항
+
   @OneToMany(mappedBy = "applicationFormDetail", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<HopeArea> hopeAreaList = new ArrayList<>();
+
+  private static final int HOPE_AREA_MAX_SIZE = 10;
 
   // 희망구역 설정 메서드
   public void addHopeArea(HopeArea hopeArea) {

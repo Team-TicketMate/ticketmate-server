@@ -15,15 +15,19 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.request.Applicat
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.ApplicationFormRequest;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.domain.applicationform.domain.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationFormDetail;
 import com.ticketmate.backend.domain.applicationform.domain.entity.HopeArea;
+import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormDetailRepositoryCustom;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepositoryCustom;
 import com.ticketmate.backend.domain.chat.domain.entity.ChatRoom;
 import com.ticketmate.backend.domain.chat.repository.ChatRoomRepository;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
@@ -56,6 +60,7 @@ public class ApplicationFormService {
 
   private final ApplicationFormRepository applicationFormRepository;
   private final ApplicationFormRepositoryCustom applicationFormRepositoryCustom;
+  private final ApplicationFormDetailRepositoryCustom applicationFormDetailRepositoryCustom;
   private final NotificationUtil notificationUtil;
   private final FcmService fcmService;
   private final MemberService memberService;
@@ -134,10 +139,21 @@ public class ApplicationFormService {
    * @return 신청서 정보
    */
   @Transactional(readOnly = true)
-  public ApplicationFormFilteredResponse getApplicationFormInfo(UUID applicationFormId) {
-    // 데이터베이스 조회
+  public ApplicationFormInfoResponse getApplicationFormInfo(UUID applicationFormId) {
+
+    // 신청서 조회
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
-    return entityMapper.toApplicationFormFilteredResponse(applicationForm);
+
+    // 공연 상세 조회
+    ConcertInfoResponse concertInfoResponse = concertService.getConcertInfo(applicationForm.getConcert().getConcertId());
+
+    // 신청서 세부사항 조회
+    List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
+
+    return ApplicationFormInfoResponse.builder()
+        .concertInfoResponse(concertInfoResponse)
+        .applicationFormDetailResponseList(applicationFormDetailResponseList)
+        .build();
   }
 
   /**
@@ -321,6 +337,17 @@ public class ApplicationFormService {
     if (applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(clientId, agentId, concertId, ticketOpenType)) {
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
     }
+  }
+
+  /**
+   * DB에서 ApplicationFormDetail 엔티티를 조회해서 DTO로 변환
+   *
+   * @param applicationFormId 조회하려는 신청서 PK
+   */
+  private List<ApplicationFormDetailResponse> getApplicationFormDetailResponseList(UUID applicationFormId) {
+    List<ApplicationFormDetail> applicationFormDetailList = applicationFormDetailRepositoryCustom
+        .findAllApplicationFormDetailWithHopeAreaListByApplicationFormId(applicationFormId);
+    return entityMapper.toApplicationFormDetailResponseList(applicationFormDetailList);
   }
 
   /**
