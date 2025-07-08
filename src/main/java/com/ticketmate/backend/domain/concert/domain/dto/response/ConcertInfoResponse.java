@@ -2,7 +2,11 @@ package com.ticketmate.backend.domain.concert.domain.dto.response;
 
 import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
+import com.ticketmate.backend.domain.concert.domain.entity.Concert;
+import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
+import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,4 +30,29 @@ public class ConcertInfoResponse {
   private List<ConcertDateInfoResponse> concertDateInfoResponseList; // 공연일자 List
   private List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponses; // 티켓 오픈일 List
   private TicketReservationSite ticketReservationSite; // 예매처
+
+  public static ConcertInfoResponse of(Concert concert, List<ConcertDate> concertDateList, List<TicketOpenDate> ticketOpenDateList) {
+    String concertHallName = concert.getConcertHall().getConcertHallName() != null
+        ? concert.getConcertHall().getConcertHallName()
+        : null;
+
+    return ConcertInfoResponse.builder()
+        .concertName(concert.getConcertName())
+        .concertHallName(concertHallName)
+        .concertThumbnailUrl(concert.getConcertThumbnailUrl())
+        .seatingChartUrl(concert.getSeatingChartUrl())
+        .concertType(concert.getConcertType())
+        .concertDateInfoResponseList(
+            concertDateList.stream()
+                .map(ConcertDateInfoResponse::from)
+                .collect(Collectors.toList())
+        )
+        .ticketOpenDateInfoResponses(
+            ticketOpenDateList.stream()
+                .map(TicketOpenDateInfoResponse::from)
+                .collect(Collectors.toList())
+        )
+        .ticketReservationSite(concert.getTicketReservationSite())
+        .build();
+  }
 }

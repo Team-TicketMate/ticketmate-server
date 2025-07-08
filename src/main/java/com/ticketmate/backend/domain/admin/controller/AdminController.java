@@ -11,6 +11,7 @@ import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminRespons
 import com.ticketmate.backend.domain.admin.service.AdminService;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
@@ -88,7 +89,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Void> saveConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ModelAttribute ConcertInfoRequest request) {
-    adminService.saveConcertInfo(request);
+    adminService.saveConcert(request);
     return ResponseEntity.ok().build();
   }
 
@@ -99,6 +100,16 @@ public class AdminController implements AdminControllerDocs {
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertFilteredRequest request) {
     return ResponseEntity.ok(adminService.filteredConcert(request));
+  }
+
+  @Override
+  @GetMapping(value = "/concert/{concert-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<ConcertInfoResponse> getConcertInfo(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @PathVariable(value = "concert-id") UUID concertId
+  ) {
+    return ResponseEntity.ok(adminService.getConcertInfo(concertId));
   }
 
   @Override

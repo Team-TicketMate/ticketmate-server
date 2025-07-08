@@ -184,7 +184,7 @@ class AdminServiceTest {
         .thenReturn("https://test.example.com/mock-file.png");
 
     // then
-    adminService.saveConcertInfo(request);
+    adminService.saveConcert(request);
 
     verify(concertRepository, times(1)).save(any(Concert.class));
     verify(concertDateRepository, times(1)).saveAll(any());
@@ -202,7 +202,7 @@ class AdminServiceTest {
     request.setSeatingChart(null);
 
     // then
-    adminService.saveConcertInfo(request);
+    adminService.saveConcert(request);
     verify(concertRepository, times(1)).save(any(Concert.class));
   }
 
@@ -216,7 +216,7 @@ class AdminServiceTest {
     ConcertInfoRequest request = createConcertInfoRequest(null, "Duplicate Concert Name");
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.DUPLICATE_CONCERT_NAME.getMessage());
   }
@@ -230,7 +230,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.CONCERT_DATE_REQUIRED.getMessage());
   }
@@ -253,7 +253,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_CONCERT_DATE.getMessage());
   }
@@ -276,7 +276,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_CONCERT_DATE.getMessage());
   }
@@ -299,7 +299,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_CONCERT_DATE.getMessage());
   }
@@ -322,7 +322,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_CONCERT_DATE.getMessage());
   }
@@ -336,7 +336,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.TICKET_OPEN_DATE_REQUIRED.getMessage());
   }
@@ -363,7 +363,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.PRE_OPEN_COUNT_EXCEED.getMessage());
   }
@@ -394,7 +394,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.GENERAL_OPEN_COUNT_EXCEED.getMessage());
   }
@@ -421,7 +421,7 @@ class AdminServiceTest {
     // when
 
     // then
-    assertThatThrownBy(() -> adminService.saveConcertInfo(request))
+    assertThatThrownBy(() -> adminService.saveConcert(request))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_TICKET_REQUEST_MAX_COUNT.getMessage());
   }

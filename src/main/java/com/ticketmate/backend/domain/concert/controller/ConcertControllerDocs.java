@@ -101,8 +101,7 @@ public interface ConcertControllerDocs {
           - **ticketReservationSite** (String): 예매처 (예: INTERPARK_TICKET 등)
           
           ### 사용 방법 & 유의 사항
-          - 이 API는 로그인된 사용자만 호출할 수 있습니다.
-          - 공연 ID는 UUID 형식이어야 하며, 올바르지 않으면 오류가 발생합니다.
+          - 티켓 오픈일이 이미 지난 공연의 티켓 오픈 데이터는 반화되지 않습니다
           """
   )
   ResponseEntity<ConcertInfoResponse> getConcertInfo(
