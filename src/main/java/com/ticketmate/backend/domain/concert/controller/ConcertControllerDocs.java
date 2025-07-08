@@ -68,6 +68,7 @@ public interface ConcertControllerDocs {
           ### 유의사항
           - concertName, concertHallName, concertType, ticketReservationSite 는 요청하지 않을 경우 필터링 조건에 적용되지 않습니다
           - sortField와 sortDirection은 해당하는 문자열만 입력 가능합니다. (UPPER_CASE)
+          - 기존 로직은 티켓 오픈일이 지난 공연도 반환했으나, 변경된 로직에서는 **티켓 선예매/일반예매 오픈일이 모두 지난 공연은 결과에서 제외**됩니다.
           """
   )
   ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
