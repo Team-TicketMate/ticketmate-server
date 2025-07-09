@@ -5,12 +5,13 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.ticketmate.backend.global.file.constant.FileExtension;
-import com.ticketmate.backend.global.file.constant.UploadType;
-import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.config.S3Config;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.global.file.constant.FileExtension;
+import com.ticketmate.backend.global.file.constant.UploadType;
+import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.global.util.common.FileUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -118,7 +119,7 @@ public class S3Service implements FileService {
    */
   private static String validateAndExtractFilename(MultipartFile file) {
     // 파일 검증
-    if (file == null || file.isEmpty()) {
+    if (FileUtil.isNullOrEmpty(file)) {
       throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
     }
 
