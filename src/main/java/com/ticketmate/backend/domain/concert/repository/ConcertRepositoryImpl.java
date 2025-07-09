@@ -21,6 +21,8 @@ import com.ticketmate.backend.domain.concert.domain.entity.QConcert;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.QTicketOpenDate;
 import com.ticketmate.backend.domain.concerthall.domain.entity.QConcertHall;
+import com.ticketmate.backend.global.exception.CustomException;
+import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.database.QueryDslUtil;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,7 +30,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -77,6 +78,9 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         .leftJoin(ticketOpenDate).on(ticketOpenDate.concert.eq(concert))
         .where(concert.concertId.eq(concertId))
         .fetch();
+    if (rows.isEmpty()) {
+      throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    }
 
     // 1) 공통 ConcertInfo 필드 추출 (rows 가 비어있지 않다고 가정)
     Tuple firstRow = rows.get(0);
@@ -108,7 +112,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Map<TicketOpenType, TicketOpenDateInfoResponse> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       LocalDateTime openDate = t.get(ticketOpenDate.openDate);
-      if (Objects.requireNonNull(openDate).isBefore(now)) {
+      if (openDate != null && openDate.isBefore(now)) {
         continue;
       }
       TicketOpenType type = t.get(ticketOpenDate.ticketOpenType);
@@ -153,6 +157,9 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         .leftJoin(ticketOpenDate).on(ticketOpenDate.concert.eq(concert))
         .where(concert.concertId.eq(concertId))
         .fetch();
+    if (rows.isEmpty()) {
+      throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    }
 
     // 1) 공통 ConcertInfo 필드 추출 (rows 가 비어있지 않다고 가정)
     Tuple firstRow = rows.get(0);
