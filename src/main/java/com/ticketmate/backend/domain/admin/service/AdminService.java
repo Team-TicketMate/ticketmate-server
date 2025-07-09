@@ -182,11 +182,7 @@ public class AdminService {
    */
   @Transactional(readOnly = true)
   public ConcertInfoResponse getConcertInfo(UUID concertId) {
-    return ConcertInfoResponse.of(
-        concertService.findConcertById(concertId),
-        concertDateRepository.findAllByConcertConcertIdOrderByPerformanceDateAsc(concertId),
-        ticketOpenDateRepository.findAllByConcertConcertId(concertId)
-    );
+    return concertRepositoryCustom.findConcertInfoResponseByConcertIdForAdmin(concertId);
   }
 
   /**

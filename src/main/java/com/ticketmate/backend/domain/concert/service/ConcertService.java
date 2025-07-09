@@ -62,11 +62,7 @@ public class ConcertService {
    */
   @Transactional(readOnly = true)
   public ConcertInfoResponse getConcertInfo(UUID concertId) {
-    return ConcertInfoResponse.of(
-        findConcertById(concertId),
-        concertDateRepository.findAllByConcertConcertIdOrderByPerformanceDateAsc(concertId),
-        ticketOpenDateRepository.findAllByConcertConcertIdAndOpenDateAfter(concertId, LocalDateTime.now())
-    );
+    return concertRepositoryCustom.findConcertInfoResponseByConcertId(concertId);
   }
 
   /**
