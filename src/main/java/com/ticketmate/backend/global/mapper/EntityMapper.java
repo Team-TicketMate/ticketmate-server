@@ -1,5 +1,7 @@
 package com.ticketmate.backend.global.mapper;
 
+import com.ticketmate.backend.domain.admin.dto.request.ConcertDateRequest;
+import com.ticketmate.backend.domain.admin.dto.request.TicketOpenDateRequest;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.applicationform.domain.dto.request.HopeAreaRequest;
@@ -51,10 +53,14 @@ public interface EntityMapper {
   ======================================공연======================================
    */
 
-  // Concert -> ConcertFilteredResponse (엔티티 -> DTO)
+  // List<ConcertDateRequest> -> List<ConcertDate> (DTO 리스트 -> 엔티티 리스트)
+  List<ConcertDate> toConcertDateList(List<ConcertDateRequest> concertDateRequestList);
 
   // List<ConcertDate> -> List<ConcertDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
   List<ConcertDateInfoResponse> toConcertDateInfoResponseList(List<ConcertDate> concertDateList);
+
+  // List<TicketOpenDateList> -> List<TicketOpenDate> (DTO 리스트 -> 엔티티 리스트)
+  List<TicketOpenDate> toTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList);
 
   // List<TicketOpenDate> -> List<TicketOpenDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
   List<TicketOpenDateInfoResponse> toTicketOpenDateInfoResponseList(List<TicketOpenDate> ticketOpenDateList);

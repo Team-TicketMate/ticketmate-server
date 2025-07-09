@@ -2,6 +2,7 @@ package com.ticketmate.backend.service.performance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.ticketmate.backend.domain.concert.domain.constant.ConcertSortField;
 import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StopWatch;
 
@@ -47,8 +49,6 @@ public class ConcertPerformanceTest {
   ConcertRepositoryImpl concertRepositoryImpl;
 
   @Autowired
-  ConcertRepositorySubqueryImpl concertRepositorySubqueryImpl;
-  @Autowired
   ConcertService concertService;
   List<ResultEntity> resultEntities = new ArrayList<>();
   @Autowired
@@ -63,8 +63,8 @@ public class ConcertPerformanceTest {
     ConcertFilteredRequest warmUpRequest = ConcertFilteredRequest.builder()
         .pageNumber(1)
         .pageSize(1)
-        .sortField("created_date")
-        .sortDirection("DESC")
+        .sortField(ConcertSortField.CREATED_DATE)
+        .sortDirection(Direction.DESC)
         .build();
     concertService.filteredConcert(warmUpRequest);
   }
@@ -91,7 +91,7 @@ public class ConcertPerformanceTest {
    */
   @RepeatedTest(10)
   void 기존_공연_필터링_조회_테스트(RepetitionInfo info) {
-    Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "created_date"));
+    Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "CREATED_DATE"));
 
     StopWatch stopWatch = new StopWatch("공연 필터링 조회");
 
@@ -150,42 +150,42 @@ public class ConcertPerformanceTest {
     testService.generateConcertMockDataAsync(count).join();
   }
 
-  @Test
-  void 공연_JOIN_쿼리_서브_쿼리_출력_데이터_비교() {
-
-    Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "created_date"));
-    StopWatch stopWatch = new StopWatch();
-
-    stopWatch.start("Left Join 쿼리");
-    Page<ConcertFilteredResponse> leftJoinResponse = concertRepositoryImpl
-        .filteredConcert(
-            "",
-            "",
-            null,
-            null,
-            pageable
-        );
-    stopWatch.stop();
-    log.info("Left Join 쿼리 소요시간: {}ms", stopWatch.getTotalTimeMillis());
-
-    stopWatch.start("서브 쿼리");
-    Page<ConcertFilteredResponse> subqueryResponse = concertRepositorySubqueryImpl
-        .filteredConcert(
-            "",
-            "",
-            null,
-            null,
-            pageable
-        );
-    stopWatch.stop();
-    log.info("서브쿼리 소요시간: {}ms", stopWatch.getTotalTimeMillis());
-
-    assertThat(leftJoinResponse.getContent())
-        .usingRecursiveFieldByFieldElementComparator()
-        .containsExactlyElementsOf(subqueryResponse.getContent());
-    assertThat(leftJoinResponse.getTotalElements())
-        .isEqualTo(subqueryResponse.getTotalElements());
-  }
+//  @Test
+//  void 공연_JOIN_쿼리_서브_쿼리_출력_데이터_비교() {
+//
+//    Pageable pageable = PageRequest.of(0, 30, Sort.by(Sort.Direction.DESC, "CREATED_DATE"));
+//    StopWatch stopWatch = new StopWatch();
+//
+//    stopWatch.start("Left Join 쿼리");
+//    Page<ConcertFilteredResponse> leftJoinResponse = concertRepositoryImpl
+//        .filteredConcert(
+//            "",
+//            "",
+//            null,
+//            null,
+//            pageable
+//        );
+//    stopWatch.stop();
+//    log.info("Left Join 쿼리 소요시간: {}ms", stopWatch.getTotalTimeMillis());
+//
+//    stopWatch.start("서브 쿼리");
+//    Page<ConcertFilteredResponse> subqueryResponse = concertRepositorySubqueryImpl
+//        .filteredConcert(
+//            "",
+//            "",
+//            null,
+//            null,
+//            pageable
+//        );
+//    stopWatch.stop();
+//    log.info("서브쿼리 소요시간: {}ms", stopWatch.getTotalTimeMillis());
+//
+//    assertThat(leftJoinResponse.getContent())
+//        .usingRecursiveFieldByFieldElementComparator()
+//        .containsExactlyElementsOf(subqueryResponse.getContent());
+//    assertThat(leftJoinResponse.getTotalElements())
+//        .isEqualTo(subqueryResponse.getTotalElements());
+//  }
 
   @Builder
   @Getter

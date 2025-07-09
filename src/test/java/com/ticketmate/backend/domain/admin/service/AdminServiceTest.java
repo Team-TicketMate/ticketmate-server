@@ -22,6 +22,8 @@ import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.domain.concert.service.ConcertDateService;
+import com.ticketmate.backend.domain.concert.service.TicketOpenDateService;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
@@ -63,6 +65,12 @@ class AdminServiceTest {
 
   @Mock
   ConcertHallRepository concertHallRepository;
+
+  @Mock
+  ConcertDateService concertDateService;
+
+  @Mock
+  TicketOpenDateService ticketOpenDateService;
 
   @Mock
   ConcertRepository concertRepository;
@@ -176,8 +184,8 @@ class AdminServiceTest {
 
     // when
     // 공연장 조회
-    when(concertHallRepository.findById(concertHallId))
-        .thenReturn(Optional.of(new ConcertHall()));
+//    when(concertHallRepository.findById(concertHallId))
+//        .thenReturn(Optional.of(new ConcertHall()));
 
     // MultipartFile 저장
     when(fileService.uploadFile(any(), any()))
