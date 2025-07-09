@@ -23,7 +23,6 @@ import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
-import com.ticketmate.backend.domain.concert.service.ConcertService;
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
@@ -63,7 +62,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class AdminService {
 
-  private final ConcertService concertService;
   private final ConcertHallService concertHallService;
   private final ConcertHallRepository concertHallRepository;
   private final ConcertHallRepositoryCustom concertHallRepositoryCustom;
@@ -405,20 +403,18 @@ public class AdminService {
     // 중복된 공연장이름 검증
     concertHallService.validateDuplicateConcertHallName(request.getConcertHallName());
 
-    ConcertHall concertHall = concertHallRepository.save(ConcertHall.builder()
+    concertHallRepository.save(ConcertHall.builder()
         .concertHallName(request.getConcertHallName())
         .address(request.getAddress()) // 요청된 주소에 따른 지역코드 할당 (없는경우 null)
         .city(City.fromAddress(request.getAddress()))
         .webSiteUrl(request.getWebSiteUrl())
         .build());
-    log.debug("[공연장 저장 성공] 공연장명: {}, 주소: {}, 지역: {}, 웹사이트: {}",
-        concertHall.getConcertHallName(), concertHall.getAddress(), concertHall.getCity().getFullName(), concertHall.getWebSiteUrl());
   }
 
   /**
    * 공연장 정보 필터링 로직
    * 필터링 조건: 공연장 이름 (검색어), 도시
-   * 정렬 조건: created_date
+   * 정렬 조건: createdDate
    *
    * @param request concertHallName 공연장 이름 검색어 (빈 문자열인 경우 필터링 제외)
    *                cityCode 지역 코드 (null 인 경우 필터링 제외)
