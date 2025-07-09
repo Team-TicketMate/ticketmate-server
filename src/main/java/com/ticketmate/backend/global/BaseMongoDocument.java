@@ -1,5 +1,7 @@
 package com.ticketmate.backend.global;
 
+import jakarta.persistence.Column;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +16,10 @@ import org.springframework.data.annotation.LastModifiedDate;
 public abstract class BaseMongoDocument {
 
   @CreatedDate
-  private java.time.LocalDateTime createdDate;
+  @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP(0)")
+  private LocalDateTime createdDate;
 
   @LastModifiedDate
-  private java.time.LocalDateTime updatedDate;
+  @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
+  private LocalDateTime updatedDate;
 }
