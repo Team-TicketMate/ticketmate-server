@@ -36,7 +36,7 @@ public class ConcertInfoRequest {
   private ConcertType concertType; // 공연 카테고리
 
   @NotNull(message = "콘서트 썸네일 이미지를 업로드하세요.")
-  private MultipartFile concertThumbNail; // 콘서트 썸네일
+  private MultipartFile concertThumbNail; // 공연 썸네일
 
   private MultipartFile seatingChart; // 좌석 배치도
 
