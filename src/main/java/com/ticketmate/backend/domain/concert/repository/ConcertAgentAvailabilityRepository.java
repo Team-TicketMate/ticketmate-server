@@ -14,11 +14,4 @@ import org.springframework.data.repository.query.Param;
 public interface ConcertAgentAvailabilityRepository extends JpaRepository<ConcertAgentAvailability, UUID> {
   Optional<ConcertAgentAvailability> findByConcertConcertIdAndAgentMemberId(UUID concertId, UUID agentId);
 
-  @Query("SELECT new com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo("
-         + "ca.agent.memberId, ca.agent.nickname, ca.agent.profileUrl, "
-         + "COALESCE(ca.introduction, '')) "
-         + "FROM ConcertAgentAvailability ca "
-         + "WHERE ca.concert.concertId = :concertId "
-         + "AND ca.accepting = true")
-  Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(@Param("concertId") UUID concertId, Pageable pageable);
 }
