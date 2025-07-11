@@ -7,7 +7,9 @@ import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
+import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
@@ -31,6 +33,7 @@ public class MemberService {
   private final JwtUtil jwtUtil;
   private final EntityMapper entityMapper;
   private final MemberRepository memberRepository;
+  private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
 
   /**
    * JWT 기반 회원정보 조회
@@ -96,5 +99,23 @@ public class MemberService {
           log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
+  }
+
+  @Transactional
+  public void promoteToAgent(Member member){
+    member.setMemberType(MemberType.AGENT);
+
+    if(!agentPerformanceSummaryRepository.existsById(member.getMemberId())){
+      AgentPerformanceSummary summary = AgentPerformanceSummary.builder()
+          .agent(member)
+          .agentId(member.getMemberId())
+          .totalScore(0.0)
+          .averageRating(0.0)
+          .reviewCount(0)
+          .followerCount(0)
+          .recentSuccessCount(0)
+          .build();
+      agentPerformanceSummaryRepository.save(summary);
+    }
   }
 }
