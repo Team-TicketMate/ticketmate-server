@@ -36,7 +36,7 @@ public class ConcertAcceptingAgentRequest {
   public ConcertAcceptingAgentRequest() {
     this.pageNumber = 1;
     this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
-    this.sortField = ConcertAgentAvailabilitySortField.CREATED_DATE;
+    this.sortField = ConcertAgentAvailabilitySortField.TOTAL_SCORE;
     this.sortDirection = Direction.DESC;
   }
 
