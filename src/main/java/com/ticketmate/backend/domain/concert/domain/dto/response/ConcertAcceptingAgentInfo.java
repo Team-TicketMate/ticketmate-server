@@ -20,4 +20,8 @@ public class ConcertAcceptingAgentInfo {
   private String profileUrl;
 
   private String introduction;
+
+  private double averageRating;
+
+  private int reviewCount;
 }
