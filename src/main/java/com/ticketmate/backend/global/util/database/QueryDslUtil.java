@@ -15,6 +15,8 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 
 @UtilityClass
@@ -154,5 +156,30 @@ public class QueryDslUtil {
     total = (total == null) ? 0L : total;
 
     return new PageImpl<>(content, pageable, total);
+  }
+
+  /**
+   * QueryDSL JPAQuery를 이용한 Slice 페이징 처리
+   * - count 쿼리 없이, '다음 페이지 존재 여부'만 확인
+   * - 무한 스크롤 방식에 최적화
+   *
+   * @param <T>          조회 엔티티 또는 DTO 타입
+   * @param contentQuery offset, limit, orderBy가 설정된 JPAQuery
+   * @param pageable     Spring Data Pageable
+   * @return Slice 페이징 결과
+   */
+  public <T> Slice<T> fetchSlice(JPAQuery<T> contentQuery, Pageable pageable) {
+    List<T> content = contentQuery
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    boolean hasNext = false;
+    if (content.size() > pageable.getPageSize()) {
+      content.remove(pageable.getPageSize());
+      hasNext = true;
+    }
+
+    return new SliceImpl<>(content, pageable, hasNext);
   }
 }

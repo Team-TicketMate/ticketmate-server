@@ -26,7 +26,7 @@ import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositoryCustom;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
 import com.ticketmate.backend.domain.notification.service.FcmService;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
@@ -68,6 +68,7 @@ public class AdminService {
   private final EntityMapper entityMapper;
   private final FcmService fcmService;
   private final NotificationUtil notificationUtil;
+  private final MemberService memberService;
 
   /*
   ======================================공연======================================
@@ -418,7 +419,7 @@ public class AdminService {
       portfolio.setPortfolioType(PortfolioType.ACCEPTED);
       log.debug("포트폴리오: {} 승인완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
 
-      portfolio.getMember().setMemberType(MemberType.AGENT);
+      memberService.promoteToAgent(portfolio.getMember());
 
       if (notificationUtil.existsFcmToken(memberId)) {
         NotificationPayloadRequest payload = notificationUtil

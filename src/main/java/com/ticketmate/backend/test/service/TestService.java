@@ -20,6 +20,7 @@ import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositor
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
+import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
 import com.ticketmate.backend.global.exception.CustomException;
@@ -66,6 +67,7 @@ public class TestService {
   private final ApplicationFormRepository applicationFormRepository;
   private final PortfolioRepository portfolioRepository;
   private final TransactionTemplate transactionTemplate;
+  private final MemberService memberService;
 
     /*
     ======================================회원======================================
@@ -87,7 +89,12 @@ public class TestService {
     log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
     Member member = memberRepository.findByUsername(request.getUsername())
-        .orElseGet(() -> memberRepository.save(mockMemberFactory.generate(request)));
+        .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
+    if (request.getMemberType().equals(AGENT)) {
+      memberService.promoteToAgent(member);
+      log.debug("테스트 유저 {}를 대리인으로 승격 처리했습니다.", member.getMemberId());
+    }
+
     CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, null);
     String accessToken = jwtUtil.createAccessToken(customOAuth2User);
 
