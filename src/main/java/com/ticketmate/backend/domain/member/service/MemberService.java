@@ -108,7 +108,6 @@ public class MemberService {
     if(!agentPerformanceSummaryRepository.existsById(member.getMemberId())){
       AgentPerformanceSummary summary = AgentPerformanceSummary.builder()
           .agent(member)
-          .agentId(member.getMemberId())
           .totalScore(0.0)
           .averageRating(0.0)
           .reviewCount(0)
