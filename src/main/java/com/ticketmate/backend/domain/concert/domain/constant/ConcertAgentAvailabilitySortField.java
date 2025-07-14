@@ -19,10 +19,7 @@ public enum ConcertAgentAvailabilitySortField implements SortField {
   FOLLOWER_COUNT("followerCount"),
 
   // 최근 30일 성공 많은 순
-  RECENT_SUCCESS_COUNT("recentSuccessCount"),
-
-  // 등록일 순
-  CREATED_DATE("createdDate");
+  RECENT_SUCCESS_COUNT("recentSuccessCount");
 
   private final String property;
 
