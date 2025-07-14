@@ -1,11 +1,12 @@
 package com.ticketmate.backend.domain.concert.service;
 
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
+import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepositoryCustom;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ConcertAgentAvailabilityService {
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
+  private final ConcertAgentAvailabilityRepositoryCustom concertAgentAvailabilityRepositoryCustom;
   private final ConcertService concertService;
 
   @Transactional
@@ -37,10 +39,10 @@ public class ConcertAgentAvailabilityService {
   }
 
   @Transactional(readOnly = true)
-  public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentRequest request){
-    Pageable pageable = request.toPageable(); // TODO: 정렬 기준 정해지면 추후 변경
+  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentFilteredRequest request){
+    Pageable pageable = request.toPageable();
 
-    return concertAgentAvailabilityRepository.findAcceptingAgentByConcert(concertId, pageable);
+    return concertAgentAvailabilityRepositoryCustom.findAcceptingAgentByConcert(concertId, pageable);
 
   }
 }
