@@ -18,7 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 @Setter
 @Builder
 @AllArgsConstructor
-public class ConcertAcceptingAgentRequest {
+public class ConcertAcceptingAgentFilteredRequest {
   @Schema(defaultValue = "1", nullable = true)
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
   @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
@@ -33,7 +33,7 @@ public class ConcertAcceptingAgentRequest {
 
   private Sort.Direction sortDirection;
 
-  public ConcertAcceptingAgentRequest() {
+  public ConcertAcceptingAgentFilteredRequest() {
     this.pageNumber = 1;
     this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
     this.sortField = ConcertAgentAvailabilitySortField.TOTAL_SCORE;

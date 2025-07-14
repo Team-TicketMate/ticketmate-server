@@ -1,26 +1,21 @@
 package com.ticketmate.backend.domain.concert.repository;
 
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertAgentAvailability;
 import com.ticketmate.backend.domain.member.domain.entity.QAgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QMember;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.database.QueryDslUtil;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -46,14 +41,14 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
    *
    * @param concertId  조회 대상 콘서트
    * @param pageable   페이지 번호, 크기, 정렬 정보를 담은 Pageable
-   * @return DTO {@link ConcertAcceptingAgentInfo} Slice
+   * @return DTO {@link ConcertAcceptingAgentResponse} Slice
    */
   @Override
-  public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, Pageable pageable){
+  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, Pageable pageable){
 
-    JPAQuery<ConcertAcceptingAgentInfo> contentQuery = queryFactory
+    JPAQuery<ConcertAcceptingAgentResponse> contentQuery = queryFactory
         .select(Projections.constructor(
-            ConcertAcceptingAgentInfo.class,
+            ConcertAcceptingAgentResponse.class,
             member.memberId,
             member.nickname,
             member.profileUrl,

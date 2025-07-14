@@ -1,8 +1,8 @@
 package com.ticketmate.backend.domain.concert.controller;
 
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.service.ConcertAgentAvailabilityService;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
@@ -45,9 +45,9 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
   @Override
   @GetMapping("/{concert-id}/agents")
   @LogMonitoringInvocation
-  public ResponseEntity<Slice<ConcertAcceptingAgentInfo>> filteredAcceptingAgents(
+  public ResponseEntity<Slice<ConcertAcceptingAgentResponse>> filteredAcceptingAgents(
       @PathVariable(value = "concert-id") UUID concertId,
-      @ParameterObject @Valid ConcertAcceptingAgentRequest request) {
+      @ParameterObject @Valid ConcertAcceptingAgentFilteredRequest request) {
     return ResponseEntity.ok().body(concertAgentAvailabilityService.findAcceptingAgentByConcert(concertId, request));
   }
 }

@@ -2,9 +2,9 @@ package com.ticketmate.backend.domain.concert.controller;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
@@ -88,14 +88,14 @@ public interface ConcertAgentAvailabilityControllerDocs {
         
         ### 요청 파라미터
         - **concert-id (UUID, Path)** : 조회할 공연 식별자 [필수]
-        - **ConcertAcceptingAgentRequest (Query)**
+        - **ConcertAcceptingAgentFilteredRequest (Query)**
           - **pageNumber (int)** : 요청할 페이지 번호 [선택, 기본값 1]
           - **pageSize (int)** : 요청할 페이지 사이즈 [선택, 기본값 10]
           - **sortField (String)** : 정렬 필드 [선택, 기본값 TOTAL_SCORE]
             - **사용 가능 값**: `TOTAL_SCORE`(기본 추천순), `AVERAGE_RATING`(별점순), `REVIEW_COUNT`(후기순), `FOLLOWER_COUNT`(팔로워순), `RECENT_SUCCESS_COUNT`(최근 성공순)
           - **sortDirection (String)** : 정렬 방향 [선택, 기본값 DESC]
         
-        ### 반환값 [Slice<ConcertAcceptingAgentInfo>]
+        ### 반환값 [Slice<ConcertAcceptingAgentResponse>]
         - **content** : 대리인 정보 리스트
           - **agentId** (UUID)       : 대리인 식별자
           - **nickname** (String)    : 닉네임
@@ -124,7 +124,7 @@ public interface ConcertAgentAvailabilityControllerDocs {
           - **INVALID_SORT_FIELD**: 정렬 필드 요청 잘못됨
         """
   )
-  public ResponseEntity<Slice<ConcertAcceptingAgentInfo>> filteredAcceptingAgents(
+  public ResponseEntity<Slice<ConcertAcceptingAgentResponse>> filteredAcceptingAgents(
       UUID concertId,
-      ConcertAcceptingAgentRequest request);
+      ConcertAcceptingAgentFilteredRequest request);
 }

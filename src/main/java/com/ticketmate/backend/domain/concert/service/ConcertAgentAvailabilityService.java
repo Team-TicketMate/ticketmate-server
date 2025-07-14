@@ -1,8 +1,8 @@
 package com.ticketmate.backend.domain.concert.service;
 
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentRequest;
+import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
@@ -39,7 +39,7 @@ public class ConcertAgentAvailabilityService {
   }
 
   @Transactional(readOnly = true)
-  public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentRequest request){
+  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentFilteredRequest request){
     Pageable pageable = request.toPageable();
 
     return concertAgentAvailabilityRepositoryCustom.findAcceptingAgentByConcert(concertId, pageable);
