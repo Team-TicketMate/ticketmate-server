@@ -1,7 +1,9 @@
 package com.ticketmate.backend.global.util.database;
 
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -10,7 +12,10 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.ticketmate.backend.global.util.common.CommonUtil;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -107,6 +112,44 @@ public class QueryDslUtil {
    */
   public <T extends Comparable<?>> OrderSpecifier<T> createOrderSpecifier(ComparableExpression<T> path, boolean asc) {
     return new OrderSpecifier<>(asc ? Order.ASC : Order.DESC, path);
+  }
+
+  /**
+   * Pageable과 미리 정의된 정렬 속성 Map을 기반으로 OrderSpecifier 배열 생성
+   * Pageable을 통해 전달하는 정렬 기준과 서버에 정의된 n차 기본 정렬 기준 모두 처리 가능
+   * 컴파일 시점에 필드의 유효성을 검사
+   *
+   * @param pageable Pageable 객체
+   * @param sortableProperties 정렬 가능한 속성 이름과 Path를 매핑한 Map
+   * @param defaultSpecifierProvider 2차, 3차 등 추가/기본 정렬 조건을 제공하는 함수
+   * @return 생성된 OrderSpecifier 배열
+   */
+  @SuppressWarnings("unchecked") // 정렬에 사용되는 Path는 항상 Comparable이므로 안전한 캐스팅, 경고 억제
+  public static OrderSpecifier<?>[] createOrderSpecifiers(Pageable pageable, Map<String, Path<?>> sortableProperties, List<Function<Order, OrderSpecifier<?>>> defaultSpecifierProvider){
+    if(pageable.getSort().isUnsorted()){
+      return new OrderSpecifier[0];
+    }
+
+    List<OrderSpecifier<?>> specifiers = new ArrayList<>();
+    Order primaryDirection = Order.DESC;
+
+    for(Sort.Order order : pageable.getSort()){
+      String prop = order.getProperty();
+      Path<?> path = sortableProperties.get(prop);
+      if(path == null) continue;
+
+      Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+      specifiers.add(new OrderSpecifier<>(direction, (Expression<Comparable<?>>) path));
+      if(specifiers.size() == 1) primaryDirection = direction;
+    }
+
+    if(defaultSpecifierProvider != null){
+      for(Function<Order, OrderSpecifier<?>> provider : defaultSpecifierProvider){
+        specifiers.add(provider.apply(primaryDirection));
+      }
+    }
+
+    return specifiers.toArray(OrderSpecifier[]::new);
   }
 
   /**

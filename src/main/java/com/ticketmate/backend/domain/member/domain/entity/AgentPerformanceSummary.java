@@ -29,7 +29,6 @@ import org.springframework.data.domain.Persistable;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AgentPerformanceSummary extends BasePostgresEntity implements Persistable<UUID> {
   @Id
-  @Column(name = "agent_id")
   private UUID agentId;
 
   @OneToOne(fetch = FetchType.LAZY)
