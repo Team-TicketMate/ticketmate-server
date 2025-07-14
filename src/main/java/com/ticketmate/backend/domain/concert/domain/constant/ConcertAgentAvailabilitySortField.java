@@ -6,8 +6,20 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum ConcertAgentAvailabilitySortField implements SortField {
-  CREATED_DATE("createdDate")
-  ;
+  // 기본순 (AI 추천)
+  TOTAL_SCORE("totalScore"),
+
+  // 별점순 (평균 별점 높은 순)
+  AVERAGE_RATING("averageRating"),
+
+  // 후기 많은 순
+  REVIEW_COUNT("reviewCount"),
+
+  // 팔로워 많은 순
+  FOLLOWER_COUNT("followerCount"),
+
+  // 최근 30일 성공 많은 순
+  RECENT_SUCCESS_COUNT("recentSuccessCount");
 
   private final String property;
 

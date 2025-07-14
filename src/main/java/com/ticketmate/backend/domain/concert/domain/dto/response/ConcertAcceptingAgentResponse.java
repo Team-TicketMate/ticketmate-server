@@ -12,7 +12,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ConcertAcceptingAgentInfo {
+public class ConcertAcceptingAgentResponse {
   private UUID agentId;
 
   private String nickname;
@@ -20,4 +20,8 @@ public class ConcertAcceptingAgentInfo {
   private String profileUrl;
 
   private String introduction;
+
+  private double averageRating;
+
+  private int reviewCount;
 }
