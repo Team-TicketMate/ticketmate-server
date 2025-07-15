@@ -1,17 +1,14 @@
 package com.ticketmate.backend.domain.concert.repository;
 
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertAgentAvailability;
+import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QAgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QMember;
 import com.ticketmate.backend.global.util.database.QueryDslUtil;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,52 +20,45 @@ import org.springframework.stereotype.Repository;
 public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvailabilityRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
-  private static final QConcertAgentAvailability concertAgentAvailability = QConcertAgentAvailability.concertAgentAvailability;
-  private static final QMember member = QMember.member;
-  private static final QAgentPerformanceSummary agentPerformanceSummary = QAgentPerformanceSummary.agentPerformanceSummary;
 
-  // 정렬 가능한 속성과 Q-Type 경로를 매핑
-  private static final Map<String, Path<?>> SORTABLE_PROPERTIES = Map.of(
-      "totalScore", agentPerformanceSummary.totalScore,
-      "averageRating", agentPerformanceSummary.averageRating,
-      "reviewCount", agentPerformanceSummary.reviewCount,
-      "followerCount", agentPerformanceSummary.followerCount,
-      "recentSuccessCount", agentPerformanceSummary.recentSuccessCount
-  );
+  private static final QConcertAgentAvailability CONCERT_AGENT_AVAILABILITY = QConcertAgentAvailability.concertAgentAvailability;
+  private static final QMember AGENT = QMember.member;
+  private static final QAgentPerformanceSummary AGENT_PERFORMANCE_SUMMARY = QAgentPerformanceSummary.agentPerformanceSummary;
 
   /**
    * 특정 콘서트(concertId)에 대해 대리인의 수락 가능 여부를 조회하고 정렬/페이징 처리하여 반환
    *
-   * @param concertId  조회 대상 콘서트
-   * @param pageable   페이지 번호, 크기, 정렬 정보를 담은 Pageable
+   * @param concertId 조회 대상 콘서트
+   * @param pageable  페이지 번호, 크기, 정렬 정보를 담은 Pageable
    * @return DTO {@link ConcertAcceptingAgentResponse} Slice
    */
   @Override
-  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, Pageable pageable){
+  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, Pageable pageable) {
 
     JPAQuery<ConcertAcceptingAgentResponse> contentQuery = queryFactory
         .select(Projections.constructor(
             ConcertAcceptingAgentResponse.class,
-            member.memberId,
-            member.nickname,
-            member.profileUrl,
-            concertAgentAvailability.introduction,
-            agentPerformanceSummary.averageRating,
-            agentPerformanceSummary.reviewCount
+            AGENT.memberId,
+            AGENT.nickname,
+            AGENT.profileUrl,
+            CONCERT_AGENT_AVAILABILITY.introduction,
+            AGENT_PERFORMANCE_SUMMARY.averageRating,
+            AGENT_PERFORMANCE_SUMMARY.reviewCount
         ))
-        .from(concertAgentAvailability)
-        .join(concertAgentAvailability.agent, member)
-        .innerJoin(agentPerformanceSummary).on(member.eq(agentPerformanceSummary.agent))
+        .from(CONCERT_AGENT_AVAILABILITY)
+        .join(CONCERT_AGENT_AVAILABILITY.agent, AGENT)
+        .innerJoin(AGENT_PERFORMANCE_SUMMARY).on(AGENT.eq(AGENT_PERFORMANCE_SUMMARY.agent))
         .where(
-            concertAgentAvailability.concert.concertId.eq(concertId),
-            concertAgentAvailability.accepting.isTrue()
+            CONCERT_AGENT_AVAILABILITY.concert.concertId.eq(concertId),
+            CONCERT_AGENT_AVAILABILITY.accepting.isTrue()
         );
 
-    OrderSpecifier<?>[] orderSpecifiers = QueryDslUtil.createOrderSpecifiers(
+    QueryDslUtil.applySorting(
+        contentQuery,
         pageable,
-        SORTABLE_PROPERTIES,
-        List.of((direction) -> new OrderSpecifier<>(direction, member.createdDate)));
-    contentQuery.orderBy(orderSpecifiers);
+        AgentPerformanceSummary.class,
+        AGENT_PERFORMANCE_SUMMARY.getMetadata().getName()
+    );
 
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
