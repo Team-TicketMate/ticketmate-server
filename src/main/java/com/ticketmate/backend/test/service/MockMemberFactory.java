@@ -141,7 +141,7 @@ public class MockMemberFactory {
         .concert(concert)
         .agent(agent)
         .accepting(true)
-        .introduction("...")
+        .introduction(koFaker.lorem().sentence(5, 0))
         .build();
   }
 }
