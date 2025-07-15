@@ -2,10 +2,14 @@ package com.ticketmate.backend.test.service;
 
 import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
 
+import com.ticketmate.backend.domain.concert.domain.entity.Concert;
+import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.constant.Role;
 import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
+import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
+import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.test.dto.request.LoginRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.exception.CustomException;
@@ -26,6 +30,7 @@ public class MockMemberFactory {
 
   private final Faker koFaker;
   private final Faker enFaker;
+
 
   /**
    * 개발자용 회원 Mock 데이터 생성
@@ -110,5 +115,33 @@ public class MockMemberFactory {
       log.error("Mock 회원은 TEST, TEST_ADMIN 권한만 부여할 수 있습니다. 요청된 ROLE: {}", role);
       throw new CustomException(ErrorCode.INVALID_MEMBER_ROLE_REQUEST);
     }
+  }
+
+  // AgentPerformanceSummary 객체 생성 및 랜덤 정수 부여
+  public AgentPerformanceSummary generatePerformanceSummary(Member agent){
+    int reviewCount = koFaker.number().numberBetween(0, 100);
+    int followerCount = koFaker.number().numberBetween(0, 300);
+    int recentSuccessCount = koFaker.number().numberBetween(0, 50);
+    double averageRating = koFaker.number().randomDouble(1, 0, 5);
+    long totalScore = koFaker.number().numberBetween(0, 100);
+
+    return AgentPerformanceSummary.builder()
+        .agent(agent)
+        .reviewCount(reviewCount)
+        .followerCount(followerCount)
+        .averageRating(averageRating)
+        .recentSuccessCount(recentSuccessCount)
+        .totalScore(totalScore)
+        .build();
+  }
+
+  // 공연에 대해 대리인의 수락 ON 설정하는 ConcertAgentAvailability 객체 생성
+  public ConcertAgentAvailability generateAvailability(Concert concert, Member agent) {
+    return ConcertAgentAvailability.builder()
+        .concert(concert)
+        .agent(agent)
+        .accepting(true)
+        .introduction(koFaker.lorem().sentence(5, 0))
+        .build();
   }
 }

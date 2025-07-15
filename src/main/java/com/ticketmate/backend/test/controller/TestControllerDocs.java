@@ -38,6 +38,12 @@ public interface TestControllerDocs {
           author = "Chuseok22",
           description = "회원 Mock 데이터 예외처리 로직 추가",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/315"
+      ),
+      @ApiChangeLog(
+          date = "2025-07-15",
+          author = "Yooonjeong",
+          description = "대리인 Mock 데이터 Summary 생성 및 랜덤 공연 수락 설정 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/417"
       )
   })
   @Operation(
@@ -58,6 +64,8 @@ public interface TestControllerDocs {
           - `count`가 1 미만일 경우 기본값 1로 처리됩니다.
           - 생성된 회원 정보는 랜덤 데이터 기반이며 실제 유저 데이터가 아닙니다.
           - 해당 API는 운영 환경에서 사용하지 않도록 주의해야 합니다.
+          - **DB에 콘서트 데이터가 최소 1개 이상 존재해야 합니다.**
+          - 대리인 및 의뢰인 정보가 함께 생성되며, 대리인 생성 시 해당 대리인의 활동 정보가 랜덤값으로 추가되고 DB에 존재하는 랜덤 공연에 대해 수락 ON 설정됩니다.
           
           ### ❌ 예외 처리
           - `INTERNAL_SERVER_ERROR (500)`: 회원 Mock 데이터 저장 중 예기치 못한 오류가 발생한 경우

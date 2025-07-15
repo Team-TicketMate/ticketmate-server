@@ -9,8 +9,10 @@ import static com.ticketmate.backend.global.util.common.CommonUtil.null2ZeroInt;
 import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
 import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
 import com.ticketmate.backend.domain.concert.domain.entity.Concert;
+import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
+import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
 import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
 import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
@@ -18,7 +20,9 @@ import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
 import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
@@ -68,6 +72,8 @@ public class TestService {
   private final PortfolioRepository portfolioRepository;
   private final TransactionTemplate transactionTemplate;
   private final MemberService memberService;
+  private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
+  private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
 
     /*
     ======================================회원======================================
@@ -115,8 +121,17 @@ public class TestService {
   @Transactional
   public CompletableFuture<Void> generateMemberMockDataAsync(int count) {
     long startMs = System.currentTimeMillis();
+
+    List<Concert> concertList = concertRepository.findAll();
+    if(concertList.isEmpty()){
+      log.error("저장된 공연이 없습니다. 공연 Mock 데이터를 먼저 생성하세요.");
+      throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    }
+
     List<CompletableFuture<Void>> futures = new ArrayList<>();
     List<Member> memberList = Collections.synchronizedList(new ArrayList<>());
+    List<AgentPerformanceSummary> summaryList = Collections.synchronizedList(new ArrayList<>());
+    List<ConcertAgentAvailability> availabilityList = Collections.synchronizedList(new ArrayList<>());
 
     // 각 회원 생성을 별도 스레드에서 처리
     for (int i = 0; i < count; i++) {
@@ -134,10 +149,21 @@ public class TestService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .thenApply(v -> {
+        .thenApply(v -> transactionTemplate.execute(status -> {
           try {
             // 트랜잭션 내에서 일괄 저장
             List<Member> savedMemberList = memberRepository.saveAll(memberList);
+
+            for(Member savedMember : savedMemberList){
+              if(savedMember.getMemberType() == AGENT){
+                summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
+
+                Concert randomConcert = concertList.get(koFaker.random().nextInt(concertList.size()));
+                availabilityList.add(mockMemberFactory.generateAvailability(randomConcert, savedMember));
+              }
+            }
+            agentPerformanceSummaryRepository.saveAll(summaryList);
+            concertAgentAvailabilityRepository.saveAll(availabilityList);
             long endMs = System.currentTimeMillis();
             log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
                 savedMemberList.size(), endMs - startMs);
@@ -146,7 +172,7 @@ public class TestService {
             log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
             throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
           }
-        });
+        })).thenAccept(v -> {});
   }
 
   /**
