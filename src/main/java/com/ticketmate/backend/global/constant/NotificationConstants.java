@@ -6,7 +6,7 @@ import lombok.experimental.UtilityClass;
 public final class NotificationConstants {
 
   // FCM Token
-  public static final long FCM_TOKEN_TTL = 30 * 24 * 60L; // FCM 토큰 30일 후 파기
+  public static final long FCM_TOKEN_TTL = 30 * 24 * 60 * 60L; // FCM 토큰 30일 후 파기
 
   // Notification
   public static final String NOTIFICATION_TTL_PREFIX = "ttl";
