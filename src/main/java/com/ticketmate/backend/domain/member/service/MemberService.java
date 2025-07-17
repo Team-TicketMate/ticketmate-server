@@ -11,6 +11,10 @@ import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummar
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
+import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
+import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -34,6 +38,7 @@ public class MemberService {
   private final EntityMapper entityMapper;
   private final MemberRepository memberRepository;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
 
   /**
    * JWT 기반 회원정보 조회
@@ -102,7 +107,8 @@ public class MemberService {
   }
 
   @Transactional
-  public void promoteToAgent(Member member){
+  public void promoteToAgent(Portfolio portfolio){
+    Member member = portfolio.getMember();
     member.setMemberType(MemberType.AGENT);
 
     if(!agentPerformanceSummaryRepository.existsById(member.getMemberId())){
@@ -116,5 +122,7 @@ public class MemberService {
           .build();
       agentPerformanceSummaryRepository.save(summary);
     }
+
+    embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
   }
 }
