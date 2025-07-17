@@ -9,7 +9,7 @@ public enum ApplicationFormStatus {
 
   PENDING("대기"),
 
-  ACCEPTED("승인"),
+  APPROVED("승인"),
 
   CANCELED("취소"),
 

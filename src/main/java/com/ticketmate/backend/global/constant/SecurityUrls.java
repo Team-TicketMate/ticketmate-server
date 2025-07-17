@@ -60,8 +60,9 @@ public final class SecurityUrls {
       // FireBase 서비스워커
       "/firebase-messaging-sw.js",
 
-      // fmc test용 정적리소스
+      // FCM test용 정적리소스
       "/notification.html",
+      "/ticketmate-logo.png",
 
       // WebSocket 관련 Url (StompChannelInterceptor 내부에서 검증)
       "/chat/**",
@@ -71,6 +72,7 @@ public final class SecurityUrls {
       "/chat-jwt-local2.html",
       "/chat-jwt-local3.html"
   );
+
   /**
    * 관리자 권한이 필요한 URL 패턴 목록
    */

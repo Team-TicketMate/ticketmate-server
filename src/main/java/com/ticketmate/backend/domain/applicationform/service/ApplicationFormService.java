@@ -34,13 +34,14 @@ import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
 import com.ticketmate.backend.domain.concert.service.ConcertService;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
-import com.ticketmate.backend.domain.notification.service.FcmService;
+import com.ticketmate.backend.domain.notification.domain.constant.ApplicationFormApproveNotificationType;
+import com.ticketmate.backend.domain.notification.domain.constant.ApplicationFormRejectNotificationType;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
+import com.ticketmate.backend.domain.notification.service.NotificationService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,12 +63,12 @@ public class ApplicationFormService {
   private final ApplicationFormRepository applicationFormRepository;
   private final ApplicationFormRepositoryCustom applicationFormRepositoryCustom;
   private final ApplicationFormDetailRepositoryCustom applicationFormDetailRepositoryCustom;
-  private final NotificationUtil notificationUtil;
-  private final FcmService fcmService;
+  private final ConcertService concertService;
   private final MemberService memberService;
+  @Qualifier("web")
+  private final NotificationService notificationService;
   private final EntityMapper entityMapper;
   private final ChatRoomRepository chatRoomRepository;
-  private final ConcertService concertService;
   private final RejectionReasonService rejectionReasonService;
 
   /**
@@ -230,7 +232,11 @@ public class ApplicationFormService {
     // 거절 사유 저장 or 업데이트
     rejectionReasonService.saveOrUpdateRejectionReason(applicationForm, request);
 
-    // TODO: 의뢰인에게 신청서 거절 알림 발송 필요 (추후 알림로직 개편 후 작성예정)
+    // 알림 페이로드 생성
+    NotificationPayload payload = buildRejectNotificationPayload(agent, request);
+
+    // 알림 발송
+    notificationService.sendToMember(applicationForm.getClient().getMemberId(), payload);
   }
 
   /**
@@ -247,9 +253,9 @@ public class ApplicationFormService {
     ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
 
     // '수락' 가능여부 검증
-    validateApplicationFormAction(applicationForm, agent, ApplicationFormAction.ACCEPT);
+    validateApplicationFormAction(applicationForm, agent, ApplicationFormAction.APPROVE);
 
-    // TODO: 아래 로직 수정필요 -> 알림, 채팅 리팩토링 진행 시 수정
+    // TODO: 아래 로직 수정필요 -> 채팅 리팩토링 진행 시 수정
     /**
      * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 수락 자체가 불가합니다.
      * 채팅방은 공연당 하나씩 생성합니다.
@@ -283,11 +289,9 @@ public class ApplicationFormService {
     chatRoomRepository.save(chatRoom);
 
     // 알림전송
-    if (notificationUtil.existsFcmToken(client.getMemberId())) {
-      NotificationPayloadRequest payloadRequest = notificationUtil.approveNotification(agent);
+    NotificationPayload payload = buildApproveNotificationPayload(agent);
 
-      fcmService.sendNotification(client.getMemberId(), payloadRequest);
-    }
+    notificationService.sendToMember(client.getMemberId(), payload);
 
     return chatRoom.getChatRoomId();
   }
@@ -473,7 +477,7 @@ public class ApplicationFormService {
         validateApplicationFormOwner(applicationForm, member); // 본인 소유 신청서 검증
         validateApplicationFormStatus(applicationForm, action); // 신청서 상태 검증
       }
-      case REJECT, ACCEPT -> { // '거절', '수락'을 하려는 경우 (대리인만 가능)
+      case REJECT, APPROVE -> { // '거절', '수락'을 하려는 경우 (대리인만 가능)
         memberService.validateMemberType(member, AGENT); // 대리인 검증
         validateAgentForApplicationForm(applicationForm, member); // 요청받은 신청서인지 검증
         validateApplicationFormStatus(applicationForm, action); // 신청서 상태 검증
@@ -499,7 +503,7 @@ public class ApplicationFormService {
           throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
         }
       }
-      case CANCEL, REJECT, ACCEPT -> {
+      case CANCEL, REJECT, APPROVE -> {
         if (!currentStatus.equals(ApplicationFormStatus.PENDING)) {
           log.error("{} 불가 상태의 신청서입니다. 신청서 상태: {}", action.getDescription(), currentStatus);
           throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
@@ -544,12 +548,28 @@ public class ApplicationFormService {
    * @param request 거절 사유 및 메모
    */
   private void validateOtherMemo(ApplicationFormRejectRequest request) {
-    // 거절사유가 기타일때 메모는 2글자 이상이여야 한다.
+    // 거절사유가 기타일때 기타 메모는 2글자 이상
     if (request.getApplicationFormRejectedType().equals(ApplicationFormRejectedType.OTHER)) {
       if (CommonUtil.nvl(request.getOtherMemo(), "").isEmpty() || request.getOtherMemo().length() < 2) {
         log.error("거절사유가 OTHER인 경우 메모는 2글자 이상 작성해야합니다. 요청된 메모: {}", request.getOtherMemo());
         throw new CustomException(ErrorCode.INVALID_MEMO_REQUEST);
       }
     }
+  }
+
+  /**
+   * 신청서 수락 알림 payload 생성
+   */
+  private NotificationPayload buildApproveNotificationPayload(Member agent) {
+    return ApplicationFormApproveNotificationType.APPROVE.toPayload(agent);
+  }
+
+  /**
+   * 신청서 거절 알림 payload 생성
+   */
+  private NotificationPayload buildRejectNotificationPayload(Member agent, ApplicationFormRejectRequest request) {
+    ApplicationFormRejectNotificationType notificationType =
+        ApplicationFormRejectNotificationType.from(request.getApplicationFormRejectedType());
+    return notificationType.toPayload(agent, request.getOtherMemo());
   }
 }

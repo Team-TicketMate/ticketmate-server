@@ -147,10 +147,11 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @PatchMapping(value = "/portfolio/{portfolio-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<UUID> reviewPortfolio(
+  public ResponseEntity<Void> reviewPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
-    return ResponseEntity.ok(adminService.reviewPortfolioCompleted(portfolioId, request));
+    adminService.reviewPortfolioCompleted(portfolioId, request);
+    return ResponseEntity.ok().build();
   }
 }

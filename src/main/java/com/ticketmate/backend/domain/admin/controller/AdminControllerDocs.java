@@ -427,9 +427,16 @@ public interface AdminControllerDocs {
       CustomOAuth2User customOAuth2User,
       PortfolioFilteredRequest request);
 
-
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-16",
+          author = "Chuseok22",
+          description = "상세 조회 시 '리뷰중' 알림전송 제거",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/419"
+      )
+  })
   @Operation(
-      summary = "의뢰인 -> 대리자로 바꾸기 위한 포트폴리오 상세 조회",
+      summary = "포트폴리오 상세 조회",
       description = """
           
           이 API는 관리자 인증이 필요합니다
@@ -441,15 +448,20 @@ public interface AdminControllerDocs {
           - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관라지에게 필요한 데이터를 반환합니다.
           
           ### 알림전송 특이사항
-          - **PENDING_REVIEW** 상태의 포트폴리오를 **IN_REVIEW** 상태로 변경합니다.
-          - 변경하며 해당 포트폴리오를 올린 사용자에 대해서 알림을 발송합니다.
-          - 백엔드측 알림구현은 Web푸시 알림을 구현하여 전송합니다.
-          - 푸시알림시 1:N 플랫폼의 사용자를 대비하기 위해 기존에 만들어놓은 RedisHash스키마를 활용하여 사용자의 모든 플랫폼에 알림을 전송합니다.
+          - **PENDING_REVIEW** 상태의 포트폴리오를 **REVIEWING** 상태로 변경합니다.
           """
   )
   ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
       CustomOAuth2User customOAuth2User, UUID portfolioId);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-16",
+          author = "Chuseok22",
+          description = "포트폴리오 상태 ACCEPTED -> APPROVED 수정 및 알림 전송 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/419"
+      )
+  })
   @Operation(
       summary = "요청한 포트폴리오 승인, 반려처리",
       description = """
@@ -462,13 +474,13 @@ public interface AdminControllerDocs {
           
           ### PortfolioType
           
-          ACCEPTED ("승인된 포트폴리오")
+          APPROVED ("승인된 포트폴리오")
           
           REJECTED ("반려된 포트폴리오")
           
           ### 유의사항
           - 관리자가 승인 요청이된 포트폴리오를 승인 및 반려하는 작업입니다.
-          - 승인(ACCEPTED)시 해당 포트폴리오의 상태가 "ACCEPTED("승인된 포트폴리오")" 로 변경됩니다.
+          - 승인(APPROVED)시 해당 포트폴리오의 상태가 "APPROVED("승인된 포트폴리오")" 로 변경됩니다.
           - 반려(REJECTED)시 해당 포트폴리오의 상태가 "REJECTED("반려된 포트폴리오")" 로 변경됩니다.
           
           ### 알림전송 특이사항
@@ -478,6 +490,6 @@ public interface AdminControllerDocs {
           - 푸시알림시 1:N 플랫폼의 사용자를 대비하기 위해 기존에 만들어놓은 RedisHash스키마를 활용하여 사용자의 모든 플랫폼에 알림을 전송합니다.
           """
   )
-  ResponseEntity<UUID> reviewPortfolio(
+  ResponseEntity<Void> reviewPortfolio(
       CustomOAuth2User customOAuth2User, UUID portfolioId, PortfolioStatusUpdateRequest request);
 }
