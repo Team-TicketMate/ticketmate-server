@@ -8,14 +8,15 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.domain.admin.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -23,9 +24,9 @@ import org.springframework.http.ResponseEntity;
 
 public interface AdminControllerDocs {
 
-    /*
-    ======================================공연장======================================
-     */
+  /*
+  ======================================공연장======================================
+   */
 
   @Operation(
       summary = "공연장 정보 저장",
@@ -134,9 +135,9 @@ public interface AdminControllerDocs {
       UUID concertHallId,
       ConcertHallInfoEditRequest request);
 
-    /*
-    ======================================공연======================================
-     */
+  /*
+  ======================================공연======================================
+   */
 
   @Operation(
       summary = "공연 정보 저장",
@@ -358,9 +359,9 @@ public interface AdminControllerDocs {
       UUID concertId,
       ConcertInfoEditRequest request);
 
-    /*
-    ======================================포트폴리오======================================
-     */
+  /*
+  ======================================포트폴리오======================================
+   */
 
   @ApiChangeLogs({
       @ApiChangeLog(
@@ -492,4 +493,37 @@ public interface AdminControllerDocs {
   )
   ResponseEntity<Void> reviewPortfolio(
       CustomOAuth2User customOAuth2User, UUID portfolioId, PortfolioStatusUpdateRequest request);
+
+  /*
+  ======================================SMS======================================
+   */
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-17",
+          author = "Chuseok22",
+          description = "CoolSMS 잔액조회",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/426"
+      )
+  })
+  @Operation(
+      summary = "CoolSMS 잔액조회",
+      description = """
+          
+          이 API는 관리자 인증이 필요합니다
+          
+          ### 요청 파라미터
+          `없음`
+          
+          ### 응답 (CoolSmsBalanceResponse)
+          - `balance` (float): 잔여 금액
+          - `point` (float): 잔여 포인트
+          
+          ### 유의사항
+          - 잔여 포인트는 금액처럼 사용할 수 있습니다.
+          - 추후 필요하다면 일정 금액 이하로 떨어질 시 관리자에게 알림을 전송하는 기능을 추가
+          """
+  )
+  ResponseEntity<CoolSmsBalanceResponse> getBalance(
+      CustomOAuth2User customOAuth2User);
 }

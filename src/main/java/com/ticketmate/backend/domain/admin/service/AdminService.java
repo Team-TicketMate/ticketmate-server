@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.domain.admin.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
@@ -46,6 +47,8 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.model.Balance;
+import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -71,6 +74,7 @@ public class AdminService {
   private final EntityMapper entityMapper;
   private final MemberService memberService;
   private final PortfolioService portfolioService;
+  private final DefaultMessageService messageService;
 
   /*
   ======================================공연======================================
@@ -431,5 +435,20 @@ public class AdminService {
 
     notificationService.sendToMember(member.getMemberId(), payload);
     log.debug("포트폴리오: {}, {} 완료: {}", portfolio.getPortfolioId(), portfolioType.getDescription(), portfolioType);
+  }
+
+  /*
+  ======================================SMS======================================
+   */
+
+  /**
+   * CoolSMS 잔액 조회
+   */
+  public CoolSmsBalanceResponse getBalance() {
+    Balance balance = messageService.getBalance();
+    return CoolSmsBalanceResponse.builder()
+        .balance(balance.getBalance() != null ? balance.getBalance() : 0f)
+        .point(balance.getPoint() != null ? balance.getPoint() : 0f)
+        .build();
   }
 }
