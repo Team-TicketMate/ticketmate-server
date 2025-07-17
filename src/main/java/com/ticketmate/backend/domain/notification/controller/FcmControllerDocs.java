@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.notification.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.notification.domain.dto.request.FcmTokenSaveRequest;
 import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
 import io.swagger.v3.oas.annotations.Operation;

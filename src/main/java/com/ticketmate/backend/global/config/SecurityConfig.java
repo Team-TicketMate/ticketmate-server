@@ -2,7 +2,7 @@ package com.ticketmate.backend.global.config;
 
 import static com.ticketmate.backend.global.constant.SecurityUrls.ALLOWED_ORIGINS;
 
-import com.ticketmate.backend.domain.member.service.CustomOAuth2UserService;
+import com.ticketmate.backend.domain.auth.service.CustomOAuth2UserService;
 import com.ticketmate.backend.global.constant.AuthConstants;
 import com.ticketmate.backend.global.constant.SecurityUrls;
 import com.ticketmate.backend.global.filter.CustomLogoutHandler;

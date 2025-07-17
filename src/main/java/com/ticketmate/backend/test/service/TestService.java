@@ -19,7 +19,7 @@ import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
