@@ -21,6 +21,9 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
 
+  private static final QPortfolio PORTFOLIO = QPortfolio.portfolio;
+  private static final QMember MEMBER = QMember.member;
+
   /**
    * 포트폴리오 필터링 조회
    *
@@ -37,31 +40,28 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
       PortfolioType portfolioType,
       Pageable pageable) {
 
-    QPortfolio portfolio = QPortfolio.portfolio;
-    QMember member = QMember.member;
-
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
-        QueryDslUtil.likeIgnoreCase(portfolio.member.username, username),
-        QueryDslUtil.likeIgnoreCase(portfolio.member.nickname, nickname),
-        QueryDslUtil.likeIgnoreCase(portfolio.member.name, name),
-        QueryDslUtil.eqIfNotNull(portfolio.portfolioType, portfolioType)
+        QueryDslUtil.likeIgnoreCase(PORTFOLIO.member.username, username),
+        QueryDslUtil.likeIgnoreCase(PORTFOLIO.member.nickname, nickname),
+        QueryDslUtil.likeIgnoreCase(PORTFOLIO.member.name, name),
+        QueryDslUtil.eqIfNotNull(PORTFOLIO.portfolioType, portfolioType)
     );
 
     // 쿼리 작성
     JPAQuery<PortfolioFilteredAdminResponse> contentQuery = queryFactory
         .select(Projections.constructor(PortfolioFilteredAdminResponse.class,
-            portfolio.portfolioId,
-            portfolio.member.memberId,
-            portfolio.member.username,
-            portfolio.member.nickname,
-            portfolio.member.name,
-            portfolio.portfolioType,
-            portfolio.createdDate,
-            portfolio.updatedDate
+            PORTFOLIO.portfolioId,
+            PORTFOLIO.member.memberId,
+            PORTFOLIO.member.username,
+            PORTFOLIO.member.nickname,
+            PORTFOLIO.member.name,
+            PORTFOLIO.portfolioType,
+            PORTFOLIO.createdDate,
+            PORTFOLIO.updatedDate
         ))
-        .from(portfolio)
-        .innerJoin(portfolio.member, member)
+        .from(PORTFOLIO)
+        .innerJoin(PORTFOLIO.member, MEMBER)
         .where(whereClause);
 
     // applySorting 동적 정렬 적용
@@ -69,13 +69,13 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
         contentQuery,
         pageable,
         Portfolio.class,
-        portfolio.getMetadata().getName(
-        ));
+        PORTFOLIO.getMetadata().getName()
+    );
 
     // countQuery 생성
     JPAQuery<Long> countQuery = queryFactory
-        .select(portfolio.count())
-        .from(portfolio)
+        .select(PORTFOLIO.count())
+        .from(PORTFOLIO)
         .where(whereClause);
 
     return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);

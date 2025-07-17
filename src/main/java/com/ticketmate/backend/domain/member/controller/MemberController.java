@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.member.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;

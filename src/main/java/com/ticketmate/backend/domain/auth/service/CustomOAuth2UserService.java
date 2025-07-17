@@ -1,13 +1,13 @@
-package com.ticketmate.backend.domain.member.service;
+package com.ticketmate.backend.domain.auth.service;
 
 import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.constant.Role;
 import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.domain.dto.response.KakaoResponse;
-import com.ticketmate.backend.domain.member.domain.dto.response.NaverResponse;
-import com.ticketmate.backend.domain.member.domain.dto.response.OAuth2Response;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.response.KakaoResponse;
+import com.ticketmate.backend.domain.auth.domain.dto.response.NaverResponse;
+import com.ticketmate.backend.domain.auth.domain.dto.response.OAuth2Response;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.global.exception.CustomException;

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.member.domain.dto.response;
+package com.ticketmate.backend.domain.auth.domain.dto.response;
 
 import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
 

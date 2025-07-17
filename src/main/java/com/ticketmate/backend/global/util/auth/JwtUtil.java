@@ -4,8 +4,8 @@ import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_CATEGO
 import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
 import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_CATEGORY;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.service.CustomOAuth2UserService;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.service.CustomOAuth2UserService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;

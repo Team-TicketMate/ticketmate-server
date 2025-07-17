@@ -14,7 +14,7 @@ import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFiltered
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -147,10 +147,11 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @PatchMapping(value = "/portfolio/{portfolio-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<UUID> reviewPortfolio(
+  public ResponseEntity<Void> reviewPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
-    return ResponseEntity.ok(adminService.reviewPortfolioCompleted(portfolioId, request));
+    adminService.reviewPortfolioCompleted(portfolioId, request);
+    return ResponseEntity.ok().build();
   }
 }

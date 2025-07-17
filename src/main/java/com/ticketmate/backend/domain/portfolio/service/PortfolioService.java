@@ -56,6 +56,19 @@ public class PortfolioService {
   }
 
   /**
+   * portfolioId 해당하는 포트폴리오 반환
+   *
+   * @param portfolioId 포트폴리오 PK
+   */
+  public Portfolio findPortfolioById(UUID portfolioId) {
+    return portfolioRepository.findById(portfolioId)
+        .orElseThrow(() -> {
+          log.error("요청한 PK값에 해당하는 포트폴리오를 찾을 수 없습니다. 요청 PK: {}", portfolioId);
+          return new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND);
+        });
+  }
+
+  /**
    * 포트폴리오 엔티티 생성
    */
   private Portfolio createPortfolio(PortfolioRequest request, Member client) {

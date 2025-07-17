@@ -4,7 +4,7 @@ import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_
 import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
 import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.auth.CookieUtil;

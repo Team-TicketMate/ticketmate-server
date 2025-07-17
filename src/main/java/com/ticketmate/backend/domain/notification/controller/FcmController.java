@@ -1,10 +1,10 @@
 package com.ticketmate.backend.domain.notification.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.notification.domain.dto.request.FcmTokenSaveRequest;
 import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.service.FcmService;
+import com.ticketmate.backend.domain.notification.service.FcmTokenService;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class FcmController implements FcmControllerDocs {
 
-  private final FcmService fcmService;
+  private final FcmTokenService fcmTokenService;
 
   @Override
   @PostMapping(value = "")
@@ -34,6 +34,6 @@ public class FcmController implements FcmControllerDocs {
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @RequestBody @Valid FcmTokenSaveRequest request) {
     Member member = customOAuth2User.getMember();
-    return ResponseEntity.ok(fcmService.saveFcmToken(request, member));
+    return ResponseEntity.ok(fcmTokenService.saveFcmToken(request, member));
   }
 }
