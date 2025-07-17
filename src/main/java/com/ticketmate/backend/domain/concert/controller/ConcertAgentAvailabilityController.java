@@ -4,7 +4,7 @@ import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAccepting
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.service.ConcertAgentAvailabilityService;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

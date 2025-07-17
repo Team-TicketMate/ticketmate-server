@@ -14,7 +14,7 @@ import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFiltered
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
