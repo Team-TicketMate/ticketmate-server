@@ -59,7 +59,7 @@ public class AuthService {
     jwtUtil.deleteRefreshToken(refreshToken);
 
     // refreshToken 저장
-    // RefreshToken을 Redisd에 저장 (key: RT:memberId)
+    // RefreshToken을 Redis에 저장 (key: RT:memberId)
     jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), newRefreshToken);
 
     // 쿠키에 accessToken, refreshToken 추가
@@ -76,7 +76,8 @@ public class AuthService {
     String code = generateCode(); // 6자리 인증코드 생성
     String normalizedPhoneNumber =
         normalizeAndRemoveSpecialCharacters(request.getPhoneNumber()); // 요청 전화번호 정규화 (01012345678)
-    saveCode(normalizedPhoneNumber, code); // Redis TTL 저장
+    String key = generateKey(normalizedPhoneNumber); // Redis Key 생성
+    saveCode(key, code); // Redis TTL 저장
     String message = generateMessage(code); // 인증문자 메시지 생성
     smsService.sendSms(normalizedPhoneNumber, message); // 인증문자 발송
   }
@@ -90,12 +91,24 @@ public class AuthService {
   public void verifyVerificationCode(VerifyCodeRequest request) {
     String normalizedPhoneNumber =
         normalizeAndRemoveSpecialCharacters(request.getPhoneNumber()); // 요청 전화번호 정규화 (01012345678)
-    String savedCode = getCode(normalizedPhoneNumber);
+    String key = generateKey(normalizedPhoneNumber); // Redis Key 생성
+    String savedCode = getCode(key); // Redis에 저장된 인증코드 조회
     if (!savedCode.equals(request.getCode())) {
-      log.error("인증번호가 일치하지 않습니다. 인증번호: {}, 요청값: {}", savedCode, request.getCode());
+      log.error("인증번호가 일치하지 않습니다.");
       throw new CustomException(ErrorCode.VERIFY_CODE_NOT_SAME);
     }
     log.debug("본인인증 성공");
+    deleteCode(key);
+  }
+
+  /**
+   * Redis에 저장할 Key를 생성합니다 {VERIF_CODE:01012345678}
+   *
+   * @param phone 정규화된 전화번호 {01012345678}
+   * @return VERIF_CODE:01012345678
+   */
+  private String generateKey(String phone) {
+    return REDIS_VERIFICATION_KEY + phone;
   }
 
   /**
@@ -104,18 +117,17 @@ public class AuthService {
   private String generateCode() {
     SecureRandom secureRandom = new SecureRandom();
     int number = secureRandom.nextInt(100_000, 1_000_000); // 6자리 정수 생성
-    log.debug("6자리 인증코드 생성: {}", number);
+    log.debug("6자리 인증코드 생성 성공");
     return String.valueOf(number);
   }
 
   /**
    * Redis TTL [Key: VERIF_CODE:01012345678] 인증코드 저장
    *
-   * @param phone 인증 전화번호
-   * @param code  6자리 인증코드
+   * @param key  Redis TTL Key
+   * @param code 6자리 인증코드
    */
-  private void saveCode(String phone, String code) {
-    String key = REDIS_VERIFICATION_KEY + phone;
+  private void saveCode(String key, String code) {
     log.debug("Redis에 저장된 TTL Key: {}", key);
     redisTemplate.opsForValue()
         .set(key, code, SMS_CODE_TTL_MIN, TimeUnit.MINUTES);
@@ -124,18 +136,26 @@ public class AuthService {
   /**
    * Redis에서 저장된 인증번호 조회
    *
-   * @param phone 인증 전화번호
+   * @param key Redis TTL Key
    * @return Redis에 저장된 인증번호
    */
-  private String getCode(String phone) {
-    String key = REDIS_VERIFICATION_KEY + phone;
+  private String getCode(String key) {
     String code = redisTemplate.opsForValue().get(key);
     if (CommonUtil.nvl(code, "").isEmpty()) {
       log.error("인증번호가 만료되었거나, 존재하지 않습니다.");
       throw new CustomException(ErrorCode.VERIFY_CODE_EXPIRED_OR_NOT_FOUND);
     }
-    log.debug("전화번호: {}, Redis에 저장된 인증번호: {}", phone, code);
     return code;
+  }
+
+  /**
+   * Redis에 저장된 인증번호 삭제
+   *
+   * @param key Redis TTL Key
+   */
+  private void deleteCode(String key) {
+    redisTemplate.delete(key);
+    log.debug("Redis에 저장된 인증번호 삭제 성공: {}", key);
   }
 
   /**

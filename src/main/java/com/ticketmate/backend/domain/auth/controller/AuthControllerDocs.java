@@ -3,7 +3,6 @@ package com.ticketmate.backend.domain.auth.controller;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.auth.domain.dto.request.SendCodeRequest;
 import com.ticketmate.backend.domain.auth.domain.dto.request.VerifyCodeRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,8 +48,7 @@ public interface AuthControllerDocs {
   )
   ResponseEntity<Void> reissue(
       HttpServletRequest request,
-      HttpServletResponse response,
-      CustomOAuth2User customOAuth2User);
+      HttpServletResponse response);
 
   @ApiChangeLogs({
       @ApiChangeLog(

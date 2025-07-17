@@ -1,6 +1,5 @@
 package com.ticketmate.backend.domain.auth.controller;
 
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.auth.domain.dto.request.SendCodeRequest;
 import com.ticketmate.backend.domain.auth.domain.dto.request.VerifyCodeRequest;
 import com.ticketmate.backend.domain.auth.service.AuthService;
@@ -11,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +31,7 @@ public class AuthController implements AuthControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Void> reissue(
       HttpServletRequest request,
-      HttpServletResponse response,
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+      HttpServletResponse response) {
     authService.reissue(request, response);
     return ResponseEntity.ok().build();
   }
