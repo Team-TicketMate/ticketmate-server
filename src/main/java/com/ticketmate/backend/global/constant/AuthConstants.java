@@ -24,4 +24,9 @@ public final class AuthConstants {
   public static final String ADMIN_RESPONSE_PREFIX = "/admin/";
   public static final String LOGOUT_URL = "/api/auth/logout";
   public static final String LOGOUT_SUCCESS_URL = "/";
+
+  // SMS
+  public static final long SMS_CODE_TTL_MIN = 5;
+  public static final String REDIS_VERIFICATION_KEY = "VERIF_CODE:";
+  public static final String SMS_VERIFICATION_MESSAGE = "[Ticketmate] 인증번호 [{code}]를 입력해주세요.";
 }

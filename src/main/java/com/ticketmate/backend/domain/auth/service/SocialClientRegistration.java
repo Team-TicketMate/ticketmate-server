@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.member.service;
+package com.ticketmate.backend.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

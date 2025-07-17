@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.portfolio.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.portfolio.domain.dto.request.PortfolioRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.portfolio.service.PortfolioService;

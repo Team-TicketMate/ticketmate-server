@@ -1,7 +1,10 @@
-package com.ticketmate.backend.domain.member.controller;
+package com.ticketmate.backend.domain.auth.controller;
 
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.chuseok22.apichangelog.annotation.ApiChangeLog;
+import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
+import com.ticketmate.backend.domain.auth.domain.dto.request.SendCodeRequest;
+import com.ticketmate.backend.domain.auth.domain.dto.request.VerifyCodeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,5 +46,63 @@ public interface AuthControllerDocs {
           - 리프레시 토큰은 자동으로 쿠키로 전송되며, 쿠키는 HTTP-Only 속성으로 설정되어 있기 때문에 클라이언트에서 접근할 수 없습니다.
           """
   )
-  ResponseEntity<Void> reissue(HttpServletRequest request, HttpServletResponse response, CustomOAuth2User customOAuth2User);
+  ResponseEntity<Void> reissue(
+      HttpServletRequest request,
+      HttpServletResponse response);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-17",
+          author = "Chuseok22",
+          description = "본인인증 6자리 인증문자 발송 api",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/423"
+      )
+  })
+  @Operation(
+      summary = "본인인증 6자리 인증문자 발송",
+      description = """
+          이 API는 인증이 필요하지 않습니다.
+          
+          ### 요청 파라미터
+          - **phoneNumber** (String): 인증문자를 발송할 전화번호 [필수]
+          
+          ### 반환값
+          **없음**
+          
+          ### 유의사항
+          - 전화번호 형태는 서버측에서 자동으로 "01012345678" 형태로 정규화합니다
+          """
+  )
+  ResponseEntity<Void> sendVerificationCode(
+      SendCodeRequest request
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-17",
+          author = "Chuseok22",
+          description = "본인인증 6자리 인증문자 검증 api",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/423"
+      )
+  })
+  @Operation(
+      summary = "본인인증 6자리 인증문자 검증",
+      description = """
+          이 API는 인증이 필요하지 않습니다.
+          
+          ### 요청 파라미터
+          - **phoneNumber** (String): 인증문자를 발송한 전화번호 [필수]
+          - **code** (String): 인증번호 6자리 [필수]
+          
+          ### 반환값
+          **없음**
+          
+          ### 유의사항
+          - 전화번호 형태는 서버측에서 자동으로 "01012345678" 형태로 정규화합니다
+          - 인증번호는 숫자 6자리만 요청가능합니다
+          """
+  )
+  ResponseEntity<Void> verifyVerificationCode(
+      VerifyCodeRequest request
+  );
 }

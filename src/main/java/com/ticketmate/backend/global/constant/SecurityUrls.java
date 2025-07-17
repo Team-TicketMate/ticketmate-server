@@ -45,6 +45,8 @@ public final class SecurityUrls {
       // API
       "/", // 홈
       "/api/auth/reissue", // accessToken 재발급
+      "/api/auth/send-code", // 인증문자 발송
+      "/api/auth/verify", // 인증문자 검증
       "/api/oauth2/**", // 소셜 로그인
       "/login/**", // 기본 Spring Security OAuth2 로그인경로
       "/api/concert/**", // 공연 조회
