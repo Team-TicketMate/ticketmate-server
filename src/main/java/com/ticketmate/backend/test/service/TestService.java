@@ -25,8 +25,10 @@ import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.domain.member.service.MemberService;
+import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
@@ -74,6 +76,7 @@ public class TestService {
   private final MemberService memberService;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
 
     /*
     ======================================회원======================================
@@ -97,7 +100,13 @@ public class TestService {
     Member member = memberRepository.findByUsername(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT)) {
-      memberService.promoteToAgent(member);
+      Portfolio testPortfolio = Portfolio.builder()
+          .member(member)
+          .portfolioDescription("테스트 대리인 한줄 소개입니다.")
+          .portfolioType(PortfolioType.ACCEPTED)
+          .build();
+      portfolioRepository.save(testPortfolio);
+      memberService.promoteToAgent(testPortfolio);
       log.debug("테스트 유저 {}를 대리인으로 승격 처리했습니다.", member.getMemberId());
     }
 
@@ -132,6 +141,7 @@ public class TestService {
     List<Member> memberList = Collections.synchronizedList(new ArrayList<>());
     List<AgentPerformanceSummary> summaryList = Collections.synchronizedList(new ArrayList<>());
     List<ConcertAgentAvailability> availabilityList = Collections.synchronizedList(new ArrayList<>());
+    List<Portfolio> portfolioList = Collections.synchronizedList(new ArrayList<>());
 
     // 각 회원 생성을 별도 스레드에서 처리
     for (int i = 0; i < count; i++) {
@@ -156,14 +166,26 @@ public class TestService {
 
             for(Member savedMember : savedMemberList){
               if(savedMember.getMemberType() == AGENT){
+                // AgentPerformanceSummary 생성 및 추가
                 summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
 
+                // ConcertAgentAvailability 생성 및 추가
                 Concert randomConcert = concertList.get(koFaker.random().nextInt(concertList.size()));
                 availabilityList.add(mockMemberFactory.generateAvailability(randomConcert, savedMember));
-              }
+
+                // Portfolio 생성 및 추가
+                Portfolio portfolio = mockPortfolioFactory.generate(savedMember);
+                portfolioList.add(portfolio);}
             }
             agentPerformanceSummaryRepository.saveAll(summaryList);
             concertAgentAvailabilityRepository.saveAll(availabilityList);
+            List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
+
+            // 대리인 Embedding 생성
+            for(Portfolio portfolio : savedPortfolioList){
+              embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
+            }
+
             long endMs = System.currentTimeMillis();
             log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
                 savedMemberList.size(), endMs - startMs);
