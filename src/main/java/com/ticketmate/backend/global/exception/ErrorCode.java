@@ -32,6 +32,10 @@ public enum ErrorCode {
 
   COOKIES_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠키가 존재하지 않습니다."),
 
+  VERIFY_CODE_EXPIRED_OR_NOT_FOUND(HttpStatus.NOT_FOUND, "인증코드가 만료되었거나, 존재하지 않습니다."),
+
+  VERIFY_CODE_NOT_SAME(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
+
   // OAUTH2
 
   INVALID_SOCIAL_PLATFORM(HttpStatus.BAD_REQUEST, "잘못된 소셜 플랫폼이 요청되었습니다."),
@@ -183,6 +187,17 @@ public enum ErrorCode {
   // PAGEABLE
 
   INVALID_SORT_FIELD(HttpStatus.BAD_REQUEST, "필터링 조회 시 정렬 필드 요청이 잘못되었습니다."),
+
+  // SMS
+
+  MESSAGE_NOT_RECEIVED(HttpStatus.BAD_REQUEST, "SMS 발송 - 메시지 접수 실패"),
+
+  SMS_EMPTY_RESPONSE(HttpStatus.BAD_REQUEST, "SMS 발송 - SMS 서버로 부터 아무런 응답을 받지 못했습니다"),
+
+  SMS_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SMS 발송 - 알 수 없는 오류 발생"),
+
+  SMS_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송 예외 발생"),
+
   ;
 
   private final HttpStatus status;
