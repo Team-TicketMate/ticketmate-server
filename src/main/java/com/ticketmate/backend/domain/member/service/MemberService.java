@@ -81,4 +81,26 @@ public class MemberService {
       agentPerformanceSummaryRepository.save(summary);
     }
   }
+
+  /**
+   * 팔로잉 수 변동
+   *
+   * @param member 팔로잉 수를 변동하려는 회원
+   * @param count  변동량
+   */
+  @Transactional
+  public void updateFollowingCount(Member member, long count) {
+    memberRepository.updateFollowingCount(member.getMemberId(), count);
+  }
+
+  /**
+   * 팔로워 수 변동
+   *
+   * @param member 팔로워 수를 변동하려는 회원
+   * @param count  변동량
+   */
+  @Transactional
+  public void updateFollowerCount(Member member, long count) {
+    memberRepository.updateFollowerCount(member.getMemberId(), count);
+  }
 }

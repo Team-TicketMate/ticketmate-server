@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
 
@@ -15,4 +19,16 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
   Optional<List<Member>> findAllByMemberType(MemberType memberType);
 
   void deleteAllByRole(Role role);
+
+  // 팔로잉 수 + n
+  @Modifying
+  @Transactional
+  @Query("UPDATE Member m SET m.followingCount = m.followingCount + :delta WHERE m.memberId = :memberId")
+  void updateFollowingCount(@Param("memberId") UUID memberId, long delta);
+
+  // 팔로워 수 + n
+  @Modifying
+  @Transactional
+  @Query("UPDATE Member m SET m.followerCount = m.followerCount + :delta WHERE m.memberId = :memberId")
+  void updateFollowerCount(@Param("memberId") UUID memberId, long delta);
 }
