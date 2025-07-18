@@ -5,7 +5,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.ticketmate.backend.global.config.S3Config;
+import com.ticketmate.backend.global.config.properties.S3Properties;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.file.constant.FileExtension;
@@ -32,7 +32,7 @@ public class S3Service implements FileService {
   // 날짜 포멧: yyyyMMdd
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
   private final AmazonS3 amazonS3;
-  private final S3Config s3Config;
+  private final S3Properties s3Properties;
 
   /**
    * S3 파일 업로드 후 파일 URL 반환
@@ -63,13 +63,13 @@ public class S3Service implements FileService {
 
     // S3 파일 업로드
     try (InputStream inputStream = file.getInputStream()) {
-      amazonS3.putObject(s3Config.getBucket(), filename, inputStream, metadata);
+      amazonS3.putObject(s3Properties.getS3().getBucket(), filename, inputStream, metadata);
       log.debug("S3 파일 업로드 성공: {}", filename);
     } catch (AmazonServiceException ase) {
-      log.error("AmazonServiceException - S3 파일 업로드 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Config.getBucket(), filename, ase.getMessage());
+      log.error("AmazonServiceException - S3 파일 업로드 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ase.getMessage());
       throw new CustomException(ErrorCode.S3_UPLOAD_AMAZON_SERVICE_ERROR);
     } catch (AmazonClientException ace) {
-      log.error("AmazonClientException - S3 클라이언트 에러 발생. 버킷: {}, 파일명: {}, 에러: {}", s3Config.getBucket(), filename, ace.getMessage());
+      log.error("AmazonClientException - S3 클라이언트 에러 발생. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ace.getMessage());
       throw new CustomException(ErrorCode.S3_UPLOAD_AMAZON_CLIENT_ERROR);
     } catch (IOException ioe) {
       log.error("IOException - 파일 스트림 처리 중 에러 발생. 원본 파일명: {}, 파일명: {} 에러: {}", originalFilename, filename, ioe.getMessage());
@@ -97,16 +97,16 @@ public class S3Service implements FileService {
 
     // S3 파일 삭제
     try {
-      amazonS3.deleteObject(new DeleteObjectRequest(s3Config.getBucket(), filename));
+      amazonS3.deleteObject(new DeleteObjectRequest(s3Properties.getS3().getBucket(), filename));
       log.debug("S3 파일 삭제 성공: {}", filename);
     } catch (AmazonServiceException ase) {
-      log.error("AmazonServiceException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Config.getBucket(), filename, ase.getMessage());
+      log.error("AmazonServiceException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ase.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_AMAZON_SERVICE_ERROR);
     } catch (AmazonClientException ace) {
-      log.error("AmazonClientException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Config.getBucket(), filename, ace.getMessage());
+      log.error("AmazonClientException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ace.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_AMAZON_CLIENT_ERROR);
     } catch (Exception e) {
-      log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Config.getBucket(), filename, e.getMessage());
+      log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, e.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_ERROR);
     }
   }
@@ -151,7 +151,7 @@ public class S3Service implements FileService {
    * @return 파일 URL
    */
   private String generateFilePath(String filename) {
-    return s3Config.getDomain() + filename; // 예: "member/20250605-a1b2c3-원본이미지.jpg"
+    return s3Properties.getS3().getDomain() + filename; // 예: "member/20250605-a1b2c3-원본이미지.jpg"
   }
 
   /**
@@ -162,8 +162,8 @@ public class S3Service implements FileService {
    */
   private String extractFilenameFromFilepath(String filePath) {
     String filename = filePath;
-    if (filePath.startsWith(s3Config.getDomain())) {
-      filename = filePath.substring(s3Config.getDomain().length());
+    if (filePath.startsWith(s3Properties.getS3().getDomain())) {
+      filename = filePath.substring(s3Properties.getS3().getDomain().length());
     }
     if (CommonUtil.nvl(filename, "").isEmpty()) {
       log.error("파일명 추출 실패: {}", filePath);
@@ -177,10 +177,10 @@ public class S3Service implements FileService {
    */
   private String determinePrefix(UploadType type) {
     return switch (type) {
-      case MEMBER -> s3Config.getMemberPrefix();
-      case CONCERT_HALL -> s3Config.getConcertHallPrefix();
-      case CONCERT -> s3Config.getConcertPrefix();
-      case PORTFOLIO -> s3Config.getPortfolioPrefix();
+      case MEMBER -> s3Properties.getS3().getPath().getMember();
+      case CONCERT_HALL -> s3Properties.getS3().getPath().getConcertHall();
+      case CONCERT -> s3Properties.getS3().getPath().getConcert();
+      case PORTFOLIO -> s3Properties.getS3().getPath().getPortfolio();
     };
   }
 }

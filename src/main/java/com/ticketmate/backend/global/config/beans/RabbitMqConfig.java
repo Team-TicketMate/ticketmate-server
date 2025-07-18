@@ -1,9 +1,11 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
 import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_QUEUE_NAME;
 import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
 
+import com.ticketmate.backend.global.config.properties.RabbitMqProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -13,28 +15,17 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableRabbit
+@RequiredArgsConstructor
+@EnableConfigurationProperties(RabbitMqProperties.class)
 public class RabbitMqConfig {
 
-  @Value("${rabbitmq.host}")
-  private String host;
-
-  @Value("${rabbitmq.virtual-host}")
-  private String virtualHost;
-
-  @Value("${rabbitmq.username}")
-  private String username;
-
-  @Value("${rabbitmq.password}")
-  private String password;
-
-  @Value("${rabbitmq.port}")
-  private int port;
+  private final RabbitMqProperties properties;
 
   // chat.queue 라는 Queue 생성
   @Bean
@@ -69,11 +60,11 @@ public class RabbitMqConfig {
   @Bean
   public ConnectionFactory connectionFactory() {
     CachingConnectionFactory factory = new CachingConnectionFactory();
-    factory.setHost(host);
-    factory.setVirtualHost(virtualHost);
-    factory.setUsername(username);
-    factory.setPassword(password);
-    factory.setPort(port);
+    factory.setHost(properties.getHost());
+    factory.setVirtualHost(properties.getVirtualHost());
+    factory.setUsername(properties.getUsername());
+    factory.setPassword(properties.getPassword());
+    factory.setPort(properties.getPort());
     return factory;
   }
 

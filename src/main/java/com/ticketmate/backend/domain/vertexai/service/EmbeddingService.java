@@ -8,7 +8,7 @@ import com.google.genai.types.EmbedContentResponse;
 import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
 import com.ticketmate.backend.domain.vertexai.domain.entity.Embedding;
 import com.ticketmate.backend.domain.vertexai.repository.EmbeddingRepository;
-import com.ticketmate.backend.global.config.EmbeddingConfig;
+import com.ticketmate.backend.global.config.properties.GoogleGenAiProperties;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.common.CommonUtil;
@@ -26,7 +26,7 @@ public class EmbeddingService {
 
   private final EmbeddingRepository embeddingRepository;
   private final Client genAiClient;
-  private final EmbeddingConfig embeddingConfig;
+  private final GoogleGenAiProperties googleGenAIProperties;
 
   /**
    * Vertex AI 임베딩 요청
@@ -62,7 +62,7 @@ public class EmbeddingService {
   private EmbedContentResponse generateEmbedding(String text) {
     try {
       return genAiClient.models.embedContent(
-          embeddingConfig.getModel(),
+          googleGenAIProperties.getModel(),
           text,
           EmbedContentConfig.builder().build()
       );

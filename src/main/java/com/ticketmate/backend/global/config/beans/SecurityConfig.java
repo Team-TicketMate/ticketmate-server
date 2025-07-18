@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import static com.ticketmate.backend.global.constant.SecurityUrls.ALLOWED_ORIGINS;
 

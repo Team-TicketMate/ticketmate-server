@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.sms.service;
 
-import com.ticketmate.backend.global.config.CoolSmsConfig;
+import com.ticketmate.backend.global.config.properties.CoolSmsProperties;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 @Primary
 public class CoolSmsService implements SmsService {
 
-  private final CoolSmsConfig coolSmsConfig;
   private final DefaultMessageService messageService;
+  private final CoolSmsProperties coolSmsProperties;
 
   /**
    * SMS 발송
@@ -42,7 +42,7 @@ public class CoolSmsService implements SmsService {
    */
   private Message buildMessage(String to, String content) {
     Message message = new Message();
-    message.setFrom(coolSmsConfig.getFrom());
+    message.setFrom(coolSmsProperties.getFrom());
     message.setTo(to);
     message.setText(content);
     return message;
