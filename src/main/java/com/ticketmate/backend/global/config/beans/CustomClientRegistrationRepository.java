@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import com.ticketmate.backend.domain.auth.service.SocialClientRegistration;
 import lombok.RequiredArgsConstructor;

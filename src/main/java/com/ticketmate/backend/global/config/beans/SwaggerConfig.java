@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import static com.ticketmate.backend.global.constant.SwaggerConstants.LOCAL_SERVER_URL;
 import static com.ticketmate.backend.global.constant.SwaggerConstants.MAIN_SERVER_URL;

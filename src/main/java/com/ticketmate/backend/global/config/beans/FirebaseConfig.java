@@ -1,28 +1,31 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.ticketmate.backend.global.config.properties.FirebaseProperties;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
+@EnableConfigurationProperties(FirebaseProperties.class)
 public class FirebaseConfig {
 
-  @Value("${firebase.service-account-key-path}")
-  private String firebaseKeyPath;
+  private final FirebaseProperties properties;
 
   @PostConstruct
   public void init() throws IOException {
     try {
       // resources 디렉토리에 있는 서비스 계정 키 파일 로드
       InputStream serviceAccount = getClass()
-          .getResourceAsStream(firebaseKeyPath);
+          .getResourceAsStream(properties.getServiceAccountKeyPath());
 
       FirebaseOptions options = FirebaseOptions.builder()
           .setCredentials(GoogleCredentials.fromStream(serviceAccount))

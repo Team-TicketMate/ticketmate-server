@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config;
+package com.ticketmate.backend.global.config.beans;
 
 import java.util.Locale;
 import net.datafaker.Faker;
