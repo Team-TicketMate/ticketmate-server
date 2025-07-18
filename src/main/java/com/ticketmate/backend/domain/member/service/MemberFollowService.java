@@ -4,6 +4,9 @@ import com.ticketmate.backend.domain.member.domain.dto.request.FollowRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.domain.entity.MemberFollow;
 import com.ticketmate.backend.domain.member.repository.MemberFollowRepository;
+import com.ticketmate.backend.domain.notification.domain.constant.FollowingNotificationType;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
+import com.ticketmate.backend.domain.notification.service.NotificationService;
 import com.ticketmate.backend.global.validator.member.MemberFollowValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ public class MemberFollowService {
 
   private final MemberFollowRepository memberFollowRepository;
   private final MemberService memberService;
+  private final NotificationService notificationService;
 
   /**
    * 팔로우
@@ -31,6 +35,10 @@ public class MemberFollowService {
         .validateSelfFollow() // 자기자신 팔로우 검증
         .validateClientToAgentOnly() // 의뢰인 -> 대리인 팔로우 요청 검증
         .validateDuplicateFollow(memberFollowRepository); // 이미 팔로우 한 회원 검증
+
+    NotificationPayload payload = buildFollowingNotificationPayload(follower);
+
+    notificationService.sendToMember(followee.getMemberId(), payload);
 
     saveMemberFollowEntity(follower, followee);
   }
@@ -80,5 +88,12 @@ public class MemberFollowService {
     memberFollowRepository.deleteByFollowerAndFollowee(follower, followee);
     memberService.updateFollowingCount(follower, -1);
     memberService.updateFollowerCount(followee, -1);
+  }
+
+  /**
+   * 팔로우 알림 Payload 생성
+   */
+  private NotificationPayload buildFollowingNotificationPayload(Member follower) {
+    return FollowingNotificationType.FOLLOW.toPayload(follower);
   }
 }
