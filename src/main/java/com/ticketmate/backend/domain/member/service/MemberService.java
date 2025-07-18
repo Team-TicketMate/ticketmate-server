@@ -75,7 +75,6 @@ public class MemberService {
           .totalScore(0.0)
           .averageRating(0.0)
           .reviewCount(0)
-          .followerCount(0)
           .recentSuccessCount(0)
           .build();
       agentPerformanceSummaryRepository.save(summary);
