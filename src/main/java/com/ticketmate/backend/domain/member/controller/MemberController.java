@@ -48,7 +48,7 @@ public class MemberController implements MemberControllerDocs {
   }
 
   @Override
-  @PostMapping("unfollow")
+  @PostMapping("/unfollow")
   @LogMonitoringInvocation
   public ResponseEntity<Void> unfollow(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,

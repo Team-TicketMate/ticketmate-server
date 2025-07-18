@@ -38,7 +38,7 @@ public class MemberFollowValidator {
    * Client 만 Agent 팔로우 가능
    */
   public MemberFollowValidator validateClientToAgentOnly() {
-    if (!follower.getMemberType().equals(MemberType.CLIENT) && followee.getMemberType().equals(MemberType.AGENT)) {
+    if (!(follower.getMemberType().equals(MemberType.CLIENT) && followee.getMemberType().equals(MemberType.AGENT))) {
       log.error("의뢰인만 대리인을 팔로우 할 수 있습니다. followerType={}, followeeType={}",
           follower.getMemberType(), followee.getMemberType());
       throw new CustomException(ErrorCode.CLIENT_FOLLOW_AGENT_ONLY);
@@ -51,7 +51,7 @@ public class MemberFollowValidator {
    */
   public MemberFollowValidator validateDuplicateFollow(MemberFollowRepository repository) {
     if (repository.existsByFollowerAndFollowee(follower, followee)) {
-      log.error("이미 필로우한 회원입니다. followerId={}, followeeId={}",
+      log.error("이미 팔로우한 회원입니다. followerId={}, followeeId={}",
           follower.getMemberId(), followee.getMemberId());
       throw new CustomException(ErrorCode.DUPLICATE_FOLLOW_NOT_ALLOWED);
     }

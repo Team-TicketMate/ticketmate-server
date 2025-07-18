@@ -93,7 +93,7 @@ public interface MemberControllerDocs {
           
           **요청 예시**
           ```
-          POST /api/members/follow
+          POST /api/member/follow
           Authorization: Bearer eyJ...
           Content-Type: application/json
           
@@ -135,7 +135,7 @@ public interface MemberControllerDocs {
           
           **요청 예시**
           ```
-          POST /api/members/follow
+          POST /api/member/unfollow
           Authorization: Bearer eyJ...
           Content-Type: application/json
           
