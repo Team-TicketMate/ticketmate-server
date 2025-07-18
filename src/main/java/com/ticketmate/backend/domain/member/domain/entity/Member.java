@@ -97,10 +97,12 @@ public class Member extends BasePostgresEntity {
   private LocalDateTime lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)
+  @Builder.Default
   @Column(nullable = false)
   private long followingCount = 0L;
 
   // 팔로워 수 (나를 팔로우하는 수)
+  @Builder.Default
   @Column(nullable = false)
   private long followerCount = 0L;
 }
