@@ -12,16 +12,17 @@ import com.ticketmate.backend.global.file.constant.FileExtension;
 import com.ticketmate.backend.global.file.constant.UploadType;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.FileUtil;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Primary
 @Service
@@ -181,6 +182,18 @@ public class S3Service implements FileService {
       case CONCERT_HALL -> s3Properties.getS3().getPath().getConcertHall();
       case CONCERT -> s3Properties.getS3().getPath().getConcert();
       case PORTFOLIO -> s3Properties.getS3().getPath().getPortfolio();
+      case CHAT -> s3Properties.getS3().getPath().getChat();
     };
+  }
+
+  /**
+   * S3에 파일은 업로드 되어있지만 서버 내부적으로 오류 발생시 이미지 롤백(삭제)
+   */
+  public void safeDeleteFile(String path) {
+    try {
+      deleteFile(path);
+    } catch (Exception ex) {
+      log.warn("S3 파일 롤백 실패: {}", path, ex);
+    }
   }
 }

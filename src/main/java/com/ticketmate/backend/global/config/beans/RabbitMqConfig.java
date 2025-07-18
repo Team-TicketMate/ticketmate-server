@@ -1,9 +1,5 @@
 package com.ticketmate.backend.global.config.beans;
 
-import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_EXCHANGE_NAME;
-import static com.ticketmate.backend.global.util.rabbit.RabbitMq.CHAT_QUEUE_NAME;
-import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
-
 import com.ticketmate.backend.global.config.properties.RabbitMqProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
@@ -18,6 +14,10 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_EXCHANGE_NAME;
+import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_QUEUE_NAME;
+import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
 
 @Configuration
 @EnableRabbit
