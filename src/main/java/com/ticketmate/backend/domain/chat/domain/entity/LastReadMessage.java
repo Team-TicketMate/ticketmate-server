@@ -1,15 +1,12 @@
 package com.ticketmate.backend.domain.chat.domain.entity;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * 마지막으로 읽은 메시지의 포인터역할
@@ -22,12 +19,12 @@ public class LastReadMessage {
 
   @Id
   private String lastReadMessage; // "userLastRead:" + {roomId} + {memberId}
-  private String lastMessageId;  // 마지막으로 **읽은** 메시지의 ID (마지막 메시지 X) [포인터용]
+  private String lastMessageId;  // 마지막으로 읽은 메시지의 ID [포인터용]
   @Indexed
   private String chatRoomId;
   @Indexed
   private UUID memberId;
-  private LocalDateTime readDate;  // 읽은 시각
+  private LocalDateTime readDate;  // 마지막으로 읽은 시각
 
   @Builder
   public LastReadMessage(String lastReadMessage, String chatRoomId, UUID memberId,
