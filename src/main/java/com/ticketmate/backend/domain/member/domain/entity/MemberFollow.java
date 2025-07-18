@@ -1,0 +1,40 @@
+package com.ticketmate.backend.domain.member.domain.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ticketmate.backend.global.BasePostgresEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
+@Entity
+@Getter
+@Setter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString(callSuper = true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class MemberFollow extends BasePostgresEntity {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(updatable = false, nullable = false)
+  private UUID memberFollowId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Member follower; // 팔로우 요청자
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private Member followee; // 팔로우 대상자
+}
