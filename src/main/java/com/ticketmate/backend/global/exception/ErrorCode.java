@@ -178,6 +178,12 @@ public enum ErrorCode {
 
   NO_AUTH_TO_ROOM(HttpStatus.FORBIDDEN, "해당 사용자는 이 채팅방에 들어갈 수 없습니다."),
 
+  CHAT_PICTURE_EMPTY(HttpStatus.NOT_FOUND, "전송할 이미지가 없습니다."),
+
+  CHAT_PICTURE_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "채팅 이미지는 최대 10장까지 보낼 수 있습니다."),
+
+  CHAT_MESSAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "채팅 메시지 전송중 오류가 발생했습니다."),
+
   // EMBEDDING
 
   EMBEDDING_API_ERROR(HttpStatus.BAD_REQUEST, "Vertex AI API 호출에 실패했습니다."),
