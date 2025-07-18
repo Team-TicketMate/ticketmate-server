@@ -1,5 +1,6 @@
 package com.ticketmate.backend.domain.member.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
@@ -86,11 +87,22 @@ public class Member extends BasePostgresEntity {
   @Builder.Default
   private AccountStatus accountStatus = AccountStatus.ACTIVE_ACCOUNT;
 
-  // 첫 로그인 여부 (DB 저장 X)
+  // 첫 로그인 여부
   @Builder.Default
-//    @Transient
   private Boolean isFirstLogin = true;
 
   // 마지막 로그인 시간
+  @Column(columnDefinition = "TIMESTAMP(0)")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime lastLoginTime;
+
+  // 팔로잉 수 (내가 팔로잉하는 수)
+  @Builder.Default
+  @Column(nullable = false)
+  private long followingCount = 0L;
+
+  // 팔로워 수 (나를 팔로우하는 수)
+  @Builder.Default
+  @Column(nullable = false)
+  private long followerCount = 0L;
 }

@@ -1,14 +1,19 @@
 package com.ticketmate.backend.domain.concert.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.ComparableExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.ticketmate.backend.domain.concert.domain.constant.ConcertAgentAvailabilitySortField;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertAgentAvailability;
 import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QAgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QMember;
 import com.ticketmate.backend.global.util.database.QueryDslUtil;
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -53,11 +58,24 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
             CONCERT_AGENT_AVAILABILITY.accepting.isTrue()
         );
 
+    ComparableExpression<Long> followerCountExpression = Expressions.comparableTemplate(
+        Long.class,
+        "{0}",
+        AGENT.followerCount
+    );
+
+    // 커스텀 정렬 Map (followerCount 매핑)
+    Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
+        ConcertAgentAvailabilitySortField.FOLLOWER_COUNT.getProperty(),
+        followerCountExpression
+    );
+
     QueryDslUtil.applySorting(
         contentQuery,
         pageable,
         AgentPerformanceSummary.class,
-        AGENT_PERFORMANCE_SUMMARY.getMetadata().getName()
+        AGENT_PERFORMANCE_SUMMARY.getMetadata().getName(),
+        customSortMap
     );
 
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
