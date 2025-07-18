@@ -1,5 +1,6 @@
 package com.ticketmate.backend.global.validator.member;
 
+import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.MemberFollowRepository;
 import com.ticketmate.backend.global.exception.CustomException;
@@ -34,13 +35,13 @@ public class MemberFollowValidator {
   }
 
   /**
-   * 동일한 MemberType 팔로우 검증
+   * Client 만 Agent 팔로우 가능
    */
-  public MemberFollowValidator validateMemberTypeNotSame() {
-    if (follower.getMemberType().equals(followee.getMemberType())) {
-      log.error("의뢰인 <-> 대리인 간 팔로우만 가능합니다. followerType: {}, followeeType: {}",
+  public MemberFollowValidator validateClientToAgentOnly() {
+    if (!follower.getMemberType().equals(MemberType.CLIENT) && followee.getMemberType().equals(MemberType.AGENT)) {
+      log.error("의뢰인만 대리인을 팔로우 할 수 있습니다. followerType={}, followeeType={}",
           follower.getMemberType(), followee.getMemberType());
-      throw new CustomException(ErrorCode.SAME_MEMBER_TYPE_FOLLOW_NOT_ALLOWED);
+      throw new CustomException(ErrorCode.CLIENT_FOLLOW_AGENT_ONLY);
     }
     return this;
   }

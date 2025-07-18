@@ -29,7 +29,7 @@ public class MemberFollowService {
 
     MemberFollowValidator.of(follower, followee)
         .validateSelfFollow() // 자기자신 팔로우 검증
-        .validateMemberTypeNotSame() // 의뢰인 <-> 대리인 팔로우 검증
+        .validateClientToAgentOnly() // 의뢰인 -> 대리인 팔로우 요청 검증
         .validateDuplicateFollow(memberFollowRepository); // 이미 팔로우 한 회원 검증
 
     saveMemberFollowEntity(follower, followee);
@@ -46,7 +46,7 @@ public class MemberFollowService {
 
     MemberFollowValidator.of(follower, followee)
         .validateSelfFollow()
-        .validateMemberTypeNotSame()
+        .validateClientToAgentOnly()
         .validateUnfollowAble(memberFollowRepository);
 
     deleteMemberFollowEntity(follower, followee);

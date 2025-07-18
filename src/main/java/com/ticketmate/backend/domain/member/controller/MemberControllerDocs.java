@@ -86,9 +86,7 @@ public interface MemberControllerDocs {
           이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
-          | 필드명      | 타입   | 필수여부 | 설명                              |
-          |-------------|--------|----------|-----------------------------------|
-          | followeeId  | UUID   | 필수     | 팔로우 대상 회원의 PK             |
+          - **followeeId** (UUID): 팔로우 하려는 대상 회원 PK [필수]
           
           ### 응답 데이터
           - HTTP 200 OK
@@ -106,7 +104,7 @@ public interface MemberControllerDocs {
           
           ### 유의 사항
           - 본인 자신(self)을 대상으로 팔로우할 수 없습니다.
-          - 의뢰인(Client)과 대리인(Agent) 간에만 팔로우가 가능합니다.
+          - 의뢰인(Client)이 대리인(Agent)을 팔로우하는 경우만 가능합니다.
           - 이미 팔로우한 대상에 대해 중복 호출 시 에러가 발생합니다.
           """
   )
@@ -128,9 +126,7 @@ public interface MemberControllerDocs {
           이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
-          | 필드명      | 타입   | 필수여부 | 설명                              |
-          |-------------|--------|----------|-----------------------------------|
-          | followeeId  | UUID   | 필수     | 언팔로우 대상 회원의 PK           |
+          - **followeeId** (UUID): 언팔로우 하려는 대상 회원 PK [필수]
           
           ### 응답 데이터
           - HTTP 200 OK
@@ -150,7 +146,7 @@ public interface MemberControllerDocs {
           
           ### 유의 사항
           - 본인 자신(self)을 대상으로 언팔로우할 수 없습니다.
-          - 고객(Client)과 대리인(Agent) 간에만 언팔로우가 가능합니다.
+          - 의뢰인(Client)이 대리인(Agent)을 언팔로우하는 경우만 가능합니다.
           - 팔로우하지 않은 대상에 대해 언팔로우 호출 시 에러가 발생합니다.
           """
   )

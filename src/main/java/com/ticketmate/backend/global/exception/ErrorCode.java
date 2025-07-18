@@ -56,7 +56,7 @@ public enum ErrorCode {
 
   SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신은 팔로우 할 수 없습니다."),
 
-  SAME_MEMBER_TYPE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "서로 다른 회원 유형 (의뢰인 <-> 대리인) 간에만 팔로우 할 수 있습니다"),
+  CLIENT_FOLLOW_AGENT_ONLY(HttpStatus.BAD_REQUEST, "의뢰인만 대리인을 팔로우 할 수 있습니다."),
 
   DUPLICATE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "이미 팔로우한 회원입니다."),
 
