@@ -3,6 +3,7 @@ package com.ticketmate.backend.domain.member.controller;
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.member.domain.dto.request.FollowRequest;
 import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,12 @@ import org.springframework.http.ResponseEntity;
 public interface MemberControllerDocs {
 
   @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-18",
+          author = "Chuseok22",
+          description = "회원 정보 조회 팔로우/팔로잉 수 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/356"
+      ),
       @ApiChangeLog(
           date = "2025-06-26",
           author = "Chuseok22",
@@ -41,7 +48,9 @@ public interface MemberControllerDocs {
               "phone": "010-1234-5678",
               "profileUrl": null,
               "gender": "female",
-              "memberType": "CLIENT"
+              "memberType": "CLIENT",
+              "followingCount": "130",
+              "followerCount": "70"
             }
           ```
           
@@ -60,5 +69,92 @@ public interface MemberControllerDocs {
           - 인증 정보가 없거나 잘못된 경우에는 컨트롤러에 진입하지 않고 보안 필터에서 차단됩니다.
           """
   )
-  public ResponseEntity<MemberInfoResponse> getMemberInfo(CustomOAuth2User customOAuth2User);
+  public ResponseEntity<MemberInfoResponse> getMemberInfo(
+      CustomOAuth2User customOAuth2User);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-18",
+          author = "Chuseok22",
+          description = "팔로우 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/356"
+      )
+  })
+  @Operation(
+      summary = "팔로우 기능",
+      description = """
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          | 필드명      | 타입   | 필수여부 | 설명                              |
+          |-------------|--------|----------|-----------------------------------|
+          | followeeId  | UUID   | 필수     | 팔로우 대상 회원의 PK             |
+          
+          ### 응답 데이터
+          - HTTP 200 OK
+          
+          **요청 예시**
+          ```
+          POST /api/members/follow
+          Authorization: Bearer eyJ...
+          Content-Type: application/json
+          
+          {
+           "followeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+          ```
+          
+          ### 유의 사항
+          - 본인 자신(self)을 대상으로 팔로우할 수 없습니다.
+          - 의뢰인(Client)과 대리인(Agent) 간에만 팔로우가 가능합니다.
+          - 이미 팔로우한 대상에 대해 중복 호출 시 에러가 발생합니다.
+          """
+  )
+  public ResponseEntity<Void> follow(
+      CustomOAuth2User customOAuth2User,
+      FollowRequest request);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-07-18",
+          author = "Chuseok22",
+          description = "언팔로우 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/356"
+      )
+  })
+  @Operation(
+      summary = "언팔로우 기능",
+      description = """
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          | 필드명      | 타입   | 필수여부 | 설명                              |
+          |-------------|--------|----------|-----------------------------------|
+          | followeeId  | UUID   | 필수     | 언팔로우 대상 회원의 PK           |
+          
+          ### 응답 데이터
+          - HTTP 200 OK
+          
+          ### 사용 방법
+          
+          **요청 예시**
+          ```
+          POST /api/members/follow
+          Authorization: Bearer eyJ...
+          Content-Type: application/json
+          
+          {
+           "followeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+          }
+          ```
+          
+          ### 유의 사항
+          - 본인 자신(self)을 대상으로 언팔로우할 수 없습니다.
+          - 고객(Client)과 대리인(Agent) 간에만 언팔로우가 가능합니다.
+          - 팔로우하지 않은 대상에 대해 언팔로우 호출 시 에러가 발생합니다.
+          """
+  )
+  public ResponseEntity<Void> unfollow(
+      CustomOAuth2User customOAuth2User,
+      FollowRequest request);
 }

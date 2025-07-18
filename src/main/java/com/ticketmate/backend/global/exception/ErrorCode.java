@@ -52,6 +52,16 @@ public enum ErrorCode {
 
   INVALID_MEMBER_ROLE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 권한 요청입니다."),
 
+  // MEMBER FOLLOW
+
+  SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신은 팔로우 할 수 없습니다."),
+
+  SAME_MEMBER_TYPE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "서로 다른 회원 유형 (의뢰인 <-> 대리인) 간에만 팔로우 할 수 있습니다"),
+
+  DUPLICATE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "이미 팔로우한 회원입니다."),
+
+  UNFOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "팔로우하지 않은 회원에 대해 언팔로우할 수 없습니다."),
+
   // CONCERT
 
   CONCERT_NOT_FOUND(HttpStatus.BAD_REQUEST, "콘서트를 찾을 수 없습니다."),
