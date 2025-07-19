@@ -21,16 +21,20 @@ import org.springframework.data.domain.Pageable;
 public class SearchRequest {
   private String keyword; // 검색 키워드
 
+  @Builder.Default
   private EmbeddingType type = EmbeddingType.CONCERT; // 검색 타입
 
   @Schema(defaultValue = "1")
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
-  private Integer pageNumber = 1;
+  @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
+  @Builder.Default
+  private Integer pageNumber = 1; // 페이지 번호 (1부터 시작)
 
   @Schema(defaultValue = "10")
   @Min(value = 1, message = "페이지 당 데이터 최솟값은 1개 입니다.")
   @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
-  private Integer pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
+  @Builder.Default
+  private Integer pageSize = PageableConstants.DEFAULT_PAGE_SIZE; // 페이지 사이즈
 
   public Pageable toPageable() {
     return PageableUtil.createPageable(
