@@ -7,7 +7,7 @@ import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageFiltered
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;

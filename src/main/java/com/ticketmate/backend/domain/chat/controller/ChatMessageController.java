@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.chat.controller;
 
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ReadAckRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;

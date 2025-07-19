@@ -139,7 +139,7 @@ public interface EntityMapper {
   ======================================FCM======================================
    */
 
-  // FcmToken -> FcmTokenSaveResponse
+  // FcmToken -> FcmTokenSaveResponse (엔티티 -> DTO)
   FcmTokenSaveResponse toFcmTokenSaveResponse(FcmToken fcmToken);
 
 

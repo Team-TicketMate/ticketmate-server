@@ -8,6 +8,7 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.domain.admin.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
@@ -26,15 +27,17 @@ import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositoryCustom;
 import com.ticketmate.backend.domain.concerthall.service.ConcertHallService;
+import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayloadRequest;
-import com.ticketmate.backend.domain.notification.service.FcmService;
+import com.ticketmate.backend.domain.notification.domain.constant.PortfolioNotificationType;
+import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
+import com.ticketmate.backend.domain.notification.service.NotificationService;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepositoryCustom;
 import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
 import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
+import com.ticketmate.backend.domain.portfolio.service.PortfolioService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.file.constant.UploadType;
@@ -42,11 +45,13 @@ import com.ticketmate.backend.global.file.service.FileService;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.util.common.FileUtil;
-import com.ticketmate.backend.global.util.notification.NotificationUtil;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.model.Balance;
+import net.nurigo.sdk.message.service.DefaultMessageService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,14 +69,15 @@ public class AdminService {
   private final ConcertRepositoryCustom concertRepositoryCustom;
   private final ConcertDateService concertDateService;
   private final TicketOpenDateService ticketOpenDateService;
-  private final PortfolioRepository portfolioRepository;
   private final PortfolioRepositoryCustom portfolioRepositoryCustom;
+  @Qualifier("web")
+  private final NotificationService notificationService;
   private final FileService fileService;
   private final EntityMapper entityMapper;
-  private final FcmService fcmService;
-  private final NotificationUtil notificationUtil;
   private final MemberService memberService;
   private final EmbeddingService embeddingService;
+  private final PortfolioService portfolioService;
+  private final DefaultMessageService messageService;
 
   /*
   ======================================공연======================================
@@ -378,81 +384,81 @@ public class AdminService {
    * 해당 포트폴리오 상태를 IN_REVIEW(검토중) 으로 변경
    * 포트폴리오 대상 사용자 알림 발송
    *
-   * @param portfolioId (UUID)
+   * @param portfolioId 포트폴리오 PK
    */
   @Transactional
   public PortfolioForAdminResponse getPortfolio(UUID portfolioId) {
-    Portfolio portfolio = portfolioRepository.findById(portfolioId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
-
-    // 포트폴리오 작성 의뢰인 PK
-    UUID clientId = portfolio.getMember().getMemberId();
+    Portfolio portfolio = portfolioService.findPortfolioById(portfolioId);
 
     // 포트폴리오가 "검토 대기" 상태인 경우
     if (portfolio.getPortfolioType().equals(PortfolioType.PENDING_REVIEW)) {
       // 포트폴리오 상태 "검토중" (IN_REVIEW)으로 변경
-      portfolio.setPortfolioType(PortfolioType.IN_REVIEW);
-
-      // FCM 토큰이 있는 회원에게만 알림을 발송합니다.
-      if (notificationUtil.existsFcmToken(clientId)) {
-        // 알림 payload 설정
-        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.IN_REVIEW, portfolio);
-
-        // 알림 발송
-        fcmService.sendNotification(clientId, payload);
-      }
+      portfolio.setPortfolioType(PortfolioType.REVIEWING);
     }
-
     return entityMapper.toPortfolioForAdminResponse(portfolio);
   }
 
   /**
    * 관리자의 포트폴리오 승인 및 반려처리 로직
    *
-   * @param request portfolioId (UUID)
-   *                PortfolioType (포트폴리오 상태)
+   * @param portfolioId 포트폴리오 PK
+   * @param request     portfolioId (UUID)
+   *                    PortfolioType (포트폴리오 상태)
    */
   @Transactional
-  public UUID reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
-    Portfolio portfolio = portfolioRepository.findById(portfolioId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND));
+  public void reviewPortfolioCompleted(UUID portfolioId, PortfolioStatusUpdateRequest request) {
+    Portfolio portfolio = portfolioService.findPortfolioById(portfolioId);
+    Member client = portfolio.getMember();
+    handlePortfolio(client, portfolio, request.getPortfolioType());
+  }
 
-    if (!portfolio.getPortfolioType().equals(PortfolioType.IN_REVIEW)) {
+  /**
+   * 포트폴리오 알림 payload 생성
+   */
+  private NotificationPayload buildPortfolioNotificationPayload(Member member, PortfolioType portfolioType) {
+    PortfolioNotificationType notificationType = PortfolioNotificationType.from(portfolioType);
+    return notificationType.toPayload(member);
+  }
+
+  /**
+   * 포트폴리오 수락 or 거절
+   *
+   * @param member        회원
+   * @param portfolio     포트폴리오
+   * @param portfolioType 변경하려는 포트폴리오 상태
+   */
+  private void handlePortfolio(Member member, Portfolio portfolio, PortfolioType portfolioType) {
+    if (!portfolio.getPortfolioType().equals(PortfolioType.REVIEWING)) {
       log.error("검토중인 상태의 포트폴리오만 승인 및 반려처리 가능합니다. 요청된 포트폴리오 상태: {}", portfolio.getPortfolioType());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
     }
 
-    UUID memberId = portfolio.getMember().getMemberId();
+    // 포트폴리오 상태 업데이트
+    portfolio.setPortfolioType(portfolioType);
 
-    // 승인
-    if (request.getPortfolioType().equals(PortfolioType.ACCEPTED)) {
-      portfolio.setPortfolioType(PortfolioType.ACCEPTED);
-      log.debug("포트폴리오: {} 승인완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
-
+    // '승인'인 경우 의뢰인 -> 대리인 변경
+    if (portfolioType.equals(PortfolioType.APPROVED)) {
       memberService.promoteToAgent(portfolio);
-
-      if (notificationUtil.existsFcmToken(memberId)) {
-        NotificationPayloadRequest payload = notificationUtil
-            .portfolioNotification(PortfolioType.ACCEPTED, portfolio);
-
-        fcmService.sendNotification(memberId, payload);
-      }
-    } else if (request.getPortfolioType().equals(PortfolioType.REJECTED)) {
-      // 반려
-      portfolio.setPortfolioType(PortfolioType.REJECTED);
-      log.debug("포트폴리오: {} 반려완료: {}", portfolio.getPortfolioId(), portfolio.getPortfolioType());
-
-      if (notificationUtil.existsFcmToken(memberId)) {
-
-        NotificationPayloadRequest payload = notificationUtil.portfolioNotification(PortfolioType.REJECTED, portfolio);
-
-        fcmService.sendNotification(memberId, payload);
-      }
-
-    } else {
-      log.error("유효하지않은 PortfolioType이 요청되었습니다: {}", request.getPortfolioType());
-      throw new CustomException(ErrorCode.INVALID_PORTFOLIO_TYPE);
     }
-    return portfolio.getPortfolioId();
+
+    NotificationPayload payload = buildPortfolioNotificationPayload(member, portfolioType);
+
+    notificationService.sendToMember(member.getMemberId(), payload);
+    log.debug("포트폴리오: {}, {} 완료: {}", portfolio.getPortfolioId(), portfolioType.getDescription(), portfolioType);
+  }
+
+  /*
+  ======================================SMS======================================
+   */
+
+  /**
+   * CoolSMS 잔액 조회
+   */
+  public CoolSmsBalanceResponse getBalance() {
+    Balance balance = messageService.getBalance();
+    return CoolSmsBalanceResponse.builder()
+        .balance(balance.getBalance() != null ? balance.getBalance() : 0f)
+        .point(balance.getPoint() != null ? balance.getPoint() : 0f)
+        .build();
   }
 }

@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.DateTimeExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.ticketmate.backend.domain.concert.domain.constant.ConcertSortField;
 import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
@@ -295,12 +296,26 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                 )
         );
 
+    ComparableExpression<LocalDateTime> earliestOpenDateExpression = Expressions.dateTimeTemplate(
+        LocalDateTime.class,
+        "least({0}, {1})",
+        preOpenDateExpression,
+        generalOpenDateExpression
+    );
+
+    // enum.property -> 표현식 매핑
+    Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
+        ConcertSortField.TICKET_OPEN_DATE.getProperty(),
+        earliestOpenDateExpression
+    );
+
     // applySorting 동적 정렬 적용
     QueryDslUtil.applySorting(
         contentQuery,
         pageable,
         Concert.class,
-        concert.getMetadata().getName()
+        concert.getMetadata().getName(),
+        customSortMap
     );
 
     // countQuery 생성
@@ -339,6 +354,24 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         QueryDslUtil.eqIfNotNull(concert.ticketReservationSite, ticketReservationSite)
     );
 
+    ComparableExpression<LocalDateTime> preOpenDateExpression = Expressions.dateTimeTemplate(
+        LocalDateTime.class,
+        "min({0})",
+        new CaseBuilder()
+            .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
+            .then(ticketOpenDate.openDate)
+            .otherwise((LocalDateTime) null)
+    ).as("ticketPreOpenDate");
+
+    ComparableExpression<LocalDateTime> generalOpenDateExpression = Expressions.dateTimeTemplate(
+        LocalDateTime.class,
+        "min({0})",
+        new CaseBuilder()
+            .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
+            .then(ticketOpenDate.openDate)
+            .otherwise((LocalDateTime) null)
+    ).as("ticketGeneralOpenDate");
+
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
     JPAQuery<ConcertFilteredResponse> contentQuery = queryFactory
         .select(Projections.constructor(ConcertFilteredResponse.class,
@@ -350,14 +383,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
 
             // 성능 최적화를 위한 CASE WHEN
             // 선예매 오픈일
-            Expressions.dateTimeTemplate(
-                LocalDateTime.class,
-                "min({0})",
-                new CaseBuilder()
-                    .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
-                    .then(ticketOpenDate.openDate)
-                    .otherwise((LocalDateTime) null)
-            ).as("ticketPreOpenDate"),
+            preOpenDateExpression,
             // 선예매 무통장 여부
             Expressions.booleanTemplate(
                 "bool_or({0})",
@@ -367,14 +393,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                     .otherwise((Boolean) null)
             ).as("preOpenBankTransfer"),
             // 일반 예매 오픈일
-            Expressions.dateTimeTemplate(
-                LocalDateTime.class,
-                "min({0})",
-                new CaseBuilder()
-                    .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
-                    .then(ticketOpenDate.openDate)
-                    .otherwise((LocalDateTime) null)
-            ).as("ticketGeneralOpenDate"),
+            generalOpenDateExpression,
             // 일반 예매 무통장 여부
             Expressions.booleanTemplate(
                 "bool_or({0})",
@@ -404,12 +423,26 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
             concert.seatingChartUrl
         );
 
+    ComparableExpression<LocalDateTime> earliestOpenDateExpression = Expressions.dateTimeTemplate(
+        LocalDateTime.class,
+        "least({0}, {1})",
+        preOpenDateExpression,
+        generalOpenDateExpression
+    );
+
+    // enum.property -> 표현식 매핑
+    Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
+        ConcertSortField.TICKET_OPEN_DATE.getProperty(),
+        earliestOpenDateExpression
+    );
+
     // applySorting 동적 정렬 적용
     QueryDslUtil.applySorting(
         contentQuery,
         pageable,
         Concert.class,
-        concert.getMetadata().getName()
+        concert.getMetadata().getName(),
+        customSortMap
     );
 
     // countQuery 생성

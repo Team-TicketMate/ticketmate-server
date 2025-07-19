@@ -7,6 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FcmTokenRepository extends CrudRepository<FcmToken, String> {
-  boolean existsByMemberId(UUID memberId);
   List<FcmToken> findAllByMemberId(UUID memberId);
 }

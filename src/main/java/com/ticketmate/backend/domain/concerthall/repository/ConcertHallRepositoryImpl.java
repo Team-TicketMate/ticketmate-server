@@ -20,6 +20,8 @@ public class ConcertHallRepositoryImpl implements ConcertHallRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
 
+  private static final QConcertHall CONCERT_HALL = QConcertHall.concertHall;
+
   /**
    * 공연장 필터링 조회
    *
@@ -32,23 +34,21 @@ public class ConcertHallRepositoryImpl implements ConcertHallRepositoryCustom {
       City city,
       Pageable pageable) {
 
-    QConcertHall concertHall = QConcertHall.concertHall;
-
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
-        QueryDslUtil.likeIgnoreCase(concertHall.concertHallName, concertHallName),
-        QueryDslUtil.eqIfNotNull(concertHall.city, city)
+        QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, concertHallName),
+        QueryDslUtil.eqIfNotNull(CONCERT_HALL.city, city)
     );
 
     // 쿼리 작성
     JPAQuery<ConcertHallFilteredResponse> contentQuery = queryFactory
         .select(Projections.constructor(ConcertHallFilteredResponse.class,
-            concertHall.concertHallId,
-            concertHall.concertHallName,
-            concertHall.address,
-            concertHall.webSiteUrl
+            CONCERT_HALL.concertHallId,
+            CONCERT_HALL.concertHallName,
+            CONCERT_HALL.address,
+            CONCERT_HALL.webSiteUrl
         ))
-        .from(concertHall)
+        .from(CONCERT_HALL)
         .where(whereClause);
 
     // applySorting 동적 정렬 적용
@@ -56,13 +56,13 @@ public class ConcertHallRepositoryImpl implements ConcertHallRepositoryCustom {
         contentQuery,
         pageable,
         ConcertHall.class,
-        concertHall.getMetadata().getName()
+        CONCERT_HALL.getMetadata().getName()
     );
 
     // countQuery 생성
     JPAQuery<Long> countQuery = queryFactory
-        .select(concertHall.count())
-        .from(concertHall)
+        .select(CONCERT_HALL.count())
+        .from(CONCERT_HALL)
         .where(whereClause);
 
     return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);

@@ -6,14 +6,43 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-messaging-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    #notifications { margin-top: 2rem; }
+    #notifications h2 { margin-bottom: 0.5rem; }
+    #notifications ul { list-style: none; padding: 0; }
+    #notifications li {
+      display: flex;
+      align-items: flex-start;
+      background: #f1f1f1;
+      border-radius: 4px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #notifications li img {
+      width: 40px;
+      height: 40px;
+      margin-right: 0.75rem;
+      border-radius: 4px;
+    }
+    #notifications li .text {
+      flex: 1;
+    }
+    #notifications li .title { font-weight: bold; }
+    #notifications li .body  { margin-top: 0.25rem; }
+  </style>
 </head>
 <body>
 <h1>Firebase Web SDK Test</h1>
-
 <button id="getTokenBtn">토큰 발급받기</button>
 
+<!-- 수신된 메시지를 보여줄 영역 -->
+<div id="notifications">
+  <h2>수신된 알림</h2>
+  <ul id="messageList"></ul>
+</div>
 
-<!-- Thymeleaf JS 치환 -->
 <script th:inline="javascript">
   /*<![CDATA[*/
   var firebaseConfig = {
@@ -29,22 +58,54 @@
   const app = firebase.initializeApp(firebaseConfig);
   const messaging = firebase.messaging();
 
+  // 메시지를 페이지에 표시하는 헬퍼 (icon도 함께 렌더링)
+  function appendMessageToUI(title, body, iconUrl) {
+    const ul = document.getElementById('messageList');
+    const li = document.createElement('li');
+
+    if (iconUrl) {
+      const img = document.createElement('img');
+      img.src = iconUrl;
+      img.alt = 'icon';
+      li.appendChild(img);
+    }
+
+    const textWrap = document.createElement('div');
+    textWrap.className = 'text';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'title';
+    titleEl.textContent = title;
+
+    const bodyEl = document.createElement('div');
+    bodyEl.className = 'body';
+    bodyEl.textContent = body;
+
+    textWrap.appendChild(titleEl);
+    textWrap.appendChild(bodyEl);
+    li.appendChild(textWrap);
+
+    ul.prepend(li);
+  }
+
   messaging.onMessage((payload) => {
     console.log('포그라운드 메시지:', payload);
+    const { title, body, icon } = payload.notification || {};
 
-    // 1) Notification 권한 확인(보통 getToken() 단계에서 이미 물어봤겠지만 재확인)
+    // OS 알림 띄우기
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
-        // 2) 실제 알림 표시
-        const {title, body} = payload.notification;
-        new Notification(title, {
-          body: body
-          // icon, image 등 더 넣고 싶으면 여기서 추가
-        });
-      } else {
-        console.log("안됨")
+        new Notification(title, { body, icon });
       }
     });
+
+    // 페이지 UI에 표시 (icon도 넘겨줌)
+    // 백엔드에서 넘어온 icon 문자열이 "classpath:/static/…" 형태라면 필요시 잘라내세요.
+    let iconUrl = icon;
+    if (iconUrl && iconUrl.startsWith('classpath:/static')) {
+      iconUrl = iconUrl.replace('classpath:/static', '');
+    }
+    appendMessageToUI(title, body, iconUrl);
   });
 
   document.getElementById('getTokenBtn').addEventListener('click', function () {

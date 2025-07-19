@@ -15,7 +15,7 @@ public enum ApplicationFormAction {
 
   REJECT("거절"),
 
-  ACCEPT("수락");
+  APPROVE("수락");
 
   private final String description;
 }

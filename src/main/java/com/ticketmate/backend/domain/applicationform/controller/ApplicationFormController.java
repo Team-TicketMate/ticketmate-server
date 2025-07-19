@@ -10,7 +10,7 @@ import com.ticketmate.backend.domain.applicationform.domain.dto.response.Applica
 import com.ticketmate.backend.domain.applicationform.domain.dto.response.RejectionReasonResponse;
 import com.ticketmate.backend.domain.applicationform.service.ApplicationFormService;
 import com.ticketmate.backend.domain.applicationform.service.RejectionReasonService;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;

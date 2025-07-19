@@ -6,7 +6,7 @@ import com.ticketmate.backend.domain.chat.domain.dto.request.ChatRoomFilteredReq
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.domain.chat.domain.dto.response.ChatRoomListResponse;
 import com.ticketmate.backend.domain.chat.service.ChatRoomService;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

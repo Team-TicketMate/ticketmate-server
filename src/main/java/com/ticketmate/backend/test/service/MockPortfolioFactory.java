@@ -57,7 +57,7 @@ public class MockPortfolioFactory {
         .portfolioDescription(portfolioDescription)
         .member(agent)
         .portfolioImgList(new ArrayList<>())
-        .portfolioType(PortfolioType.ACCEPTED)
+        .portfolioType(PortfolioType.APPROVED)
         .build();
 
     // 포트폴리오 이미지 추가 (양방향 관계 설정)

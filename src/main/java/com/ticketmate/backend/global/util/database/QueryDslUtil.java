@@ -1,9 +1,7 @@
 package com.ticketmate.backend.global.util.database;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -12,10 +10,9 @@ import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.ticketmate.backend.global.util.common.CommonUtil;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -59,9 +56,7 @@ public class QueryDslUtil {
       return null;
     }
     for (BooleanExpression expression : expressions) {
-      if (expression != null) {
-        result = (result == null) ? expression : result.and(expression);
-      }
+      result = combineWhereClause(result, expression);
     }
     return result;
   }
@@ -136,44 +131,6 @@ public class QueryDslUtil {
   }
 
   /**
-   * Pageable과 미리 정의된 정렬 속성 Map을 기반으로 OrderSpecifier 배열 생성
-   * Pageable을 통해 전달하는 정렬 기준과 서버에 정의된 n차 기본 정렬 기준 모두 처리 가능
-   * 컴파일 시점에 필드의 유효성을 검사
-   *
-   * @param pageable Pageable 객체
-   * @param sortableProperties 정렬 가능한 속성 이름과 Path를 매핑한 Map
-   * @param defaultSpecifierProvider 2차, 3차 등 추가/기본 정렬 조건을 제공하는 함수
-   * @return 생성된 OrderSpecifier 배열
-   */
-  @SuppressWarnings("unchecked") // 정렬에 사용되는 Path는 항상 Comparable이므로 안전한 캐스팅, 경고 억제
-  public static OrderSpecifier<?>[] createOrderSpecifiers(Pageable pageable, Map<String, Path<?>> sortableProperties, List<Function<Order, OrderSpecifier<?>>> defaultSpecifierProvider){
-    if(pageable.getSort().isUnsorted()){
-      return new OrderSpecifier[0];
-    }
-
-    List<OrderSpecifier<?>> specifiers = new ArrayList<>();
-    Order primaryDirection = Order.DESC;
-
-    for(Sort.Order order : pageable.getSort()){
-      String prop = order.getProperty();
-      Path<?> path = sortableProperties.get(prop);
-      if(path == null) continue;
-
-      Order direction = order.isAscending() ? Order.ASC : Order.DESC;
-      specifiers.add(new OrderSpecifier<>(direction, (Expression<Comparable<?>>) path));
-      if(specifiers.size() == 1) primaryDirection = direction;
-    }
-
-    if(defaultSpecifierProvider != null){
-      for(Function<Order, OrderSpecifier<?>> provider : defaultSpecifierProvider){
-        specifiers.add(provider.apply(primaryDirection));
-      }
-    }
-
-    return specifiers.toArray(OrderSpecifier[]::new);
-  }
-
-  /**
    * JPAQuery에 동적 정렬을 적용
    * PathBuilder를 통해 프로퍼티명을 직접 참조
    * 각 엔티티별 공통 활용
@@ -182,18 +139,46 @@ public class QueryDslUtil {
    * @param <E>         정렬 대상이 되는 엔티티 타입
    * @param query       정렬할 JPAQuery
    * @param pageable    Spring Data Pageable
-   * @param entityClass 엔티티 클래스
+   * @param entityClass 정렬할 필드를 가진 엔티티 클래스
    * @param alias       QueryDSL 별명 (ex. "entity")
    */
   public <D, E> void applySorting(JPAQuery<D> query, Pageable pageable, Class<E> entityClass, String alias) {
+    applySorting(query, pageable, entityClass, alias, Collections.emptyMap());
+  }
+
+  /**
+   * JPAQuery에 동적 정렬을 적용
+   * PathBuilder를 통해 프로퍼티명을 직접 참조
+   * customSortMap에 프로퍼티명이 매핑된 ComparableExpression이 있으면 사용
+   *
+   * @param <D>           query의 projection(DTO) 타입
+   * @param <E>           정렬 대상이 되는 엔티티 타입
+   * @param query         정렬할 JPAQuery
+   * @param pageable      Spring Data Pageable
+   * @param entityClass   정렬할 필드를 가진 엔티티 클래스
+   * @param alias         QueryDSL에서 사용되는 엔티티 별칭 (ex. "entity")
+   * @param customSortMap 프로퍼티명과 {@link ComparableExpression}을 매핑한 사용자 정의 정렬 Map
+   */
+  public <D, E> void applySorting(
+      JPAQuery<D> query,
+      Pageable pageable,
+      Class<E> entityClass, String alias,
+      Map<String, ComparableExpression<?>> customSortMap
+  ) {
     if (pageable.getSort().isEmpty()) {
       return;
     }
     PathBuilder<E> builder = new PathBuilder<>(entityClass, alias);
     for (Sort.Order order : pageable.getSort()) {
-      String prop = order.getProperty();
+      String property = order.getProperty();
       boolean asc = order.isAscending();
-      ComparableExpression<?> expression = builder.getComparable(prop, Comparable.class);
+
+      // enum.getProperty() 로 넘어온 커스텀 표현식이 있으면 우선 사용
+      ComparableExpression<?> expression = customSortMap.get(property);
+      if (expression == null) {
+        // 없으면 엔티티 필드로 처리
+        expression = builder.getComparable(property, Comparable.class);
+      }
       query.orderBy(createOrderSpecifier(expression, asc));
     }
   }

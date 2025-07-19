@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class PortfolioStatusUpdateRequest {
 
-  @Schema(defaultValue = "ACCEPTED")
-  @Pattern(regexp = "^(ACCEPTED|REJECTED)$")
+  @Schema(defaultValue = "APPROVED")
+  @Pattern(regexp = "^(APPROVED|REJECTED)$")
   private PortfolioType portfolioType;
 }

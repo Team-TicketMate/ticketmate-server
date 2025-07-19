@@ -45,6 +45,8 @@ public final class SecurityUrls {
       // API
       "/", // 홈
       "/api/auth/reissue", // accessToken 재발급
+      "/api/auth/send-code", // 인증문자 발송
+      "/api/auth/verify", // 인증문자 검증
       "/api/oauth2/**", // 소셜 로그인
       "/login/**", // 기본 Spring Security OAuth2 로그인경로
       "/api/concert/**", // 공연 조회
@@ -60,8 +62,9 @@ public final class SecurityUrls {
       // FireBase 서비스워커
       "/firebase-messaging-sw.js",
 
-      // fmc test용 정적리소스
+      // FCM test용 정적리소스
       "/notification.html",
+      "/ticketmate-logo.png",
 
       // WebSocket 관련 Url (StompChannelInterceptor 내부에서 검증)
       "/chat/**",
@@ -71,6 +74,7 @@ public final class SecurityUrls {
       "/chat-jwt-local2.html",
       "/chat-jwt-local3.html"
   );
+
   /**
    * 관리자 권한이 필요한 URL 패턴 목록
    */

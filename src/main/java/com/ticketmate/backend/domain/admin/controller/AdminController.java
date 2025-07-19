@@ -6,15 +6,16 @@ import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.domain.admin.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.domain.admin.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.domain.admin.service.AdminService;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,9 +47,9 @@ public class AdminController implements AdminControllerDocs {
 
   private final AdminService adminService;
 
-    /*
-    ======================================공연장======================================
-     */
+  /*
+  ======================================공연장======================================
+   */
 
   @Override
   @PostMapping(value = "/concert-hall")
@@ -79,9 +80,9 @@ public class AdminController implements AdminControllerDocs {
     return ResponseEntity.ok().build();
   }
 
-    /*
-    ======================================공연======================================
-     */
+  /*
+  ======================================공연======================================
+   */
 
   @Override
   @PostMapping(value = "/concert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -122,9 +123,9 @@ public class AdminController implements AdminControllerDocs {
     return ResponseEntity.ok().build();
   }
 
-    /*
-    ======================================포트폴리오======================================
-     */
+  /*
+  ======================================포트폴리오======================================
+   */
 
   @Override
   @GetMapping(value = "/portfolio")
@@ -147,10 +148,23 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @PatchMapping(value = "/portfolio/{portfolio-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<UUID> reviewPortfolio(
+  public ResponseEntity<Void> reviewPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
-    return ResponseEntity.ok(adminService.reviewPortfolioCompleted(portfolioId, request));
+    adminService.reviewPortfolioCompleted(portfolioId, request);
+    return ResponseEntity.ok().build();
+  }
+
+  /*
+  ======================================SMS======================================
+   */
+
+  @Override
+  @GetMapping("/cool-sms/balance")
+  @LogMonitoringInvocation
+  public ResponseEntity<CoolSmsBalanceResponse> getBalance(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    return ResponseEntity.ok(adminService.getBalance());
   }
 }

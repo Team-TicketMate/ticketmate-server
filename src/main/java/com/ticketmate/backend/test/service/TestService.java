@@ -19,7 +19,7 @@ import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository
 import com.ticketmate.backend.domain.concerthall.domain.constant.City;
 import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
 import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.domain.member.domain.dto.CustomOAuth2User;
+import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
 import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
@@ -103,7 +103,7 @@ public class TestService {
       Portfolio testPortfolio = Portfolio.builder()
           .member(member)
           .portfolioDescription("테스트 대리인 한줄 소개입니다.")
-          .portfolioType(PortfolioType.ACCEPTED)
+          .portfolioType(PortfolioType.APPROVED)
           .build();
       portfolioRepository.save(testPortfolio);
       memberService.promoteToAgent(testPortfolio);
