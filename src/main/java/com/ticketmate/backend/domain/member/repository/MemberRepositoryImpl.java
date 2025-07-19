@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import com.ticketmate.backend.domain.member.domain.entity.QAgentPerformanceSummary;
 import com.ticketmate.backend.domain.member.domain.entity.QMember;
 import com.ticketmate.backend.domain.portfolio.domain.entity.QPortfolio;
 import com.ticketmate.backend.domain.search.domain.dto.response.AgentSearchResponse;
@@ -20,6 +21,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
   private final JPAQueryFactory queryFactory;
   private static final QMember member = QMember.member;
   private static final QPortfolio portfolio = QPortfolio.portfolio;
+  private static final QAgentPerformanceSummary agentPerformanceSummary = QAgentPerformanceSummary.agentPerformanceSummary;
 
   /**
    * 키워드를 사용하여 닉네임, 한줄 소개에 대해 LIKE 검색을 수행하고 일치하는 대리인 ID 목록을 반환합니다.
@@ -63,10 +65,13 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
             member.memberId,
             member.nickname,
             member.profileUrl,
-            portfolio.portfolioDescription
+            portfolio.portfolioDescription,
+            agentPerformanceSummary.averageRating,
+            agentPerformanceSummary.reviewCount
         ))
         .from(member)
         .leftJoin(portfolio).on(portfolio.member.eq(member))
+        .innerJoin(agentPerformanceSummary).on(member.eq(agentPerformanceSummary.agent))
         .where(member.memberId.in(agentIds))
         .fetch();
   }

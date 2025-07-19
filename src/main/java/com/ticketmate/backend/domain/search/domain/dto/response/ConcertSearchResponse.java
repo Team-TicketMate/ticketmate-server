@@ -1,6 +1,7 @@
 package com.ticketmate.backend.domain.search.domain.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -45,6 +46,7 @@ public class ConcertSearchResponse implements SearchResult {
   }
 
   @Override
+  @JsonIgnore
   public UUID getId() {
     return this.concertId;
   }
