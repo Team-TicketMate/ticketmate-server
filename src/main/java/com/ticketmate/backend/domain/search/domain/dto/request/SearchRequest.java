@@ -1,6 +1,6 @@
 package com.ticketmate.backend.domain.search.domain.dto.request;
 
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.search.domain.dto.constant.SearchType;
 import com.ticketmate.backend.global.constant.PageableConstants;
 import com.ticketmate.backend.global.util.database.PageableUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +22,7 @@ public class SearchRequest {
   private String keyword; // 검색 키워드
 
   @Builder.Default
-  private EmbeddingType type = EmbeddingType.CONCERT; // 검색 타입
+  private SearchType type = SearchType.CONCERT; // 검색 타입
 
   @Schema(defaultValue = "1")
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")

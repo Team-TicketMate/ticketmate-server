@@ -4,10 +4,10 @@ import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.domain.member.repository.MemberRepositoryCustom;
 import com.ticketmate.backend.domain.search.domain.dto.CachedSearchResult;
 import com.ticketmate.backend.domain.search.domain.dto.IdScorePair;
+import com.ticketmate.backend.domain.search.domain.dto.constant.SearchType;
 import com.ticketmate.backend.domain.search.domain.dto.request.SearchRequest;
 import com.ticketmate.backend.domain.search.domain.dto.response.SearchResponse;
 import com.ticketmate.backend.domain.search.domain.dto.response.SearchResult;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class SearchService {
 
     Slice<? extends SearchResult> slice;
 
-    if (request.getType() == EmbeddingType.CONCERT) {
+    if (request.getType() == SearchType.CONCERT) {
       slice = getPaginatedResults(
           results.getConcertResults(),
           pageable,
