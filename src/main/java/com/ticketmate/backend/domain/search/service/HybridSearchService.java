@@ -1,0 +1,107 @@
+package com.ticketmate.backend.domain.search.service;
+
+import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
+import com.ticketmate.backend.domain.member.repository.MemberRepositoryCustom;
+import com.ticketmate.backend.domain.search.domain.dto.CachedSearchResult;
+import com.ticketmate.backend.domain.search.domain.dto.IdScorePair;
+import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.vertexai.domain.entity.Embedding;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class HybridSearchService {
+  private final EmbeddingService embeddingService;
+  private final ConcertRepositoryCustom concertRepositoryCustom;
+  private final MemberRepositoryCustom memberRepositoryCustom;
+
+  private static final int LIMIT = 100;
+  private static final int RRF_K = 60;
+
+
+  /**
+   * 실제 검색 로직을 수행하고 Redis에 결과를 캐싱하는 메서드
+   */
+  @Cacheable(value = "searches", key = "#keyword")
+  public CachedSearchResult executeHybridSearch(String keyword){
+    Embedding queryEmbedding = embeddingService.fetchOrGenerateEmbedding(null, keyword, EmbeddingType.SEARCH);
+    float[] queryVector = queryEmbedding.getEmbeddingVector();
+
+    List<IdScorePair> concertList = getRankedConcertResults(keyword, queryVector);
+    List<IdScorePair> agentList = getRankedAgentResults(keyword, queryVector);
+
+    return new CachedSearchResult(concertList, agentList);
+  }
+
+  /**
+   * 두 종류의 ID 조회 함수를 받아 RRF 점수를 계산하고 정렬된 IdScorePair 리스트를 반환하는 공통 메서드
+   *
+   * @param vectorIdFetcher 벡터 검색 ID 조회 함수
+   * @param keywordIdFetcher 키워드 검색 ID 조회 함수
+   * @return 정렬된 IdScorePair 리스트
+   */
+  private List<IdScorePair> getRankedResults(
+      Supplier<List<UUID>> vectorIdFetcher,
+      Supplier<List<UUID>> keywordIdFetcher
+  ){
+    // 벡터 및 키워드 기반 id 리스트 조회
+    List<UUID> vectorIdList = vectorIdFetcher.get();
+    List<UUID> keywordIdList = keywordIdFetcher.get();
+
+    // RRF 점수 계산
+    Map<UUID, Double> scoreMap = calculateScores(vectorIdList, keywordIdList);
+
+    return getRankedIdScorePairs(scoreMap);
+  }
+
+  private List<IdScorePair> getRankedIdScorePairs(Map<UUID, Double> scoreMap){
+    return scoreMap.entrySet().stream()
+        .sorted(Entry.<UUID, Double>comparingByValue().reversed())
+        .map(entry -> new IdScorePair(entry.getKey(), entry.getValue()))
+        .collect(Collectors.toList());
+  }
+
+  private List<IdScorePair> getRankedConcertResults(String keyword, float[] queryVector){
+    return getRankedResults(
+        () -> embeddingService.findNearestConcerts(queryVector, LIMIT),
+        () -> concertRepositoryCustom.findConcertIdsByKeyword(keyword)
+    );
+  }
+
+  private List<IdScorePair> getRankedAgentResults(String keyword, float[] queryVector){
+    return getRankedResults(
+        () -> embeddingService.findNearestAgents(queryVector, LIMIT),
+        () -> memberRepositoryCustom.findAgentIdsByKeyword(keyword)
+    );
+  }
+
+  private Map<UUID, Double> calculateScores(List<UUID> vectorIdList, List<UUID> likeIdList){
+    Map<UUID, Double> scoreMap = new HashMap<>();
+    // 벡터 검색 결과에 대한 RRF 점수 계산
+    for (int i = 0; i < vectorIdList.size(); i++) {
+      UUID id = vectorIdList.get(i);
+      double rrfScore = 1.0 / (RRF_K + (i + 1));
+      scoreMap.put(id, rrfScore);
+    }
+
+    // 키워드 검색 결과에 대한 RRF 점수 계산 및 병합
+    for (int i = 0; i < likeIdList.size(); i++) {
+      UUID id = likeIdList.get(i);
+      double rrfScore = 1.0 / (RRF_K + (i + 1));
+      // 기존 점수(벡터 검색)에 현재 점수(키워드 검색)를 합산
+      scoreMap.merge(id, rrfScore, Double::sum);
+    }
+
+    return scoreMap;
+  }
+}
