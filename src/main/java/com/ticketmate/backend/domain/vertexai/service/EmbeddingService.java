@@ -90,4 +90,12 @@ public class EmbeddingService {
     }
     return vector;
   }
+
+  public List<UUID> findNearestConcerts(float[] queryVector, int limit){
+    return embeddingRepository.findNearestConcerts(queryVector, limit);
+  }
+
+  public List<UUID> findNearestAgents(float[] queryVector, int limit){
+    return embeddingRepository.findNearestAgents(queryVector, limit);
+  }
 }

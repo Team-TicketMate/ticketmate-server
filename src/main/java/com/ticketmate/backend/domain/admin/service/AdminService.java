@@ -35,6 +35,8 @@ import com.ticketmate.backend.domain.notification.service.NotificationService;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepositoryCustom;
+import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
 import com.ticketmate.backend.domain.portfolio.service.PortfolioService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
@@ -73,6 +75,7 @@ public class AdminService {
   private final FileService fileService;
   private final EntityMapper entityMapper;
   private final MemberService memberService;
+  private final EmbeddingService embeddingService;
   private final PortfolioService portfolioService;
   private final DefaultMessageService messageService;
 
@@ -112,7 +115,7 @@ public class AdminService {
         : null;
 
     // 공연 정보 저장
-    concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailUrl, seatingChartUrl));
+    Concert concert = concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailUrl, seatingChartUrl));
 
     // 공연 날짜 검증 및 저장
     concertDateService.validateConcertDateList(request.getConcertDateRequestList());
@@ -122,7 +125,14 @@ public class AdminService {
     ticketOpenDateService.validateTicketOpenDateList(request.getTicketOpenDateRequestList());
     ticketOpenDateService.saveTicketOpenDateList(request.getTicketOpenDateRequestList());
 
-    log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    // Embedding 생성 및 저장
+    String embeddingText = String.join(" ",
+        concert.getConcertName(),
+        concert.getConcertType().getDescription(),
+        concertHall != null ? concertHall.getConcertHallName() : "");
+    embeddingService.fetchOrGenerateEmbedding(concert.getConcertId(), embeddingText, EmbeddingType.CONCERT);
+
+    log.debug("공연 정보 및 임베딩 저장 성공: {}", request.getConcertName());
   }
 
   /**
@@ -428,7 +438,7 @@ public class AdminService {
 
     // '승인'인 경우 의뢰인 -> 대리인 변경
     if (portfolioType.equals(PortfolioType.APPROVED)) {
-      memberService.promoteToAgent(member);
+      memberService.promoteToAgent(portfolio);
     }
 
     NotificationPayload payload = buildPortfolioNotificationPayload(member, portfolioType);
