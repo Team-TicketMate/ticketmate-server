@@ -3,9 +3,13 @@ package com.ticketmate.backend.global.util.database;
 import static com.ticketmate.backend.global.constant.PageableConstants.MAX_PAGE_SIZE;
 
 import com.ticketmate.backend.global.constant.SortField;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -62,6 +66,10 @@ public class PageableUtil {
 
     int pageIndex = convertToPageIndex(pageNumber);
     int validatedSize = validatePageSize(pageSize, defaultPageSize);
+
+    if (sortField == null || sortDirection == null) {
+      return PageRequest.of(pageIndex, validatedSize, Sort.unsorted());
+    }
 
     Sort sort = Sort.by(sortDirection, sortField.getProperty());
     return PageRequest.of(pageIndex, validatedSize, sort);

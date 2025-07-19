@@ -67,6 +67,27 @@ public class QueryDslUtil {
   }
 
   /**
+   * 여러 BooleanExpression을 하나의 OR 절로 결합
+   * - 전달된 expressions 순서대로 null 체크 후 OR 연산
+   * - 모든 expression이 null이면 null반환
+   *
+   * @param expressions 결합할 BooleanExpression 배열
+   * @return 결합된 BooleanExpression 또는 모두 null 일 경우 null
+   */
+  public BooleanExpression anyOf(BooleanExpression... expressions) {
+    BooleanExpression result = null;
+    if (expressions == null || expressions.length == 0) {
+      return null;
+    }
+    for (BooleanExpression expression : expressions) {
+      if (expression != null) {
+        result = (result == null) ? expression : result.or(expression);
+      }
+    }
+    return result;
+  }
+
+  /**
    * 주어진 값(value)이 null이 아닐 때만 EQ(=) 조건 생성
    * - value가 null이면 null을 반환하여 WHERE 절에 해당 조건이 포함되지 않게 합니다
    * - value가 null이 아니면 path.eq(value) 조건을 반환합니다
