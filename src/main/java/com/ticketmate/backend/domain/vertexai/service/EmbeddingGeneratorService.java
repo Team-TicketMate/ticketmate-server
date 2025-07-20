@@ -32,6 +32,11 @@ public class EmbeddingGeneratorService {
         concertHall != null && concertHall.getConcertHallName() != null ? concertHall.getConcertHallName() : ""
     );
 
+    if(embeddingText.trim().isEmpty()){
+      log.warn("Concert (ID: {})에 대해 임베딩 생성을 위한 유효한 텍스트가 없습니다.", concert.getConcertId());
+      throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
+    }
+
     embeddingService.fetchOrGenerateEmbedding(
         concert.getConcertId(),
         embeddingText,
@@ -58,6 +63,11 @@ public class EmbeddingGeneratorService {
         member.getNickname() != null ? member.getNickname() : "",
         portfolio.getPortfolioDescription() != null ? portfolio.getPortfolioDescription() : ""
     );
+
+    if(embeddingText.trim().isEmpty()){
+      log.warn("Agent (ID: {})에 대해 임베딩 생성을 위한 유효한 텍스트가 없습니다.", member.getMemberId());
+      throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
+    }
 
     embeddingService.fetchOrGenerateEmbedding(
         member.getMemberId(),
