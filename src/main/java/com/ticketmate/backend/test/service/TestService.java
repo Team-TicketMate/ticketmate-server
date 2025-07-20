@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -100,11 +101,7 @@ public class TestService {
     Member member = memberRepository.findByUsername(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT)) {
-      Portfolio testPortfolio = Portfolio.builder()
-          .member(member)
-          .portfolioDescription("테스트 대리인 한줄 소개입니다.")
-          .portfolioType(PortfolioType.APPROVED)
-          .build();
+      Portfolio testPortfolio = mockPortfolioFactory.generate(member);
       portfolioRepository.save(testPortfolio);
       memberService.promoteToAgent(testPortfolio);
       log.debug("테스트 유저 {}를 대리인으로 승격 처리했습니다.", member.getMemberId());
@@ -182,9 +179,17 @@ public class TestService {
             List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
 
             // 대리인 Embedding 생성
-            for(Portfolio portfolio : savedPortfolioList){
-              embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
-            }
+            List<CompletableFuture<Void>> embeddingFutures = savedPortfolioList.stream()
+                .map(portfolio -> CompletableFuture.runAsync(() -> {
+                  try {
+                    embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
+                  } catch (Exception e){
+                    log.error("포트폴리오 ID {} 임베딩 생성 실패: {}", portfolio.getPortfolioId(), e.getMessage());
+                  }
+                }, taskExecutor))
+                .toList();
+
+            CompletableFuture.allOf(embeddingFutures.toArray(new CompletableFuture[0])).join();
 
             long endMs = System.currentTimeMillis();
             log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",

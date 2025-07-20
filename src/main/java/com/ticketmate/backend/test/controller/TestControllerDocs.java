@@ -46,7 +46,7 @@ public interface TestControllerDocs {
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/417"
       ),
       @ApiChangeLog(
-          date = "2025-07-17",
+          date = "2025-07-20",
           author = "Yooonjeong",
           description = "대리인 Mock 데이터 Portfolio 및 Embedding 생성 추가",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/376"
