@@ -20,6 +20,7 @@ import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.file.constant.UploadType;
 import com.ticketmate.backend.global.file.service.S3Service;
 import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.global.util.common.CommonUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +37,10 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.ticketmate.backend.global.constant.ChatConstants.*;
-import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
 import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_EXCHANGE_NAME;
 import static com.ticketmate.backend.global.constant.RabbitMqConstants.UN_READ_ROUTING_KEY;
+import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -163,13 +164,15 @@ public class ChatMessageService {
 
     ChatMessage message = saveChatMessage(sender, request, chatRoom);
 
+    List<UUID> chatRoomMemberIdList = List.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId());
+
     // Redis 갱신
-    for (UUID target : List.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId())) {
-      if (target.equals(sender.getMemberId())) {
+    for (UUID chatRoomMemberId : chatRoomMemberIdList) {
+      if (chatRoomMemberId.equals(sender.getMemberId())) {
         continue;   // 발송자 제외
       }
 
-      String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoom.getChatRoomId(), target);
+      String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoom.getChatRoomId(), chatRoomMemberId);
       Long count = redisTemplate.opsForValue().increment(key);
       redisTemplate.expire(key, TTL);
 
@@ -177,7 +180,7 @@ public class ChatMessageService {
 
       rabbitTemplate.convertAndSend(
               "",
-              UN_READ_ROUTING_KEY + target,
+              UN_READ_ROUTING_KEY + chatRoomMemberId,
               Map.of(
                       "chatRoomId", chatRoom.getChatRoomId(),
                       "unReadMessageCount", count,
@@ -252,7 +255,7 @@ public class ChatMessageService {
     List<MultipartFile> pictureList = request.getChatMessagePictureList();
 
     // 사진 리스트 검증
-    if (pictureList == null || pictureList.isEmpty()) {
+    if (CommonUtil.nullOrEmpty(pictureList)) {
       throw new CustomException(ErrorCode.CHAT_PICTURE_EMPTY);
     }
     if (pictureList.size() > ChatConstants.CHAT_PICTURE_MAX_SIZE) {
