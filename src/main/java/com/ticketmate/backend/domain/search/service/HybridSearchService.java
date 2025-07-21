@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +27,8 @@ public class HybridSearchService {
   private final EmbeddingService embeddingService;
   private final ConcertRepositoryCustom concertRepositoryCustom;
   private final MemberRepositoryCustom memberRepositoryCustom;
+  @Qualifier("applicationTaskExecutor")
+  private final TaskExecutor taskExecutor;
 
   private static final int LIMIT = 100;
   private static final int RRF_K = 60;
@@ -31,14 +36,31 @@ public class HybridSearchService {
 
   /**
    * 실제 검색 로직을 수행하고 Redis에 결과를 캐싱하는 메서드
+   * TTL 30분 설정
+   * 데이터 변경(공연 저장/수정, 대리인 승격 등) 시 AdminService, PortfolioCacheEvictListener에서 해당 캐시 무효화
    */
   @Cacheable(value = "searches", key = "#keyword")
   public CachedSearchResult executeHybridSearch(String keyword){
     Embedding queryEmbedding = embeddingService.fetchOrGenerateEmbedding(null, keyword, EmbeddingType.SEARCH);
     float[] queryVector = queryEmbedding.getEmbeddingVector();
 
-    List<IdScorePair> concertList = getRankedConcertResults(keyword, queryVector);
-    List<IdScorePair> agentList = getRankedAgentResults(keyword, queryVector);
+    // 공연 및 대리인 결과 병렬 조회
+    CompletableFuture<List<IdScorePair>> concertFuture =
+        CompletableFuture.supplyAsync(
+            () -> getRankedConcertResults(keyword, queryVector),
+            taskExecutor
+        );
+    CompletableFuture<List<IdScorePair>> agentFuture =
+        CompletableFuture.supplyAsync(
+            () -> getRankedAgentResults(keyword, queryVector),
+            taskExecutor
+        );
+
+    // 모두 완료될 때까지 대기
+    CompletableFuture.allOf(concertFuture, agentFuture).join();
+
+    List<IdScorePair> concertList = concertFuture.join();
+    List<IdScorePair> agentList = agentFuture.join();
 
     return new CachedSearchResult(concertList, agentList);
   }
