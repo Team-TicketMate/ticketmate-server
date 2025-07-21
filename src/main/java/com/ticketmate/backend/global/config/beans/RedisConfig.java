@@ -1,6 +1,8 @@
 package com.ticketmate.backend.global.config.beans;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +33,20 @@ public class RedisConfig {
 
   @Bean
   public CacheManager cacheManager(RedisConnectionFactory cf) {
-    RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+    RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
         .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
-        .entryTtl(Duration.ofMinutes(30L)); // 유효시간 30분
+        .entryTtl(Duration.ofMinutes(30));
+
+    // 캐시별 TTL 설정
+    Map<String, RedisCacheConfiguration> configs = new HashMap<>();
+    // 임베딩은 영구 캐시 (TTL 없이, null 값은 캐시하지 않음)
+    configs.put("embeddings", defaultConfig.entryTtl(Duration.ZERO).disableCachingNullValues());
 
     return RedisCacheManager.RedisCacheManagerBuilder
         .fromConnectionFactory(cf)
-        .cacheDefaults(redisCacheConfiguration)
+        .cacheDefaults(defaultConfig)
+        .withInitialCacheConfigurations(configs)
         .build();
   }
 
