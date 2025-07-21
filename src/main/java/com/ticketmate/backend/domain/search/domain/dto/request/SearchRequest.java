@@ -9,12 +9,14 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.Pageable;
 
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Builder
