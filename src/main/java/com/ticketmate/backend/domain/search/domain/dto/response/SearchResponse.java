@@ -1,12 +1,18 @@
 package com.ticketmate.backend.domain.search.domain.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Getter;
 import org.springframework.data.domain.Slice;
 
 @Getter
 public class SearchResponse<T> {
   private final Slice<T> searchResults; // 검색 결과
+
+  @JsonInclude(Include.NON_EMPTY)
   private final Integer concertCount;
+
+  @JsonInclude(Include.NON_EMPTY)
   private final Integer agentCount;
 
   private SearchResponse(Slice<T> searchResults, Integer concertCount, Integer agentCount){
