@@ -40,18 +40,18 @@ public class SearchService {
 
     if (request.getType() == SearchType.CONCERT) {
       slice = getPaginatedResults(
-          results.getConcertResults(),
+          results.concertResults(),
           pageable,
           concertRepositoryCustom::findConcertDetailsByIds
       );
     } else {
       slice = getPaginatedResults(
-          results.getAgentResults(),
+          results.agentResults(),
           pageable,
           memberRepositoryCustom::findAgentDetailsByIds
       );
     }
-    if(pageable.getPageNumber() == 0) return SearchResponse.firstPage(slice, results.getConcertResults().size(), results.getAgentResults().size());
+    if(pageable.getPageNumber() == 0) return SearchResponse.firstPage(slice, results.concertResults().size(), results.agentResults().size());
     return SearchResponse.nextPage(slice);
   }
 

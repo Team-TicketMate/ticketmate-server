@@ -141,6 +141,10 @@ dependencies {
 
     // CoolSMS
     implementation 'net.nurigo:sdk:4.3.2'
+
+    // 역직렬화
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
