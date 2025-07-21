@@ -37,7 +37,7 @@ public class EmbeddingGeneratorService {
       throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
     }
 
-    embeddingService.fetchOrGenerateEmbedding(
+    embeddingService.regenerateEmbedding(
         concert.getConcertId(),
         embeddingText,
         EmbeddingType.CONCERT
@@ -69,7 +69,7 @@ public class EmbeddingGeneratorService {
       throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
     }
 
-    embeddingService.fetchOrGenerateEmbedding(
+    embeddingService.regenerateEmbedding(
         member.getMemberId(),
         embeddingText,
         EmbeddingType.AGENT
