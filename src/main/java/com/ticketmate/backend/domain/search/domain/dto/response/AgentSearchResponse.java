@@ -28,7 +28,7 @@ public class AgentSearchResponse implements SearchResult {
 
   private int reviewCount;
 
-  private double score; // 최종 점수
+  private Double score; // 최종 점수
 
   // QueryDSL 프로젝션을 위한 생성자
   public AgentSearchResponse(UUID agentId, String nickname, String profileUrl, String introduction, double averageRating, int reviewCount){

@@ -38,7 +38,7 @@ public class ConcertSearchResponse implements SearchResult {
 
   private String concertThumbnailUrl; // 공연 썸네일 URL
 
-  private double score; // 최종 점수
+  private Double score; // 최종 점수
 
   @Override
   public void setScore(Double score) {
