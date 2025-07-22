@@ -44,12 +44,6 @@ public interface TestControllerDocs {
           author = "Yooonjeong",
           description = "대리인 Mock 데이터 Summary 생성 및 랜덤 공연 수락 설정 추가",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/417"
-      ),
-      @ApiChangeLog(
-          date = "2025-07-20",
-          author = "Yooonjeong",
-          description = "대리인 Mock 데이터 Portfolio 및 Embedding 생성 추가",
-          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/376"
       )
   })
   @Operation(
@@ -74,8 +68,6 @@ public interface TestControllerDocs {
           - 대리인 및 의뢰인 정보가 함께 생성되며, 대리인 생성 시 아래 내용이 함께 추가됩니다.
             - 해당 대리인의 활동 정보 랜덤값으로 추가
             - DB에 존재하는 랜덤 공연에 대해 수락 ON 설정
-            - 대리인과 연결된 수락된 Portfolio 생성
-            - 대리인 임베딩값 저장
           
           ### ❌ 예외 처리
           - `INTERNAL_SERVER_ERROR (500)`: 회원 Mock 데이터 저장 중 예기치 못한 오류가 발생한 경우
