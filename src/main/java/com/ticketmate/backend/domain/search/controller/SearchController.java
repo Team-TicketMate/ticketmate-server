@@ -3,6 +3,7 @@ package com.ticketmate.backend.domain.search.controller;
 import com.ticketmate.backend.domain.search.domain.dto.request.SearchRequest;
 import com.ticketmate.backend.domain.search.domain.dto.response.SearchResponse;
 import com.ticketmate.backend.domain.search.service.SearchService;
+import com.ticketmate.backend.global.aop.log.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class SearchController implements SearchControllerDocs {
 
   @Override
   @GetMapping
+  @LogMonitoringInvocation
   public ResponseEntity<SearchResponse<?>> search(@ParameterObject @Valid SearchRequest request){
     return ResponseEntity.ok(searchService.search(request));
   }

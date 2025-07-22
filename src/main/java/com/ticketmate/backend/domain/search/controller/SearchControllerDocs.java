@@ -6,6 +6,7 @@ import com.ticketmate.backend.domain.search.domain.dto.request.SearchRequest;
 import com.ticketmate.backend.domain.search.domain.dto.response.SearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
@@ -26,7 +27,7 @@ public interface SearchControllerDocs {
 
 ### 요청 파라미터
 - **keyword** (String, Query) : 검색어 [필수]
-- **type** (EmbeddingType, Query)
+- **type** (SearchType, Query)
   - `CONCERT` : 공연
   - `AGENT`   : 대리인
   - 기본값: `CONCERT`
@@ -69,5 +70,5 @@ public interface SearchControllerDocs {
 - **score** 필드로 결과 랭킹을 판단할 수 있습니다.
 """
   )
-  public ResponseEntity<SearchResponse<?>> search(@ModelAttribute @Valid SearchRequest request);
+  public ResponseEntity<SearchResponse<?>> search(@ParameterObject @Valid SearchRequest request);
 }
