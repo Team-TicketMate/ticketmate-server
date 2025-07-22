@@ -95,14 +95,14 @@ public class HybridSearchService {
 
   private List<IdScorePair> getRankedConcertResults(String keyword, float[] queryVector){
     return getRankedResults(
-        () -> embeddingService.findNearestConcerts(queryVector, LIMIT),
+        () -> embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.CONCERT),
         () -> concertRepositoryCustom.findConcertIdsByKeyword(keyword)
     );
   }
 
   private List<IdScorePair> getRankedAgentResults(String keyword, float[] queryVector){
     return getRankedResults(
-        () -> embeddingService.findNearestAgents(queryVector, LIMIT),
+        () -> embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.AGENT),
         () -> memberRepositoryCustom.findAgentIdsByKeyword(keyword)
     );
   }

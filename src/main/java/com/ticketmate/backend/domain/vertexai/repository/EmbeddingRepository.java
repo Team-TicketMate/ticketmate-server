@@ -13,11 +13,15 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
 
   Optional<Embedding> findByTextAndEmbeddingType(String text, EmbeddingType embeddingType);
 
-  // 공연 벡터 유사도 검색
-  @Query(value = "SELECT target_id FROM embedding WHERE embedding_type = 'CONCERT' ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
-  List<UUID> findNearestConcerts(@Param("vector") float[] vector, @Param("limit") int limit);
-
-  // 대리인 벡터 유사도 검색
-  @Query(value = "SELECT target_id FROM embedding WHERE embedding_type = 'AGENT' ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
-  List<UUID> findNearestAgents(@Param("vector") float[] vector, @Param("limit") int limit);
+  /**
+   * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드
+   * @param vector 비교할 기준 벡터
+   * @param limit 반환할 결과의 수
+   * @param embeddingType 검색할 임베딩의 타입 (CONCERT, AGENT 등)
+   * @return 유사도 순으로 정렬된 target_id 리스트
+   */
+  @Query(value = "SELECT target_id FROM embedding "
+                 + "WHERE embedding_type = :#{#embeddingType.name()} "
+                 + "ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
+  List<UUID> findNearestEmbeddings(@Param("vector") float[] vector, @Param("limit") int limit, @Param("embeddingType") EmbeddingType embeddingType);
 }

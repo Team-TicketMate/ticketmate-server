@@ -126,26 +126,15 @@ public class EmbeddingService {
   }
 
   /**
-   * 공연 검색을 위한 벡터 탐색 결과 반환
-   * 지정된 queryVector로 유사도가 높은 콘서트 ID 리스트 조회
+   * 벡터 탐색 결과 반환
+   * 지정된 queryVector로 유사도가 높은 순서대로 정렬된 리스트 조회
    *
    * @param queryVector 검색에 사용할 임베딩 벡터
    * @param limit 조회할 최대 아이디 개수
-   * @return 유사도 순으로 정렬된 공연 ID 리스트
-   */
-  public List<UUID> findNearestConcerts(float[] queryVector, int limit){
-    return embeddingRepository.findNearestConcerts(queryVector, limit);
-  }
-
-  /**
-   * 대리인 검색을 위한 벡터 탐색 결과 반환
-   * 지정된 queryVector로 유사도가 높은 에이전트(ID) 리스트 조회
-   *
-   * @param queryVector 검색에 사용할 임베딩 벡터
-   * @param limit 조회할 최대 아이디 개수
+   * @param embeddingType 조회할 임베딩 타입
    * @return 유사도 순으로 정렬된 대리인 ID 리스트
    */
-  public List<UUID> findNearestAgents(float[] queryVector, int limit){
-    return embeddingRepository.findNearestAgents(queryVector, limit);
+  public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType){
+    return embeddingRepository.findNearestEmbeddings(queryVector, limit, embeddingType);
   }
 }

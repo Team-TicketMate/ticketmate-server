@@ -36,10 +36,10 @@ class EmbeddingServiceTest {
         .getEmbeddingVector();
 
     // 워밍업
-    embeddingService.findNearestConcerts(queryVector, LIMIT);
+    embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.CONCERT);
 
     long start = System.currentTimeMillis();
-    List<UUID> concertIds = embeddingService.findNearestConcerts(queryVector, LIMIT);
+    List<UUID> concertIds = embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.CONCERT);
     long duration = System.currentTimeMillis() - start;
 
     log.info("findNearestConcerts 벡터 검색 시간: {}ms, 결과 개수: {}",
@@ -53,10 +53,10 @@ class EmbeddingServiceTest {
         .getEmbeddingVector();
 
     // 워밍업
-    embeddingService.findNearestAgents(queryVector, LIMIT);
+    embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.AGENT);
 
     long start = System.currentTimeMillis();
-    List<UUID> agentIds = embeddingService.findNearestAgents(queryVector, LIMIT);
+    List<UUID> agentIds = embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.AGENT);
     long duration = System.currentTimeMillis() - start;
 
     log.info("findNearestAgents 벡터 검색 시간: {}ms, 결과 개수: {}",
