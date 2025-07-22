@@ -57,7 +57,7 @@ public interface ConcertRepositoryCustom {
    * 공연 키워드 LIKE 검색
    * 공연명, 공연 카테고리, 공연장 기준 비교
    */
-  List<UUID> findConcertIdsByKeyword(String keyword);
+  List<UUID> findConcertIdsByKeyword(String keyword, int limit);
 
   /**
    * ID 리스트 기반 ConcertSearchResponse DTO 리스트 반환

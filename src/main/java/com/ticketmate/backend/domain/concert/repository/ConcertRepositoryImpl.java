@@ -503,10 +503,11 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    * 키워드를 사용하여 공연명, 공연장명, 공연 타입에 대해 LIKE 검색을 수행하고 일치하는 공연 ID 목록을 반환합니다.
    *
    * @param keyword 검색할 키워드
+   * @param limit 반환할 결과의 수
    * @return 일치하는 공연의 UUID 리스트
    */
   @Override
-  public List<UUID> findConcertIdsByKeyword(String keyword){
+  public List<UUID> findConcertIdsByKeyword(String keyword, int limit){
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.anyOf(
         QueryDslUtil.likeIgnoreCase(concert.concertName, keyword),
@@ -518,6 +519,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         .from(concert)
         .leftJoin(concert.concertHall, concertHall)
         .where(whereClause)
+        .limit(limit)
         .fetch();
   }
 

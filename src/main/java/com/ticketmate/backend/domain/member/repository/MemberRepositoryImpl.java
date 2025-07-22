@@ -27,10 +27,11 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
    * 키워드를 사용하여 닉네임, 한줄 소개에 대해 LIKE 검색을 수행하고 일치하는 대리인 ID 목록을 반환합니다.
    *
    * @param keyword 검색할 키워드
+   * @param limit 반환할 결과의 수
    * @return 일치하는 대리인의 UUID 리스트
    */
   @Override
-  public List<UUID> findAgentIdsByKeyword(String keyword){
+  public List<UUID> findAgentIdsByKeyword(String keyword, int limit){
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
         member.memberType.eq(MemberType.AGENT),
@@ -46,6 +47,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         .innerJoin(portfolio)
         .on((portfolio.member).eq(member))
         .where(whereClause)
+        .limit(limit)
         .fetch();
   }
 

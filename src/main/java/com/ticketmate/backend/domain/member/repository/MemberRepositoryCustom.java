@@ -9,7 +9,7 @@ public interface MemberRepositoryCustom {
    * 대리인 키워드 LIKE 검색
    * 닉네임, 한줄 소개 기준 비교
    */
-  public List<UUID> findAgentIdsByKeyword(String keyword);
+  public List<UUID> findAgentIdsByKeyword(String keyword, int limit);
 
   /**
    * ID 리스트 기반 AgentSearchResponse DTO 리스트 반환
