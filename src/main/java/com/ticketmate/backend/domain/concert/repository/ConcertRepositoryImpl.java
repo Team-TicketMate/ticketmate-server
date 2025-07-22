@@ -516,6 +516,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     return queryFactory
         .select(concert.concertId)
         .from(concert)
+        .leftJoin(concert.concertHall, concertHall)
         .where(whereClause)
         .fetch();
   }
