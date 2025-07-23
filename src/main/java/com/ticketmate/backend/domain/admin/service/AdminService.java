@@ -11,6 +11,7 @@ import com.ticketmate.backend.domain.admin.dto.request.PortfolioStatusUpdateRequ
 import com.ticketmate.backend.domain.admin.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.domain.admin.dto.response.PortfolioForAdminResponse;
+import com.ticketmate.backend.domain.admin.event.PortfolioHandledEvent;
 import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
@@ -35,6 +36,8 @@ import com.ticketmate.backend.domain.notification.service.NotificationService;
 import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepositoryCustom;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
 import com.ticketmate.backend.domain.portfolio.service.PortfolioService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
@@ -50,6 +53,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.message.model.Balance;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +80,8 @@ public class AdminService {
   private final MemberService memberService;
   private final PortfolioService portfolioService;
   private final DefaultMessageService messageService;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
+  private final ApplicationEventPublisher publisher;
 
   /*
   ======================================공연======================================
@@ -93,6 +100,7 @@ public class AdminService {
    *                ticketOpenDateRequestList 티켓 오픈일 DTO List
    */
   @Transactional
+  @CacheEvict(cacheNames = "searches", allEntries = true)
   public void saveConcert(ConcertInfoRequest request) {
 
     // 중복된 공연이름 검증
@@ -112,7 +120,7 @@ public class AdminService {
         : null;
 
     // 공연 정보 저장
-    concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailUrl, seatingChartUrl));
+    Concert concert = concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailUrl, seatingChartUrl));
 
     // 공연 날짜 검증 및 저장
     concertDateService.validateConcertDateList(request.getConcertDateRequestList());
@@ -122,7 +130,10 @@ public class AdminService {
     ticketOpenDateService.validateTicketOpenDateList(request.getTicketOpenDateRequestList());
     ticketOpenDateService.saveTicketOpenDateList(request.getTicketOpenDateRequestList());
 
-    log.debug("공연 정보 저장 성공: {}", request.getConcertName());
+    // 공연 임베딩 저장
+    embeddingGeneratorService.generateOrUpdateConcertEmbedding(concert);
+
+    log.debug("공연 정보 및 임베딩 저장 성공: {}", request.getConcertName());
   }
 
   /**
@@ -169,6 +180,7 @@ public class AdminService {
    *                  ticketOpenDateRequestList 티켓 오픈일 DTO List
    */
   @Transactional
+  @CacheEvict(cacheNames = "searches", allEntries = true)
   public void editConcertInfo(UUID concertId, ConcertInfoEditRequest request) {
     // 공연 조회
     Concert concert = concertService.findConcertById(concertId);
@@ -223,6 +235,9 @@ public class AdminService {
     if (!CommonUtil.nullOrEmpty(request.getTicketOpenDateRequestList())) {
       ticketOpenDateService.replaceAllTicketOpenDateList(concert, request.getTicketOpenDateRequestList());
     }
+
+    // 공연 임베딩 업데이트
+    embeddingGeneratorService.generateOrUpdateConcertEmbedding(concert);
 
     // 공연 정보 저장
     concertRepository.save(concert);
@@ -428,7 +443,8 @@ public class AdminService {
 
     // '승인'인 경우 의뢰인 -> 대리인 변경
     if (portfolioType.equals(PortfolioType.APPROVED)) {
-      memberService.promoteToAgent(member);
+      memberService.promoteToAgent(portfolio);
+      publisher.publishEvent(new PortfolioHandledEvent(portfolio.getPortfolioId(), portfolioType));
     }
 
     NotificationPayload payload = buildPortfolioNotificationPayload(member, portfolioType);

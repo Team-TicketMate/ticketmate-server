@@ -200,6 +200,8 @@ public enum ErrorCode {
 
   EMBEDDING_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "반환된 임베딩 데이터가 존재하지 않습니다."),
 
+  INSUFFICIENT_DATA_FOR_EMBEDDING(HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 생성을 위한 데이터가 불충분합니다."),
+
   // PAGEABLE
 
   INVALID_SORT_FIELD(HttpStatus.BAD_REQUEST, "필터링 조회 시 정렬 필드 요청이 잘못되었습니다."),

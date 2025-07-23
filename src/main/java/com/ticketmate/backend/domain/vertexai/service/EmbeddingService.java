@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,27 +32,59 @@ public class EmbeddingService {
 
   /**
    * Vertex AI 임베딩 요청
-   * 이미 저장된 임베딩이 있는지 확인
-   * 없으면 임베딩 생성 후 저장
+   * 검색용 임베딩 생성/조회
+   * TTL 없이 영구 캐시 적용
    *
    * @param targetId      공연/대리인 ID (검색어의 경우 null)
    * @param text          임베딩 생성할 텍스트 (공연&대리인: plain-text 조합, 검색어: 입력 키워드)
    * @param embeddingType CONCERT, AGENT, SEARCH
    */
   @Transactional
+  @Caching(
+      cacheable = @Cacheable(
+          value     = "embeddings",
+          key       = "T(com.ticketmate.backend.global.util.common.CommonUtil)"
+                      + ".normalizeAndRemoveSpecialCharacters(#text)"
+                      + "+':' + #embeddingType",
+          condition = "#targetId == null",
+          unless    = "#result == null"
+      )
+  )
   public Embedding fetchOrGenerateEmbedding(UUID targetId, String text, EmbeddingType embeddingType) {
     // 텍스트 정규화
     String normalizeText = CommonUtil.normalizeAndRemoveSpecialCharacters(text);
-    // DB조회 후 반환 or 새로운 임베딩 저장
+
+    // 검색 모드: 캐시나 DB 조회 후 없으면 생성
     return embeddingRepository.findByTextAndEmbeddingType(normalizeText, embeddingType)
-        .orElseGet(() -> embeddingRepository.save(
-            Embedding.builder()
-                .targetId(targetId)
-                .text(normalizeText)
-                .embeddingVector(extractVector(generateEmbedding(normalizeText)))
-                .embeddingType(embeddingType)
-                .build())
-        );
+        .orElseGet(() -> createAndSaveEmbedding(targetId, normalizeText, embeddingType));
+  }
+
+  /**
+   * 공연/대리인 업데이트 시점에 호출: 무조건 DB에 새 임베딩 저장
+   */
+  @Transactional
+  public void regenerateEmbedding(
+      UUID targetId,
+      String text,
+      EmbeddingType embeddingType
+  ) {
+    String normalizeText = CommonUtil.normalizeAndRemoveSpecialCharacters(text);
+    createAndSaveEmbedding(targetId, normalizeText, embeddingType);
+  }
+
+  /**
+   * 실제 Embedding 생성 및 저장 로직
+   */
+  private Embedding createAndSaveEmbedding(UUID targetId, String normalizedText, EmbeddingType type) {
+    // Vertex AI 호출하여 벡터 생성
+    float[] vector = extractVector(generateEmbedding(normalizedText));
+
+    return embeddingRepository.save(Embedding.builder()
+        .targetId(targetId)
+        .text(normalizedText)
+        .embeddingVector(vector)
+        .embeddingType(type)
+        .build());
   }
 
   /**
@@ -89,5 +123,18 @@ public class EmbeddingService {
       vector[i] = embeddingValues.get(i);
     }
     return vector;
+  }
+
+  /**
+   * 벡터 탐색 결과 반환
+   * 지정된 queryVector로 유사도가 높은 순서대로 정렬된 리스트 조회
+   *
+   * @param queryVector 검색에 사용할 임베딩 벡터
+   * @param limit 조회할 최대 아이디 개수
+   * @param embeddingType 조회할 임베딩 타입
+   * @return 유사도 순으로 정렬된 대리인 ID 리스트
+   */
+  public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType){
+    return embeddingRepository.findNearestEmbeddings(queryVector, limit, embeddingType);
   }
 }

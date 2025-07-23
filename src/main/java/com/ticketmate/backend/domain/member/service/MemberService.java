@@ -6,6 +6,10 @@ import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummar
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
+import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
+import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -22,6 +26,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
   private final EntityMapper entityMapper;
 
   /**
@@ -63,10 +68,11 @@ public class MemberService {
   /**
    * 의뢰인 -> 대리인 MemberType 변경
    *
-   * @param member MemberType을 변경하려는 Member
+   * @param portfolio MemberType을 변경하려는 Member의 portfolio
    */
   @Transactional
-  public void promoteToAgent(Member member) {
+  public void promoteToAgent(Portfolio portfolio){
+    Member member = portfolio.getMember();
     member.setMemberType(MemberType.AGENT);
 
     if (!agentPerformanceSummaryRepository.existsById(member.getMemberId())) {
@@ -79,6 +85,8 @@ public class MemberService {
           .build();
       agentPerformanceSummaryRepository.save(summary);
     }
+
+    embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
   }
 
   /**
