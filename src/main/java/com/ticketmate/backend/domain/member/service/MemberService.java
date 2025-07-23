@@ -6,6 +6,10 @@ import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummar
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.domain.member.repository.MemberRepository;
+import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
+import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.mapper.EntityMapper;
@@ -22,6 +26,7 @@ public class MemberService {
 
   private final MemberRepository memberRepository;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
   private final EntityMapper entityMapper;
 
   /**
@@ -63,10 +68,11 @@ public class MemberService {
   /**
    * 의뢰인 -> 대리인 MemberType 변경
    *
-   * @param member MemberType을 변경하려는 Member
+   * @param portfolio MemberType을 변경하려는 Member의 portfolio
    */
   @Transactional
-  public void promoteToAgent(Member member) {
+  public void promoteToAgent(Portfolio portfolio){
+    Member member = portfolio.getMember();
     member.setMemberType(MemberType.AGENT);
 
     if (!agentPerformanceSummaryRepository.existsById(member.getMemberId())) {
@@ -75,10 +81,33 @@ public class MemberService {
           .totalScore(0.0)
           .averageRating(0.0)
           .reviewCount(0)
-          .followerCount(0)
           .recentSuccessCount(0)
           .build();
       agentPerformanceSummaryRepository.save(summary);
     }
+
+    embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
+  }
+
+  /**
+   * 팔로잉 수 변동
+   *
+   * @param member 팔로잉 수를 변동하려는 회원
+   * @param count  변동량
+   */
+  @Transactional
+  public void updateFollowingCount(Member member, long count) {
+    memberRepository.updateFollowingCount(member.getMemberId(), count);
+  }
+
+  /**
+   * 팔로워 수 변동
+   *
+   * @param member 팔로워 수를 변동하려는 회원
+   * @param count  변동량
+   */
+  @Transactional
+  public void updateFollowerCount(Member member, long count) {
+    memberRepository.updateFollowerCount(member.getMemberId(), count);
   }
 }

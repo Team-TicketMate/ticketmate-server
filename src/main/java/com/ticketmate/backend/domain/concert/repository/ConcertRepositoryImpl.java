@@ -22,6 +22,7 @@ import com.ticketmate.backend.domain.concert.domain.entity.QConcert;
 import com.ticketmate.backend.domain.concert.domain.entity.QConcertDate;
 import com.ticketmate.backend.domain.concert.domain.entity.QTicketOpenDate;
 import com.ticketmate.backend.domain.concerthall.domain.entity.QConcertHall;
+import com.ticketmate.backend.domain.search.domain.dto.response.ConcertSearchResponse;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.database.QueryDslUtil;
@@ -496,5 +497,81 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
             .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
         .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
         .otherwise((Boolean) null);
+  }
+
+  /**
+   * 키워드를 사용하여 공연명, 공연장명, 공연 타입에 대해 LIKE 검색을 수행하고 일치하는 공연 ID 목록을 반환합니다.
+   *
+   * @param keyword 검색할 키워드
+   * @param limit 반환할 결과의 수
+   * @return 일치하는 공연의 UUID 리스트
+   */
+  @Override
+  public List<UUID> findConcertIdsByKeyword(String keyword, int limit){
+    // 동적 WHERE 절 조합
+    BooleanExpression whereClause = QueryDslUtil.anyOf(
+        QueryDslUtil.likeIgnoreCase(concert.concertName, keyword),
+        QueryDslUtil.likeIgnoreCase(concertHall.concertHallName, keyword),
+        QueryDslUtil.likeIgnoreCase(concert.concertType.stringValue(), keyword)
+    );
+    return queryFactory
+        .select(concert.concertId)
+        .from(concert)
+        .leftJoin(concert.concertHall, concertHall)
+        .where(whereClause)
+        .limit(limit)
+        .fetch();
+  }
+
+  /**
+   * 제공된 ID 목록에 해당하는 공연들의 상세 정보를 조회하여 ConcertSearchResponse DTO 리스트로 반환합니다.
+   *
+   * @param concertIds 상세 정보를 조회할 공연의 UUID 리스트
+   * @return 공연 상세 정보가 담긴 DTO 리스트
+   */
+  @Override
+  public List<ConcertSearchResponse> findConcertDetailsByIds(List<UUID> concertIds) {
+    if (concertIds == null || concertIds.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return queryFactory
+        .select(Projections.constructor(ConcertSearchResponse.class,
+            concert.concertId,
+            concert.concertName,
+            concertHall.concertHallName,
+            // 선예매 오픈일
+            Expressions.dateTimeTemplate(
+                LocalDateTime.class,
+                "min({0})",
+                new CaseBuilder()
+                    .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
+                    .then(ticketOpenDate.openDate)
+                    .otherwise((LocalDateTime) null)
+            ).as("ticketPreOpenDate"),
+            // 일반 예매 오픈일
+            Expressions.dateTimeTemplate(
+                LocalDateTime.class,
+                "min({0})",
+                new CaseBuilder()
+                    .when(ticketOpenDate.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
+                    .then(ticketOpenDate.openDate)
+                    .otherwise((LocalDateTime) null)
+            ).as("ticketGeneralOpenDate"),
+            concertDate.performanceDate.min().as("startDate"),
+            concertDate.performanceDate.max().as("endDate"),
+            concert.concertThumbnailUrl,
+            Expressions.constant(0.0)
+        ))
+        .from(concert)
+        .leftJoin(concert.concertHall, concertHall)
+        .join(concertDate).on(concert.eq(concertDate.concert))
+        .join(ticketOpenDate).on(concert.eq(ticketOpenDate.concert))
+        .where(concert.concertId.in(concertIds))
+        .groupBy(concert.concertId,
+            concert.concertName,
+            concertHall.concertHallName,
+            concert.concertThumbnailUrl
+        )
+        .fetch();
   }
 }

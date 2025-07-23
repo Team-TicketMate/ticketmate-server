@@ -48,6 +48,27 @@ public class MockPortfolioFactory {
   }
 
   /**
+   * 승인된 포트폴리오 Mock 데이터 생성 (저장 X) - 특정 대리인 Member와 연결
+   */
+  public Portfolio generate(Member agent) {
+    String portfolioDescription = koFaker.lorem().sentence(5, 10);
+
+    Portfolio portfolio = Portfolio.builder()
+        .portfolioDescription(portfolioDescription)
+        .member(agent)
+        .portfolioImgList(new ArrayList<>())
+        .portfolioType(PortfolioType.APPROVED)
+        .build();
+
+    // 포트폴리오 이미지 추가 (양방향 관계 설정)
+    List<PortfolioImg> portfolioImgList = generatePortfolioImgList(portfolio);
+    if (!CommonUtil.nullOrEmpty(portfolioImgList)) {
+      portfolioImgList.forEach(portfolio::addImg);
+    }
+    return portfolio;
+  }
+
+  /**
    * 포트폴리오 이미지 List Mock 데이터 생성 (0 ~ 20개 랜덤)
    */
   private List<PortfolioImg> generatePortfolioImgList(Portfolio portfolio) {

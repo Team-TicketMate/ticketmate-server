@@ -38,6 +38,10 @@ repositories {
             artifact()
         }
     }
+    maven {
+        url "http://suh-project.synology.me:9999/repository/maven-releases/"
+        allowInsecureProtocol = true
+    }
 }
 
 dependencies {
@@ -141,6 +145,13 @@ dependencies {
 
     // CoolSMS
     implementation 'net.nurigo:sdk:4.3.2'
+
+    // 역직렬화
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Suh-Random-Engine
+    implementation 'me.suhsaechan:suh-random-engine:1.1.0'
 }
 
 tasks.named('test') {

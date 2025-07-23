@@ -27,6 +27,7 @@ import com.ticketmate.backend.domain.member.repository.MemberRepository;
 import com.ticketmate.backend.domain.member.service.MemberService;
 import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
 import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
+import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
 import com.ticketmate.backend.global.util.auth.JwtUtil;
@@ -74,6 +75,7 @@ public class TestService {
   private final MemberService memberService;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
+  private final EmbeddingGeneratorService embeddingGeneratorService;
 
     /*
     ======================================회원======================================
@@ -97,7 +99,9 @@ public class TestService {
     Member member = memberRepository.findByUsername(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT)) {
-      memberService.promoteToAgent(member);
+      Portfolio testPortfolio = mockPortfolioFactory.generate(member);
+      portfolioRepository.save(testPortfolio);
+      memberService.promoteToAgent(testPortfolio);
       log.debug("테스트 유저 {}를 대리인으로 승격 처리했습니다.", member.getMemberId());
     }
 
@@ -155,15 +159,18 @@ public class TestService {
             List<Member> savedMemberList = memberRepository.saveAll(memberList);
 
             for(Member savedMember : savedMemberList){
-              if(savedMember.getMemberType() == AGENT){
+              if(savedMember.getMemberType() == AGENT) {
+                // AgentPerformanceSummary 생성 및 추가
                 summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
 
+                // ConcertAgentAvailability 생성 및 추가
                 Concert randomConcert = concertList.get(koFaker.random().nextInt(concertList.size()));
                 availabilityList.add(mockMemberFactory.generateAvailability(randomConcert, savedMember));
               }
             }
             agentPerformanceSummaryRepository.saveAll(summaryList);
             concertAgentAvailabilityRepository.saveAll(availabilityList);
+
             long endMs = System.currentTimeMillis();
             log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
                 savedMemberList.size(), endMs - startMs);

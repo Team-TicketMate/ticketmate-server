@@ -52,6 +52,16 @@ public enum ErrorCode {
 
   INVALID_MEMBER_ROLE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 권한 요청입니다."),
 
+  // MEMBER FOLLOW
+
+  SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신은 팔로우 할 수 없습니다."),
+
+  CLIENT_FOLLOW_AGENT_ONLY(HttpStatus.BAD_REQUEST, "의뢰인만 대리인을 팔로우 할 수 있습니다."),
+
+  DUPLICATE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "이미 팔로우한 회원입니다."),
+
+  UNFOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "팔로우하지 않은 회원에 대해 언팔로우할 수 없습니다."),
+
   // CONCERT
 
   CONCERT_NOT_FOUND(HttpStatus.BAD_REQUEST, "콘서트를 찾을 수 없습니다."),
@@ -178,11 +188,19 @@ public enum ErrorCode {
 
   NO_AUTH_TO_ROOM(HttpStatus.FORBIDDEN, "해당 사용자는 이 채팅방에 들어갈 수 없습니다."),
 
+  CHAT_PICTURE_EMPTY(HttpStatus.NOT_FOUND, "전송할 이미지가 없습니다."),
+
+  CHAT_PICTURE_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "채팅 이미지는 최대 10장까지 보낼 수 있습니다."),
+
+  CHAT_MESSAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "채팅 메시지 전송중 오류가 발생했습니다."),
+
   // EMBEDDING
 
   EMBEDDING_API_ERROR(HttpStatus.BAD_REQUEST, "Vertex AI API 호출에 실패했습니다."),
 
   EMBEDDING_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "반환된 임베딩 데이터가 존재하지 않습니다."),
+
+  INSUFFICIENT_DATA_FOR_EMBEDDING(HttpStatus.INTERNAL_SERVER_ERROR, "임베딩 생성을 위한 데이터가 불충분합니다."),
 
   // PAGEABLE
 

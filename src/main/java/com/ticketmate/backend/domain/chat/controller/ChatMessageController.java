@@ -1,20 +1,27 @@
 package com.ticketmate.backend.domain.chat.controller;
 
 import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageRequest;
+import com.ticketmate.backend.domain.chat.domain.dto.request.PictureMessageRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ReadAckRequest;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.domain.chat.domain.dto.request.TextMessageRequest;
 import com.ticketmate.backend.domain.chat.service.ChatMessageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
-public class ChatMessageController {
+public class ChatMessageController implements ChatMessageControllerDocs{
 
   private final ChatMessageService chatMessageService;
 
@@ -26,16 +33,25 @@ public class ChatMessageController {
    */
   @MessageMapping("chat.message.{roomId}")
   public void sendMessage(@DestinationVariable("roomId") String chatRoomId,
-      @Payload ChatMessageRequest request,
+      @Payload TextMessageRequest request,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-    Member member = customOAuth2User.getMember();
-    chatMessageService.sendMessage(chatRoomId, request, member);
+    chatMessageService.sendMessage(chatRoomId, request, customOAuth2User.getMember());
   }
 
   @MessageMapping("chat.read.{roomId}")
   public void updateRead(@Payload ReadAckRequest ack, @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @DestinationVariable("roomId") String roomId) {
-    Member member = customOAuth2User.getMember();
-    chatMessageService.acknowledgeRead(ack, member, roomId);
+    chatMessageService.acknowledgeRead(ack, customOAuth2User.getMember(), roomId);
+  }
+
+  @ResponseBody
+  @Override
+  @PostMapping(value = "/api/chat-message/{chat-room-id}/send/pictures",
+          consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<Void> sendPictureMessage(@PathVariable(value = "chat-room-id") String chatRoomId,
+                                                 @ModelAttribute @Valid PictureMessageRequest request,
+                                                 @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    chatMessageService.sendMessage(chatRoomId, request, customOAuth2User.getMember());
+    return ResponseEntity.ok().build();
   }
 }

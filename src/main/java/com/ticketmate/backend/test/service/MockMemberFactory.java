@@ -9,17 +9,17 @@ import com.ticketmate.backend.domain.member.domain.constant.MemberType;
 import com.ticketmate.backend.domain.member.domain.constant.Role;
 import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
 import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
-import com.ticketmate.backend.test.dto.request.LoginRequest;
 import com.ticketmate.backend.domain.member.domain.entity.Member;
 import com.ticketmate.backend.global.exception.CustomException;
 import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.test.dto.request.LoginRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.suhsaechan.suhnicknamegenerator.core.SuhRandomKit;
 import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class MockMemberFactory {
 
   private final Faker koFaker;
   private final Faker enFaker;
-
+  private final SuhRandomKit suhRandomKit;
 
   /**
    * 개발자용 회원 Mock 데이터 생성
@@ -77,7 +77,7 @@ public class MockMemberFactory {
             .replaceAll("[^a-zA-Z0-9@.]", ""));
 
     // 공통 랜덤 필드
-    String nickname = UUID.randomUUID().toString();
+    String nickname = suhRandomKit.nicknameWithUuid();
     String name = koFaker.name().name().replaceAll(" ", "");
     SocialPlatform social = requestOptional
         .map(LoginRequest::getSocialPlatform)
@@ -120,7 +120,6 @@ public class MockMemberFactory {
   // AgentPerformanceSummary 객체 생성 및 랜덤 정수 부여
   public AgentPerformanceSummary generatePerformanceSummary(Member agent){
     int reviewCount = koFaker.number().numberBetween(0, 100);
-    int followerCount = koFaker.number().numberBetween(0, 300);
     int recentSuccessCount = koFaker.number().numberBetween(0, 50);
     double averageRating = koFaker.number().randomDouble(1, 0, 5);
     long totalScore = koFaker.number().numberBetween(0, 100);
@@ -128,7 +127,6 @@ public class MockMemberFactory {
     return AgentPerformanceSummary.builder()
         .agent(agent)
         .reviewCount(reviewCount)
-        .followerCount(followerCount)
         .averageRating(averageRating)
         .recentSuccessCount(recentSuccessCount)
         .totalScore(totalScore)

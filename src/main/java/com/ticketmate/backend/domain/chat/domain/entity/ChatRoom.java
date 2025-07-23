@@ -1,5 +1,6 @@
 package com.ticketmate.backend.domain.chat.domain.entity;
 
+import com.ticketmate.backend.domain.chat.domain.constant.ChatMessageType;
 import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
 import com.ticketmate.backend.global.BaseMongoDocument;
 import lombok.*;
@@ -49,6 +50,8 @@ public class ChatRoom extends BaseMongoDocument {
   private UUID concertId;  // 콘서트
   @Indexed
   private String lastMessageId;  // 마지막 메시지의 ID 정보
+  @Indexed
+  private ChatMessageType lastMessageType;  // 마지막 메시지의 타입 (텍스트, 사진)
   private TicketOpenType ticketOpenType;  // 신청폼의 선예매, 일반예매인지
 
   public void updateLastMessage(String message) {
@@ -61,5 +64,8 @@ public class ChatRoom extends BaseMongoDocument {
 
   public void updateLastMessageId(String messageId) {
     this.lastMessageId = messageId;
+  }
+  public void updateLastMessageType(ChatMessageType chatMessageType) {
+    this.lastMessageType = chatMessageType;
   }
 }
