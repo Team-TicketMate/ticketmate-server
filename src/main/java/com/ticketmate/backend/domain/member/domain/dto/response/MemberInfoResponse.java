@@ -44,4 +44,10 @@ public class MemberInfoResponse {
 
   // 회원 종류 (대리인, 구매자)
   private MemberType memberType;
+
+  // 팔로잉 수 (내가 팔로잉하는 수)
+  private long followingCount;
+
+  // 팔로워 수 (나를 팔로우하는 수)
+  private long followerCount;
 }
