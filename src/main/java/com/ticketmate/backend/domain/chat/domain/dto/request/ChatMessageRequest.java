@@ -1,16 +1,16 @@
 package com.ticketmate.backend.domain.chat.domain.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.ticketmate.backend.domain.chat.domain.constant.ChatMessageType;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class ChatMessageRequest {
-  @NotBlank(message = "메시지를 입력해주세요.")
-  @Size(max = 500, message = "메시지는 500자를 초과할 수 없습니다")
-  private String message;
+public sealed interface ChatMessageRequest permits TextMessageRequest, PictureMessageRequest{
+    /**
+     * 사진을 보냈는지, 텍스트를 보냈는지에 대한 타입을 반환하는 메서드
+     */
+    ChatMessageType getType();
+
+    /**
+     * 채팅리스트 페이지 및 추후 확장을 고려한 미리보기 전용 메서드
+     * (ex. 사진업로드시 -> 채팅방 리스트에서는 이미지를 보여주는것이 아닌 "사진을 보냈습니다.")
+     */
+    String toPreview();
 }

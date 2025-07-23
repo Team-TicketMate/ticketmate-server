@@ -11,5 +11,7 @@ public enum UploadType {
 
   CONCERT,
 
-  PORTFOLIO;
+  PORTFOLIO,
+
+  CHAT;
 }
