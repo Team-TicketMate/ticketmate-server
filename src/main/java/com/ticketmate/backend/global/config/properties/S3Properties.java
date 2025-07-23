@@ -48,6 +48,9 @@ public class S3Properties {
 
     @NotBlank
     private final String portfolio;
+
+    @NotBlank
+    private final String chat;
   }
 
   @Getter
