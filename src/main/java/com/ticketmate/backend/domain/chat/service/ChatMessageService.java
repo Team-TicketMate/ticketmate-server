@@ -1,5 +1,14 @@
 package com.ticketmate.backend.domain.chat.service;
 
+import static com.ticketmate.backend.global.constant.ChatConstants.ISO_SEC;
+import static com.ticketmate.backend.global.constant.ChatConstants.LAST_READ_MESSAGE_POINTER_KEY;
+import static com.ticketmate.backend.global.constant.ChatConstants.TTL;
+import static com.ticketmate.backend.global.constant.ChatConstants.UN_READ_MESSAGE_COUNTER_KEY;
+import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_EXCHANGE_NAME;
+import static com.ticketmate.backend.global.constant.RabbitMqConstants.UN_READ_ROUTING_KEY;
+import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
+import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
+
 import com.ticketmate.backend.domain.chat.domain.constant.ChatMessageType;
 import com.ticketmate.backend.domain.chat.domain.dto.request.ChatMessageRequest;
 import com.ticketmate.backend.domain.chat.domain.dto.request.PictureMessageRequest;
@@ -22,6 +31,14 @@ import com.ticketmate.backend.global.file.service.S3Service;
 import com.ticketmate.backend.global.mapper.EntityMapper;
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,17 +47,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static com.ticketmate.backend.global.constant.ChatConstants.*;
-import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_EXCHANGE_NAME;
-import static com.ticketmate.backend.global.constant.RabbitMqConstants.UN_READ_ROUTING_KEY;
-import static com.ticketmate.backend.global.exception.ErrorCode.CHAT_ROOM_NOT_FOUND;
-import static com.ticketmate.backend.global.exception.ErrorCode.MESSAGE_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -300,14 +306,9 @@ public class ChatMessageService {
    * 마지막 메시지 갱신을 위한 메서드
    */
   private void updateLastMessageInfo(ChatRoom chatRoom, ChatMessage chatMessage, String preViewMessage) {
-    chatRoom.updateLastMessageTime(chatMessage.getSendDate());
-
-    // 사진 -> "사진을 보냈습니다." / 텍스트 -> 채팅 내용 그대로
-    chatRoom.updateLastMessage(preViewMessage);
-    log.debug("세팅된 마지막 메시지: {}", chatRoom.getLastMessage());
-
-    chatRoom.updateLastMessageId(chatMessage.getChatMessageId());
-
-    chatRoom.updateLastMessageType(chatMessage.getChatMessageType());
+    chatRoom.setLastMessage(preViewMessage); // 사진 -> "사진을 보냈습니다.", 텍스트 -> 채팅 내용 그대로
+    chatRoom.setLastMessageTime(chatMessage.getSendDate());
+    chatRoom.setLastMessageId(chatMessage.getChatMessageId());
+    chatRoom.setLastMessageType(chatMessage.getChatMessageType());
   }
 }

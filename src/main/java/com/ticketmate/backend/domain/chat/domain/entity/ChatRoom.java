@@ -53,19 +53,4 @@ public class ChatRoom extends BaseMongoDocument {
   @Indexed
   private ChatMessageType lastMessageType;  // 마지막 메시지의 타입 (텍스트, 사진)
   private TicketOpenType ticketOpenType;  // 신청폼의 선예매, 일반예매인지
-
-  public void updateLastMessage(String message) {
-    this.lastMessage = message;
-  }
-
-  public void updateLastMessageTime(LocalDateTime lastMessageTime) {
-    this.lastMessageTime = lastMessageTime;
-  }
-
-  public void updateLastMessageId(String messageId) {
-    this.lastMessageId = messageId;
-  }
-  public void updateLastMessageType(ChatMessageType chatMessageType) {
-    this.lastMessageType = chatMessageType;
-  }
 }
