@@ -1,5 +1,6 @@
 package com.ticketmate.backend.global;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +15,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 public abstract class BaseMongoDocument {
 
   @CreatedDate
-  private java.time.LocalDateTime createdDate;
+  private LocalDateTime createdDate;
 
   @LastModifiedDate
-  private java.time.LocalDateTime updatedDate;
+  private LocalDateTime updatedDate;
 }
