@@ -14,14 +14,14 @@ jar {
 // common 모듈에 있는 의존성은 모든 모듈에 적용
 dependencies {
     // Spring Starter Web
-    api libs.spring.boot.starter.web
-
-    // Spring Starter Test
-    api libs.spring.boot.starter.test
+    api 'org.springframework.boot:spring-boot-starter-web'
 
     // JPA
-    api libs.spring.boot.starter.data.jpa
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Validation
+    api 'org.springframework.boot:spring-boot-starter-validation'
 
     // AOP
-    api libs.aop
+    implementation libs.aop
 }

@@ -1,9 +1,9 @@
-package com.match.backend.storage.core.service;
+package com.ticketmate.backend.global.file.service;
 
-import com.match.backend.storage.core.constant.UploadType;
+import com.ticketmate.backend.global.file.constant.UploadType;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface StorageService {
+public interface FileService {
 
   /**
    * 파일 업로드

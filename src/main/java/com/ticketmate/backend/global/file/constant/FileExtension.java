@@ -1,4 +1,4 @@
-package com.match.backend.storage.core.constant;
+package com.ticketmate.backend.global.file.constant;
 
 import com.ticketmate.backend.global.util.common.CommonUtil;
 import com.ticketmate.backend.global.exception.CustomException;
