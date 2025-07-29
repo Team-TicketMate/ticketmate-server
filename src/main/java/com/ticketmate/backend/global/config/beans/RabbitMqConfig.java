@@ -22,7 +22,6 @@ import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateO
 @Configuration
 @EnableRabbit
 @RequiredArgsConstructor
-@EnableConfigurationProperties(RabbitMqProperties.class)
 public class RabbitMqConfig {
 
   private final RabbitMqProperties properties;

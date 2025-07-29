@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 @Configuration
-@EnableConfigurationProperties(GoogleGenAiProperties.class)
 public class GoogleGenAiConfig {
 
   @Bean
