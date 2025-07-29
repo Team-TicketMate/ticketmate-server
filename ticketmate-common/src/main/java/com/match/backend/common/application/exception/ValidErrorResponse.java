@@ -1,9 +1,7 @@
-package com.ticketmate.backend.global.exception;
+package com.match.backend.common.application.exception;
 
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 
 /**
  * 예시 응답값
@@ -11,14 +9,8 @@ import lombok.Getter;
  * "message" : "잘못된 요청입니다."
  * "title" : "값을 입력해주세요"
  */
-@Getter
 @Builder
-@AllArgsConstructor
-public class ValidErrorResponse {
-
-  private final String errorCode;
-  private final String errorMessage;
-  private final Map<String, String> validation;
+public record ValidErrorResponse(String errorCode, String errorMessage, Map<String, String> validation) {
 
   public void addValidation(String field, String message) {
     this.validation.put(field, message);
