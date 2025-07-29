@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.aop.log;
+package com.match.backend.common.infrastructure.aop.log;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class ExecutionTimeLoggingAspect {
    * LogTimeInvocation, LogMonitoringInvocation 어노테이션이 붙은 메서드가 호출될 때 해당 어드바이스 동작
    * ProceedingJoinPoint 를 통해 호출 대상(메서드) 정보 가져옴
    */
-  @Around("@annotation(com.ticketmate.backend.global.aop.log.LogTimeInvocation) || @annotation(com.ticketmate.backend.global.aop.log.LogMonitoringInvocation)")
+  @Around("@annotation(com.match.backend.common.infrastructure.aop.log.LogTimeInvocation) || @annotation(com.match.backend.common.infrastructure.aop.log.LogMonitoringInvocation)")
   public Object logMethod(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Object result;
