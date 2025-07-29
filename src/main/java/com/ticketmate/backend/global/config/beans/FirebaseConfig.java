@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
-@EnableConfigurationProperties(FirebaseProperties.class)
 public class FirebaseConfig {
 
   private final FirebaseProperties properties;
