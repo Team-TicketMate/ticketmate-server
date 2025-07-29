@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.file.constant;
+package com.match.backend.storage.core.constant;
 
 import lombok.Getter;
 
