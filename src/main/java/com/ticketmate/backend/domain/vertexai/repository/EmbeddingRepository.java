@@ -13,6 +13,8 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
 
   Optional<Embedding> findByTextAndEmbeddingType(String text, EmbeddingType embeddingType);
 
+  void deleteByText(String text);
+
   /**
    * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드
    * @param vector 비교할 기준 벡터

@@ -40,8 +40,8 @@ public class RedisConfig {
 
     // 캐시별 TTL 설정
     Map<String, RedisCacheConfiguration> configs = new HashMap<>();
-    // 임베딩은 영구 캐시 (TTL 없이, null 값은 캐시하지 않음)
-    configs.put("embeddings", defaultConfig.entryTtl(Duration.ZERO).disableCachingNullValues());
+    // embeddings 캐시는 TTL 7일로 설정
+    configs.put("embeddings", defaultConfig.entryTtl(Duration.ofDays(7)).disableCachingNullValues());
 
     return RedisCacheManager.RedisCacheManagerBuilder
         .fromConnectionFactory(cf)
