@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.filter;
+package com.ticketmate.backend.global.handler;
 
 import com.ticketmate.backend.global.constant.AuthConstants;
 import com.ticketmate.backend.global.util.auth.AuthUtil;

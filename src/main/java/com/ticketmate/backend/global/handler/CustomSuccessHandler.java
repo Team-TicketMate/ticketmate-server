@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.filter;
+package com.ticketmate.backend.global.handler;
 
 import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
 import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -25,13 +24,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  private final JwtUtil jwtUtil;
-  private final RedisTemplate<String, Object> redisTemplate;
   @Value("${spring.security.app.redirect-uri.dev}")
   private String devRedirectUri;
 
   @Value("${spring.security.app.redirect-uri.prod}")
   private String prodRedirectUri;
+
+  private final JwtUtil jwtUtil;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

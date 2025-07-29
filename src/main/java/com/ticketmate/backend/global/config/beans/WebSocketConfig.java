@@ -4,7 +4,6 @@ import com.ticketmate.backend.global.config.properties.WebSocketProperties;
 import com.ticketmate.backend.global.exception.stomp.StompExceptionHandler;
 import com.ticketmate.backend.global.util.rabbit.StompChannelInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -19,7 +18,6 @@ import reactor.netty.tcp.TcpClient;
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-@EnableConfigurationProperties(WebSocketProperties.class)
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   private final StompChannelInterceptor channelInterceptor;
