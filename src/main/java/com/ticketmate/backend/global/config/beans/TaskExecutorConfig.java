@@ -11,7 +11,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(TaskExecutorProperties.class)
 public class TaskExecutorConfig {
 
   private final TaskExecutorProperties properties;
