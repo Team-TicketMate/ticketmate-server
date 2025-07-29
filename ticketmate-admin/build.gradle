@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+
+    // PostgreSQL
+    api libs.postgresql.driver
+
+    // Spring Validation
+    api libs.validation
+}
