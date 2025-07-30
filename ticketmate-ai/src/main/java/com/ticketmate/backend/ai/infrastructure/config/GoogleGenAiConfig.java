@@ -1,9 +1,9 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.ai.infrastructure.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.genai.Client;
-import com.ticketmate.backend.global.config.properties.GoogleGenAiProperties;
+import com.ticketmate.backend.ai.infrastructure.properties.GoogleGenAiProperties;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 @Configuration
+@EnableConfigurationProperties(GoogleGenAiProperties.class)
 public class GoogleGenAiConfig {
 
   @Bean

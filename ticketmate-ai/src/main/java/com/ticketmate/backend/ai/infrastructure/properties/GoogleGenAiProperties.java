@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.properties;
+package com.ticketmate.backend.ai.infrastructure.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
