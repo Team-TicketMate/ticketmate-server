@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-
 @Validated
 @ConfigurationProperties(prefix = "springdoc")
 public record SpringDocProperties(
