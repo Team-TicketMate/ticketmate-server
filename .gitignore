@@ -67,6 +67,8 @@ application-dev.yml
 application-prod.yml
 oauth2.yml
 springdoc.yml
+messaging.yml
+config-imports.yml
 
 ### FCM ConfigFile ###
 ticketmate-firebase-key.json

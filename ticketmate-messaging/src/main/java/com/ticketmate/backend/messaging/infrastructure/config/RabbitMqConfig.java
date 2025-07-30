@@ -1,6 +1,9 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.messaging.infrastructure.config;
 
-import com.ticketmate.backend.global.config.properties.RabbitMqProperties;
+import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
+
+import com.ticketmate.backend.messaging.infrastructure.properties.ChatRabbitMqProperties;
+import com.ticketmate.backend.messaging.infrastructure.properties.RabbitMqProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -15,27 +18,28 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_EXCHANGE_NAME;
-import static com.ticketmate.backend.global.constant.RabbitMqConstants.CHAT_QUEUE_NAME;
-import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
-
-@Configuration
 @EnableRabbit
+@Configuration
 @RequiredArgsConstructor
+@EnableConfigurationProperties({
+    RabbitMqProperties.class,
+    ChatRabbitMqProperties.class
+})
 public class RabbitMqConfig {
 
-  private final RabbitMqProperties properties;
+  private final RabbitMqProperties rabbitMqProperties;
+  private final ChatRabbitMqProperties chatRabbitMqProperties;
 
   // chat.queue 라는 Queue 생성
   @Bean
   public Queue queue() {
-    return new Queue(CHAT_QUEUE_NAME, true);
+    return new Queue(chatRabbitMqProperties.queueName(), true);
   }
 
   // AMQP 전략 중 TopicExchange 전략 사용 (chat.exchange 를 이름으로 지정)
   @Bean
   public TopicExchange exchange() {
-    return new TopicExchange(CHAT_EXCHANGE_NAME);
+    return new TopicExchange(chatRabbitMqProperties.exchangeName());
   }
 
   // Exchange와 Queue바인딩 ("chat.queue"에 "chat.exchange" 규칙을 Binding)
@@ -59,11 +63,11 @@ public class RabbitMqConfig {
   @Bean
   public ConnectionFactory connectionFactory() {
     CachingConnectionFactory factory = new CachingConnectionFactory();
-    factory.setHost(properties.getHost());
-    factory.setVirtualHost(properties.getVirtualHost());
-    factory.setUsername(properties.getUsername());
-    factory.setPassword(properties.getPassword());
-    factory.setPort(properties.getPort());
+    factory.setHost(rabbitMqProperties.host());
+    factory.setVirtualHost(rabbitMqProperties.virtualHost());
+    factory.setUsername(rabbitMqProperties.username());
+    factory.setPassword(rabbitMqProperties.password());
+    factory.setPort(rabbitMqProperties.port());
     return factory;
   }
 

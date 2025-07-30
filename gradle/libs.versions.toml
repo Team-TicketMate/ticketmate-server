@@ -12,6 +12,7 @@ spring_cloud_aws = "2.2.6.RELEASE"
 datafaker = "2.4.4"
 firebase_admin = "9.5.0"
 redisson = "3.50.0"
+rabbit_test = "3.2.6"
 reactor_netty = "3.5.4"
 querydsl = "5.1.0"
 jakarta-persistence = "3.2.0"
@@ -97,7 +98,7 @@ websocket_starter = { module = "org.springframework.boot:spring-boot-starter-web
 
 # RabbitMQ
 amqp_starter = { module = "org.springframework.boot:spring-boot-starter-amqp", version.ref = "spring_boot" }
-spring_rabbit_test = { module = "org.springframework.amqp:spring-rabbit-test", version.ref = "spring_boot" }
+spring_rabbit_test = { module = "org.springframework.amqp:spring-rabbit-test", version.ref = "rabbit_test" }
 
 # Netty
 reactor_netty = { module = "org.springframework.boot:spring-boot-starter-reactor-netty", version.ref = "reactor_netty" }

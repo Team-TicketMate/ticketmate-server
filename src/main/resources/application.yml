@@ -2,7 +2,7 @@ spring:
   profiles:
     active: prod
   config:
-    import: "classpath:oauth2.yml", "classpath:springdoc.yml"
+    import: classpath:config-import.yml
   jpa:
     generate-ddl: true
     hibernate:
