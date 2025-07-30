@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.properties;
+package com.ticketmate.backend.storage.infrastructure.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,8 @@ import org.springframework.validation.annotation.Validated;
 
 @Getter
 @Validated
-@ConfigurationProperties(prefix = "cloud.aws")
 @AllArgsConstructor
+@ConfigurationProperties(prefix = "cloud.aws")
 public class S3Properties {
 
   private final S3 s3;

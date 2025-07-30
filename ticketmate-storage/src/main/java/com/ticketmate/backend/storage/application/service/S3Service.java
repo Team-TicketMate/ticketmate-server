@@ -1,34 +1,34 @@
-package com.ticketmate.backend.global.file.service;
+package com.ticketmate.backend.storage.application.service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.ticketmate.backend.global.config.properties.S3Properties;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.file.constant.FileExtension;
-import com.ticketmate.backend.global.file.constant.UploadType;
-import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.util.common.FileUtil;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.storage.core.constant.FileExtension;
+import com.ticketmate.backend.storage.core.constant.UploadType;
+import com.ticketmate.backend.storage.core.service.StorageService;
+import com.ticketmate.backend.storage.infrastructure.properties.S3Properties;
+import com.ticketmate.backend.storage.infrastructure.util.FileUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
-
 @Primary
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class S3Service implements FileService {
+public class S3Service implements StorageService {
 
   // 날짜 포멧: yyyyMMdd
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");

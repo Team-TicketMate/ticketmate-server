@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.util.common;
+package com.ticketmate.backend.storage.infrastructure.util;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.web.multipart.MultipartFile;

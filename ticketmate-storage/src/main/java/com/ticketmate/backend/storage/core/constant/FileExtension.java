@@ -1,8 +1,8 @@
-package com.ticketmate.backend.global.file.constant;
+package com.ticketmate.backend.storage.core.constant;
 
-import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import java.util.Arrays;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
