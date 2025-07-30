@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.constant;
+package com.ticketmate.backend.auth.infrastructure.constant;
 
 import java.util.List;
 import lombok.experimental.UtilityClass;
@@ -8,8 +8,6 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class SecurityUrls {
-
-
 
   /**
    * 인증을 생략할 URL 패턴 목록

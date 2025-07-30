@@ -1,11 +1,8 @@
-package com.ticketmate.backend.global.util.auth;
+package com.ticketmate.backend.auth.infrastructure.util;
 
-import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.ROOT_DOMAIN;
-
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import lombok.experimental.UtilityClass;
@@ -21,9 +18,9 @@ public class CookieUtil {
    * @return 발급된 쿠키를 반환합니다
    */
   public Cookie createCookie(String key, String token, long expirationTimeInSeconds) {
-    if (key.equals(ACCESS_TOKEN_KEY)) {
+    if (key.equals(AuthConstants.ACCESS_TOKEN_KEY)) {
       return createAccessTokenCookie(token, expirationTimeInSeconds);
-    } else if (key.equals(REFRESH_TOKEN_KEY)) {
+    } else if (key.equals(AuthConstants.REFRESH_TOKEN_KEY)) {
       return createRefreshTokenCookie(token, expirationTimeInSeconds);
     } else {
       log.error("잘못된 Cookie key가 요청됐습니다. 요청값: {}", key);
@@ -61,11 +58,11 @@ public class CookieUtil {
    */
   private Cookie createAccessTokenCookie(String accessToken, long expirationTimeInSeconds) {
     log.debug("accessToken을 포함한 쿠키를 발급합니다.");
-    Cookie cookie = new Cookie(ACCESS_TOKEN_KEY, accessToken);
+    Cookie cookie = new Cookie(AuthConstants.ACCESS_TOKEN_KEY, accessToken);
     cookie.setHttpOnly(false);
     cookie.setSecure(true);
     cookie.setPath("/");
-    cookie.setDomain(ROOT_DOMAIN);
+    cookie.setDomain(AuthConstants.ROOT_DOMAIN);
     cookie.setMaxAge((int) expirationTimeInSeconds);
     return cookie;
   }
@@ -76,11 +73,11 @@ public class CookieUtil {
    */
   private Cookie createRefreshTokenCookie(String refreshToken, long expirationTimeInSeconds) {
     log.debug("refreshToken을 포함한 쿠키를 발급합니다.");
-    Cookie cookie = new Cookie(REFRESH_TOKEN_KEY, refreshToken);
+    Cookie cookie = new Cookie(AuthConstants.REFRESH_TOKEN_KEY, refreshToken);
     cookie.setHttpOnly(true);
     cookie.setSecure(true);
     cookie.setPath("/");
-    cookie.setDomain(ROOT_DOMAIN);
+    cookie.setDomain(AuthConstants.ROOT_DOMAIN);
     cookie.setMaxAge((int) expirationTimeInSeconds);
     return cookie;
   }

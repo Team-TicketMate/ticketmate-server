@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.security;
+package com.ticketmate.backend.auth.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

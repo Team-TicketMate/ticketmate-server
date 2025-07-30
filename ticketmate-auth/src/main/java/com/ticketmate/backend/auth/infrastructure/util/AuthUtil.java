@@ -1,9 +1,6 @@
-package com.ticketmate.backend.global.util.auth;
+package com.ticketmate.backend.auth.infrastructure.util;
 
-import static com.ticketmate.backend.global.constant.AuthConstants.HEADER_AUTHORIZATION;
-import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.TOKEN_PREFIX;
-
+import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
@@ -17,7 +14,7 @@ public class AuthUtil {
    * HTTP 요청에서 엑세스 토큰을 추출합니다
    */
   public String extractAccessTokenFromRequest(HttpServletRequest request) {
-    String bearerToken = request.getHeader(HEADER_AUTHORIZATION);
+    String bearerToken = request.getHeader(AuthConstants.HEADER_AUTHORIZATION);
     return extractTokenWithoutBearer(bearerToken);
   }
 
@@ -25,7 +22,7 @@ public class AuthUtil {
    * HTTP 요청에서 리프레시 토큰을 추출합니다
    */
   public String extractRefreshTokenFromRequest(HttpServletRequest request) {
-    return CookieUtil.extractedByCookieName(request.getCookies(), REFRESH_TOKEN_KEY).getValue();
+    return CookieUtil.extractedByCookieName(request.getCookies(), AuthConstants.REFRESH_TOKEN_KEY).getValue();
   }
 
   /**
@@ -33,7 +30,7 @@ public class AuthUtil {
    */
   private String extractTokenWithoutBearer(String bearerToken) {
     return Optional.ofNullable(bearerToken)
-        .filter(token -> token.startsWith(TOKEN_PREFIX))
+        .filter(token -> token.startsWith(AuthConstants.TOKEN_PREFIX))
         .map(token -> token.substring(7).trim())
         .orElse(null);
   }

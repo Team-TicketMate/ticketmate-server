@@ -1,22 +1,26 @@
-package com.ticketmate.backend.global.filter;
+package com.ticketmate.backend.auth.infrastructure.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ticketmate.backend.global.constant.AuthConstants;
-import com.ticketmate.backend.global.constant.SecurityUrls;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.exception.ErrorResponse;
-import com.ticketmate.backend.global.util.auth.AuthUtil;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
+import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
+import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
+import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.ErrorResponse;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,7 +33,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-  private final JwtUtil jwtUtil;
+  private final JwtProvider jwtProvider;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -49,7 +53,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       String token = AuthUtil.extractAccessTokenFromRequest(request);
 
       // 토큰 검증: 토큰이 유효하면 인증 설정
-      if (jwtUtil.isValidToken(token)) {
+      if (jwtProvider.isValidToken(token)) {
         handleValidToken(request, response, filterChain, token, apiRequestType);
         return;
       }
@@ -107,7 +111,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    * @return 관리자 권한 여부
    */
   private boolean hasAdminRole(String token) {
-    return jwtUtil.getRole(token).equals("ROLE_ADMIN");
+    return jwtProvider.getRole(token).equals("ROLE_ADMIN");
   }
 
   /**
@@ -115,18 +119,23 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    * TODO: 추후 삭제
    */
   private boolean hasTestAdminRole(String token) {
-    return jwtUtil.getRole(token).equals("ROLE_TEST_ADMIN");
+    return jwtProvider.getRole(token).equals("ROLE_TEST_ADMIN");
   }
 
   /**
    * 유효한 토큰 처리
    */
-  private void handleValidToken(HttpServletRequest request,
+  private void handleValidToken(
+      HttpServletRequest request,
       HttpServletResponse response,
       FilterChain filterChain,
       String token,
-      ApiRequestType apiRequestType) throws IOException, ServletException {
-    SecurityContextHolder.getContext().setAuthentication(jwtUtil.getAuthentication(token));
+      ApiRequestType apiRequestType
+  ) throws IOException, ServletException {
+    String username = jwtProvider.getUsername(token);
+    String role = jwtProvider.getRole(token);
+    GrantedAuthority authority = new SimpleGrantedAuthority(role);
+    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, List.of(authority)));
 
     // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
     if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
