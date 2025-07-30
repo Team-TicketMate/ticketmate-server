@@ -2,7 +2,7 @@ spring:
   profiles:
     active: prod
   config:
-    import: classpath:config-import.yml
+    import: classpath:config-imports.yml
   jpa:
     generate-ddl: true
     hibernate:
