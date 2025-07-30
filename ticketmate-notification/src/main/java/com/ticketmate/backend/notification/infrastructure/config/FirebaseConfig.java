@@ -1,9 +1,9 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.notification.infrastructure.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.ticketmate.backend.global.config.properties.FirebaseProperties;
+import com.ticketmate.backend.notification.infrastructure.properties.FirebaseProperties;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
+@EnableConfigurationProperties(FirebaseProperties.class)
 public class FirebaseConfig {
 
   private final FirebaseProperties properties;
