@@ -1,9 +1,6 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.api.infrastructure.config;
 
-import static com.ticketmate.backend.global.constant.SwaggerConstants.LOCAL_SERVER_URL;
-import static com.ticketmate.backend.global.constant.SwaggerConstants.MAIN_SERVER_URL;
-import static com.ticketmate.backend.global.constant.SwaggerConstants.TEST_SERVER_URL;
-
+import com.ticketmate.backend.api.core.constant.SwaggerConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
@@ -31,9 +28,9 @@ import org.springframework.context.annotation.Configuration;
         version = "1.0v"
     ),
     servers = {
-        @Server(url = MAIN_SERVER_URL, description = "메인 서버"),
-        @Server(url = TEST_SERVER_URL, description = "테스트 서버"),
-        @Server(url = LOCAL_SERVER_URL, description = "로컬 서버")
+        @Server(url = SwaggerConstants.MAIN_SERVER_URL, description = "메인 서버"),
+        @Server(url = SwaggerConstants.TEST_SERVER_URL, description = "테스트 서버"),
+        @Server(url = SwaggerConstants.LOCAL_SERVER_URL, description = "로컬 서버")
     }
 )
 @Configuration
@@ -56,13 +53,13 @@ public class SwaggerConfig {
         .addSecurityItem(securityRequirement)
         .servers(List.of(
                 new io.swagger.v3.oas.models.servers.Server()
-                    .url(LOCAL_SERVER_URL)
+                    .url(SwaggerConstants.LOCAL_SERVER_URL)
                     .description("로컬 서버"),
                 new io.swagger.v3.oas.models.servers.Server()
-                    .url(TEST_SERVER_URL)
+                    .url(SwaggerConstants.TEST_SERVER_URL)
                     .description("테스트 서버"),
                 new io.swagger.v3.oas.models.servers.Server()
-                    .url(MAIN_SERVER_URL)
+                    .url(SwaggerConstants.MAIN_SERVER_URL)
                     .description("메인 서버")
             )
         );
