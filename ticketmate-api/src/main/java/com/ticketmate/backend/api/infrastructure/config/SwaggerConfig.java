@@ -1,16 +1,17 @@
 package com.ticketmate.backend.api.infrastructure.config;
 
-import com.ticketmate.backend.api.core.constant.SwaggerConstants;
+import com.ticketmate.backend.api.infrastructure.properties.SpringDocProperties;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityScheme.In;
 import io.swagger.v3.oas.models.security.SecurityScheme.Type;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,42 +27,37 @@ import org.springframework.context.annotation.Configuration;
               백엔드 개발에 관심이 있다면 저장소를 방문해보세요.
             """,
         version = "1.0v"
-    ),
-    servers = {
-        @Server(url = SwaggerConstants.MAIN_SERVER_URL, description = "메인 서버"),
-        @Server(url = SwaggerConstants.TEST_SERVER_URL, description = "테스트 서버"),
-        @Server(url = SwaggerConstants.LOCAL_SERVER_URL, description = "로컬 서버")
-    }
+    )
 )
 @Configuration
+@RequiredArgsConstructor
+@EnableConfigurationProperties(SpringDocProperties.class)
 public class SwaggerConfig {
+
+  private final SpringDocProperties properties;
 
   @Bean
   public OpenAPI openAPI() {
     SecurityScheme apiKey = new SecurityScheme()
         .type(Type.HTTP)
-        .in(In.HEADER)
-        .name("Authorization")
         .scheme("bearer")
-        .bearerFormat("JWT");
-
-    SecurityRequirement securityRequirement = new SecurityRequirement()
-        .addList("Bearer Token");
+        .bearerFormat("JWT")
+        .in(In.HEADER)
+        .name("Authorization");
 
     return new OpenAPI()
         .components(new Components().addSecuritySchemes("Bearer Token", apiKey))
-        .addSecurityItem(securityRequirement)
-        .servers(List.of(
-                new io.swagger.v3.oas.models.servers.Server()
-                    .url(SwaggerConstants.LOCAL_SERVER_URL)
-                    .description("로컬 서버"),
-                new io.swagger.v3.oas.models.servers.Server()
-                    .url(SwaggerConstants.TEST_SERVER_URL)
-                    .description("테스트 서버"),
-                new io.swagger.v3.oas.models.servers.Server()
-                    .url(SwaggerConstants.MAIN_SERVER_URL)
-                    .description("메인 서버")
-            )
-        );
+        .addSecurityItem(new SecurityRequirement().addList("Bearer Token"));
+  }
+
+  @Bean
+  public OpenApiCustomizer serverCustomizer() {
+    return openApi -> {
+      properties.servers().forEach(server ->
+          openApi.addServersItem(new io.swagger.v3.oas.models.servers.Server()
+              .url(server.url())
+              .description(server.description()))
+      );
+    };
   }
 }

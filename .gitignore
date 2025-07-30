@@ -66,6 +66,7 @@ Thumbs.db
 application-dev.yml
 application-prod.yml
 oauth2.yml
+springdoc.yml
 
 ### FCM ConfigFile ###
 ticketmate-firebase-key.json
