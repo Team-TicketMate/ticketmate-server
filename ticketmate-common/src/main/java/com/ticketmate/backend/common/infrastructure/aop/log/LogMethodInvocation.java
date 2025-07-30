@@ -1,4 +1,4 @@
-package com.match.backend.common.infrastructure.aop.log;
+package com.ticketmate.backend.common.infrastructure.aop.log;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
