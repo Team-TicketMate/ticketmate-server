@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.exception.stomp;
+package com.ticketmate.backend.websocket.infrastructure.exception.stomp;
 
 import jakarta.annotation.Nullable;
 import java.nio.charset.StandardCharsets;

@@ -1,6 +1,6 @@
-package com.ticketmate.backend.global.exception.stomp;
+package com.ticketmate.backend.websocket.infrastructure.exception.stomp;
 
-import com.ticketmate.backend.global.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.CustomException;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +10,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class AuthenticateExceptionInterceptor implements StompExceptionInterceptor {
 
   @Override
