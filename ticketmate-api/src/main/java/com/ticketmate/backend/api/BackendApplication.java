@@ -1,4 +1,4 @@
-package com.ticketmate.backend;
+package com.ticketmate.backend.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
