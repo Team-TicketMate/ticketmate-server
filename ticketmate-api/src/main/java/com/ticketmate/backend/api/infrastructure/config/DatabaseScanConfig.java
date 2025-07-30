@@ -13,6 +13,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = {
     "com.ticketmate.backend.*"
 })
-public class DatabaseConfig {
+public class DatabaseScanConfig {
 
 }
