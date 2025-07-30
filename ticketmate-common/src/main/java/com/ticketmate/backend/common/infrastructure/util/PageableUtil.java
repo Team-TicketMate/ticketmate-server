@@ -1,15 +1,10 @@
-package com.ticketmate.backend.global.util.database;
+package com.ticketmate.backend.common.infrastructure.util;
 
-import static com.ticketmate.backend.global.constant.PageableConstants.MAX_PAGE_SIZE;
-
-import com.ticketmate.backend.global.constant.SortField;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.ticketmate.backend.common.core.constant.SortField;
+import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -43,7 +38,7 @@ public class PageableUtil {
     if (pageSize == null || pageSize < 1) {
       return defaultPageSize;
     }
-    return Math.min(pageSize, MAX_PAGE_SIZE); // 최대값 제한
+    return Math.min(pageSize, PageableConstants.MAX_PAGE_SIZE); // 최대값 제한
   }
 
   /**

@@ -1,8 +1,8 @@
-package com.ticketmate.backend.global.util.common;
+package com.ticketmate.backend.common.core.util;
 
-import com.ticketmate.backend.global.constant.SortField;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.constant.SortField;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;

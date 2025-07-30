@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.constant;
+package com.ticketmate.backend.common.core.constant;
 
 /**
  * 각 도메인이 제공하는 정렬 키 enum 이 구현해야 할 인터페이스
