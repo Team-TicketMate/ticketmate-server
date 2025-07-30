@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global;
+package com.ticketmate.backend.common.infrastructure.persistence;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global;
+package com.ticketmate.backend.common.infrastructure.persistence;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
