@@ -1,86 +1,52 @@
 package com.ticketmate.backend.storage.infrastructure.properties;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-@Getter
 @Validated
-@AllArgsConstructor
 @ConfigurationProperties(prefix = "cloud.aws")
-public class S3Properties {
+public record S3Properties(
+    @Valid S3 s3,
+    @Valid Credentials credentials,
+    @Valid Region region,
+    @Valid Stack stack
+) {
 
-  private final S3 s3;
-
-  private final Credentials credentials;
-
-  private final Region region;
-
-  private final Stack stack;
-
-  @Getter
-  @AllArgsConstructor
-  public static class S3 {
-
-    @NotBlank
-    private final String bucket;
-
-    @NotBlank
-    private final String domain;
-
-    private final Path path;
-  }
-
-  @Getter
-  @AllArgsConstructor
-  public static class Path {
-
-    @NotBlank
-    private final String member;
-
-    @NotBlank
-    private final String concertHall;
-
-    @NotBlank
-    private final String concert;
-
-    @NotBlank
-    private final String portfolio;
-
-    @NotBlank
-    private final String chat;
-  }
-
-  @Getter
-  @AllArgsConstructor
-  public static class Credentials {
-
-    @NotBlank
-    private final String accessKey;
-
-    @NotBlank
-    private final String secretKey;
+  public record S3(
+      @NotBlank String bucket,
+      @NotBlank String domain,
+      @Valid Path path
+  ) {
 
   }
 
-  @Getter
-  @AllArgsConstructor
-  public static class Region {
-
-    @NotBlank
-    private final String staticRegion;
-
-    private final boolean auto;
+  public record Path(
+      @NotBlank String member,
+      @NotBlank String concertHall,
+      @NotBlank String concert,
+      @NotBlank String portfolio,
+      @NotBlank String chat
+  ) {
 
   }
 
-  @Getter
-  @AllArgsConstructor
-  public static class Stack {
+  public record Credentials(
+      @NotBlank String accessKey,
+      @NotBlank String secretKey
+  ) {
 
-    private final boolean auto;
+  }
+
+  public record Region(
+      @NotBlank String staticRegion,
+      boolean auto
+  ) {
+
+  }
+
+  public record Stack(boolean auto) {
 
   }
 }
