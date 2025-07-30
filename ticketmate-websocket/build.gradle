@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+
+    // WebSocket
+    implementation libs.websocket.starter
+
+    // Netty
+    implementation libs.reactor.netty
+}
