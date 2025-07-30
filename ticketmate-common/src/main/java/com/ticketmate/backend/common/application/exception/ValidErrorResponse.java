@@ -1,4 +1,4 @@
-package com.match.backend.common.application.exception;
+package com.ticketmate.backend.common.application.exception;
 
 import java.util.Map;
 import lombok.Builder;

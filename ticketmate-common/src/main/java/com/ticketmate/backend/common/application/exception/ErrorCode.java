@@ -1,4 +1,4 @@
-package com.match.backend.common.application.exception;
+package com.ticketmate.backend.common.application.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
