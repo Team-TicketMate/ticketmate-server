@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.redis.infrastructure.config;
 
 import java.time.Duration;
 import java.util.HashMap;
