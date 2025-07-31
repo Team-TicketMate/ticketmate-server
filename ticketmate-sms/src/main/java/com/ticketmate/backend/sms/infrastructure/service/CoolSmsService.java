@@ -1,8 +1,9 @@
-package com.ticketmate.backend.domain.sms.service;
+package com.ticketmate.backend.sms.infrastructure.service;
 
-import com.ticketmate.backend.global.config.properties.CoolSmsProperties;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.sms.core.service.SmsService;
+import com.ticketmate.backend.sms.infrastructure.properties.CoolSmsProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.message.exception.NurigoEmptyResponseException;
@@ -42,7 +43,7 @@ public class CoolSmsService implements SmsService {
    */
   private Message buildMessage(String to, String content) {
     Message message = new Message();
-    message.setFrom(coolSmsProperties.getFrom());
+    message.setFrom(coolSmsProperties.from());
     message.setTo(to);
     message.setText(content);
     return message;

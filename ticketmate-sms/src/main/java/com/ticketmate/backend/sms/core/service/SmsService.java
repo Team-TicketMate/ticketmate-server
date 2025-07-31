@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.sms.service;
+package com.ticketmate.backend.sms.core.service;
 
 public interface SmsService {
 
