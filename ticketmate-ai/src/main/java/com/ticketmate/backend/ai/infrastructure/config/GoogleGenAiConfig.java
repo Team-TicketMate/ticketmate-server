@@ -19,18 +19,18 @@ public class GoogleGenAiConfig {
   @Bean
   public Client genAiClient(GoogleGenAiProperties properties) throws IOException {
     // JSON 파일 로드
-    ClassPathResource classPathResource = new ClassPathResource(properties.getCredentialsFile());
+    ClassPathResource classPathResource = new ClassPathResource(properties.credentialsFile());
     try (InputStream inputStream = classPathResource.getInputStream()) {
 
       // 서비스 계정 로드
       GoogleCredentials googleCredentials =
           ServiceAccountCredentials.fromStream(inputStream)
-              .createScoped(List.of(properties.getCloudPlatformUrl()));
+              .createScoped(List.of(properties.cloudPlatformUrl()));
 
       return Client.builder()
-          .vertexAI(properties.isVertexAiEnabled())
-          .project(properties.getProjectId())
-          .location(properties.getLocation())
+          .vertexAI(properties.vertexAiEnabled())
+          .project(properties.projectId())
+          .location(properties.location())
           .credentials(googleCredentials)
           .build();
     }
