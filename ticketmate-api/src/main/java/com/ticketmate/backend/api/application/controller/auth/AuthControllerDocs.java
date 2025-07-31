@@ -1,4 +1,4 @@
-package com.ticketmate.backend.api.application.controller;
+package com.ticketmate.backend.api.application.controller.auth;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;

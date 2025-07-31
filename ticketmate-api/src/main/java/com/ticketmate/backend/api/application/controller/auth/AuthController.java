@@ -1,4 +1,4 @@
-package com.ticketmate.backend.api.application.controller;
+package com.ticketmate.backend.api.application.controller.auth;
 
 import com.ticketmate.backend.auth.application.service.AuthService;
 import com.ticketmate.backend.common.infrastructure.aop.log.LogMonitoringInvocation;
