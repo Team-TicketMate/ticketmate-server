@@ -16,7 +16,7 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.member.application.service.MemberService;
-import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import com.ticketmate.backend.sms.core.service.SmsService;
