@@ -1,26 +1,29 @@
-package com.ticketmate.backend.domain.auth.service;
+package com.ticketmate.backend.auth.application.service;
 
-import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
-import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_VERIFICATION_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.SMS_CODE_TTL_MIN;
-import static com.ticketmate.backend.global.constant.AuthConstants.SMS_VERIFICATION_MESSAGE;
-import static com.ticketmate.backend.global.util.common.CommonUtil.normalizeAndRemoveSpecialCharacters;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REDIS_VERIFICATION_KEY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_TOKEN_KEY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.SMS_CODE_TTL_MIN;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.SMS_VERIFICATION_MESSAGE;
+import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRemoveSpecialCharacters;
 
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.auth.domain.dto.request.SendCodeRequest;
-import com.ticketmate.backend.domain.auth.domain.dto.request.VerifyCodeRequest;
-import com.ticketmate.backend.domain.sms.service.SmsService;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.util.auth.AuthUtil;
-import com.ticketmate.backend.global.util.auth.CookieUtil;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.auth.core.service.TokenProvider;
+import com.ticketmate.backend.auth.core.service.TokenStore;
+import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
+import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
+import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.member.application.service.MemberService;
+import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
+import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
+import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
+import com.ticketmate.backend.sms.core.service.SmsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.security.SecureRandom;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-  private final JwtUtil jwtUtil;
+  private final TokenProvider tokenProvider;
+  private final TokenStore tokenStore;
+  private final JwtProperties jwtProperties;
+  private final MemberService memberService;
   private final SmsService smsService;
   private final RedisTemplate<String, String> redisTemplate;
 
@@ -49,22 +55,23 @@ public class AuthService {
     String refreshToken = AuthUtil.extractRefreshTokenFromRequest(request);
 
     // 사용자 정보 조회
-    CustomOAuth2User customOAuth2User = jwtUtil.getCustomOAuth2User(refreshToken);
+    String memberId = tokenProvider.getMemberId(refreshToken);
+    Member member = memberService.findMemberById(UUID.fromString(memberId));
 
     // 새로운 토큰 생성
-    String newAccessToken = jwtUtil.createAccessToken(customOAuth2User);
-    String newRefreshToken = jwtUtil.createRefreshToken(customOAuth2User);
+    String newAccessToken = tokenProvider.createAccessToken(memberId, member.getUsername(), member.getRole().name());
+    String newRefreshToken = tokenProvider.createRefreshToken(memberId, member.getUsername(), member.getRole().name());
 
     // 기존 refreshToken 삭제
-    jwtUtil.deleteRefreshToken(refreshToken);
+    tokenStore.remove(refreshToken);
 
     // refreshToken 저장
     // RefreshToken을 Redis에 저장 (key: RT:memberId)
-    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), newRefreshToken);
+    tokenStore.save(AuthUtil.getRefreshTokenTtlKey(memberId), newRefreshToken, jwtProperties.refreshExpMillis());
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken, jwtUtil.getAccessExpirationTimeInSeconds()));
-    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, newRefreshToken, jwtUtil.getRefreshExpirationTimeInSeconds()));
+    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, newAccessToken, jwtProperties.accessExpMillis() / 1000));
+    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, newRefreshToken, jwtProperties.refreshExpMillis() / 1000));
   }
 
   /**

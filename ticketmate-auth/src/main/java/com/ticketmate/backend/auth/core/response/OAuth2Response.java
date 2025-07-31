@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.auth.domain.dto.response;
+package com.ticketmate.backend.auth.core.response;
 
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
 
 public interface OAuth2Response {
 

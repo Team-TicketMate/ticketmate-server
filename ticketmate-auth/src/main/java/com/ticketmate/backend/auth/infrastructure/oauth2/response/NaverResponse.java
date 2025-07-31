@@ -1,6 +1,7 @@
-package com.ticketmate.backend.domain.auth.domain.dto.response;
+package com.ticketmate.backend.auth.infrastructure.oauth2.response;
 
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
+import com.ticketmate.backend.auth.core.response.OAuth2Response;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
