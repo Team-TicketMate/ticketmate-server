@@ -1,12 +1,12 @@
-package com.ticketmate.backend.domain.vertexai.service;
+package com.ticketmate.backend.ai.application.service;
 
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.ai.core.constant.EmbeddingType;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EmbeddingGeneratorService {
-  private final EmbeddingService embeddingService;
+public class VertexAiEmbeddingGeneratorService {
+  private final VertexAiEmbeddingService vertexAiEmbeddingService;
 
   /**
    * 공연 임베딩 데이터를 생성 또는 업데이트
@@ -40,7 +40,7 @@ public class EmbeddingGeneratorService {
       throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
     }
 
-    embeddingService.regenerateEmbedding(
+    vertexAiEmbeddingService.regenerateEmbedding(
         concert.getConcertId(),
         embeddingText,
         EmbeddingType.CONCERT
@@ -67,7 +67,7 @@ public class EmbeddingGeneratorService {
       throw new CustomException(ErrorCode.INSUFFICIENT_DATA_FOR_EMBEDDING);
     }
 
-    embeddingService.regenerateEmbedding(
+    vertexAiEmbeddingService.regenerateEmbedding(
         member.getMemberId(),
         embeddingText,
         EmbeddingType.AGENT
