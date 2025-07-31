@@ -11,7 +11,7 @@ import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

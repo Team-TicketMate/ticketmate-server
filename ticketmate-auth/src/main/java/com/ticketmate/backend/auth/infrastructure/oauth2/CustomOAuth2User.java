@@ -3,7 +3,7 @@ package com.ticketmate.backend.auth.infrastructure.oauth2;
 import com.ticketmate.backend.auth.core.principal.UserPrincipal;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
-import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
