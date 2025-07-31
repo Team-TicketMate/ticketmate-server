@@ -1,4 +1,4 @@
-package com.ticketmate.backend.auth.infrastructure.service;
+package com.ticketmate.backend.auth.infrastructure.util;
 
 import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_CATEGORY;
 import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_CATEGORY;

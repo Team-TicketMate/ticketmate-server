@@ -1,4 +1,4 @@
-package com.ticketmate.backend.auth.infrastructure.service;
+package com.ticketmate.backend.auth.infrastructure.util;
 
 import com.ticketmate.backend.auth.core.service.TokenStore;
 import java.util.concurrent.TimeUnit;

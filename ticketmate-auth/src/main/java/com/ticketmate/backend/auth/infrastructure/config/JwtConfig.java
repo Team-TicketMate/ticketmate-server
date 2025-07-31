@@ -1,8 +1,8 @@
 package com.ticketmate.backend.auth.infrastructure.config;
 
 import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
-import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
-import com.ticketmate.backend.auth.infrastructure.service.JwtStore;
+import com.ticketmate.backend.auth.infrastructure.util.JwtProvider;
+import com.ticketmate.backend.auth.infrastructure.util.JwtStore;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import javax.crypto.SecretKey;
