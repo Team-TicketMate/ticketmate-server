@@ -1,17 +1,17 @@
-package com.ticketmate.backend.domain.vertexai.service;
+package com.ticketmate.backend.ai.application.service;
 
 import com.google.genai.Client;
 import com.google.genai.errors.ClientException;
 import com.google.genai.types.ContentEmbedding;
 import com.google.genai.types.EmbedContentConfig;
 import com.google.genai.types.EmbedContentResponse;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.domain.vertexai.domain.entity.Embedding;
-import com.ticketmate.backend.domain.vertexai.repository.EmbeddingRepository;
-import com.ticketmate.backend.global.config.properties.GoogleGenAiProperties;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.ai.core.constant.EmbeddingType;
+import com.ticketmate.backend.ai.infrastructure.entity.Embedding;
+import com.ticketmate.backend.ai.infrastructure.properties.GoogleGenAiProperties;
+import com.ticketmate.backend.ai.infrastructure.repository.EmbeddingRepository;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EmbeddingService {
+public class VertexAiEmbeddingService {
 
   private final EmbeddingRepository embeddingRepository;
   private final Client genAiClient;
@@ -43,7 +43,7 @@ public class EmbeddingService {
   @Caching(
       cacheable = @Cacheable(
           value     = "embeddings",
-          key       = "T(com.ticketmate.backend.global.util.common.CommonUtil)"
+          key       = "T(com.ticketmate.backend.common.core.util.CommonUtil)"
                       + ".normalizeAndRemoveSpecialCharacters(#text)"
                       + "+':' + #embeddingType",
           condition = "#targetId == null",
@@ -96,7 +96,7 @@ public class EmbeddingService {
   private EmbedContentResponse generateEmbedding(String text) {
     try {
       return genAiClient.models.embedContent(
-          googleGenAIProperties.getModel(),
+          googleGenAIProperties.model(),
           text,
           EmbedContentConfig.builder().build()
       );

@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.vertexai.repository;
+package com.ticketmate.backend.ai.infrastructure.repository;
 
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.domain.vertexai.domain.entity.Embedding;
+import com.ticketmate.backend.ai.core.constant.EmbeddingType;
+import com.ticketmate.backend.ai.infrastructure.entity.Embedding;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

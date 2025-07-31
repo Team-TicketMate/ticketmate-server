@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.vertexai.domain.entity;
+package com.ticketmate.backend.ai.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.global.BasePostgresEntity;
+import com.ticketmate.backend.ai.core.constant.EmbeddingType;
+import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
