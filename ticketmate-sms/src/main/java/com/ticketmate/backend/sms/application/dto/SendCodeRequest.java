@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.auth.domain.dto.request;
+package com.ticketmate.backend.sms.application.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

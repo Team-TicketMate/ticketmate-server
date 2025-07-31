@@ -1,4 +1,4 @@
-package com.ticketmate.backend.sms.infrastructure.service;
+package com.ticketmate.backend.sms.application.service;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
