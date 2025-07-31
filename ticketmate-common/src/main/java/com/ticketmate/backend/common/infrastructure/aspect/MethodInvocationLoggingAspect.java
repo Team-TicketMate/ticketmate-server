@@ -1,4 +1,4 @@
-package com.ticketmate.backend.common.infrastructure.aop.log;
+package com.ticketmate.backend.common.infrastructure.aspect;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class MethodInvocationLoggingAspect {
   /**
    * RequestContextHolder를 통해 현재 HTTP 요청 객체를 가져와 RequestID 값을 읽음
    */
-  @Around("@annotation(com.ticketmate.backend.common.infrastructure.aop.log.LogMethodInvocation) || @annotation(com.ticketmate.backend.common.infrastructure.aop.log.LogMonitoringInvocation)")
+  @Around("@annotation(com.ticketmate.backend.common.application.annotation.LogMethodInvocation) || @annotation(com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation)")
   public Object logMethod(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
