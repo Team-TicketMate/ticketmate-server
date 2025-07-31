@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.concerthall.domain.constant;
+package com.ticketmate.backend.concerthall.core.constant;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
+import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

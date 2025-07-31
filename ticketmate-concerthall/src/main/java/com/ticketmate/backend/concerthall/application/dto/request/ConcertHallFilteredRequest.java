@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.concerthall.domain.dto.request;
+package com.ticketmate.backend.concerthall.application.dto.request;
 
-import com.ticketmate.backend.domain.concerthall.domain.constant.ConcertHallSortField;
-import com.ticketmate.backend.global.constant.PageableConstants;
-import com.ticketmate.backend.global.util.database.PageableUtil;
+import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
+import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
+import com.ticketmate.backend.concerthall.core.constant.ConcertHallSortField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

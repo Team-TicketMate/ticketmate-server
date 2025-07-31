@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.concerthall.domain.dto.response;
+package com.ticketmate.backend.concerthall.application.dto.response;
 
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
+import com.ticketmate.backend.concerthall.core.constant.City;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

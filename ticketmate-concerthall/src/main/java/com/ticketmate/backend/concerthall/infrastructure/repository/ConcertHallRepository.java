@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.concerthall.repository;
+package com.ticketmate.backend.concerthall.infrastructure.repository;
 
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

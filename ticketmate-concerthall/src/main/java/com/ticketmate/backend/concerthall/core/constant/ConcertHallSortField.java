@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.concerthall.domain.constant;
+package com.ticketmate.backend.concerthall.core.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.ticketmate.backend.global.constant.SortField;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.constant.SortField;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

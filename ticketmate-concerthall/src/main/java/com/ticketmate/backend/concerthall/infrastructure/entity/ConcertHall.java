@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.concerthall.domain.entity;
+package com.ticketmate.backend.concerthall.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.global.BasePostgresEntity;
+import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
+import com.ticketmate.backend.concerthall.core.constant.City;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

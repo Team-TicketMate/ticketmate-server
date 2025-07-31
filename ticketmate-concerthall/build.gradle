@@ -13,4 +13,11 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+
+    // Swagger UI
+    api libs.springdoc.openapi.ui
+
+    // MapStructure
+    implementation libs.mapstruct
+    implementation libs.mapstruct.processor
 }
