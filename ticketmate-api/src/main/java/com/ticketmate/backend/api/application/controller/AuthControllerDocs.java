@@ -1,10 +1,9 @@
-package com.ticketmate.backend.domain.auth.controller;
-
+package com.ticketmate.backend.api.application.controller;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.domain.auth.domain.dto.request.SendCodeRequest;
-import com.ticketmate.backend.domain.auth.domain.dto.request.VerifyCodeRequest;
+import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
+import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

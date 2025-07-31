@@ -17,6 +17,7 @@ dependencies {
     implementation project(':ticketmate-querydsl')
     implementation project(':ticketmate-search')
     implementation project(':ticketmate-storage')
+    implementation project(':ticketmate-sms')
 
     // Swagger UI
     implementation libs.springdoc.openapi.ui
