@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.web;
+package com.ticketmate.backend.api.infrastructure.web;
 
 import java.util.List;
 import org.springframework.context.annotation.Bean;
