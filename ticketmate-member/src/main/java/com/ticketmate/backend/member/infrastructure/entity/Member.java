@@ -1,4 +1,4 @@
-package com.ticketmate.backend.member.infrastructure.domain.entity;
+package com.ticketmate.backend.member.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

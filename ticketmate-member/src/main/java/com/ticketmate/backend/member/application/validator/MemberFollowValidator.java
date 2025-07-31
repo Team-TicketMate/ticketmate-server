@@ -1,10 +1,10 @@
-package com.ticketmate.backend.global.validator.member;
+package com.ticketmate.backend.member.application.validator;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.repository.MemberFollowRepository;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.repository.MemberFollowRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

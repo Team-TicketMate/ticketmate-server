@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.member.repository;
+package com.ticketmate.backend.member.infrastructure.repository;
 
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.domain.entity.MemberFollow;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.entity.MemberFollow;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 

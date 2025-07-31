@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.member.repository;
+package com.ticketmate.backend.member.infrastructure.repository;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.constant.Role;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.Role;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

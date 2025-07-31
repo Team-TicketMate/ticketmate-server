@@ -13,7 +13,12 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-querydsl')
 
     // PostgreSQL
     api libs.postgresql.driver
+
+    // MapStructure
+    implementation libs.mapstruct
+    implementation libs.mapstruct.processor
 }
