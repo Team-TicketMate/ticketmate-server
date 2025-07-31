@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.member.domain.constant;
+package com.ticketmate.backend.member.core.constant;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,12 +1,12 @@
-package com.ticketmate.backend.domain.member.domain.entity;
+package com.ticketmate.backend.member.infrastructure.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.constant.Role;
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
-import com.ticketmate.backend.global.BasePostgresEntity;
+import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.Role;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
