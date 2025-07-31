@@ -1,14 +1,17 @@
-package com.ticketmate.backend.global.handler;
+package com.ticketmate.backend.auth.infrastructure.handler;
 
-import static com.ticketmate.backend.global.constant.AuthConstants.ACCESS_TOKEN_KEY;
-import static com.ticketmate.backend.global.constant.AuthConstants.REDIS_REFRESH_KEY_PREFIX;
-import static com.ticketmate.backend.global.constant.AuthConstants.REFRESH_TOKEN_KEY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_TOKEN_KEY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_TOKEN_KEY;
 
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.util.auth.CookieUtil;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
+import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
+import com.ticketmate.backend.auth.infrastructure.service.JwtStore;
+import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
+import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -30,26 +33,28 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   @Value("${spring.security.app.redirect-uri.prod}")
   private String prodRedirectUri;
 
-  private final JwtUtil jwtUtil;
+  private final JwtProvider jwtProvider;
+  private final JwtStore jwtStore;
+  private final JwtProperties jwtProperties;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
     // CustomOAuth2User
-    CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-    String accessToken = jwtUtil.createAccessToken(customOAuth2User);
-    String refreshToken = jwtUtil.createRefreshToken(customOAuth2User);
+    Member member = ((CustomOAuth2User) authentication.getPrincipal()).getMember();
+    String accessToken = jwtProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+    String refreshToken = jwtProvider.createRefreshToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
 
     log.debug("로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
     log.debug("accessToken = {}", accessToken);
     log.debug("refreshToken = {}", refreshToken);
 
     // RefreshToken을 Redis에 저장 (key: RT:memberId)
-    jwtUtil.saveRefreshToken(REDIS_REFRESH_KEY_PREFIX + customOAuth2User.getMemberId(), refreshToken);
+    jwtStore.save(AuthUtil.getRefreshTokenTtlKey(member.getMemberId().toString()), refreshToken, jwtProperties.refreshExpMillis());
 
     // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtUtil.getAccessExpirationTimeInSeconds()));
-    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken, jwtUtil.getRefreshExpirationTimeInSeconds()));
+    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtProperties.accessExpMillis() / 1000));
+    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken, jwtProperties.refreshExpMillis() / 1000));
 
     // 로그인 성공 후 메인 페이지로 리다이렉트
     try {

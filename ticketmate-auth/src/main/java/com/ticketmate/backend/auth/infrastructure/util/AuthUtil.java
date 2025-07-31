@@ -26,6 +26,13 @@ public class AuthUtil {
   }
 
   /**
+   * 리프레시 토큰 저장을 위한 Key 반환
+   */
+  public String getRefreshTokenTtlKey(String memberId) {
+    return AuthConstants.REDIS_REFRESH_KEY_PREFIX + memberId;
+  }
+
+  /**
    * "Bearer " 부분은 제거하고 순수 토큰을 획득합니다
    */
   private String extractTokenWithoutBearer(String bearerToken) {

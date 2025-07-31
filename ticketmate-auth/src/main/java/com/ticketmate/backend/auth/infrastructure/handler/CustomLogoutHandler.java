@@ -1,9 +1,10 @@
-package com.ticketmate.backend.global.handler;
+package com.ticketmate.backend.auth.infrastructure.handler;
 
-import com.ticketmate.backend.global.constant.AuthConstants;
-import com.ticketmate.backend.global.util.auth.AuthUtil;
-import com.ticketmate.backend.global.util.auth.CookieUtil;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
+import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
+import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
+import com.ticketmate.backend.auth.infrastructure.service.JwtStore;
+import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
+import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,14 +19,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomLogoutHandler implements LogoutHandler {
 
-  private final JwtUtil jwtUtil;
+  private final JwtProvider jwtProvider;
+  private final JwtStore jwtStore;
 
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
     // 쿠키에서 리프레시 토큰 추출 및 삭제
     String refreshToken = AuthUtil.extractRefreshTokenFromRequest(request);
-    jwtUtil.deleteRefreshToken(refreshToken);
+    String memberId = jwtProvider.getMemberId(refreshToken);
+    jwtStore.remove(AuthUtil.getRefreshTokenTtlKey(memberId));
 
     // 쿠키 삭제
     deleteCookieAndAttachToResponse(request, response, AuthConstants.ACCESS_TOKEN_KEY);

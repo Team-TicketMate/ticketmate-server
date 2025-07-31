@@ -1,13 +1,13 @@
-package com.ticketmate.backend.global.config.security;
+package com.ticketmate.backend.auth.infrastructure.config;
 
-import com.ticketmate.backend.domain.auth.service.CustomOAuth2UserService;
-import com.ticketmate.backend.global.config.beans.CustomClientRegistrationRepository;
-import com.ticketmate.backend.global.constant.AuthConstants;
-import com.ticketmate.backend.global.constant.SecurityUrls;
-import com.ticketmate.backend.global.filter.TokenAuthenticationFilter;
-import com.ticketmate.backend.global.handler.CustomSuccessHandler;
-import com.ticketmate.backend.global.handler.CustomLogoutHandler;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
+import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
+import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
+import com.ticketmate.backend.auth.infrastructure.filter.TokenAuthenticationFilter;
+import com.ticketmate.backend.auth.infrastructure.handler.CustomLogoutHandler;
+import com.ticketmate.backend.auth.infrastructure.handler.CustomSuccessHandler;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomClientRegistrationRepository;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
+import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtUtil jwtUtil;
+  private final JwtProvider jwtProvider;
   private final CustomSuccessHandler customSuccessHandler;
   private final CustomOAuth2UserService customOAuth2UserService;
   private final CustomClientRegistrationRepository customClientRegistrationRepository;
@@ -68,7 +68,7 @@ public class SecurityConfig {
             .successHandler(customSuccessHandler))
         // JWT Filter
         .addFilterAfter(
-            new TokenAuthenticationFilter(jwtUtil),
+            new TokenAuthenticationFilter(jwtProvider),
             OAuth2LoginAuthenticationFilter.class
         )
         .build();

@@ -13,6 +13,7 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-member')
     implementation project(':ticketmate-redis')
 
     // JWT

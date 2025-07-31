@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.auth.service;
+package com.ticketmate.backend.auth.infrastructure.oauth2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

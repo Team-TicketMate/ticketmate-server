@@ -1,13 +1,14 @@
-package com.ticketmate.backend.domain.auth.domain.dto;
+package com.ticketmate.backend.auth.infrastructure.oauth2;
 
-import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import java.security.Principal;
+import com.ticketmate.backend.auth.core.principal.UserPrincipal;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
+import com.ticketmate.backend.member.infrastructure.domain.entity.Member;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Getter
 @RequiredArgsConstructor
-public class CustomOAuth2User implements OAuth2User, Principal {
+public class CustomOAuth2User implements OAuth2User, UserPrincipal {
 
   private final Member member;
   private final Map<String, Object> attributes;
@@ -42,6 +43,11 @@ public class CustomOAuth2User implements OAuth2User, Principal {
 
   public String getUsername() {
     return member.getUsername(); // 이메일
+  }
+
+  @Override
+  public List<String> getRoles() {
+    return List.of(member.getRole().name());
   }
 
   public SocialPlatform getSocialPlatform() {

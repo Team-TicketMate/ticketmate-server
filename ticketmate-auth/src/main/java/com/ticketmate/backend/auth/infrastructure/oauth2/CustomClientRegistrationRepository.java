@@ -1,6 +1,5 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.auth.infrastructure.oauth2;
 
-import com.ticketmate.backend.domain.auth.service.SocialClientRegistration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
