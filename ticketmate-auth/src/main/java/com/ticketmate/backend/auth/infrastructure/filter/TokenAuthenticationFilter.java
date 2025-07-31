@@ -1,9 +1,9 @@
 package com.ticketmate.backend.auth.infrastructure.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
-import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
 import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
@@ -33,7 +33,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private static final AntPathMatcher pathMatcher = new AntPathMatcher();
-  private final JwtProvider jwtProvider;
+  private final TokenProvider tokenProvider;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,7 +53,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       String token = AuthUtil.extractAccessTokenFromRequest(request);
 
       // 토큰 검증: 토큰이 유효하면 인증 설정
-      if (jwtProvider.isValidToken(token)) {
+      if (tokenProvider.isValidToken(token)) {
         handleValidToken(request, response, filterChain, token, apiRequestType);
         return;
       }
@@ -111,7 +111,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    * @return 관리자 권한 여부
    */
   private boolean hasAdminRole(String token) {
-    return jwtProvider.getRole(token).equals("ROLE_ADMIN");
+    return tokenProvider.getRole(token).equals("ROLE_ADMIN");
   }
 
   /**
@@ -119,7 +119,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    * TODO: 추후 삭제
    */
   private boolean hasTestAdminRole(String token) {
-    return jwtProvider.getRole(token).equals("ROLE_TEST_ADMIN");
+    return tokenProvider.getRole(token).equals("ROLE_TEST_ADMIN");
   }
 
   /**
@@ -132,8 +132,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       String token,
       ApiRequestType apiRequestType
   ) throws IOException, ServletException {
-    String username = jwtProvider.getUsername(token);
-    String role = jwtProvider.getRole(token);
+    String username = tokenProvider.getUsername(token);
+    String role = tokenProvider.getRole(token);
     GrantedAuthority authority = new SimpleGrantedAuthority(role);
     SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, List.of(authority)));
 

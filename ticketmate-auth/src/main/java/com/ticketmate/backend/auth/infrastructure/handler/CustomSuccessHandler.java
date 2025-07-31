@@ -3,10 +3,10 @@ package com.ticketmate.backend.auth.infrastructure.handler;
 import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_TOKEN_KEY;
 import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_TOKEN_KEY;
 
+import com.ticketmate.backend.auth.core.service.TokenProvider;
+import com.ticketmate.backend.auth.core.service.TokenStore;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
-import com.ticketmate.backend.auth.infrastructure.service.JwtProvider;
-import com.ticketmate.backend.auth.infrastructure.service.JwtStore;
 import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
 import com.ticketmate.backend.common.application.exception.CustomException;
@@ -33,8 +33,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
   @Value("${spring.security.app.redirect-uri.prod}")
   private String prodRedirectUri;
 
-  private final JwtProvider jwtProvider;
-  private final JwtStore jwtStore;
+  private final TokenProvider tokenProvider;
+  private final TokenStore tokenStore;
   private final JwtProperties jwtProperties;
 
   @Override
@@ -42,15 +42,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     // CustomOAuth2User
     Member member = ((CustomOAuth2User) authentication.getPrincipal()).getMember();
-    String accessToken = jwtProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
-    String refreshToken = jwtProvider.createRefreshToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+    String accessToken = tokenProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+    String refreshToken = tokenProvider.createRefreshToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
 
     log.debug("로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
     log.debug("accessToken = {}", accessToken);
     log.debug("refreshToken = {}", refreshToken);
 
     // RefreshToken을 Redis에 저장 (key: RT:memberId)
-    jwtStore.save(AuthUtil.getRefreshTokenTtlKey(member.getMemberId().toString()), refreshToken, jwtProperties.refreshExpMillis());
+    tokenStore.save(AuthUtil.getRefreshTokenTtlKey(member.getMemberId().toString()), refreshToken, jwtProperties.refreshExpMillis());
 
     // 쿠키에 accessToken, refreshToken 추가
     response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtProperties.accessExpMillis() / 1000));

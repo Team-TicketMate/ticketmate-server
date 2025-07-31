@@ -44,7 +44,7 @@ public class JwtConfig {
   }
 
   /**
-   * TokenStore 구현체(JwtStore) 빈 드옭
+   * TokenStore 구현체(JwtStore) 빈 등록
    * 토큰 저장 & 삭제 로직을 담은 유틸리티 빈
    */
   @Bean

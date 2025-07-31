@@ -1,5 +1,8 @@
 package com.ticketmate.backend.auth.infrastructure.service;
 
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_CATEGORY;
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_CATEGORY;
+
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -26,13 +29,13 @@ public class JwtProvider implements TokenProvider {
 
   @Override
   public String createAccessToken(String memberId, String username, String role) {
-    log.debug("엑세스 토큰 생성 중: 회원: {}", customOAuth2User.getUsername());
+    log.debug("엑세스 토큰 생성 중: 회원: {}", username);
     return createToken(ACCESS_CATEGORY, memberId, username, role, accessExpMillis);
   }
 
   @Override
   public String createRefreshToken(String memberId, String username, String role) {
-    log.debug("리프래시 토큰 생성 중: 회원: {}", customOAuth2User.getUsername());
+    log.debug("리프래시 토큰 생성 중: 회원: {}", username);
     return createToken(REFRESH_CATEGORY, memberId, username, role, refreshExpMillis);
   }
 
