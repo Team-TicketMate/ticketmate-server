@@ -13,4 +13,10 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-concerthall')
+    implementation project(':ticketmate-member')
+
+    // MapStructure
+    implementation libs.mapstruct
+    implementation libs.mapstruct.processor
 }
