@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.util.database;
+package com.ticketmate.backend.querydsl.infrastructure.util;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -9,7 +9,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

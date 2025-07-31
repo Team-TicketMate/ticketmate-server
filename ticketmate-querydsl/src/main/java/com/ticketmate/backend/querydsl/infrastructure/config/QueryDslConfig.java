@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.querydsl.infrastructure.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
