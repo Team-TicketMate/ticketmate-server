@@ -60,19 +60,6 @@ public class VertexAiEmbeddingService {
   }
 
   /**
-   * 공연/대리인 업데이트 시점에 호출: 무조건 DB에 새 임베딩 저장
-   */
-  @Transactional
-  public void regenerateEmbedding(
-      UUID targetId,
-      String text,
-      EmbeddingType embeddingType
-  ) {
-    String normalizeText = CommonUtil.normalizeAndRemoveSpecialCharacters(text);
-    createAndSaveEmbedding(targetId, normalizeText, embeddingType);
-  }
-
-  /**
    * 실제 Embedding 생성 및 저장 로직
    */
   private Embedding createAndSaveEmbedding(UUID targetId, String normalizedText, EmbeddingType type) {
@@ -134,6 +121,7 @@ public class VertexAiEmbeddingService {
    * @param embeddingType 조회할 임베딩 타입
    * @return 유사도 순으로 정렬된 대리인 ID 리스트
    */
+  @Transactional(readOnly = true)
   public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType){
     return embeddingRepository.findNearestEmbeddings(queryVector, limit, embeddingType);
   }
