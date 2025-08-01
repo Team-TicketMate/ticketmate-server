@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.auth;
 
 import com.ticketmate.backend.auth.application.service.AuthService;
-import com.ticketmate.backend.common.infrastructure.aop.log.LogMonitoringInvocation;
+import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;

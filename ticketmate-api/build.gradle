@@ -13,11 +13,16 @@ dependencies {
     implementation project(':ticketmate-concert')
     implementation project(':ticketmate-concerthall')
     implementation project(':ticketmate-member')
+    implementation project(':ticketmate-messaging')
+    implementation project(':ticketmate-mock')
     implementation project(':ticketmate-portfolio')
     implementation project(':ticketmate-querydsl')
     implementation project(':ticketmate-search')
     implementation project(':ticketmate-storage')
+    implementation project(':ticketmate-notification')
+    implementation project(':ticketmate-redis')
     implementation project(':ticketmate-sms')
+    implementation project(':ticketmate-websocket')
 
     // Swagger UI
     implementation libs.springdoc.openapi.ui
