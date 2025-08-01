@@ -17,7 +17,7 @@ public interface StorageService {
   /**
    * 파일 삭제
    *
-   * @param filePath 삭제할 파일의 URL
+   * @param fileUrl 삭제할 파일의 URL
    */
-  void deleteFile(String filePath);
+  void deleteFile(String fileUrl);
 }

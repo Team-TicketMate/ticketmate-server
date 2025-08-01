@@ -64,13 +64,13 @@ public class S3Service implements StorageService {
 
     // S3 파일 업로드
     try (InputStream inputStream = file.getInputStream()) {
-      amazonS3.putObject(s3Properties.getS3().getBucket(), filename, inputStream, metadata);
+      amazonS3.putObject(s3Properties.s3().bucket(), filename, inputStream, metadata);
       log.debug("S3 파일 업로드 성공: {}", filename);
     } catch (AmazonServiceException ase) {
-      log.error("AmazonServiceException - S3 파일 업로드 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ase.getMessage());
+      log.error("AmazonServiceException - S3 파일 업로드 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, ase.getMessage());
       throw new CustomException(ErrorCode.S3_UPLOAD_AMAZON_SERVICE_ERROR);
     } catch (AmazonClientException ace) {
-      log.error("AmazonClientException - S3 클라이언트 에러 발생. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ace.getMessage());
+      log.error("AmazonClientException - S3 클라이언트 에러 발생. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, ace.getMessage());
       throw new CustomException(ErrorCode.S3_UPLOAD_AMAZON_CLIENT_ERROR);
     } catch (IOException ioe) {
       log.error("IOException - 파일 스트림 처리 중 에러 발생. 원본 파일명: {}, 파일명: {} 에러: {}", originalFilename, filename, ioe.getMessage());
@@ -84,30 +84,30 @@ public class S3Service implements StorageService {
   /**
    * S3에서 파일 삭제
    *
-   * @param filePath 삭제할 파일의 URL
+   * @param fileUrl 삭제할 파일의 URL
    */
   @Override
-  public void deleteFile(String filePath) {
-    if (CommonUtil.nvl(filePath, "").isEmpty()) {
+  public void deleteFile(String fileUrl) {
+    if (CommonUtil.nvl(fileUrl, "").isEmpty()) {
       log.warn("삭제할 파일 URL이 없습니다.");
       return;
     }
 
     // URL에서 도메인 제거 (filename만 추출)
-    String filename = extractFilenameFromFilepath(filePath);
+    String filename = extractFilenameFromFilepath(fileUrl);
 
     // S3 파일 삭제
     try {
-      amazonS3.deleteObject(new DeleteObjectRequest(s3Properties.getS3().getBucket(), filename));
+      amazonS3.deleteObject(new DeleteObjectRequest(s3Properties.s3().bucket(), filename));
       log.debug("S3 파일 삭제 성공: {}", filename);
     } catch (AmazonServiceException ase) {
-      log.error("AmazonServiceException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ase.getMessage());
+      log.error("AmazonServiceException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, ase.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_AMAZON_SERVICE_ERROR);
     } catch (AmazonClientException ace) {
-      log.error("AmazonClientException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, ace.getMessage());
+      log.error("AmazonClientException - S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, ace.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_AMAZON_CLIENT_ERROR);
     } catch (Exception e) {
-      log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.getS3().getBucket(), filename, e.getMessage());
+      log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, e.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_ERROR);
     }
   }
@@ -152,7 +152,7 @@ public class S3Service implements StorageService {
    * @return 파일 URL
    */
   private String generateFilePath(String filename) {
-    return s3Properties.getS3().getDomain() + filename; // 예: "member/20250605-a1b2c3-원본이미지.jpg"
+    return s3Properties.s3().domain() + filename; // 예: "member/20250605-a1b2c3-원본이미지.jpg"
   }
 
   /**
@@ -163,8 +163,8 @@ public class S3Service implements StorageService {
    */
   private String extractFilenameFromFilepath(String filePath) {
     String filename = filePath;
-    if (filePath.startsWith(s3Properties.getS3().getDomain())) {
-      filename = filePath.substring(s3Properties.getS3().getDomain().length());
+    if (filePath.startsWith(s3Properties.s3().domain())) {
+      filename = filePath.substring(s3Properties.s3().domain().length());
     }
     if (CommonUtil.nvl(filename, "").isEmpty()) {
       log.error("파일명 추출 실패: {}", filePath);
@@ -178,11 +178,11 @@ public class S3Service implements StorageService {
    */
   private String determinePrefix(UploadType type) {
     return switch (type) {
-      case MEMBER -> s3Properties.getS3().getPath().getMember();
-      case CONCERT_HALL -> s3Properties.getS3().getPath().getConcertHall();
-      case CONCERT -> s3Properties.getS3().getPath().getConcert();
-      case PORTFOLIO -> s3Properties.getS3().getPath().getPortfolio();
-      case CHAT -> s3Properties.getS3().getPath().getChat();
+      case MEMBER -> s3Properties.s3().path().member();
+      case CONCERT_HALL -> s3Properties.s3().path().concertHall();
+      case CONCERT -> s3Properties.s3().path().concert();
+      case PORTFOLIO -> s3Properties.s3().path().portfolio();
+      case CHAT -> s3Properties.s3().path().chat();
     };
   }
 
