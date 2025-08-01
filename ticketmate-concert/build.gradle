@@ -15,8 +15,19 @@ dependencies {
     implementation project(':ticketmate-common')
     implementation project(':ticketmate-concerthall')
     implementation project(':ticketmate-member')
+    implementation project(':ticketmate-querydsl')
 
     // MapStructure
     implementation libs.mapstruct
-    implementation libs.mapstruct.processor
+    annotationProcessor libs.mapstruct.processor
+
+    // QueryDSL annotationProcessor
+    annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }
+    annotationProcessor libs.jakarta.persistence.api
+    annotationProcessor libs.jakarta.annotation.api
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file('src/main/generated')
 }

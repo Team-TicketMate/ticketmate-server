@@ -36,6 +36,6 @@ public enum ConcertAgentAvailabilitySortField implements SortField {
    */
   @JsonCreator
   public static ConcertAgentAvailabilitySortField from(String value) {
-    return CommonUtil.stringToEnum(ConcertAgentAvailabilitySortField.class, value);
+    return CommonUtil.stringToSortField(ConcertAgentAvailabilitySortField.class, value);
   }
 }

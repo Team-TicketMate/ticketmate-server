@@ -1,8 +1,8 @@
-package com.ticketmate.backend.domain.concert.repository;
+package com.ticketmate.backend.concert.infrastructure.repository;
 
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

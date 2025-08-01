@@ -1,15 +1,15 @@
-package com.ticketmate.backend.domain.concert.service;
+package com.ticketmate.backend.concert.application.service;
 
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAcceptingAgentFilteredRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
-import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepositoryCustom;
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.service.MemberService;
+import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
+import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
+import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepository;
+import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepositoryCustom;
+import com.ticketmate.backend.member.application.service.MemberService;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

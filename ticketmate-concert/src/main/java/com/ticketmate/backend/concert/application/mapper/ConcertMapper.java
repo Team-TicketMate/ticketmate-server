@@ -8,16 +8,10 @@ import java.util.List;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface ConcertEntityMapper {
-
-  // List<ConcertDateRequest> -> List<ConcertDate> (DTO 리스트 -> 엔티티 리스트)
-  List<ConcertDate> toConcertDateList(List<ConcertDateRequest> concertDateRequestList);
+public interface ConcertMapper {
 
   // List<ConcertDate> -> List<ConcertDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
   List<ConcertDateInfoResponse> toConcertDateInfoResponseList(List<ConcertDate> concertDateList);
-
-  // List<TicketOpenDateList> -> List<TicketOpenDate> (DTO 리스트 -> 엔티티 리스트)
-  List<TicketOpenDate> toTicketOpenDateList(List<TicketOpenDateRequest> ticketOpenDateRequestList);
 
   // List<TicketOpenDate> -> List<TicketOpenDateInfoResponse> (엔티티 리스트 -> DTO 리스트)
   List<TicketOpenDateInfoResponse> toTicketOpenDateInfoResponseList(List<TicketOpenDate> ticketOpenDateList);

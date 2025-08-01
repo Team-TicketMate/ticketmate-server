@@ -1,17 +1,17 @@
-package com.ticketmate.backend.domain.concert.repository;
+package com.ticketmate.backend.concert.infrastructure.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.domain.concert.domain.constant.ConcertAgentAvailabilitySortField;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.domain.concert.domain.entity.QConcertAgentAvailability;
-import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.domain.entity.QAgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.domain.entity.QMember;
-import com.ticketmate.backend.global.util.database.QueryDslUtil;
+import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.core.constant.ConcertAgentAvailabilitySortField;
+import com.ticketmate.backend.concert.infrastructure.entity.QConcertAgentAvailability;
+import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
+import com.ticketmate.backend.member.infrastructure.entity.QAgentPerformanceSummary;
+import com.ticketmate.backend.member.infrastructure.entity.QMember;
+import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;

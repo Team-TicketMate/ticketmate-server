@@ -1,11 +1,9 @@
-package com.ticketmate.backend.domain.concert.repository;
+package com.ticketmate.backend.concert.infrastructure.repository;
 
-import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
-import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertFilteredResponse;
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertInfoResponse;
-import com.ticketmate.backend.domain.search.domain.dto.response.ConcertSearchResponse;
-import java.util.List;
+import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
+import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.core.constant.ConcertType;
+import com.ticketmate.backend.concert.core.constant.TicketReservationSite;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,15 +50,4 @@ public interface ConcertRepositoryCustom {
       TicketReservationSite ticketReservationSite,
       Pageable pageable
   );
-
-  /**
-   * 공연 키워드 LIKE 검색
-   * 공연명, 공연 카테고리, 공연장 기준 비교
-   */
-  List<UUID> findConcertIdsByKeyword(String keyword, int limit);
-
-  /**
-   * ID 리스트 기반 ConcertSearchResponse DTO 리스트 반환
-   */
-  public List<ConcertSearchResponse> findConcertDetailsByIds(List<UUID> concertIds);
 }

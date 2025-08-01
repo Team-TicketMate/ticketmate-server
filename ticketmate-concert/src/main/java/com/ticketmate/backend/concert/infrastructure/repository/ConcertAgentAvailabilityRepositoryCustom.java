@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.concert.repository;
+package com.ticketmate.backend.concert.infrastructure.repository;
 
-import com.ticketmate.backend.domain.concert.domain.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
