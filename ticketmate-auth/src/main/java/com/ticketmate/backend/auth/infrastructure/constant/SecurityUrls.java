@@ -22,8 +22,8 @@ public class SecurityUrls {
       "/api/concert/**", // 공연 조회
       "/api/concert-hall/**", // 공연장 조회
 
-      // TEST
-      "/test/**", // 개발자용 테스트 api
+      // MOCK
+      "/mock/**", // 개발자용 테스트 api
 
       // Swagger
       "/docs/swagger-ui/**", // Swagger UI
