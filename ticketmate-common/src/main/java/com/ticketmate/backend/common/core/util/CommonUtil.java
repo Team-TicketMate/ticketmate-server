@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 공통 메서드
@@ -72,14 +73,33 @@ public class CommonUtil {
   }
 
   /**
-   * enumClass의 값 중 value와 매칭된 상수를 반환합니다
+   * enumClass의 값 중 value와 매칭된 상수 반환
    *
-   * @param <E>       enum 타입 (Enum<E>이면서 SortField 구현)
+   * @param <E>       enum 타입
    * @param enumClass 해당 enum 클래스
-   * @param value     클라이언트에서 보낸 문자열
+   * @param value     문자열
    * @return 매칭된 enum 상수
    */
-  public static <E extends Enum<E> & SortField> E stringToEnum(Class<E> enumClass, String value) {
+  public static <E extends Enum<E>> E stringToEnum(Class<E> enumClass, String value) {
+    if (nvl(value, "").isEmpty()) {
+      throw new CustomException(ErrorCode.INVALID_REQUEST);
+    }
+
+    return Arrays.stream(enumClass.getEnumConstants())
+        .filter(e -> e.name().equalsIgnoreCase(value))
+        .findFirst()
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
+  }
+
+  /**
+   * SortField를 구현한 enumClass의 값 중 value와 매칭된 상수 반환
+   *
+   * @param <E>       enum 타입 (Enum<E>이면서 SortField 구현)
+   * @param enumClass SortField를 구현한 해당 enum 클래스
+   * @param value     문자열
+   * @return 매칭된 enum 상수
+   */
+  public static <E extends Enum<E> & SortField> E stringToSortField(Class<E> enumClass, String value) {
     if (nvl(value, "").isEmpty()) {
       throw new CustomException(ErrorCode.INVALID_SORT_FIELD);
     }
@@ -126,5 +146,18 @@ public class CommonUtil {
         .map(s -> SPECIAL_CHARS.matcher(s).replaceAll(specialReplacement)) // 특수문자 제거/치환
         .map(s -> s.replaceAll("\\s+", " ").trim()) // 공백 정리 & trim
         .orElse("");
+  }
+
+  /**
+   * 여러 문자열을 하나의 텍스트로 결합
+   * null이나 빈 문자열은 제외하고 공백으로 구분
+   *
+   * @param texts 결합할 문자열
+   * @return 공백으로 구분된 하나의 문자열
+   */
+  public static String combineTexts(String... texts) {
+    return Arrays.stream(texts)
+        .filter(text -> !nvl(text, "").isEmpty())
+        .collect(Collectors.joining(" "));
   }
 }
