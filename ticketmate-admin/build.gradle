@@ -13,10 +13,34 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-member')
+    implementation project(':ticketmate-portfolio')
+    implementation project(':ticketmate-concert')
+    implementation project(':ticketmate-concerthall')
+    implementation project(':ticketmate-applicationform')
+    implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-ai')
+    implementation project(':ticketmate-storage')
+    implementation project(':ticketmate-notification')
+    implementation project(':ticketmate-sms')
 
     // PostgreSQL
     api libs.postgresql.driver
 
     // Spring Validation
     api libs.validation
+
+    // MapStruct
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+
+    // QueryDSL annotationProcessor
+    annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }
+    annotationProcessor libs.jakarta.persistence.api
+    annotationProcessor libs.jakarta.annotation.api
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file('src/main/generated')
 }
