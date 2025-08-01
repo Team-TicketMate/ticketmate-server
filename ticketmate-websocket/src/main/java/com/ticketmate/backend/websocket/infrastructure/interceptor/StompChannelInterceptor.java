@@ -1,9 +1,10 @@
-package com.ticketmate.backend.global.util.rabbit;
+package com.ticketmate.backend.websocket.infrastructure.interceptor;
 
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
+import com.ticketmate.backend.auth.core.service.TokenProvider;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import lombok.NonNull;
@@ -17,7 +18,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,7 +32,8 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class StompChannelInterceptor implements ChannelInterceptor {
 
-  private final JwtUtil jwtUtil;
+  private final TokenProvider tokenProvider;
+  private final CustomOAuth2UserService customOAuth2UserService;
 
   @Override
   public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
@@ -75,14 +76,14 @@ public class StompChannelInterceptor implements ChannelInterceptor {
       String accessToken = authorization.substring(7);
 
       // 1) CONNECT 시 토큰 파싱
-      long remaining = jwtUtil.getRemainingValidationMilliSecond(accessToken);
+      long remaining = tokenProvider.getExpiredAt(accessToken).getTime() - System.currentTimeMillis();
       if (remaining <= 0) {
         throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
       }
 
       // 2) CustomOAuth2User 생성 시 AT 만료시간을 세팅
-      Authentication authentication = jwtUtil.getAuthentication(accessToken);
-      CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
+      String username = tokenProvider.getUsername(accessToken);
+      CustomOAuth2User customOAuth2User = customOAuth2UserService.loadUserByUsername(username);
       customOAuth2User.confirmExpire(remaining);
 
       accessor.setUser(customOAuth2User);

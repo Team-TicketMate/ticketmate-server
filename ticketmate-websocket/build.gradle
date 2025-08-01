@@ -13,6 +13,7 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-auth')
 
     // WebSocket
     implementation libs.websocket.starter
