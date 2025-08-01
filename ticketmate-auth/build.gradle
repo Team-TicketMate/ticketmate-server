@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+    implementation project(':ticketmate-member')
+    implementation project(':ticketmate-redis')
+    implementation project(':ticketmate-sms')
+
+    // JWT
+    api libs.jjwt.api
+    api libs.jjwt.impl
+    api libs.jjwt.jackson
+
+    // Security
+    api libs.spring.boot.starter.security
+    api libs.spring.security.test
+
+    // OAuth2
+    api libs.spring.oauth2.client
+}

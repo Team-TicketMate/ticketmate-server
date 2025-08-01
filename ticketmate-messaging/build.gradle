@@ -1,0 +1,21 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+
+    // RabbitMQ
+    api libs.amqp.starter
+    api libs.spring.rabbit.test
+
+}

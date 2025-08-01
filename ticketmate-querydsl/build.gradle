@@ -1,0 +1,27 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+
+    // QueryDSL JPA
+    api(libs.querydsl.jpa) { artifact { classifier = "jakarta" } }
+    annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }
+    annotationProcessor libs.jakarta.persistence.api
+    annotationProcessor libs.jakarta.annotation.api
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file('src/main/generated')
+}
