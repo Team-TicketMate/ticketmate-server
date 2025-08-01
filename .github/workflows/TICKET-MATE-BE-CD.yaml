@@ -23,50 +23,56 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # firebase sdk 파일을 빌드 전에 생성
+      # firebase sdk 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
       - name: Create ticketmate-firebase-key.json from secret
+        env:
+          FIREBASE_KEY_JSON: ${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}
         run: |
-          echo "${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}" > ./src/main/resources/ticketmate-firebase-key.json
+          echo "$FIREBASE_KEY_JSON" | sed 's/\n/\n/g' > api/src/main/resources/ticketmate-firebase-key.json
 
-      # firebase 서비스워커 파일을 빌드 전에 생성
+      # firebase 서비스워커 파일을 빌드 전에 생성 ("" 따옴표 표기 삭제 방지)
       - name: Create firebase-messaging-sw.js from secret
         run: |
-          echo "${{ secrets.FIREBASE_MESSAGING_SW_JS }}" > ./src/main/resources/static/firebase-messaging-sw.js     
+          cat << 'EOF' > api/src/main/resources/static/firebase-messaging-sw.js
+          ${{ secrets.FIREBASE_MESSAGING_SW_JS }}
+          EOF
 
-      # embedding.json 파일을 빌드 전에 생성
-      - name: Create embedding.json from secret
+      # embedding.json 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
+      - name: Create ticketmate-embedding.json from secret
+        env:
+          EMBEDDING_JSON: ${{ secrets.TICKETMATE_EMBEDDING_JSON }}
         run: |
-          echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" > ./src/main/resources/ticketmate-embedding.json
+          echo "$EMBEDDING_JSON" | sed 's/\n/\n/g' > api/src/main/resources/ticketmate-embedding.json
 
       # config-imports.yml 파일을 빌드 전에 생성
       - name: Create config-imports.yml from secret
         run: |
-          echo "${{ secrets.CONFIG_IMPORTS_YML }}" > ./src/main/resources/config-imports.yml
+          echo "${{ secrets.CONFIG_IMPORTS_YML }}" > api/src/main/resources/config-imports.yml
 
       # oauth2.yml 파일을 빌드 전에 생성
       - name: Create oauth2.yml from secret
         run: |
-          echo "${{ secrets.OAUTH2_YML }}" > ./src/main/resources/oauth2.yml
+          echo "${{ secrets.OAUTH2_YML }}" > api/src/main/resources/oauth2.yml
 
       # aws-s3.yml 파일을 빌드 전에 생성
       - name: Create aws-s3.yml from secret
         run: |
-          echo "${{ secrets.AWS_S3_YML }}" > ./src/main/resources/aws-s3.yml
+          echo "${{ secrets.AWS_S3_YML }}" > api/src/main/resources/aws-s3.yml
 
       # messaging.yml 파일을 빌드 전에 생성
       - name: Create messaging.yml from secret
         run: |
-          echo "${{ secrets.MESSAGING_YML }}" > ./src/main/resources/messaging.yml
+          echo "${{ secrets.MESSAGING_YML }}" > api/src/main/resources/messaging.yml
 
       # springdoc.yml 파일을 빌드 전에 생성
       - name: Create springdoc.yml from secret
         run: |
-          echo "${{ secrets.SPRINGDOC_YML }}" > ./src/main/resources/springdoc.yml
+          echo "${{ secrets.SPRINGDOC_YML }}" > api/src/main/resources/springdoc.yml
 
       # application-prod.yml 파일을 빌드 전에 생성
       - name: Create application-prod.yml from secret
         run: |
-          echo "${{ secrets.APPLICATION_PROD_YML }}" > ./src/main/resources/application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > api/src/main/resources/application-prod.yml
 
       # prod 프로파일을 활성화하여 빌드 ( 테스트 코드 테스트 X )
       - name: Build with Gradle
