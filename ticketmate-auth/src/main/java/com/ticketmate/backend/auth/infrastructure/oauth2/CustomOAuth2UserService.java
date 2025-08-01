@@ -11,6 +11,7 @@ import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
+  private final Clock clock;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) {
@@ -34,17 +36,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     log.debug("요청된 OAuth2User: {}", oAuth2User.getAttributes());
 
     String registrationId = request.getClientRegistration().getRegistrationId();
-    SocialPlatform socialPlatform = SocialPlatform.valueOf(registrationId.toUpperCase());
+    SocialPlatform socialPlatform = SocialPlatform.fromRegistrationId(registrationId);
     log.debug("요청된 SocialPlatform: {}", socialPlatform);
 
     OAuth2Response oAuth2Response;
-    if (socialPlatform.equals(SocialPlatform.NAVER)) { // 네이버 소셜 로그인 오쳥 시
-      oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-    } else if (socialPlatform.equals(SocialPlatform.KAKAO)) { // 카카오 소셜 로그인 요청 시
-      oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
-    } else {
-      log.error("네이버 또는 카카오 소셜 로그인 요청만 가능합니다.");
-      throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
+    switch (socialPlatform) {
+      case NAVER -> oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+      case KAKAO -> oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
+      default -> {
+        log.error("네이버 또는 카카오 소셜 로그인 요청만 가능합니다.");
+        throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
+      }
     }
 
     // Member 확인
@@ -66,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
-          .lastLoginTime(LocalDateTime.now())
+          .lastLoginTime(LocalDateTime.now(clock))
           .build();
     } else { // 첫 로그인이 아닌경우
       member = optionalMember.get();
@@ -76,11 +78,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
       }
       member.setIsFirstLogin(false);
-      member.setLastLoginTime(LocalDateTime.now());
+      member.setLastLoginTime(LocalDateTime.now(clock));
     }
     Member savedMember = memberRepository.save(member);
 
-    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes());
+    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes(), clock);
   }
 
   // 회원 이메일을 통한 CustomOAuth2User 반환
@@ -92,6 +94,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
 
-    return new CustomOAuth2User(member, null);
+    return new CustomOAuth2User(member, null, clock);
   }
 }

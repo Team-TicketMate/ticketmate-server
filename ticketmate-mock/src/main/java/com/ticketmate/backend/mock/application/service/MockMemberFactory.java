@@ -13,6 +13,7 @@ import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class MockMemberFactory {
   private final Faker koFaker;
   private final Faker enFaker;
   private final SuhRandomKit suhRandomKit;
+  private final Clock clock;
 
   /**
    * 개발자용 회원 Mock 데이터 생성
@@ -106,7 +108,7 @@ public class MockMemberFactory {
         .memberType(memberType)
         .accountStatus(status)
         .isFirstLogin(firstLogin)
-        .lastLoginTime(LocalDateTime.now());
+        .lastLoginTime(LocalDateTime.now(clock));
   }
 
   // 테스트 회원 Role 검증

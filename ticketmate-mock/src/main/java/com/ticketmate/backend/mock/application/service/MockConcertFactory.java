@@ -8,6 +8,7 @@ import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 public class MockConcertFactory {
 
   private final Faker koFaker;
+  private final Clock clock;
 
   /**
    * 공연 단일 Mock 데이터를 생성 후 반환합니다. (저장 X)
@@ -69,7 +71,7 @@ public class MockConcertFactory {
     List<ConcertDate> concertDateList = new ArrayList<>();
 
     // 기준 날짜 (현재로부터 60~90 일 이후)
-    LocalDateTime baseDate = LocalDateTime.now().plusDays(koFaker.number().numberBetween(60, 91));
+    LocalDateTime baseDate = LocalDateTime.now(clock).plusDays(koFaker.number().numberBetween(60, 91));
 
     // 1. 공연 일자
     for (int i = 0; i < size; i++) {
@@ -93,7 +95,7 @@ public class MockConcertFactory {
     List<TicketOpenDate> ticketOpenDateList = new ArrayList<>();
 
     // 기준 날짜 (현재로부터 10~30 일 이후)
-    LocalDateTime baseDate = LocalDateTime.now().plusDays(koFaker.number().numberBetween(10, 31));
+    LocalDateTime baseDate = LocalDateTime.now(clock).plusDays(koFaker.number().numberBetween(10, 31));
 
     // 1. 선예매 오픈일 (50% 확률로 생성)
     if (koFaker.random().nextBoolean()) {
