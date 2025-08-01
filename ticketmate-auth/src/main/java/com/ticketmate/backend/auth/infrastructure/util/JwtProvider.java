@@ -105,6 +105,14 @@ public class JwtProvider implements TokenProvider {
         .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
   }
 
+  @Override
+  public Date getExpiredAt(String token) {
+    return Optional.of(token)
+        .map(this::getClaims)
+        .map(Claims::getExpiration)
+        .orElseThrow(() -> new CustomException(ErrorCode.INVALID_JWT_TOKEN));
+  }
+
   /**
    * 토큰에서 페이로드 (Claim) 추출
    */

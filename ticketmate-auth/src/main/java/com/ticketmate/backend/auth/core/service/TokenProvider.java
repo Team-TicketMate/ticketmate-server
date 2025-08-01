@@ -1,5 +1,7 @@
 package com.ticketmate.backend.auth.core.service;
 
+import java.util.Date;
+
 public interface TokenProvider {
 
   /**
@@ -31,4 +33,9 @@ public interface TokenProvider {
    * 토큰에서 role 파싱
    */
   String getRole(String token);
+
+  /**
+   * 토큰 만료시간 반환 (ms)
+   */
+  Date getExpiredAt(String token);
 }

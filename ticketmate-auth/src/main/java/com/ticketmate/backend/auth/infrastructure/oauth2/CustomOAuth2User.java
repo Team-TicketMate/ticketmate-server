@@ -4,6 +4,7 @@ import com.ticketmate.backend.auth.core.principal.UserPrincipal;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
@@ -18,7 +19,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Getter
 @RequiredArgsConstructor
-public class CustomOAuth2User implements OAuth2User, UserPrincipal {
+public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
 
   private final Member member;
   private final Map<String, Object> attributes;
