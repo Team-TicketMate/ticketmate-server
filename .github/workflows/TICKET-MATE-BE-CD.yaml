@@ -38,10 +38,30 @@ jobs:
         run: |
           echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" > ./src/main/resources/ticketmate-embedding.json
 
+      # config-imports.yml 파일을 빌드 전에 생성
+      - name: Create config-imports.yml from secret
+        run: |
+          echo "${{ secrets.CONFIG_IMPORTS_YML }}" > ./src/main/resources/config-imports.yml
+
       # oauth2.yml 파일을 빌드 전에 생성
       - name: Create oauth2.yml from secret
         run: |
           echo "${{ secrets.OAUTH2_YML }}" > ./src/main/resources/oauth2.yml
+
+      # aws-s3.yml 파일을 빌드 전에 생성
+      - name: Create aws-s3.yml from secret
+        run: |
+          echo "${{ secrets.AWS_S3_YML }}" > ./src/main/resources/aws-s3.yml
+
+      # messaging.yml 파일을 빌드 전에 생성
+      - name: Create messaging.yml from secret
+        run: |
+          echo "${{ secrets.MESSAGING_YML }}" > ./src/main/resources/messaging.yml
+
+      # springdoc.yml 파일을 빌드 전에 생성
+      - name: Create springdoc.yml from secret
+        run: |
+          echo "${{ secrets.SPRINGDOC_YML }}" > ./src/main/resources/springdoc.yml
 
       # application-prod.yml 파일을 빌드 전에 생성
       - name: Create application-prod.yml from secret
