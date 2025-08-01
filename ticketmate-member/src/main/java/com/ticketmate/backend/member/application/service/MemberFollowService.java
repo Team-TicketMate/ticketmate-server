@@ -1,13 +1,13 @@
-package com.ticketmate.backend.domain.member.service;
+package com.ticketmate.backend.member.application.service;
 
-import com.ticketmate.backend.domain.member.domain.dto.request.FollowRequest;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.domain.entity.MemberFollow;
-import com.ticketmate.backend.domain.member.repository.MemberFollowRepository;
-import com.ticketmate.backend.domain.notification.domain.constant.FollowingNotificationType;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
-import com.ticketmate.backend.domain.notification.service.NotificationService;
-import com.ticketmate.backend.global.validator.member.MemberFollowValidator;
+import com.ticketmate.backend.member.application.dto.request.FollowRequest;
+import com.ticketmate.backend.member.application.validator.MemberFollowValidator;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.entity.MemberFollow;
+import com.ticketmate.backend.member.infrastructure.repository.MemberFollowRepository;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.application.type.FollowingNotificationType;
+import com.ticketmate.backend.notification.core.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -94,6 +94,6 @@ public class MemberFollowService {
    * 팔로우 알림 Payload 생성
    */
   private NotificationPayload buildFollowingNotificationPayload(Member follower) {
-    return FollowingNotificationType.FOLLOW.toPayload(follower);
+    return FollowingNotificationType.FOLLOW.toPayload(follower.getNickname());
   }
 }

@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.member.domain.dto.response;
+package com.ticketmate.backend.member.application.dto.response;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.MemberType;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

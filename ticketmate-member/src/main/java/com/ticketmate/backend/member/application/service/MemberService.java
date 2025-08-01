@@ -1,18 +1,12 @@
-package com.ticketmate.backend.domain.member.service;
+package com.ticketmate.backend.member.application.service;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.dto.response.MemberInfoResponse;
-import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
-import com.ticketmate.backend.domain.member.repository.MemberRepository;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
-import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
+import com.ticketmate.backend.member.application.mapper.MemberMapper;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final MemberRepository memberRepository;
-  private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
-  private final EmbeddingGeneratorService embeddingGeneratorService;
-  private final EntityMapper entityMapper;
+  private final MemberMapper memberMapper;
 
   /**
    * JWT 기반 회원정보 조회
@@ -36,7 +28,7 @@ public class MemberService {
    */
   @Transactional(readOnly = true)
   public MemberInfoResponse getMemberInfo(Member member) {
-    return entityMapper.toMemberInfoResponse(member);
+    return memberMapper.toMemberInfoResponse(member);
   }
 
   /**
@@ -63,30 +55,6 @@ public class MemberService {
           log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
-  }
-
-  /**
-   * 의뢰인 -> 대리인 MemberType 변경
-   *
-   * @param portfolio MemberType을 변경하려는 Member의 portfolio
-   */
-  @Transactional
-  public void promoteToAgent(Portfolio portfolio){
-    Member member = portfolio.getMember();
-    member.setMemberType(MemberType.AGENT);
-
-    if (!agentPerformanceSummaryRepository.existsById(member.getMemberId())) {
-      AgentPerformanceSummary summary = AgentPerformanceSummary.builder()
-          .agent(member)
-          .totalScore(0.0)
-          .averageRating(0.0)
-          .reviewCount(0)
-          .recentSuccessCount(0)
-          .build();
-      agentPerformanceSummaryRepository.save(summary);
-    }
-
-    embeddingGeneratorService.generateOrUpdateAgentEmbedding(portfolio);
   }
 
   /**

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.member.domain.dto.request;
+package com.ticketmate.backend.member.application.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;

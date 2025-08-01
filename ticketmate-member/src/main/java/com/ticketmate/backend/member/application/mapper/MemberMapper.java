@@ -5,7 +5,7 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface MemberEntityMapper {
+public interface MemberMapper {
 
   // Member -> MemberInfoResponse (DTO)
   MemberInfoResponse toMemberInfoResponse(Member member);
