@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.portfolio.repository;
+package com.ticketmate.backend.portfolio.infrastructure.repository;
 
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
+import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

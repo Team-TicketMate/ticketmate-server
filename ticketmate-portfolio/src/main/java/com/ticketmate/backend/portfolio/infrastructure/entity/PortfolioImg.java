@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.portfolio.domain.entity;
+package com.ticketmate.backend.portfolio.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.global.BasePostgresEntity;
+import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

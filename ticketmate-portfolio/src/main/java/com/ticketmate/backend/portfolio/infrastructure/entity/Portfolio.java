@@ -1,9 +1,9 @@
-package com.ticketmate.backend.domain.portfolio.domain.entity;
+package com.ticketmate.backend.portfolio.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.BasePostgresEntity;
+import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

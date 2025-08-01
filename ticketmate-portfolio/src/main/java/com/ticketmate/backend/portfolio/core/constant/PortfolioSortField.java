@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.portfolio.domain.constant;
+package com.ticketmate.backend.portfolio.core.constant;
 
-import com.ticketmate.backend.global.constant.SortField;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.constant.SortField;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -23,6 +23,6 @@ public enum PortfolioSortField implements SortField {
    * 만약 {"sortField": "ticketOpenDate"}와 같이 카멜케이스로 들어와도 f.property와 비교하여 자동 매칭
    */
   public static PortfolioSortField from(String value) {
-    return CommonUtil.stringToEnum(PortfolioSortField.class, value);
+    return CommonUtil.stringToSortField(PortfolioSortField.class, value);
   }
 }
