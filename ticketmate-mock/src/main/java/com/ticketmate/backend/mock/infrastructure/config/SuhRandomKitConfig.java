@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.config.beans;
+package com.ticketmate.backend.mock.infrastructure.config;
 
 import me.suhsaechan.suhnicknamegenerator.core.SuhRandomKit;
 import org.springframework.context.annotation.Bean;

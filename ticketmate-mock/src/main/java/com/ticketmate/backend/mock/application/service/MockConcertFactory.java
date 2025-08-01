@@ -1,13 +1,13 @@
-package com.ticketmate.backend.test.service;
+package com.ticketmate.backend.mock.application.service;
 
-import com.ticketmate.backend.domain.concert.domain.constant.ConcertType;
-import com.ticketmate.backend.domain.concert.domain.constant.TicketOpenType;
-import com.ticketmate.backend.domain.concert.domain.constant.TicketReservationSite;
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
-import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.concert.core.constant.ConcertType;
+import com.ticketmate.backend.concert.core.constant.TicketOpenType;
+import com.ticketmate.backend.concert.core.constant.TicketReservationSite;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
+import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,18 +1,18 @@
-package com.ticketmate.backend.test.service;
+package com.ticketmate.backend.mock.application.service;
 
-import static com.ticketmate.backend.global.util.common.CommonUtil.nvl;
+import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.domain.member.domain.constant.AccountStatus;
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.member.domain.constant.Role;
-import com.ticketmate.backend.domain.member.domain.constant.SocialPlatform;
-import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.test.dto.request.LoginRequest;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.Role;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
+import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;

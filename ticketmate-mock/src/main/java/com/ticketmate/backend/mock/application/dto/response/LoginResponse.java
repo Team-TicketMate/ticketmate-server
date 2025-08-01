@@ -1,6 +1,6 @@
-package com.ticketmate.backend.test.dto.response;
+package com.ticketmate.backend.mock.application.dto.response;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.MemberType;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

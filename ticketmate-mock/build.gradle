@@ -1,0 +1,29 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+    implementation project(':ticketmate-auth')
+    implementation project(':ticketmate-member')
+    implementation project(':ticketmate-concert')
+    implementation project(':ticketmate-concerthall')
+    implementation project(':ticketmate-portfolio')
+    implementation project(':ticketmate-applicationform')
+    implementation project(':ticketmate-ai')
+
+    // DataFaker
+    implementation libs.datafaker
+
+    // Suh Random Engine
+    implementation libs.suh.random.engine
+}

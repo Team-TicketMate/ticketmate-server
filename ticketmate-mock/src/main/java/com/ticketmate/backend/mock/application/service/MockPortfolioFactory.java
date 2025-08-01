@@ -1,14 +1,14 @@
-package com.ticketmate.backend.test.service;
+package com.ticketmate.backend.mock.application.service;
 
-import com.ticketmate.backend.domain.member.domain.constant.MemberType;
-import com.ticketmate.backend.domain.portfolio.domain.constant.PortfolioType;
-import com.ticketmate.backend.domain.member.domain.constant.Role;
-import com.ticketmate.backend.test.dto.request.LoginRequest;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.portfolio.domain.entity.PortfolioImg;
-import com.ticketmate.backend.domain.member.repository.MemberRepository;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.Role;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
+import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
+import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
+import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
+import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

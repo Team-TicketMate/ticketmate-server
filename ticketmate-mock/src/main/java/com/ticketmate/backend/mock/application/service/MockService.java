@@ -1,39 +1,37 @@
-package com.ticketmate.backend.test.service;
+package com.ticketmate.backend.mock.application.service;
 
-import static com.ticketmate.backend.domain.member.domain.constant.MemberType.AGENT;
-import static com.ticketmate.backend.domain.member.domain.constant.MemberType.CLIENT;
-import static com.ticketmate.backend.domain.member.domain.constant.Role.ROLE_TEST;
-import static com.ticketmate.backend.domain.member.domain.constant.Role.ROLE_TEST_ADMIN;
-import static com.ticketmate.backend.global.util.common.CommonUtil.null2ZeroInt;
+import static com.ticketmate.backend.common.core.util.CommonUtil.null2ZeroInt;
+import static com.ticketmate.backend.member.core.constant.MemberType.AGENT;
+import static com.ticketmate.backend.member.core.constant.MemberType.CLIENT;
+import static com.ticketmate.backend.member.core.constant.Role.ROLE_TEST;
+import static com.ticketmate.backend.member.core.constant.Role.ROLE_TEST_ADMIN;
 
-import com.ticketmate.backend.domain.applicationform.domain.entity.ApplicationForm;
-import com.ticketmate.backend.domain.applicationform.repository.ApplicationFormRepository;
-import com.ticketmate.backend.domain.concert.domain.entity.Concert;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.domain.concert.domain.entity.ConcertDate;
-import com.ticketmate.backend.domain.concert.domain.entity.TicketOpenDate;
-import com.ticketmate.backend.domain.concert.repository.ConcertAgentAvailabilityRepository;
-import com.ticketmate.backend.domain.concert.repository.ConcertDateRepository;
-import com.ticketmate.backend.domain.concert.repository.ConcertRepository;
-import com.ticketmate.backend.domain.concert.repository.TicketOpenDateRepository;
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.domain.auth.domain.dto.CustomOAuth2User;
-import com.ticketmate.backend.domain.member.domain.entity.AgentPerformanceSummary;
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.member.repository.AgentPerformanceSummaryRepository;
-import com.ticketmate.backend.domain.member.repository.MemberRepository;
-import com.ticketmate.backend.domain.member.service.MemberService;
-import com.ticketmate.backend.domain.portfolio.domain.entity.Portfolio;
-import com.ticketmate.backend.domain.portfolio.repository.PortfolioRepository;
-import com.ticketmate.backend.domain.vertexai.service.EmbeddingGeneratorService;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.util.auth.JwtUtil;
-import com.ticketmate.backend.global.util.common.CommonUtil;
-import com.ticketmate.backend.test.dto.request.LoginRequest;
-import com.ticketmate.backend.test.dto.response.LoginResponse;
+import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
+import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
+import com.ticketmate.backend.auth.core.service.TokenProvider;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
+import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
+import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepository;
+import com.ticketmate.backend.concert.infrastructure.repository.ConcertDateRepository;
+import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepository;
+import com.ticketmate.backend.concert.infrastructure.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.concerthall.core.constant.City;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepository;
+import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
+import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
+import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.LoginResponse;
+import com.ticketmate.backend.portfolio.application.service.PortfolioService;
+import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
+import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +50,7 @@ import org.springframework.util.StopWatch;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TestService {
+public class MockService {
 
   // 배치 사이즈
   private static final int BATCH_SIZE = 500;
@@ -62,7 +60,7 @@ public class TestService {
   private final MockConcertFactory mockConcertFactory;
   private final MockPortfolioFactory mockPortfolioFactory;
   private final MockApplicationFormFactory mockApplicationFormFactory;
-  private final JwtUtil jwtUtil;
+  private final TokenProvider tokenProvider;
   @Qualifier("applicationTaskExecutor")
   private final TaskExecutor taskExecutor;
   private final ConcertRepository concertRepository;
@@ -72,10 +70,9 @@ public class TestService {
   private final ApplicationFormRepository applicationFormRepository;
   private final PortfolioRepository portfolioRepository;
   private final TransactionTemplate transactionTemplate;
-  private final MemberService memberService;
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
-  private final EmbeddingGeneratorService embeddingGeneratorService;
+  private final PortfolioService portfolioService;
 
     /*
     ======================================회원======================================
@@ -101,12 +98,11 @@ public class TestService {
     if (request.getMemberType().equals(AGENT)) {
       Portfolio testPortfolio = mockPortfolioFactory.generate(member);
       portfolioRepository.save(testPortfolio);
-      memberService.promoteToAgent(testPortfolio);
+      portfolioService.promoteToAgent(testPortfolio);
       log.debug("테스트 유저 {}를 대리인으로 승격 처리했습니다.", member.getMemberId());
     }
 
-    CustomOAuth2User customOAuth2User = new CustomOAuth2User(member, null);
-    String accessToken = jwtUtil.createAccessToken(customOAuth2User);
+    String accessToken = tokenProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
 
     log.debug("테스트 로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
     log.debug("테스트 accessToken = {}", accessToken);
