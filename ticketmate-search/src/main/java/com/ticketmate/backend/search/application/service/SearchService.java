@@ -1,13 +1,12 @@
-package com.ticketmate.backend.domain.search.service;
+package com.ticketmate.backend.search.application.service;
 
-import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
-import com.ticketmate.backend.domain.member.repository.MemberRepositoryCustom;
-import com.ticketmate.backend.domain.search.domain.dto.CachedSearchResult;
-import com.ticketmate.backend.domain.search.domain.dto.IdScorePair;
-import com.ticketmate.backend.domain.search.domain.dto.constant.SearchType;
-import com.ticketmate.backend.domain.search.domain.dto.request.SearchRequest;
-import com.ticketmate.backend.domain.search.domain.dto.response.SearchResponse;
-import com.ticketmate.backend.domain.search.domain.dto.response.SearchResult;
+import com.ticketmate.backend.search.application.dto.CachedSearchResult;
+import com.ticketmate.backend.search.application.dto.IdScorePair;
+import com.ticketmate.backend.search.application.dto.request.SearchRequest;
+import com.ticketmate.backend.search.application.dto.response.SearchResponse;
+import com.ticketmate.backend.search.application.dto.response.SearchResult;
+import com.ticketmate.backend.search.core.constant.SearchType;
+import com.ticketmate.backend.search.infrastructure.repository.SearchRepositoryCustom;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,14 +23,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
+
   private final HybridSearchService hybridSearchService;
-  private final ConcertRepositoryCustom concertRepositoryCustom;
-  private final MemberRepositoryCustom memberRepositoryCustom;
+  private final SearchRepositoryCustom searchRepositoryCustom;
 
   /**
    * 사용자 요청을 처리하는 메인 검색 메서드
    */
-  public SearchResponse<?> search(SearchRequest request){
+  public SearchResponse<?> search(SearchRequest request) {
     // 하이브리드 검색 결과 가져오기
     CachedSearchResult results = hybridSearchService.executeHybridSearch(request.getKeyword());
     Pageable pageable = request.toPageable();
@@ -42,32 +41,34 @@ public class SearchService {
       slice = getPaginatedResults(
           results.concertResults(),
           pageable,
-          concertRepositoryCustom::findConcertDetailsByIds
+          searchRepositoryCustom::findConcertDetailsByIds
       );
     } else {
       slice = getPaginatedResults(
           results.agentResults(),
           pageable,
-          memberRepositoryCustom::findAgentDetailsByIds
+          searchRepositoryCustom::findAgentDetailsByIds
       );
     }
-    if(pageable.getPageNumber() == 0) return SearchResponse.firstPage(slice, results.concertResults().size(), results.agentResults().size());
+    if (pageable.getPageNumber() == 0) {
+      return SearchResponse.firstPage(slice, results.concertResults().size(), results.agentResults().size());
+    }
     return SearchResponse.nextPage(slice);
   }
 
   /**
    * ID 리스트와 DB 조회 함수를 받아 페이징된 Slice를 반환하는 제네릭 메서드
    *
-   * @param allPairList 정렬된 전체 ID 리스트
-   * @param pageable 페이지 정보
+   * @param allPairList    정렬된 전체 ID 리스트
+   * @param pageable       페이지 정보
    * @param detailsFetcher paginated 된 ID 리스트를 받아 실제 DTO 리스트를 반환하는 함수
-   * @param <T> DTO 타입 (e.g., ConcertSearchResponse, AgentSearchResponse)
+   * @param <T>            DTO 타입 (e.g., ConcertSearchResponse, AgentSearchResponse)
    * @return 페이징된 DTO가 담긴 Slice 객체
    */
   private <T extends SearchResult> Slice<T> getPaginatedResults(
       List<IdScorePair> allPairList,
       Pageable pageable,
-      Function<List<UUID>, List<T>> detailsFetcher){
+      Function<List<UUID>, List<T>> detailsFetcher) {
     // 먼저 페이징
     List<IdScorePair> paginatedPairList = allPairList.stream()
         .skip(pageable.getOffset())
@@ -89,7 +90,9 @@ public class SearchService {
     List<T> results = paginatedPairList.stream()
         .map(pair -> {
           T dto = dtoMap.get(pair.id());
-          if(dto != null) dto.setScore(pair.score());
+          if (dto != null) {
+            dto.setScore(pair.score());
+          }
           return dto;
         })
         .filter(Objects::nonNull)

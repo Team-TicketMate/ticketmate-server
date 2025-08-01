@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.search.domain.dto.response;
+package com.ticketmate.backend.search.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

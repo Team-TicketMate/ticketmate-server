@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.search.domain.dto;
+package com.ticketmate.backend.search.application.dto;
 
 import java.util.List;
 

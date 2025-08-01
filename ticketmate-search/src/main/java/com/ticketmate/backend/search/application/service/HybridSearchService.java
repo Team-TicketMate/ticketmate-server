@@ -1,12 +1,11 @@
-package com.ticketmate.backend.domain.search.service;
+package com.ticketmate.backend.search.application.service;
 
-import com.ticketmate.backend.domain.concert.repository.ConcertRepositoryCustom;
-import com.ticketmate.backend.domain.member.repository.MemberRepositoryCustom;
-import com.ticketmate.backend.domain.search.domain.dto.CachedSearchResult;
-import com.ticketmate.backend.domain.search.domain.dto.IdScorePair;
-import com.ticketmate.backend.domain.vertexai.domain.constant.EmbeddingType;
-import com.ticketmate.backend.domain.vertexai.domain.entity.Embedding;
-import com.ticketmate.backend.domain.vertexai.service.EmbeddingService;
+import com.ticketmate.backend.ai.application.service.VertexAiEmbeddingService;
+import com.ticketmate.backend.ai.core.constant.EmbeddingType;
+import com.ticketmate.backend.ai.infrastructure.entity.Embedding;
+import com.ticketmate.backend.search.application.dto.CachedSearchResult;
+import com.ticketmate.backend.search.application.dto.IdScorePair;
+import com.ticketmate.backend.search.infrastructure.repository.SearchRepositoryCustom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class HybridSearchService {
-  private final EmbeddingService embeddingService;
-  private final ConcertRepositoryCustom concertRepositoryCustom;
-  private final MemberRepositoryCustom memberRepositoryCustom;
+  private final VertexAiEmbeddingService vertexAiEmbeddingService;
+  private final SearchRepositoryCustom searchRepositoryCustom;
   @Qualifier("applicationTaskExecutor")
   private final TaskExecutor taskExecutor;
 
@@ -41,7 +39,7 @@ public class HybridSearchService {
    */
   @Cacheable(value = "searches", key = "#keyword")
   public CachedSearchResult executeHybridSearch(String keyword){
-    Embedding queryEmbedding = embeddingService.fetchOrGenerateEmbedding(null, keyword, EmbeddingType.SEARCH);
+    Embedding queryEmbedding = vertexAiEmbeddingService.fetchOrGenerateEmbedding(null, keyword, EmbeddingType.SEARCH);
     float[] queryVector = queryEmbedding.getEmbeddingVector();
 
     // 공연 및 대리인 결과 병렬 조회
@@ -95,15 +93,15 @@ public class HybridSearchService {
 
   private List<IdScorePair> getRankedConcertResults(String keyword, float[] queryVector){
     return getRankedResults(
-        () -> embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.CONCERT),
-        () -> concertRepositoryCustom.findConcertIdsByKeyword(keyword, LIMIT)
+        () -> vertexAiEmbeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.CONCERT),
+        () -> searchRepositoryCustom.findConcertIdsByKeyword(keyword, LIMIT)
     );
   }
 
   private List<IdScorePair> getRankedAgentResults(String keyword, float[] queryVector){
     return getRankedResults(
-        () -> embeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.AGENT),
-        () -> memberRepositoryCustom.findAgentIdsByKeyword(keyword, LIMIT)
+        () -> vertexAiEmbeddingService.findNearestEmbeddings(queryVector, LIMIT, EmbeddingType.AGENT),
+        () -> searchRepositoryCustom.findAgentIdsByKeyword(keyword, LIMIT)
     );
   }
 
