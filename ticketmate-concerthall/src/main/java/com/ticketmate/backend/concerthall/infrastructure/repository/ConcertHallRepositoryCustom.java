@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.concerthall.repository;
+package com.ticketmate.backend.concerthall.infrastructure.repository;
 
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.concerthall.core.constant.City;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

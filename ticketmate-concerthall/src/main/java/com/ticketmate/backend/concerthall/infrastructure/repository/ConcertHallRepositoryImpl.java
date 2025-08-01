@@ -1,14 +1,14 @@
-package com.ticketmate.backend.domain.concerthall.repository;
+package com.ticketmate.backend.concerthall.infrastructure.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.domain.concerthall.domain.entity.QConcertHall;
-import com.ticketmate.backend.global.util.database.QueryDslUtil;
+import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.concerthall.core.constant.City;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.concerthall.infrastructure.entity.QConcertHall;
+import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

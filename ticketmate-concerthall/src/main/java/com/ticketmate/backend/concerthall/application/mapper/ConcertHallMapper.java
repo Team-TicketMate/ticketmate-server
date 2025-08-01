@@ -6,12 +6,11 @@ import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface ConcertHallEntityMapper {
+public interface ConcertHallMapper {
 
   // ConcertHall -> ConcertHallFilteredResponse (엔티티 -> DTO)
   ConcertHallFilteredResponse toConcertHallFilteredResponse(ConcertHall concertHall);
 
   // ConcertHall -> ConcertHallInfoResponse (엔티티 -> DTO)
   ConcertHallInfoResponse toConcertHallInfoResponse(ConcertHall concertHall);
-
 }

@@ -1,15 +1,15 @@
-package com.ticketmate.backend.domain.concerthall.service;
+package com.ticketmate.backend.concerthall.application.service;
 
-import com.ticketmate.backend.domain.concerthall.domain.constant.City;
-import com.ticketmate.backend.domain.concerthall.domain.dto.request.ConcertHallFilteredRequest;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallFilteredResponse;
-import com.ticketmate.backend.domain.concerthall.domain.dto.response.ConcertHallInfoResponse;
-import com.ticketmate.backend.domain.concerthall.domain.entity.ConcertHall;
-import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepository;
-import com.ticketmate.backend.domain.concerthall.repository.ConcertHallRepositoryCustom;
-import com.ticketmate.backend.global.exception.CustomException;
-import com.ticketmate.backend.global.exception.ErrorCode;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.concerthall.application.dto.request.ConcertHallFilteredRequest;
+import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
+import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallInfoResponse;
+import com.ticketmate.backend.concerthall.application.mapper.ConcertHallMapper;
+import com.ticketmate.backend.concerthall.core.constant.City;
+import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepository;
+import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepositoryCustom;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ConcertHallService {
 
   private final ConcertHallRepository concertHallRepository;
   private final ConcertHallRepositoryCustom concertHallRepositoryCustom;
-  private final EntityMapper entityMapper;
+  private final ConcertHallMapper concertHallMapper;
 
   /**
    * 공연장 정보 필터링 로직
@@ -58,7 +58,7 @@ public class ConcertHallService {
    */
   @Transactional(readOnly = true)
   public ConcertHallInfoResponse getConcertHallInfo(UUID concertHallId) {
-    return entityMapper.toConcertHallInfoResponse(findConcertHallById(concertHallId));
+    return concertHallMapper.toConcertHallInfoResponse(findConcertHallById(concertHallId));
   }
 
   /**

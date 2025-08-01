@@ -24,6 +24,6 @@ public enum ConcertHallSortField implements SortField {
    */
   @JsonCreator
   public static ConcertHallSortField from(String value) {
-    return CommonUtil.stringToEnum(ConcertHallSortField.class, value);
+    return CommonUtil.stringToSortField(ConcertHallSortField.class, value);
   }
 }
