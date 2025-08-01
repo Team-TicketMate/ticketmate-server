@@ -1,7 +1,6 @@
-package com.ticketmate.backend.domain.notification.domain.dto.response;
+package com.ticketmate.backend.notification.application.dto.response;
 
-
-import com.ticketmate.backend.domain.notification.domain.constant.DeviceType;
+import com.ticketmate.backend.notification.core.constant.DeviceType;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

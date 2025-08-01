@@ -1,13 +1,14 @@
-package com.ticketmate.backend.domain.notification.service;
+package com.ticketmate.backend.notification.infrastructure.service;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
 import com.google.firebase.messaging.WebpushNotification;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
-import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
-import com.ticketmate.backend.global.constant.NotificationConstants;
-import com.ticketmate.backend.global.util.common.CommonUtil;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.core.constant.NotificationConstants;
+import com.ticketmate.backend.notification.core.service.NotificationService;
+import com.ticketmate.backend.notification.infrastructure.entity.FcmToken;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

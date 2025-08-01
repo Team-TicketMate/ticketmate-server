@@ -1,11 +1,10 @@
-package com.ticketmate.backend.domain.notification.service;
+package com.ticketmate.backend.notification.infrastructure.service;
 
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.domain.dto.request.FcmTokenSaveRequest;
-import com.ticketmate.backend.domain.notification.domain.dto.response.FcmTokenSaveResponse;
-import com.ticketmate.backend.domain.notification.domain.entity.FcmToken;
-import com.ticketmate.backend.domain.notification.repository.FcmTokenRepository;
-import com.ticketmate.backend.global.mapper.EntityMapper;
+import com.ticketmate.backend.notification.application.dto.request.FcmTokenSaveRequest;
+import com.ticketmate.backend.notification.application.dto.response.FcmTokenSaveResponse;
+import com.ticketmate.backend.notification.application.mapper.NotificationMapper;
+import com.ticketmate.backend.notification.infrastructure.entity.FcmToken;
+import com.ticketmate.backend.notification.infrastructure.repository.FcmTokenRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -15,22 +14,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class FcmTokenService {
 
   private final FcmTokenRepository fcmTokenRepository;
-  private final EntityMapper entityMapper;
+  private final NotificationMapper notificationMapper;
 
   /**
    * RedisHash에 FCM 토큰 저장
    */
   @Transactional
-  public FcmTokenSaveResponse saveFcmToken(FcmTokenSaveRequest request, Member member) {
+  public FcmTokenSaveResponse saveFcmToken(FcmTokenSaveRequest request, UUID memberId) {
     // DTO -> 엔티티
     FcmToken fcmToken = FcmToken.builder()
         .token(request.getFcmToken())
-        .memberId(member.getMemberId())
+        .memberId(memberId)
         .deviceType(request.getDeviceType())
         .build();
 
@@ -41,7 +40,7 @@ public class FcmTokenService {
     log.debug("사용자 ID : {}", fcmToken.getMemberId());
     log.debug("사용자 기기 : {}", fcmToken.getDeviceType());
 
-    return entityMapper.toFcmTokenSaveResponse(fcmToken);
+    return notificationMapper.toFcmTokenSaveResponse(fcmToken);
   }
 
   /**

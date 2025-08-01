@@ -13,7 +13,12 @@ jar {
 
 dependencies {
     implementation project(':ticketmate-common')
+    implementation project(':ticketmate-redis')
 
     // Firebase
     api libs.firebase.admin
+
+    // MapStruct
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
 }

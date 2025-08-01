@@ -1,7 +1,7 @@
-package com.ticketmate.backend.domain.notification.domain.entity;
+package com.ticketmate.backend.notification.infrastructure.entity;
 
-import com.ticketmate.backend.domain.notification.domain.constant.DeviceType;
-import com.ticketmate.backend.global.constant.NotificationConstants;
+import com.ticketmate.backend.notification.core.constant.DeviceType;
+import com.ticketmate.backend.notification.core.constant.NotificationConstants;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,8 +22,8 @@ public class FcmToken {
   private String fcmTokenId; // 회원 PK + "-" + DeviceType 형태
 
   private String token;  // FCM 토큰
-  @Indexed
 
+  @Indexed
   private UUID memberId;  // 사용자의 PK
 
   private DeviceType deviceType;  // 토큰을 받은 사용자의 기기종류

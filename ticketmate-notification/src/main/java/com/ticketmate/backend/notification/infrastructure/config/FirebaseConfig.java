@@ -25,7 +25,7 @@ public class FirebaseConfig {
     try {
       // resources 디렉토리에 있는 서비스 계정 키 파일 로드
       InputStream serviceAccount = getClass()
-          .getResourceAsStream(properties.getServiceAccountKeyPath());
+          .getResourceAsStream(properties.serviceAccountKeyPath());
 
       FirebaseOptions options = FirebaseOptions.builder()
           .setCredentials(GoogleCredentials.fromStream(serviceAccount))

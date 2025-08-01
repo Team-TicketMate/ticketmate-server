@@ -1,10 +1,9 @@
-package com.ticketmate.backend.domain.notification.domain.constant;
+package com.ticketmate.backend.notification.application.type;
 
-import static com.ticketmate.backend.global.constant.NotificationConstants.PLACEHOLDER_NICKNAME_KEY;
-
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
-import com.ticketmate.backend.global.util.notification.NotificationUtil;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.application.util.NotificationUtil;
+import com.ticketmate.backend.notification.core.constant.NotificationConstants;
+import com.ticketmate.backend.notification.core.type.DomainNotificationType;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -25,9 +24,9 @@ public enum ApplicationFormApproveNotificationType implements DomainNotification
   /**
    * 신청서 승인 알림 payload 생성
    */
-  public NotificationPayload toPayload(Member agent) {
+  public NotificationPayload toPayload(String nickname) {
     Map<String, String> placeholder = new HashMap<>();
-    placeholder.put(PLACEHOLDER_NICKNAME_KEY, agent.getNickname());
+    placeholder.put(NotificationConstants.PLACEHOLDER_NICKNAME_KEY, nickname);
     return NotificationUtil.createNotification(this, placeholder);
   }
 }

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.global.constant;
+package com.ticketmate.backend.notification.core.constant;
 
 import lombok.experimental.UtilityClass;
 

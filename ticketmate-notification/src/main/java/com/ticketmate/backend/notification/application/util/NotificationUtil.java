@@ -1,7 +1,7 @@
-package com.ticketmate.backend.global.util.notification;
+package com.ticketmate.backend.notification.application.util;
 
-import com.ticketmate.backend.domain.notification.domain.constant.DomainNotificationType;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.core.type.DomainNotificationType;
 import java.util.Map;
 import lombok.experimental.UtilityClass;
 

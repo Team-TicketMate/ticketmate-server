@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.notification.domain.constant;
+package com.ticketmate.backend.notification.core.type;
 
 public interface DomainNotificationType {
 

@@ -1,10 +1,9 @@
-package com.ticketmate.backend.domain.notification.domain.constant;
+package com.ticketmate.backend.notification.application.type;
 
-import static com.ticketmate.backend.global.constant.NotificationConstants.PLACEHOLDER_NICKNAME_KEY;
-
-import com.ticketmate.backend.domain.member.domain.entity.Member;
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
-import com.ticketmate.backend.global.util.notification.NotificationUtil;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.application.util.NotificationUtil;
+import com.ticketmate.backend.notification.core.constant.NotificationConstants;
+import com.ticketmate.backend.notification.core.type.DomainNotificationType;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -21,9 +20,9 @@ public enum FollowingNotificationType implements DomainNotificationType {
   /**
    * 팔로우 알림 Payload 생성
    */
-  public NotificationPayload toPayload(Member follower) {
+  public NotificationPayload toPayload(String nickname) {
     Map<String, String> placeholder = new HashMap<>();
-    placeholder.put(PLACEHOLDER_NICKNAME_KEY, follower.getNickname());
+    placeholder.put(NotificationConstants.PLACEHOLDER_NICKNAME_KEY, nickname);
     return NotificationUtil.createNotification(this, placeholder);
   }
 }

@@ -1,6 +1,6 @@
-package com.ticketmate.backend.domain.notification.service;
+package com.ticketmate.backend.notification.core.service;
 
-import com.ticketmate.backend.domain.notification.domain.dto.request.NotificationPayload;
+import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
 import java.util.List;
 import java.util.UUID;
 

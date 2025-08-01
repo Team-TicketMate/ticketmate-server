@@ -1,4 +1,4 @@
-package com.ticketmate.backend.domain.notification.domain.dto.request;
+package com.ticketmate.backend.notification.application.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
