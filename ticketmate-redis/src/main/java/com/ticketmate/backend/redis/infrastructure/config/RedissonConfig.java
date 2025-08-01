@@ -19,9 +19,13 @@ public class RedissonConfig {
 
   @Bean(destroyMethod = "shutdown")
   public RedissonClient redissonClient() {
+    String address = String.format("redis://%s:%d",
+        redisProperties.getHost(),
+        redisProperties.getPort());
+
     Config config = new Config();
     config.useSingleServer()
-        .setAddress(redisProperties.getUrl())
+        .setAddress(address)
         .setPassword(redisProperties.getPassword());
     return Redisson.create(config);
   }
