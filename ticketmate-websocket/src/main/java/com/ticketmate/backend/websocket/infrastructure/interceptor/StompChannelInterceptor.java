@@ -6,6 +6,7 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import java.security.Principal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
 
   private final TokenProvider tokenProvider;
   private final CustomOAuth2UserService customOAuth2UserService;
+  private final Clock clock;
 
   @Override
   public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
@@ -97,7 +99,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     if (principal instanceof CustomOAuth2User customOAuth2User) {
       // SUB 혹은 SEND시 (클라이언트 요청) AT의 만료시간을 검증한다.
       log.debug("사용자 만료시간 정보 검증중");
-      if (customOAuth2User.getExpiresAt().isBefore(LocalDateTime.now())) {
+      if (customOAuth2User.getExpiresAt().isBefore(LocalDateTime.now(clock))) {
         throw new CustomException(ErrorCode.EXPIRED_ACCESS_TOKEN);
       }
     } else { // 잘못된 토큰이 들어올 경우

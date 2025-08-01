@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
@@ -14,13 +16,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -34,6 +33,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private static final AntPathMatcher pathMatcher = new AntPathMatcher();
   private final TokenProvider tokenProvider;
+  private final CustomOAuth2UserService customOAuth2UserService;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -133,9 +133,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       ApiRequestType apiRequestType
   ) throws IOException, ServletException {
     String username = tokenProvider.getUsername(token);
-    String role = tokenProvider.getRole(token);
-    GrantedAuthority authority = new SimpleGrantedAuthority(role);
-    SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, List.of(authority)));
+
+    CustomOAuth2User customOAuth2User = customOAuth2UserService.loadUserByUsername(username);
+    SecurityContextHolder.getContext().setAuthentication(
+        new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities())
+    );
 
     // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
     if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {

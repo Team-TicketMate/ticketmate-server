@@ -15,6 +15,7 @@ import com.ticketmate.backend.storage.infrastructure.properties.S3Properties;
 import com.ticketmate.backend.storage.infrastructure.util.FileUtil;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -34,6 +35,7 @@ public class S3Service implements StorageService {
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
   private final AmazonS3 amazonS3;
   private final S3Properties s3Properties;
+  private final Clock clock;
 
   /**
    * 파일 검증 및 원본 파일명 반환
@@ -139,7 +141,7 @@ public class S3Service implements StorageService {
    * @return UUID-originalFilename: 가공된 파일명
    */
   private String generateFilename(String originalFilename, String prefix) {
-    String datePart = LocalDateTime.now().format(DATE_TIME_FORMATTER);
+    String datePart = LocalDateTime.now(clock).format(DATE_TIME_FORMATTER);
     // 파일명에서 경로 구분자와 특수 문자 제거
     String sanitizedFilename = originalFilename.replaceAll("[/\\\\:*?\"<>|]", "_");
     return String.format("%s/%s-%s-%s", prefix, datePart, UUID.randomUUID(), sanitizedFilename);

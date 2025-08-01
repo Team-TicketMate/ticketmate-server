@@ -68,7 +68,7 @@ public class SecurityConfig {
             .successHandler(customSuccessHandler))
         // JWT Filter
         .addFilterAfter(
-            new TokenAuthenticationFilter(tokenProvider),
+            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService),
             OAuth2LoginAuthenticationFilter.class
         )
         .build();

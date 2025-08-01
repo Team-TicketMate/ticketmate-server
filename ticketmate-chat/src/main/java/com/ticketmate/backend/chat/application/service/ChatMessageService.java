@@ -22,6 +22,7 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.messaging.infrastructure.properties.ChatRabbitMqProperties;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.service.StorageService;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class ChatMessageService {
   private final ChatMapper chatMapper;
   private final RedisTemplate<String, String> redisTemplate;
   private final StorageService storageService;
+  private final Clock clock;
 
   /**
    * 채팅 메시지를 보내는 메서드입니다.
@@ -235,7 +237,7 @@ public class ChatMessageService {
         .message(message)
         .chatMessageType(chatMessageType)
         .isRead(false)
-        .sendDate(LocalDateTime.now())
+        .sendDate(LocalDateTime.now(clock))
         .pictureMessageList(Collections.emptyList())
         .build();
 
@@ -286,7 +288,7 @@ public class ChatMessageService {
         .message(null)
         .chatMessageType(ChatMessageType.PICTURE)
         .isRead(false)
-        .sendDate(LocalDateTime.now())
+        .sendDate(LocalDateTime.now(clock))
         .pictureMessageList(pictureUrlList)
         .build();
 
