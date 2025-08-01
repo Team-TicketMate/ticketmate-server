@@ -1,0 +1,31 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+    implementation project(':ticketmate-member')
+    implementation project(':ticketmate-concert')
+    implementation project(':ticketmate-applicationform')
+    implementation project(':ticketmate-redis')
+    implementation project(':ticketmate-messaging')
+    implementation project(':ticketmate-websocket')
+    implementation project(':ticketmate-notification')
+    implementation project(':ticketmate-storage')
+
+    // MongoDB
+    api libs.mongodb.starter
+
+    // MapStruct
+    implementation libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+}

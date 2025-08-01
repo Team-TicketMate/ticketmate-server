@@ -1,0 +1,134 @@
+[versions]
+spring_boot = "3.5.4"
+springdoc_openapi = "2.8.9"
+jjwt = "0.12.6"
+postgresql = "42.7.7"
+spring_security_test = "6.5.2"
+classmate = "1.7.0"
+junit_platform_launcher = "1.13.4"
+validation = "3.5.4"
+mapstruct = "1.6.3"
+spring_cloud_aws = "2.2.6.RELEASE"
+datafaker = "2.4.4"
+firebase_admin = "9.5.0"
+redisson = "3.50.0"
+rabbit_test = "3.2.6"
+reactor_netty = "3.5.4"
+querydsl = "5.1.0"
+jakarta-persistence = "3.2.0"
+jakarta-annotation = "3.0.0"
+api_changelog = "1.0.1"
+google_genai = "1.10.0"
+google_auth = "1.37.1"
+hibernate_vector = "7.0.8.Final"
+nurigo_sdk = "4.3.2"
+jackson_jsr310 = "2.19.2"
+jackson_databind = "2.15.2"
+suh_random_engine = "1.1.0"
+aop = "6.2.9"
+
+[libraries]
+
+# Spring Starter Web
+spring_boot_starter_web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring_boot" }
+
+# Spring Stater Test
+spring_boot_starter_test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring_boot" }
+
+# JPA
+spring_boot_starter_data_jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring_boot" }
+
+# Security
+spring_boot_starter_security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "spring_boot" }
+spring_security_test = { module = "org.springframework.security:spring-security-test", version.ref = "spring_security_test" }
+
+# JWT 0.12
+jjwt_api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
+jjwt_impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt_jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+
+# Swagger UI
+springdoc_openapi_ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc_openapi" }
+
+# PostgreSQL
+postgresql_driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+# MongoDB
+mongodb_starter = { module = "org.springframework.boot:spring-boot-starter-data-mongodb", version.ref = "spring_boot" }
+
+# Redis
+redis_starter = { module = "org.springframework.boot:spring-boot-starter-data-redis", version.ref = "spring_boot" }
+
+# Hibernate 호환성 문제
+classmate = { module = "com.fasterxml:classmate", version.ref = "classmate" }
+
+# DevTool
+devtools = { module = "org.springframework.boot:spring-boot-devtools", version.ref = "spring_boot" }
+
+# Junit
+junit_platform_launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_platform_launcher" }
+
+# Spring Validation
+validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "validation" }
+
+# MapStruct
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct_processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+
+# AWS
+spring_cloud_aws = { module = "org.springframework.cloud:spring-cloud-starter-aws", version.ref = "spring_cloud_aws" }
+
+# OAuth2
+spring_oauth2_client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client", version.ref = "spring_boot" }
+
+# Datafaker
+datafaker = { module = "net.datafaker:datafaker", version.ref = "datafaker" }
+
+# Firebase
+firebase_admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase_admin" }
+
+# Thymeleaf
+thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf", version.ref = "spring_boot" }
+
+# Redission
+redisson = { module = "org.redisson:redisson-spring-boot-starter", version.ref = "redisson" }
+
+# WebSocket
+websocket_starter = { module = "org.springframework.boot:spring-boot-starter-websocket", version.ref = "spring_boot" }
+
+# RabbitMQ
+amqp_starter = { module = "org.springframework.boot:spring-boot-starter-amqp", version.ref = "spring_boot" }
+spring_rabbit_test = { module = "org.springframework.amqp:spring-rabbit-test", version.ref = "rabbit_test" }
+
+# Netty
+reactor_netty = { module = "org.springframework.boot:spring-boot-starter-reactor-netty", version.ref = "reactor_netty" }
+
+# QueryDSL
+querydsl-jpa = { module = "com.querydsl:querydsl-jpa", version.ref = "querydsl" }
+querydsl-apt = { module = "com.querydsl:querydsl-apt", version.ref = "querydsl" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence" }
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+
+# Chuseok22 API Change Log
+api_changelog = { module = "com.chuseok22:ApiChangeLog", version.ref = "api_changelog" }
+
+# Google Gen-AI (Vertex AI) 클라이언트
+google_genai = { module = "com.google.genai:google-genai", version.ref = "google_genai" }
+# JSON 으로부터 ServiceAccountCredentials 로딩
+google_auth = { module = "com.google.auth:google-auth-library-oauth2-http", version.ref = "google_auth" }
+
+# Hibernate Vector 모듈 활성화
+hibernate_vector = { module = "org.hibernate.orm:hibernate-vector", version.ref = "hibernate_vector" }
+
+# Cool SMS
+nurigo_sdk = { module = "net.nurigo:sdk", version.ref = "nurigo_sdk" }
+
+# 역직렬화
+jackson_jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson_jsr310" }
+jackson_databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson_databind" }
+
+# Suh Random Engine (닉네임 생성기)
+suh_random_engine = { module = "me.suhsaechan:suh-random-engine", version.ref = "suh_random_engine" }
+
+# AOP
+aop = { module = "org.springframework:spring-aop", version.ref = "aop"}

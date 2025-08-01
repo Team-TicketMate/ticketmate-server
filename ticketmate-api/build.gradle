@@ -1,0 +1,32 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot'
+}
+
+// API 모듈은 모든 도메인 모듈 의존
+dependencies {
+    implementation project(':ticketmate-admin')
+    implementation project(':ticketmate-applicationform')
+    implementation project(':ticketmate-auth')
+    implementation project(':ticketmate-chat')
+    implementation project(':ticketmate-common')
+    implementation project(':ticketmate-concert')
+    implementation project(':ticketmate-concerthall')
+    implementation project(':ticketmate-member')
+    implementation project(':ticketmate-messaging')
+    implementation project(':ticketmate-mock')
+    implementation project(':ticketmate-portfolio')
+    implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-search')
+    implementation project(':ticketmate-storage')
+    implementation project(':ticketmate-notification')
+    implementation project(':ticketmate-redis')
+    implementation project(':ticketmate-sms')
+    implementation project(':ticketmate-websocket')
+
+    // Swagger UI
+    implementation libs.springdoc.openapi.ui
+
+    // Chuseok22 API Change Log
+    implementation libs.api.changelog
+}

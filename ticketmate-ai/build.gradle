@@ -1,0 +1,22 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+
+    // Google Gen-AI (Vertex AI) 클라이언트
+    api libs.google.genai
+
+    // JSON 으로부터 ServiceAccountCredentials 로딩
+    api libs.google.auth
+}
