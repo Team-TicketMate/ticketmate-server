@@ -11,7 +11,7 @@ jar {
     archiveClassifier = ''
 }
 
-// common 모듈에 있는 의존성은 모든 모듈에 적용
+// common 모듈에 있는 api 의존성은 모든 모듈에 적용
 dependencies {
     // Spring Starter Web
     api 'org.springframework.boot:spring-boot-starter-web'
@@ -24,6 +24,12 @@ dependencies {
 
     // Validation
     api 'org.springframework.boot:spring-boot-starter-validation'
+
+    // QueryDSL JPA
+    implementation(libs.querydsl.jpa) { artifact { classifier = "jakarta" } }
+    annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }
+    annotationProcessor libs.jakarta.persistence.api
+    annotationProcessor libs.jakarta.annotation.api
 
     // AOP
     implementation libs.aop
