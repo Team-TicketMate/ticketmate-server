@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum ChatMessageType {
-    TEXT("텍스트"),
+  TEXT("텍스트"),
 
-    PICTURE("이미지");
+  PICTURE("이미지");
 
-    private final String description;
+  private final String description;
 }

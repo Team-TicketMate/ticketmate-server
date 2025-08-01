@@ -42,13 +42,12 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-  private final ZoneId zone = ZoneId.of("Asia/Seoul");
-
   private static final QConcert CONCERT = QConcert.concert;
   private static final QConcertHall CONCERT_HALL = QConcertHall.concertHall;
   private static final QConcertDate CONCERT_DATE = QConcertDate.concertDate;
   private static final QTicketOpenDate TICKET_OPEN_DATE = QTicketOpenDate.ticketOpenDate;
+  private final JPAQueryFactory queryFactory;
+  private final ZoneId zone = ZoneId.of("Asia/Seoul");
 
   /**
    * 공연 상세 조회

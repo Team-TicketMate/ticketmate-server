@@ -179,8 +179,8 @@
 //
 //    // when
 //    // 공연장 조회
-////    when(concertHallRepository.findById(concertHallId))
-////        .thenReturn(Optional.of(new ConcertHall()));
+/// /    when(concertHallRepository.findById(concertHallId))
+/// /        .thenReturn(Optional.of(new ConcertHall()));
 //
 //    // MultipartFile 저장
 //    when(storageService.uploadFile(any(), any()))

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PortfolioCacheEvictListener {
+
   /**
    * PortfolioHandledEvent에서 포트폴리오 승인 시 search 캐시 무효화
    */

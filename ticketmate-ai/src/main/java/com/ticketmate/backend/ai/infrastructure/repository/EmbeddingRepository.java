@@ -17,8 +17,9 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
 
   /**
    * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드
-   * @param vector 비교할 기준 벡터
-   * @param limit 반환할 결과의 수
+   *
+   * @param vector        비교할 기준 벡터
+   * @param limit         반환할 결과의 수
    * @param embeddingType 검색할 임베딩의 타입 (CONCERT, AGENT 등)
    * @return 유사도 순으로 정렬된 target_id 리스트
    */

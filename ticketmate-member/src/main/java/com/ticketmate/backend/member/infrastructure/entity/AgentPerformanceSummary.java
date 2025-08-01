@@ -26,6 +26,7 @@ import org.springframework.data.domain.Persistable;
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AgentPerformanceSummary extends BasePostgresEntity implements Persistable<UUID> {
+
   @Id
   private UUID agentId;
 

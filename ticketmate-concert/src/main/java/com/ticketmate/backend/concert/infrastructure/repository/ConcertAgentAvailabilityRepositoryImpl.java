@@ -24,11 +24,10 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvailabilityRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-
   private static final QConcertAgentAvailability CONCERT_AGENT_AVAILABILITY = QConcertAgentAvailability.concertAgentAvailability;
   private static final QMember AGENT = QMember.member;
   private static final QAgentPerformanceSummary AGENT_PERFORMANCE_SUMMARY = QAgentPerformanceSummary.agentPerformanceSummary;
+  private final JPAQueryFactory queryFactory;
 
   /**
    * 특정 콘서트(concertId)에 대해 대리인의 수락 가능 여부를 조회하고 정렬/페이징 처리하여 반환

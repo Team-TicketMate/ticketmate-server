@@ -7,15 +7,9 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum ChatMessageSortField implements SortField {
-  CREATED_DATE("createdDate")
-  ;
+  CREATED_DATE("createdDate");
 
   private final String property;
-
-  @Override
-  public String getProperty() {
-    return property;
-  }
 
   /**
    * Jackson이 JSON -> Java 객체로 역직렬화 (deserialization)할 때 자동 호출
@@ -25,5 +19,10 @@ public enum ChatMessageSortField implements SortField {
   @JsonCreator
   public static ChatMessageSortField from(String value) {
     return CommonUtil.stringToSortField(ChatMessageSortField.class, value);
+  }
+
+  @Override
+  public String getProperty() {
+    return property;
   }
 }

@@ -12,6 +12,7 @@ import lombok.ToString;
 @Setter
 @Builder
 public class NotificationPayload {
+
   private String title;
   private String body;
 }

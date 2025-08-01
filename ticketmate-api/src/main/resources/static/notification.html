@@ -7,10 +7,24 @@
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-messaging-compat.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 1rem; }
-    #notifications { margin-top: 2rem; }
-    #notifications h2 { margin-bottom: 0.5rem; }
-    #notifications ul { list-style: none; padding: 0; }
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+    }
+
+    #notifications {
+      margin-top: 2rem;
+    }
+
+    #notifications h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    #notifications ul {
+      list-style: none;
+      padding: 0;
+    }
+
     #notifications li {
       display: flex;
       align-items: flex-start;
@@ -18,19 +32,27 @@
       border-radius: 4px;
       padding: 0.75rem;
       margin-bottom: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
     #notifications li img {
       width: 40px;
       height: 40px;
       margin-right: 0.75rem;
       border-radius: 4px;
     }
+
     #notifications li .text {
       flex: 1;
     }
-    #notifications li .title { font-weight: bold; }
-    #notifications li .body  { margin-top: 0.25rem; }
+
+    #notifications li .title {
+      font-weight: bold;
+    }
+
+    #notifications li .body {
+      margin-top: 0.25rem;
+    }
   </style>
 </head>
 <body>
@@ -90,12 +112,12 @@
 
   messaging.onMessage((payload) => {
     console.log('포그라운드 메시지:', payload);
-    const { title, body, icon } = payload.notification || {};
+    const {title, body, icon} = payload.notification || {};
 
     // OS 알림 띄우기
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
-        new Notification(title, { body, icon });
+        new Notification(title, {body, icon});
       }
     });
 

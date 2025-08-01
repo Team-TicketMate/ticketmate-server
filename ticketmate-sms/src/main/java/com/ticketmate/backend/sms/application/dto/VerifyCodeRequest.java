@@ -14,6 +14,7 @@ import lombok.ToString;
 @Setter
 @Builder
 public class VerifyCodeRequest {
+
   @NotEmpty(message = "전화번호를 입력해주세요")
   private String phoneNumber;
 

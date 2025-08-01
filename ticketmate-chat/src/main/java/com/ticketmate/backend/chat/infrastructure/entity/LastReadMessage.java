@@ -1,12 +1,15 @@
 package com.ticketmate.backend.chat.infrastructure.entity;
 
-import lombok.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 마지막으로 읽은 메시지의 포인터역할

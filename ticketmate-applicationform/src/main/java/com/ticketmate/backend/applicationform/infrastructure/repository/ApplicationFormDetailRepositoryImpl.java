@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ApplicationFormDetailRepositoryImpl implements ApplicationFormDetailRepositoryCustom{
+public class ApplicationFormDetailRepositoryImpl implements ApplicationFormDetailRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
 

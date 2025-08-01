@@ -21,12 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
     description = "공연/대리인 검색 관련 API 제공"
 )
 public class SearchController implements SearchControllerDocs {
+
   private final SearchService searchService;
 
   @Override
   @GetMapping
   @LogMonitoringInvocation
-  public ResponseEntity<SearchResponse<?>> search(@ParameterObject @Valid SearchRequest request){
+  public ResponseEntity<SearchResponse<?>> search(@ParameterObject @Valid SearchRequest request) {
     return ResponseEntity.ok(searchService.search(request));
   }
 }

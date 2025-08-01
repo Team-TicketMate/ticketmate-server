@@ -24,11 +24,6 @@ public enum ConcertAgentAvailabilitySortField implements SortField {
 
   private final String property;
 
-  @Override
-  public String getProperty() {
-    return property;
-  }
-
   /**
    * Jackson이 JSON -> Java 객체로 역직렬화 (deserialization)할 때 자동 호출
    * 컨트롤러에서 들어온 {"sortField": "TICKET_OPEN_DATE"} 같은 문자열을 변환
@@ -37,5 +32,10 @@ public enum ConcertAgentAvailabilitySortField implements SortField {
   @JsonCreator
   public static ConcertAgentAvailabilitySortField from(String value) {
     return CommonUtil.stringToSortField(ConcertAgentAvailabilitySortField.class, value);
+  }
+
+  @Override
+  public String getProperty() {
+    return property;
   }
 }

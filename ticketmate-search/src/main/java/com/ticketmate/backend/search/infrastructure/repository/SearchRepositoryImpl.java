@@ -28,8 +28,6 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class SearchRepositoryImpl implements SearchRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-
   private static final QMember MEMBER = QMember.member;
   private static final QAgentPerformanceSummary AGENT_PERFORMANCE_SUMMARY = QAgentPerformanceSummary.agentPerformanceSummary;
   private static final QConcert CONCERT = QConcert.concert;
@@ -37,7 +35,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   private static final QTicketOpenDate TICKET_OPEN_DATE = QTicketOpenDate.ticketOpenDate;
   private static final QConcertHall CONCERT_HALL = QConcertHall.concertHall;
   private static final QPortfolio PORTFOLIO = QPortfolio.portfolio;
-
+  private final JPAQueryFactory queryFactory;
 
   /**
    * 제공된 ID 목록에 해당하는 공연들의 상세 정보를 조회하여 ConcertSearchResponse DTO 리스트로 반환합니다.
@@ -122,11 +120,11 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
    * 키워드를 사용하여 닉네임, 한줄 소개에 대해 LIKE 검색을 수행하고 일치하는 대리인 ID 목록을 반환합니다.
    *
    * @param keyword 검색할 키워드
-   * @param limit 반환할 결과의 수
+   * @param limit   반환할 결과의 수
    * @return 일치하는 대리인의 UUID 리스트
    */
   @Override
-  public List<UUID> findAgentIdsByKeyword(String keyword, int limit){
+  public List<UUID> findAgentIdsByKeyword(String keyword, int limit) {
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
         MEMBER.memberType.eq(MemberType.AGENT),
@@ -150,11 +148,11 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
    * 키워드를 사용하여 공연명, 공연장명, 공연 타입에 대해 LIKE 검색을 수행하고 일치하는 공연 ID 목록을 반환합니다.
    *
    * @param keyword 검색할 키워드
-   * @param limit 반환할 결과의 수
+   * @param limit   반환할 결과의 수
    * @return 일치하는 공연의 UUID 리스트
    */
   @Override
-  public List<UUID> findConcertIdsByKeyword(String keyword, int limit){
+  public List<UUID> findConcertIdsByKeyword(String keyword, int limit) {
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.anyOf(
         QueryDslUtil.likeIgnoreCase(CONCERT.concertName, keyword),

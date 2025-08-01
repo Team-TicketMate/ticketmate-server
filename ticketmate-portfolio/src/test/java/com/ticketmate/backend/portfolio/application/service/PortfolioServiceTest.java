@@ -38,6 +38,13 @@ class PortfolioServiceTest {
   @Mock
   StorageService storageService;
 
+  private static Member createClientMember() {
+    return Member.builder()
+        .memberId(UUID.randomUUID())
+        .memberType(MemberType.CLIENT)
+        .build();
+  }
+
   @BeforeEach
   void setUp() {
   }
@@ -87,13 +94,6 @@ class PortfolioServiceTest {
     Assertions.assertThatThrownBy(() -> portfolioService.uploadPortfolio(request, client))
         .isInstanceOf(CustomException.class)
         .hasMessageContaining(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT.getMessage());
-  }
-
-  private static Member createClientMember() {
-    return Member.builder()
-        .memberId(UUID.randomUUID())
-        .memberType(MemberType.CLIENT)
-        .build();
   }
 
   private PortfolioRequest createPortfolioRequest(String portfolioDescription, int imgCount) {

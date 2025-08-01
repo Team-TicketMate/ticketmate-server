@@ -42,12 +42,12 @@ public class VertexAiEmbeddingService {
   @Transactional
   @Caching(
       cacheable = @Cacheable(
-          value     = "embeddings",
-          key       = "T(com.ticketmate.backend.common.core.util.CommonUtil)"
-                      + ".normalizeAndRemoveSpecialCharacters(#text)"
-                      + "+':' + #embeddingType",
+          value = "embeddings",
+          key = "T(com.ticketmate.backend.common.core.util.CommonUtil)"
+                + ".normalizeAndRemoveSpecialCharacters(#text)"
+                + "+':' + #embeddingType",
           condition = "#targetId == null",
-          unless    = "#result == null"
+          unless = "#result == null"
       )
   )
   public Embedding fetchOrGenerateEmbedding(UUID targetId, String text, EmbeddingType embeddingType) {
@@ -116,13 +116,13 @@ public class VertexAiEmbeddingService {
    * 벡터 탐색 결과 반환
    * 지정된 queryVector로 유사도가 높은 순서대로 정렬된 리스트 조회
    *
-   * @param queryVector 검색에 사용할 임베딩 벡터
-   * @param limit 조회할 최대 아이디 개수
+   * @param queryVector   검색에 사용할 임베딩 벡터
+   * @param limit         조회할 최대 아이디 개수
    * @param embeddingType 조회할 임베딩 타입
    * @return 유사도 순으로 정렬된 대리인 ID 리스트
    */
   @Transactional(readOnly = true)
-  public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType){
+  public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType) {
     return embeddingRepository.findNearestEmbeddings(queryVector, limit, embeddingType);
   }
 }

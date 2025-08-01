@@ -37,7 +37,7 @@
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 //@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 //@Slf4j
-////@Transactional
+/// /@Transactional
 //public class ConcertPerformanceTest {
 //
 //  @Autowired

@@ -16,6 +16,7 @@ import lombok.ToString;
 @Setter
 @Builder
 public class AgentSearchResponse implements SearchResult {
+
   private UUID agentId;
 
   private String nickname;
@@ -31,7 +32,7 @@ public class AgentSearchResponse implements SearchResult {
   private Double score; // 최종 점수
 
   // QueryDSL 프로젝션을 위한 생성자
-  public AgentSearchResponse(UUID agentId, String nickname, String profileUrl, String introduction, double averageRating, int reviewCount){
+  public AgentSearchResponse(UUID agentId, String nickname, String profileUrl, String introduction, double averageRating, int reviewCount) {
     this.agentId = agentId;
     this.nickname = nickname;
     this.profileUrl = profileUrl;

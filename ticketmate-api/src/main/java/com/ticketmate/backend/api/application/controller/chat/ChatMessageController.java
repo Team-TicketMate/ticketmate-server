@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequiredArgsConstructor
-public class ChatMessageController implements ChatMessageControllerDocs{
+public class ChatMessageController implements ChatMessageControllerDocs {
 
   private final ChatMessageService chatMessageService;
 
@@ -47,10 +47,10 @@ public class ChatMessageController implements ChatMessageControllerDocs{
   @ResponseBody
   @Override
   @PostMapping(value = "/api/chat-message/{chat-room-id}/send/pictures",
-          consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Void> sendPictureMessage(@PathVariable(value = "chat-room-id") String chatRoomId,
-                                                 @ModelAttribute @Valid PictureMessageRequest request,
-                                                 @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+      @ModelAttribute @Valid PictureMessageRequest request,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     chatMessageService.sendMessage(chatRoomId, request, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }

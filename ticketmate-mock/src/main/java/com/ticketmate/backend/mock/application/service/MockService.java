@@ -123,7 +123,7 @@ public class MockService {
     long startMs = System.currentTimeMillis();
 
     List<Concert> concertList = concertRepository.findAll();
-    if(concertList.isEmpty()){
+    if (concertList.isEmpty()) {
       log.error("저장된 공연이 없습니다. 공연 Mock 데이터를 먼저 생성하세요.");
       throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
     }
@@ -154,8 +154,8 @@ public class MockService {
             // 트랜잭션 내에서 일괄 저장
             List<Member> savedMemberList = memberRepository.saveAll(memberList);
 
-            for(Member savedMember : savedMemberList){
-              if(savedMember.getMemberType() == AGENT) {
+            for (Member savedMember : savedMemberList) {
+              if (savedMember.getMemberType() == AGENT) {
                 // AgentPerformanceSummary 생성 및 추가
                 summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
 
@@ -175,7 +175,8 @@ public class MockService {
             log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
             throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
           }
-        })).thenAccept(v -> {});
+        })).thenAccept(v -> {
+        });
   }
 
   /**

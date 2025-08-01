@@ -33,8 +33,8 @@ public class ChatMessageResponse {
 
   @Builder
   public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname,
-                             String message, LocalDateTime sendDate, boolean read, String profileUrl,
-                             boolean mine, ChatMessageType chatMessageType, List<String> pictureMessageList) {
+      String message, LocalDateTime sendDate, boolean read, String profileUrl,
+      boolean mine, ChatMessageType chatMessageType, List<String> pictureMessageList) {
     this.chatRoomId = chatRoomId;
     this.messageId = messageId;
     this.senderId = senderId;

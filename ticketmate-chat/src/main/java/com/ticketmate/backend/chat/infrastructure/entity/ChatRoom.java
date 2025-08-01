@@ -68,6 +68,7 @@ public class ChatRoom extends BaseMongoDocument {
   public void updateLastMessageId(String messageId) {
     this.lastMessageId = messageId;
   }
+
   public void updateLastMessageType(ChatMessageType chatMessageType) {
     this.lastMessageType = chatMessageType;
   }

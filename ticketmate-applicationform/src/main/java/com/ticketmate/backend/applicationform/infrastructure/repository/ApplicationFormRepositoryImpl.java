@@ -28,13 +28,12 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-
   private static final QApplicationForm APPLICATION_FORM = QApplicationForm.applicationForm;
   private static final QApplicationFormDetail APPLICATION_FORM_DETAIL = QApplicationFormDetail.applicationFormDetail;
   private static final QMember CLIENT = new QMember("clientAlias");
   private static final QMember AGENT = new QMember("agentAlias");
   private static final QConcert CONCERT = QConcert.concert;
+  private final JPAQueryFactory queryFactory;
 
   /**
    * 신청서 필터링 조회

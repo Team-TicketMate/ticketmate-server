@@ -44,12 +44,12 @@ public class PageableUtil {
   /**
    * Pageable 객체 생성 (사용자 입력 페이지 번호를 인덱스로 변환)
    *
-   * @param <SF>              enum 타입, SortField를 구현해야함
-   * @param pageNumber        사용자 입력 페이지 번호 (1부터 시작)
-   * @param pageSize          페이지 크기
-   * @param defaultPageSize   도메인별 기본 페이지 사이즈
-   * @param sortField         정렬 필드
-   * @param sortDirection     정렬 방향
+   * @param <SF>            enum 타입, SortField를 구현해야함
+   * @param pageNumber      사용자 입력 페이지 번호 (1부터 시작)
+   * @param pageSize        페이지 크기
+   * @param defaultPageSize 도메인별 기본 페이지 사이즈
+   * @param sortField       정렬 필드
+   * @param sortDirection   정렬 방향
    * @return Pageable 객체
    */
   public <SF extends SortField> Pageable createPageable(

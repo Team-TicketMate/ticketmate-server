@@ -10,15 +10,9 @@ public enum ApplicationFormSortField implements SortField {
 
   CREATED_DATE("createdDate"),
 
-  REQUEST_COUNT("requestCount")
-  ;
+  REQUEST_COUNT("requestCount");
 
   private final String property;
-
-  @Override
-  public String getProperty() {
-    return property;
-  }
 
   /**
    * Jackson이 JSON -> Java 객체로 역직렬화 (deserialization)할 때 자동 호출
@@ -28,5 +22,10 @@ public enum ApplicationFormSortField implements SortField {
   @JsonCreator
   public static ApplicationFormSortField from(String value) {
     return CommonUtil.stringToSortField(ApplicationFormSortField.class, value);
+  }
+
+  @Override
+  public String getProperty() {
+    return property;
   }
 }

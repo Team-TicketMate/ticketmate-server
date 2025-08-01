@@ -18,9 +18,8 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class ConcertHallRepositoryImpl implements ConcertHallRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-
   private static final QConcertHall CONCERT_HALL = QConcertHall.concertHall;
+  private final JPAQueryFactory queryFactory;
 
   /**
    * 공연장 필터링 조회

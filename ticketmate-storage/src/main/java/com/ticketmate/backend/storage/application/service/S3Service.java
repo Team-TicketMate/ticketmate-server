@@ -36,6 +36,26 @@ public class S3Service implements StorageService {
   private final S3Properties s3Properties;
 
   /**
+   * 파일 검증 및 원본 파일명 반환
+   *
+   * @param file 요청된 MultipartFile
+   * @return 원본 파일명
+   */
+  private static String validateAndExtractFilename(MultipartFile file) {
+    // 파일 검증
+    if (FileUtil.isNullOrEmpty(file)) {
+      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
+    }
+
+    // 원본 파일 명 검증
+    String originalFilename = file.getOriginalFilename();
+    if (CommonUtil.nvl(originalFilename, "").isEmpty()) {
+      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
+    }
+    return originalFilename;
+  }
+
+  /**
    * S3 파일 업로드 후 파일 URL 반환
    *
    * @param file       업로드할 MultipartFile
@@ -110,26 +130,6 @@ public class S3Service implements StorageService {
       log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), filename, e.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_ERROR);
     }
-  }
-
-  /**
-   * 파일 검증 및 원본 파일명 반환
-   *
-   * @param file 요청된 MultipartFile
-   * @return 원본 파일명
-   */
-  private static String validateAndExtractFilename(MultipartFile file) {
-    // 파일 검증
-    if (FileUtil.isNullOrEmpty(file)) {
-      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
-    }
-
-    // 원본 파일 명 검증
-    String originalFilename = file.getOriginalFilename();
-    if (CommonUtil.nvl(originalFilename, "").isEmpty()) {
-      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
-    }
-    return originalFilename;
   }
 
   /**

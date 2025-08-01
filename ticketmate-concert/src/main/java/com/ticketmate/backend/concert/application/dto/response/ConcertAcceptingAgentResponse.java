@@ -13,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConcertAcceptingAgentResponse {
+
   private UUID agentId;
 
   private String nickname;

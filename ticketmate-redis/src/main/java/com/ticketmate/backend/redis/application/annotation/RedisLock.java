@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RedisLock {
+
   /**
    * Lock Key를 위한 SpEL 표현식
    * ex) "'member:' + #memberId"

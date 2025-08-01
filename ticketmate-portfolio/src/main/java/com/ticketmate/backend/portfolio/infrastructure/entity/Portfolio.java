@@ -35,24 +35,19 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Portfolio extends BasePostgresEntity {
 
+  public static final int MAX_IMG_COUNT = 20;
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(updatable = false, nullable = false)
   private UUID portfolioId;
-
   @OneToOne(fetch = FetchType.LAZY)
   private Member member;
-
   @Column(columnDefinition = "TEXT")
   private String portfolioDescription;  // 자기소개
-
   @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PortfolioImg> portfolioImgList = new ArrayList<>();
-
   @Enumerated(EnumType.STRING)
   private PortfolioType portfolioType;
-
-  public static final int MAX_IMG_COUNT = 20;
 
   public void addImg(PortfolioImg img) {
     if (this.getPortfolioImgList().size() < MAX_IMG_COUNT) {

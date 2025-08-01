@@ -19,10 +19,9 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
 
-  private final JPAQueryFactory queryFactory;
-
   private static final QPortfolio PORTFOLIO = QPortfolio.portfolio;
   private static final QMember MEMBER = QMember.member;
+  private final JPAQueryFactory queryFactory;
 
   /**
    * 포트폴리오 필터링 조회

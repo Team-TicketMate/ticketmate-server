@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 @Builder
 @AllArgsConstructor
 public class ConcertAcceptingAgentFilteredRequest {
+
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
   @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
   private Integer pageNumber; // 페이지 번호 (1부터 시작)

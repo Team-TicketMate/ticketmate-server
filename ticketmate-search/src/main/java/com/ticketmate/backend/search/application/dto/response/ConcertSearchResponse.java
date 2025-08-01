@@ -18,6 +18,7 @@ import lombok.ToString;
 @Setter
 @Builder
 public class ConcertSearchResponse implements SearchResult {
+
   private UUID concertId; // 공연 PK
 
   private String concertName; // 공연 제목

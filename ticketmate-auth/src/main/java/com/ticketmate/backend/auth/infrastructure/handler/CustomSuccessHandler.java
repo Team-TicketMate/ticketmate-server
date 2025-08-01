@@ -27,15 +27,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  @Value("${spring.security.app.redirect-uri.dev}")
-  private String devRedirectUri;
-
-  @Value("${spring.security.app.redirect-uri.prod}")
-  private String prodRedirectUri;
-
   private final TokenProvider tokenProvider;
   private final TokenStore tokenStore;
   private final JwtProperties jwtProperties;
+  @Value("${spring.security.app.redirect-uri.dev}")
+  private String devRedirectUri;
+  @Value("${spring.security.app.redirect-uri.prod}")
+  private String prodRedirectUri;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

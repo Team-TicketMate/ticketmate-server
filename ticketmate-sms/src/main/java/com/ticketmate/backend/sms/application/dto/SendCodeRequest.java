@@ -13,6 +13,7 @@ import lombok.ToString;
 @Setter
 @Builder
 public class SendCodeRequest {
+
   @NotEmpty
   private String phoneNumber;
 }

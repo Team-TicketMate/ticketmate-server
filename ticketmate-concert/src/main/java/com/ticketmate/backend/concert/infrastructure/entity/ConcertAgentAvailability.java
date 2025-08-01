@@ -26,6 +26,7 @@ import lombok.ToString;
 @ToString(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConcertAgentAvailability extends BasePostgresEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID concertAgentOptionId;

@@ -8,7 +8,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <title>TicketMate – 채팅방1‑1(v4.0)</title>
 
   <!-- 라이브러리 -->
@@ -21,44 +21,197 @@
       --bubble-op: #e8f0ff;
       --bubble-me: #d1ffe5;
     }
-    body { font-family: Arial,sans-serif; margin:2rem; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
 
     /* ====== 방 목록 ====== */
-    #roomList { max-width:22rem; border:1px solid #ccc; padding:1rem; }
-    .room-item { padding:0.6rem 0; border-bottom:1px solid #eee; cursor:pointer; }
-    .room-item:hover { background:#f3f7ff; }
-    .room-top { display:flex; justify-content:space-between; align-items:center; }
-    .room-name { font-weight:bold; }
-    .time { font-size:0.72rem; color:#888; margin-left:0.5rem; }
-    .badge { background:#ff3b30; color:#fff; border-radius:12px; padding:0 6px; font-size:0.7rem; min-width:1.4rem; text-align:center; }
-    .preview { font-size:0.78rem; color:#555; margin-top:0.15rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    #roomList {
+      max-width: 22rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+
+    .room-item {
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .room-item:hover {
+      background: #f3f7ff;
+    }
+
+    .room-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .room-name {
+      font-weight: bold;
+    }
+
+    .time {
+      font-size: 0.72rem;
+      color: #888;
+      margin-left: 0.5rem;
+    }
+
+    .badge {
+      background: #ff3b30;
+      color: #fff;
+      border-radius: 12px;
+      padding: 0 6px;
+      font-size: 0.7rem;
+      min-width: 1.4rem;
+      text-align: center;
+    }
+
+    .preview {
+      font-size: 0.78rem;
+      color: #555;
+      margin-top: 0.15rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* 📌 예매 타입 표시 */
-    .ticket-type { font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:8px; font-weight:bold; margin-left:0.5rem; }
-    .ticket-type.pre-open { background:#4CAF50; color:white; }
-    .ticket-type.general-open { background:#2196F3; color:white; }
-    .room-info { display:flex; align-items:center; margin-top:0.15rem; }
+    .ticket-type {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
+
+    .ticket-type.pre-open {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .ticket-type.general-open {
+      background: #2196F3;
+      color: white;
+    }
+
+    .room-info {
+      display: flex;
+      align-items: center;
+      margin-top: 0.15rem;
+    }
 
     /* ====== 채팅 + 신청서 ====== */
-    #chatContainer { display:flex; gap:1rem; max-width:60rem; }
-    #chatSection { display:flex; flex-direction:column; gap:0.5rem; flex:1; }
-    #chatBox { height:300px; overflow-y:auto; display:flex; flex-direction:column; border:1px solid #ccc; padding:1rem; }
-    .msg { margin:0.25rem 0; padding:0.5rem 0.75rem; border-radius:1rem; max-width:70%; white-space:pre-wrap; }
-    .sender-op { background:var(--bubble-op); align-self:flex-start; border-top-left-radius:0; }
-    .sender-me { background:var(--bubble-me); align-self:flex-end; border-top-right-radius:0; }
-    .meta { font-size:0.7rem; color:#555; margin-top:0.2rem; display:flex; align-items:center; gap:0.25rem; }
-    .unread-dot { width:7px; height:7px; background:#ff3b30; border-radius:50%; display:inline-block; }
-    .read-check { font-size:0.8rem; color:#888; }
+    #chatContainer {
+      display: flex;
+      gap: 1rem;
+      max-width: 60rem;
+    }
+
+    #chatSection {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    #chatBox {
+      height: 300px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+
+    .msg {
+      margin: 0.25rem 0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 1rem;
+      max-width: 70%;
+      white-space: pre-wrap;
+    }
+
+    .sender-op {
+      background: var(--bubble-op);
+      align-self: flex-start;
+      border-top-left-radius: 0;
+    }
+
+    .sender-me {
+      background: var(--bubble-me);
+      align-self: flex-end;
+      border-top-right-radius: 0;
+    }
+
+    .meta {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .unread-dot {
+      width: 7px;
+      height: 7px;
+      background: #ff3b30;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .read-check {
+      font-size: 0.8rem;
+      color: #888;
+    }
 
     /* 📌 신청서 패널 */
-    #formInfoSection { width:20rem; border:1px solid #ccc; padding:1rem; overflow-y:auto; display:none; }
-    #formInfoSection h4 { margin:0.2rem 0 0.6rem; font-size:1rem; }
-    .form-field { margin:0.25rem 0; font-size:0.85rem; }
-    .detail-box { margin:0.5rem 0; padding:0.5rem; border:1px solid #eee; border-radius:0.5rem; }
-    .detail-box h5 { margin:0.1rem 0 0.3rem; font-size:0.8rem; font-weight:bold; }
-    .hope-list { margin:0.2rem 0 0 0.8rem; font-size:0.78rem; list-style:square; }
+    #formInfoSection {
+      width: 20rem;
+      border: 1px solid #ccc;
+      padding: 1rem;
+      overflow-y: auto;
+      display: none;
+    }
+
+    #formInfoSection h4 {
+      margin: 0.2rem 0 0.6rem;
+      font-size: 1rem;
+    }
+
+    .form-field {
+      margin: 0.25rem 0;
+      font-size: 0.85rem;
+    }
+
+    .detail-box {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border: 1px solid #eee;
+      border-radius: 0.5rem;
+    }
+
+    .detail-box h5 {
+      margin: 0.1rem 0 0.3rem;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .hope-list {
+      margin: 0.2rem 0 0 0.8rem;
+      font-size: 0.78rem;
+      list-style: square;
+    }
+
     /* ===== 🔶 v4.1 NEW – Drag Hover 효과 ===== */
-    #chatBox.drag-hover{ border:2px dashed #4caf50; background:#f6fff6; }
+    #chatBox.drag-hover {
+      border: 2px dashed #4caf50;
+      background: #f6fff6;
+    }
 
     #imgSelectButton {
       padding: 0.25rem 0.75rem;
@@ -68,6 +221,7 @@
       border-radius: 0.5rem;
       cursor: pointer;
     }
+
     #imgSelectButton:hover {
       background: #ffd182;
     }
@@ -90,20 +244,20 @@
 <div id="chatContainer" style="display:none">
   <!-- ===== 채팅 영역 ===== -->
   <div id="chatSection">
-    <input id="roomId" readonly />
+    <input id="roomId" readonly/>
     <div style="display:flex; gap:0.5rem">
-      <input id="message" placeholder="메시지를 입력하세요…" />
+      <input id="message" placeholder="메시지를 입력하세요…"/>
 
       <!-- 📷 사진 선택 버튼 -->
-      <button id="imgSelectButton" type="button" title="사진 선택">사진+</button>
+      <button id="imgSelectButton" title="사진 선택" type="button">사진+</button>
 
       <!-- 실제 파일 선택 input (멀티 업로드 허용). display:none 으로 숨김 -->
       <input
-              id="imgInput"
-              type="file"
-              accept="image/*"
-              multiple
-              style="display:none"
+          accept="image/*"
+          id="imgInput"
+          multiple
+          style="display:none"
+          type="file"
       />
 
       <button id="sendButton">전송</button>
@@ -151,11 +305,11 @@
   const pendingUploads = [];
 
   /* ===== 🔶 v4.1 NEW – 사진 전송 공통 ===== */
-  const MAX_IMG_SIZE     = 10 * 1024 * 1024; // 10 MB
+  const MAX_IMG_SIZE = 10 * 1024 * 1024; // 10 MB
   const IMG_FIELD_SINGLE = "chatMessagePicture";    // 레거시
-  const IMG_FIELD_MULTI  = "chatMessagePictureList"; // ✅ 멀티 DTO 필드명
+  const IMG_FIELD_MULTI = "chatMessagePictureList"; // ✅ 멀티 DTO 필드명
 
-  function isImage(file){
+  function isImage(file) {
     return file && file.type.startsWith("image/");
   }
 
@@ -179,47 +333,54 @@
 
   // 날짜 파싱 (공백 → T 보정)
   const parseDate = (s) => {
-    if (!s || typeof s !== "string") return null;
+    if (!s || typeof s !== "string") {
+      return null;
+    }
     return new Date(s.includes("T") ? s : s.replace(" ", "T"));
   };
 
   const fmtTime = (d) =>
-          d ? d.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "";
+      d ? d.toLocaleTimeString("ko-KR", {hour: "2-digit", minute: "2-digit"}) : "";
 
   const fmtDateTime = (d) =>
-          d
-                  ? d.toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                  : "";
+      d
+          ? d.toLocaleString("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          : "";
 
   /* ===============================================
    * DTO 매핑 헬퍼
    =============================================== */
-  const mRoomId        = (o) => o.chatRoomId ?? o.roomId;
-  const mUnread        = (o) => o.unReadMessageCount ?? o.unread;
-  const mLastMsg       = (o) => o.lastMessage ?? o.lastChatMessage;
-  const mLastSendTime  = (o) => o.sentAt ?? o.lastChatSendTime ?? o.sendDate;
-  const mTicketOpenType= (o) => o.ticketOpenType;
+  const mRoomId = (o) => o.chatRoomId ?? o.roomId;
+  const mUnread = (o) => o.unReadMessageCount ?? o.unread;
+  const mLastMsg = (o) => o.lastMessage ?? o.lastChatMessage;
+  const mLastSendTime = (o) => o.sentAt ?? o.lastChatSendTime ?? o.sendDate;
+  const mTicketOpenType = (o) => o.ticketOpenType;
 
   /* ===============================================
    * UI HELPERS
    =============================================== */
   const getTicketTypeInfo = (ticketOpenType) => {
     switch (ticketOpenType) {
-      case "PRE_OPEN":     return { text: "선예매",   className: "pre-open" };
-      case "GENERAL_OPEN": return { text: "일반예매", className: "general-open" };
-      default:             return { text: "미정",     className: "unknown" };
+      case "PRE_OPEN":
+        return {text: "선예매", className: "pre-open"};
+      case "GENERAL_OPEN":
+        return {text: "일반예매", className: "general-open"};
+      default:
+        return {text: "미정", className: "unknown"};
     }
   };
 
   function ensureItem(id, name, ticketOpenType) {
     let el = document.querySelector(`.room-item[data-room-id="${id}"]`);
-    if (el) return el;
+    if (el) {
+      return el;
+    }
 
     const ticketTypeInfo = getTicketTypeInfo(ticketOpenType);
     el = document.createElement("div");
@@ -250,11 +411,15 @@
   };
   const upPrev = (id, t) => {
     const p = document.querySelector(`.preview[data-room-id="${id}"]`);
-    if (p) p.textContent = t || "";
+    if (p) {
+      p.textContent = t || "";
+    }
   };
   const upTime = (id, s) => {
     const t = document.querySelector(`.time[data-room-id="${id}"]`);
-    if (t) t.textContent = fmtTime(parseDate(s));
+    if (t) {
+      t.textContent = fmtTime(parseDate(s));
+    }
   };
 
   /* ===============================================
@@ -265,17 +430,17 @@
       const doConnect = () => {
         stomp = Stomp.over(new SockJS(`${API}/chat`));
         stomp.connect(
-                { Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get() },
-                () => {
-                  ({ memberId: myId } = claims());
-                  console.log('[STOMP CONNECTED] myId=', myId);
-                  subscribeUnread();
-                  resolve();
-                },
-                (err) => {
-                  console.error('[STOMP ERROR]', err);
-                  resolve();
-                }
+            {Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get()},
+            () => {
+              ({memberId: myId} = claims());
+              console.log('[STOMP CONNECTED] myId=', myId);
+              subscribeUnread();
+              resolve();
+            },
+            (err) => {
+              console.error('[STOMP ERROR]', err);
+              resolve();
+            }
         );
       };
 
@@ -296,7 +461,9 @@
   }
 
   function subscribeUnread() {
-    if (!stomp?.connected) return;
+    if (!stomp?.connected) {
+      return;
+    }
     stomp.subscribe(`/queue/unread.${myId}`, (msg) => {
       const dto = JSON.parse(msg.body);
       const id = mRoomId(dto);
@@ -313,11 +480,14 @@
     return new Promise((resolve) => {
       const ready = () => {
         if (roomSubscriptions[id]) {
-          try { roomSubscriptions[id].unsubscribe(); } catch {}
+          try {
+            roomSubscriptions[id].unsubscribe();
+          } catch {
+          }
         }
         const sub = stomp.subscribe(
-                `/exchange/chat.exchange/chat.room.${id}.user.${myId}`,
-                (m) => onPacket(JSON.parse(m.body), id)
+            `/exchange/chat.exchange/chat.room.${id}.user.${myId}`,
+            (m) => onPacket(JSON.parse(m.body), id)
         );
         roomSubscriptions[id] = sub;
         resolve();
@@ -334,21 +504,25 @@
   /* ===============================================
    * 방 목록 로드
    =============================================== */
-  async function loadRooms({ pageNumber = 1, ticketOpenType = '', searchKeyword = '' } = {}) {
-    const qs = new URLSearchParams({ pageNumber });
-    if (ticketOpenType) qs.append('ticketOpenType', ticketOpenType);
-    if (searchKeyword)  qs.append('searchKeyword',  searchKeyword);
+  async function loadRooms({pageNumber = 1, ticketOpenType = '', searchKeyword = ''} = {}) {
+    const qs = new URLSearchParams({pageNumber});
+    if (ticketOpenType) {
+      qs.append('ticketOpenType', ticketOpenType);
+    }
+    if (searchKeyword) {
+      qs.append('searchKeyword', searchKeyword);
+    }
 
     const res = await fetch(
-            `${API}/api/chat-room?` + qs.toString(),
-            { headers: { Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get() } }
+        `${API}/api/chat-room?` + qs.toString(),
+        {headers: {Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get()}}
     );
-    const { content: rooms = [] } = await res.json();
+    const {content: rooms = []} = await res.json();
 
     const listEl = document.getElementById('roomList');
     listEl.innerHTML = '';
     rooms.forEach(r => {
-      const id   = mRoomId(r);
+      const id = mRoomId(r);
       const type = mTicketOpenType(r);
 
       ensureItem(id, r.chatRoomName, type);
@@ -388,26 +562,39 @@
     // Drag & Drop (중복 등록 방지 위해 먼저 제거 후 등록)
     const box = document.getElementById("chatBox");
     box.classList.remove("drag-hover");
-    box.ondragenter = null; box.ondragover = null; box.ondragleave = null; box.ondrop = null;
+    box.ondragenter = null;
+    box.ondragover = null;
+    box.ondragleave = null;
+    box.ondrop = null;
 
-    ["dragenter","dragover"].forEach(evt => box.addEventListener(evt,e=>{
+    ["dragenter", "dragover"].forEach(evt => box.addEventListener(evt, e => {
       e.preventDefault();
       box.classList.add("drag-hover");
     }));
-    ["dragleave","drop"].forEach(evt => box.addEventListener(evt,e=>{
+    ["dragleave", "drop"].forEach(evt => box.addEventListener(evt, e => {
       e.preventDefault();
       box.classList.remove("drag-hover");
     }));
 
     box.addEventListener("drop", async e => {
       const files = Array.from(e.dataTransfer.files || []);
-      if (!files.length) return;
+      if (!files.length) {
+        return;
+      }
       const imgs = files.filter(isImage);
-      if (!imgs.length) { alert("이미지 파일만 업로드할 수 있습니다."); return; }
+      if (!imgs.length) {
+        alert("이미지 파일만 업로드할 수 있습니다.");
+        return;
+      }
       const overs = imgs.filter(f => f.size > MAX_IMG_SIZE);
-      if (overs.length) { alert("최대 10MB 이하 파일만 업로드 가능합니다."); return; }
+      if (overs.length) {
+        alert("최대 10MB 이하 파일만 업로드 가능합니다.");
+        return;
+      }
       const ok = confirm(`${imgs.length}장 사진을 전송할까요?`);
-      if (!ok) return;
+      if (!ok) {
+        return;
+      }
       await sendPictures(imgs, id);
     });
 
@@ -420,21 +607,28 @@
    * - 서버는 DESC(최신→오래된) 가정 → reverse() 하여 오래된→최신으로 렌더
    =============================================== */
   async function loadSlice(roomId, page, initialLoad = false) {
-    if (loadingOlder) return;
+    if (loadingOlder) {
+      return;
+    }
     loadingOlder = true;
 
     const url = `${API}/api/chat-room/${roomId}?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`;
     const res = await fetch(url, {
-      headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
+      headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
     });
-    if (!res.ok) { loadingOlder = false; return; }
+    if (!res.ok) {
+      loadingOlder = false;
+      return;
+    }
 
     const slice = await res.json();
     const list = slice.content || [];
     list.reverse(); // 오래된→최신
 
     const box = document.getElementById("chatBox");
-    if (initialLoad) box.innerHTML = "";
+    if (initialLoad) {
+      box.innerHTML = "";
+    }
 
     const prevHeight = box.scrollHeight;
 
@@ -465,14 +659,16 @@
   async function loadApplicationForm(roomId) {
     try {
       const res = await fetch(`${API}/api/chat-room/${roomId}/application-form`, {
-        headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
+        headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
       });
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) {
+        throw new Error(res.status);
+      }
       const info = await res.json();
       renderApplicationForm(info);
     } catch (e) {
       document.getElementById("formInfo").innerHTML =
-              '<span style="color:red">불러오기에 실패했습니다.</span>';
+          '<span style="color:red">불러오기에 실패했습니다.</span>';
     }
   }
 
@@ -483,31 +679,31 @@
             <div class="form-field"><b>예매 구분:</b> ${info.ticketOpenType}</div>
             <div class="form-field"><b>예매일:</b> ${fmtDateTime(parseDate(info.openDate))}</div>
             ${info.applicationFormDetailResponseList
-            .map(
-                    (d, i) => `
+    .map(
+        (d, i) => `
                     <div class="detail-box">
                         <h5>세부사항 #${i + 1}</h5>
                         <div><b>공연 일시:</b> ${fmtDateTime(parseDate(d.performanceDate))}</div>
                         <div><b>회차:</b> ${d.session}</div>
                         <div><b>요청 매수:</b> ${d.requestCount}</div>
                         ${d.hopeAreaResponseList?.length
-                            ? `
+            ? `
                                 <div><b>희망 구역:</b></div>
                                 <ul class="hope-list">
                                     ${d.hopeAreaResponseList
-                                    .map(
-                                            (h) => `
+            .map(
+                (h) => `
                                                 <li>
                                                     (${h.priority}) ${h.location} – ₩${h.price.toLocaleString()}
                                                 </li>`
-                                    )
-                                    .join("")}
-                                </ul>`
-                            : ""}
-                        ${d.requirement ? `<div><i>${d.requirement}</i></div>` : ""}
-                    </div>`
             )
             .join("")}
+                                </ul>`
+            : ""}
+                        ${d.requirement ? `<div><i>${d.requirement}</i></div>` : ""}
+                    </div>`
+    )
+    .join("")}
         `;
   }
 
@@ -588,8 +784,8 @@
     meta.textContent = fmtTime(parseDate(p.sendDate));
     if (isMine) {
       meta.innerHTML += isRead
-              ? '<span class="read-check">✓</span>'
-              : '<span class="unread-dot"></span>';
+          ? '<span class="read-check">✓</span>'
+          : '<span class="unread-dot"></span>';
     }
     div.appendChild(meta);
 
@@ -605,11 +801,13 @@
     setTimeout(() => {
       // 서버 메시지가 이미 화면에 있고 tmp는 아직 남아있다면 제거
       const el = document.querySelector(`.msg.sender-me[data-msg-id="${tmpId}"]`);
-      if (!el) return;
+      if (!el) {
+        return;
+      }
       // 화면에 동일한 시간대(±5초) PICTURE mine 메시지가 있다면 tmp 삭제
       const lastMinePicture = Array.from(document.querySelectorAll('.msg.sender-me'))
-              .reverse()
-              .find(e => !e.dataset.msgId.startsWith('tmp-'));
+      .reverse()
+      .find(e => !e.dataset.msgId.startsWith('tmp-'));
       if (lastMinePicture) {
         el.remove();
         console.log('[TMP CLEANUP] removed stale tmp', tmpId);
@@ -639,7 +837,9 @@
       const pending = pendingUploads.shift();
       if (pending) {
         const tmp = document.querySelector(`.msg.sender-me[data-msg-id="${pending.tmpId}"]`);
-        if (tmp) tmp.remove();
+        if (tmp) {
+          tmp.remove();
+        }
         console.log('[TMP MATCHED]', pending?.tmpId, '->', p.messageId);
       } else {
         // 폴백
@@ -666,7 +866,9 @@
       if (!m.querySelector(".read-check")) {
         m.querySelector(".meta").innerHTML += '<span class="read-check">✓</span>';
       }
-      if (m.dataset.msgId === upto) found = true;
+      if (m.dataset.msgId === upto) {
+        found = true;
+      }
     }
     if (!found) {
       console.warn('[READ_ACK] upto id not found in DOM:', upto);
@@ -675,8 +877,10 @@
 
   function sendAckVisible() {
     const msgs = Array.from(document.querySelectorAll("#chatBox .msg"))
-            .filter(m => !m.dataset.msgId?.startsWith("tmp-"));
-    if (!msgs.length) return;
+    .filter(m => !m.dataset.msgId?.startsWith("tmp-"));
+    if (!msgs.length) {
+      return;
+    }
     const last = msgs[msgs.length - 1];
     const lastId = last.dataset.msgId;
     if (!lastId) {
@@ -684,12 +888,12 @@
       return;
     }
     stomp.send(
-            `/pub/chat.read.${currentRoomId}`,
-            {},
-            JSON.stringify({
-              lastReadMessageId: lastId,
-              readDate: dayjs().format("YYYY-MM-DDTHH:mm:ss")
-            })
+        `/pub/chat.read.${currentRoomId}`,
+        {},
+        JSON.stringify({
+          lastReadMessageId: lastId,
+          readDate: dayjs().format("YYYY-MM-DDTHH:mm:ss")
+        })
     );
   }
 
@@ -698,11 +902,13 @@
    =============================================== */
   function sendMsg() {
     const txt = document.getElementById("message").value.trim();
-    if (!txt) return;
+    if (!txt) {
+      return;
+    }
     stomp.send(
-            `/pub/chat.message.${document.getElementById("roomId").value}`,
-            {},
-            JSON.stringify({ message: txt })
+        `/pub/chat.message.${document.getElementById("roomId").value}`,
+        {},
+        JSON.stringify({message: txt})
     );
     document.getElementById("message").value = "";
   }
@@ -711,7 +917,9 @@
    * 사진 업로드 (멀티)
    =============================================== */
   async function sendPictures(files, roomId) {
-    if (!files?.length) return;
+    if (!files?.length) {
+      return;
+    }
 
     // 1) 업로드 시작 전에 즉시 tmp 프리뷰 생성 (await는 thumb 인코딩을 위해서; 더 빠르게 하려면 see 아래)
     const tmpId = await displayTmpPictureBundle(files);  // ✅ 먼저!
@@ -721,21 +929,22 @@
 
     try {
       const res = await fetch(
-              `${API}/api/chat-message/${roomId}/send/pictures`,
-              {
-                method: "POST",
-                headers: { Authorization: BEARER ? "Bearer " + Token.get() : Token.get() },
-                body: fd
-              }
+          `${API}/api/chat-message/${roomId}/send/pictures`,
+          {
+            method: "POST",
+            headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
+            body: fd
+          }
       );
-      if (!res.ok) throw new Error(res.status);
+      if (!res.ok) {
+        throw new Error(res.status);
+      }
       // 성공 시: 서버 WebSocket이 도착하면 onPacket()에서 tmp 제거됨.
     } catch (e) {
       markTmpFailed(tmpId, e);  // 업로드 실패 UX (선택)
       alert("사진 업로드 실패: " + e);
     }
   }
-
 
   // 레거시 단일 API 대응
   async function sendPicture(file, roomId) {
@@ -751,7 +960,7 @@
     const thumb = await blobToDataURL(first);
 
     const tmpId = "tmp-" + crypto.randomUUID();
-    pendingUploads.push({ tmpId, count: files.length, createdAt: Date.now() });
+    pendingUploads.push({tmpId, count: files.length, createdAt: Date.now()});
 
     const dto = {
       messageId: tmpId,
@@ -782,10 +991,10 @@
     return dto.message ?? mLastMsg(dto);
   }
 
-  function blobToDataURL(blob){
-    return new Promise(r=>{
-      const reader=new FileReader();
-      reader.onload=()=>r(reader.result);
+  function blobToDataURL(blob) {
+    return new Promise(r => {
+      const reader = new FileReader();
+      reader.onload = () => r(reader.result);
       reader.readAsDataURL(blob);
     });
   }
@@ -835,9 +1044,15 @@
     document.getElementById("sendButton").onclick = sendMsg;
     document.getElementById("logoutButton").onclick = () => {
       Object.values(roomSubscriptions).forEach(sub => {
-        try { sub.unsubscribe(); } catch {}
+        try {
+          sub.unsubscribe();
+        } catch {
+        }
       });
-      try { stomp?.disconnect(); } catch {}
+      try {
+        stomp?.disconnect();
+      } catch {
+      }
       Token.clear();
       location.reload();
     };
@@ -845,23 +1060,35 @@
       const panel = document.getElementById("formInfoSection");
       const btn = document.getElementById("toggleFormButton");
       if (panel.style.display === "none" || panel.style.display === "") {
-        if (!formLoaded) { await loadApplicationForm(currentRoomId); formLoaded = true; }
-        panel.style.display = "block"; btn.textContent = "신청서 숨기기";
+        if (!formLoaded) {
+          await loadApplicationForm(currentRoomId);
+          formLoaded = true;
+        }
+        panel.style.display = "block";
+        btn.textContent = "신청서 숨기기";
       } else {
-        panel.style.display = "none"; btn.textContent = "신청서 보기";
+        panel.style.display = "none";
+        btn.textContent = "신청서 보기";
       }
     };
 
     // Enter 키 전송
     document.getElementById("message").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMsg();
+      if (e.key === "Enter") {
+        sendMsg();
+      }
     });
 
     // 파일 input 변경
     document.getElementById("imgInput").addEventListener("change", async (e) => {
       const files = Array.from(e.target.files || []);
-      if (!files.length) return;
-      if (!currentRoomId) { alert("채팅방에 먼저 입장하세요."); return; }
+      if (!files.length) {
+        return;
+      }
+      if (!currentRoomId) {
+        alert("채팅방에 먼저 입장하세요.");
+        return;
+      }
 
       const imgs = files.filter(isImage);
       if (!imgs.length) {
@@ -876,7 +1103,10 @@
         return;
       }
       const ok = confirm(`${imgs.length}장 사진을 전송할까요?`);
-      if (!ok) { e.target.value = ""; return; }
+      if (!ok) {
+        e.target.value = "";
+        return;
+      }
 
       await sendPictures(imgs, currentRoomId);
       e.target.value = ""; // 동일 파일 재선택 가능하도록 초기화
