@@ -1,6 +1,5 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -39,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @ToString(callSuper = true)
 @Slf4j
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ApplicationForm extends BasePostgresEntity {
 
   @Id

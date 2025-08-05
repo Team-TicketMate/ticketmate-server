@@ -1,6 +1,5 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
@@ -27,7 +26,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class RejectionReason extends BasePostgresEntity {
 
   @Id
