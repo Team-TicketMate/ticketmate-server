@@ -2,6 +2,7 @@ package com.ticketmate.backend.api.application.controller.auth;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
+import com.ticketmate.backend.auth.application.dto.request.LoginRequest;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,38 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface AuthControllerDocs {
+
+  @Operation(
+      summary = "관리자 로그인",
+      description = """
+        ### 요청 파라미터
+        - `username` (String, required): 로그인 아이디  
+        - `password` (String, required): 로그인 비밀번호  
+        
+        ### 응답 데이터
+        - HTTP Status 200 (OK): 빈 응답 본문  
+        
+        ### 사용 방법
+        1. 클라이언트에서 아래 JSON 예시와 같이 POST 요청을 보냅니다.  
+           ```json
+           {
+             "username": "yourUsername",
+             "password": "yourPassword"
+           }
+           ```
+        2. 서버에서 인증에 성공하면, 액세스 토큰과 리프레시 토큰을 각각 `ACCESS_TOKEN`, `REFRESH_TOKEN` 이름의 쿠키에 담아 응답합니다.  
+        3. 이후 브라우저(또는 클라이언트)는 자동으로 쿠키를 포함하여 인증이 필요한 요청을 전송합니다.  
+        
+        ### 유의 사항
+        - 모든 요청 필드는 반드시 값이 존재해야 합니다.  
+        - `ACCESS_TOKEN` 쿠키는 `httpOnly=false` 로 설정되어 있어 프론트엔드 코드에서 접근 가능합니다.  
+        - `REFRESH_TOKEN` 쿠키는 `httpOnly=true` 로 설정되어 있어, 브라우저 JS에서 직접 읽을 수 없습니다.  
+        """
+  )
+  ResponseEntity<Void> login(
+      LoginRequest request,
+      HttpServletResponse response
+  );
 
   @Operation(
       summary = "accessToken 재발급 요청",
