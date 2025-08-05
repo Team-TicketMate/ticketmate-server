@@ -16,7 +16,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Builder
-public class LoginRequest {
+public class MockLoginRequest {
 
   @Email
   private String username;
