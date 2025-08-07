@@ -6,6 +6,7 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  * 관리자 계정을 자동으로 생성/업데이트
  */
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class AdminBootstrap {
 
@@ -23,31 +25,32 @@ public class AdminBootstrap {
 
   @PostConstruct
   public void initAdmin() {
-    String adminUsername = authProperties.username();
-    String rawPassword = authProperties.password();
-    String totpSecret = authProperties.totpSecret();
-
-    memberRepository.findByUsername(adminUsername)
-        .ifPresentOrElse(
-            member -> {
-              // 패스워드 및 TOTP 업데이트
-              member.setPassword(passwordEncoder.encode(rawPassword));
-              member.setTotpEnabled(true);
-              member.setTotpSecret(totpSecret);
-              memberRepository.save(member);
-            },
-            () -> {
-              // 새로운 관리자 계정 생성
-              Member admin = Member.builder()
-                  .username(adminUsername)
-                  .password(passwordEncoder.encode(rawPassword))
-                  .role(Role.ROLE_ADMIN)
-                  .name(authProperties.name())
-                  .totpEnabled(true)
-                  .totpSecret(totpSecret)
-                  .build();
-              memberRepository.save(admin);
-            }
-        );
+    authProperties.admins().forEach(admin -> {
+      String username = admin.username();
+      String rawPassword = admin.password();
+      String name = admin.name();
+      memberRepository.findByUsername(username)
+          .ifPresentOrElse(
+              member -> {
+                // 패스워드 업데이트
+                member.setRole(Role.ROLE_ADMIN);
+                member.setPassword(passwordEncoder.encode(rawPassword));
+                memberRepository.save(member);
+                log.debug("관리자: {} 업데이트 완료", member.getName());
+              },
+              () -> {
+                // 새로운 관리자 계정 생성
+                Member newAdmin = Member.builder()
+                    .username(username)
+                    .role(Role.ROLE_ADMIN)
+                    .name(name)
+                    .password(passwordEncoder.encode(rawPassword))
+                    .totpEnabled(false)
+                    .build();
+                memberRepository.save(newAdmin);
+                log.debug("새로운 관리자: {} 저장 완료", newAdmin.getName());
+              }
+          );
+    });
   }
 }
