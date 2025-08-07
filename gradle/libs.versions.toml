@@ -26,6 +26,7 @@ jackson_jsr310 = "2.19.2"
 jackson_databind = "2.15.2"
 suh_random_engine = "1.1.0"
 aop = "6.2.9"
+google_authenticator = "1.5.0"
 
 [libraries]
 
@@ -131,4 +132,7 @@ jackson_databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 suh_random_engine = { module = "me.suhsaechan:suh-random-engine", version.ref = "suh_random_engine" }
 
 # AOP
-aop = { module = "org.springframework:spring-aop", version.ref = "aop"}
+aop = { module = "org.springframework:spring-aop", version.ref = "aop" }
+
+# Google Authenticator
+google_authenticator = { module = "com.warrenstrange:googleauth", version.ref = "google_authenticator" }
