@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Builder
-public class LoginResponse {
+public class MockLoginResponse {
 
   private UUID memberId;
   private MemberType memberType;

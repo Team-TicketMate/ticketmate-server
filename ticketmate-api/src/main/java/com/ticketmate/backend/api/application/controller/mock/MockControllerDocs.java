@@ -2,8 +2,8 @@ package com.ticketmate.backend.api.application.controller.mock;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
-import com.ticketmate.backend.mock.application.dto.response.LoginResponse;
+import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +30,7 @@ public interface MockControllerDocs {
           - username을 입력하지 않을 시 임의의 사용자가 생성됩니다
           """
   )
-  ResponseEntity<LoginResponse> socialLogin(LoginRequest request);
+  ResponseEntity<MockLoginResponse> socialLogin(MockLoginRequest request);
 
   @ApiChangeLogs({
       @ApiChangeLog(

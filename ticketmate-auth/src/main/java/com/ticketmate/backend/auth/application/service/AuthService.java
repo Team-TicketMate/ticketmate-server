@@ -7,8 +7,10 @@ import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.
 import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.SMS_VERIFICATION_MESSAGE;
 import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRemoveSpecialCharacters;
 
+import com.ticketmate.backend.auth.application.dto.request.LoginRequest;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.core.service.TokenStore;
+import com.ticketmate.backend.auth.infrastructure.admin.CustomAdminUser;
 import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
 import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
@@ -28,6 +30,10 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +48,32 @@ public class AuthService {
   private final MemberService memberService;
   private final SmsService smsService;
   private final RedisTemplate<String, String> redisTemplate;
+  private final AuthenticationManager authenticationManager;
+
+  /**
+   * 로그인 (관리자)
+   */
+  @Transactional
+  public void login(LoginRequest request, HttpServletResponse response) {
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+    );
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    Member member = ((CustomAdminUser) authentication.getPrincipal()).getMember();
+    String accessToken = tokenProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+    String refreshToken = tokenProvider.createRefreshToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+
+    log.debug("로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
+    log.debug("accessToken = {}", accessToken);
+    log.debug("refreshToken = {}", refreshToken);
+
+    // RefreshToken을 Redis에 저장 (key: RT:memberId)
+    tokenStore.save(AuthUtil.getRefreshTokenTtlKey(member.getMemberId().toString()), refreshToken, jwtProperties.refreshExpMillis());
+
+    // 쿠키에 accessToken, refreshToken 추가
+    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtProperties.accessExpMillis() / 1000));
+    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken, jwtProperties.refreshExpMillis() / 1000));
+  }
 
   /**
    * 쿠키에 저장된 refreshToken을 통해 accessToken, refreshToken을 재발급합니다

@@ -1,8 +1,8 @@
 package com.ticketmate.backend.api.application.controller.mock;
 
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
-import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
-import com.ticketmate.backend.mock.application.dto.response.LoginResponse;
+import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import com.ticketmate.backend.mock.application.service.MockService;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,8 +32,8 @@ public class MockController implements MockControllerDocs {
   @Override
   @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @LogMonitoringInvocation
-  public ResponseEntity<LoginResponse> socialLogin(
-      @Valid @ModelAttribute LoginRequest request) {
+  public ResponseEntity<MockLoginResponse> socialLogin(
+      @Valid @ModelAttribute MockLoginRequest request) {
     return ResponseEntity.ok(mockService.testSocialLogin(request));
   }
 

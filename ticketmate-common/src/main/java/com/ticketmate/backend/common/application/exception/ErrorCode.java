@@ -36,6 +36,10 @@ public enum ErrorCode {
 
   VERIFY_CODE_NOT_SAME(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
 
+  // ADMIN
+
+  ADMIN_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "관리자 계정을 찾을 수 없습니다."),
+
   // OAUTH2
 
   INVALID_SOCIAL_PLATFORM(HttpStatus.BAD_REQUEST, "잘못된 소셜 플랫폼이 요청되었습니다."),

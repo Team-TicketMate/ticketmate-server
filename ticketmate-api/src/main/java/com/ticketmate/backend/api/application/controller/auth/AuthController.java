@@ -1,5 +1,6 @@
 package com.ticketmate.backend.api.application.controller.auth;
 
+import com.ticketmate.backend.auth.application.dto.request.LoginRequest;
 import com.ticketmate.backend.auth.application.service.AuthService;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
@@ -25,6 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController implements AuthControllerDocs {
 
   private final AuthService authService;
+
+  @Override
+  @PostMapping(value = "/login")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> login(
+      @Valid @RequestBody LoginRequest request,
+      HttpServletResponse response) {
+    authService.login(request, response);
+    return ResponseEntity.ok().build();
+  }
 
   @Override
   @PostMapping(value = "/reissue")

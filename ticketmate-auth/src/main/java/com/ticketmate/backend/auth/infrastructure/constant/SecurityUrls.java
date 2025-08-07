@@ -15,6 +15,7 @@ public class SecurityUrls {
   public static final List<String> AUTH_WHITELIST = List.of(
 
       // API
+      "/api/auth/login", // 로그인
       "/api/auth/reissue", // accessToken 재발급
       "/api/auth/send-code", // 인증문자 발송
       "/api/auth/verify", // 인증문자 검증

@@ -1,6 +1,5 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
@@ -24,7 +23,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
@@ -33,8 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@Slf4j
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ApplicationFormDetail extends BasePostgresEntity {
 
   private static final int HOPE_AREA_MAX_SIZE = 10;

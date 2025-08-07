@@ -1,6 +1,5 @@
 package com.ticketmate.backend.portfolio.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
@@ -32,7 +31,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Portfolio extends BasePostgresEntity {
 
   public static final int MAX_IMG_COUNT = 20;
