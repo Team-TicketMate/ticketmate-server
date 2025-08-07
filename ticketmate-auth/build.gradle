@@ -16,6 +16,7 @@ dependencies {
     implementation project(':ticketmate-member')
     implementation project(':ticketmate-redis')
     implementation project(':ticketmate-sms')
+    implementation project(':ticketmate-totp')
 
     // JWT
     api libs.jjwt.api
