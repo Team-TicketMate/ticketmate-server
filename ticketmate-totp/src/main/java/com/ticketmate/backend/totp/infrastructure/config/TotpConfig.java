@@ -12,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class TotpConfig {
 
   @Bean
-  public GoogleAuthenticator googleAuthenticator() {
-    GoogleAuthenticatorConfig config = new GoogleAuthenticatorConfig();
+  public GoogleAuthenticator googleAuthenticator(GoogleAuthenticatorConfig config) {
     return new GoogleAuthenticator(config);
   }
 
