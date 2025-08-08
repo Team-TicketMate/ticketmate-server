@@ -73,13 +73,14 @@ public class TotpAuthService {
     log.debug("초기 TOTP 검증 및 활성화");
     Member member = preAuthTokenManager.getMemberByPreAuthToken(preAuthToken);
     ensureTotpNotEnabled(member);
+    int code = Integer.parseInt(request.getCode());
     String key = TOTP_PENDING_SECRET_KEY_PREFIX + member.getMemberId();
     String pendingSecret = redisTemplate.opsForValue().get(key);
     if (CommonUtil.nvl(pendingSecret, "").isEmpty()) {
       log.error("관리자: {} 에 대한 TOTP pending secret이 존재하지 않습니다.", member.getName());
       throw new CustomException(ErrorCode.PENDING_TOTP_SECRET_NOT_FOUND);
     }
-    if (!totpService.verifyCode(pendingSecret, request.getCode())) {
+    if (!totpService.verifyCode(pendingSecret, code)) {
       log.error("관리자: {} TOTP 인증에 실패했습니다", member.getName());
       throw new CustomException(ErrorCode.INVALID_TOTP_CODE);
     }
@@ -101,7 +102,8 @@ public class TotpAuthService {
     log.debug("관리자 로그인 TOTP 2차인증 코드 검증");
     Member member = preAuthTokenManager.getMemberByPreAuthToken(preAuthToken);
     ensureTotpEnabled(member);
-    if (totpService.verifyCode(member.getTotpSecret(), request.getCode())) {
+    int code = Integer.parseInt(request.getCode());
+    if (totpService.verifyCode(member.getTotpSecret(), code)) {
       log.debug("관리자 2차인증 성공: 엑세스 토큰 및 리프레시 토큰 생성");
       TokenPair tokenPair = jwtManager.generateTokenPair(member);
       jwtManager.saveAndAttachTokenPair(member, tokenPair, response);

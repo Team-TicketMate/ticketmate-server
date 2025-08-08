@@ -155,7 +155,7 @@ public interface AuthControllerDocs {
           - `X-PreAuth-Token` (String, required): `/login` 호출 시 받은 preAuthToken
           
           ### 요청 파라미터
-          - `code` (int, required): 사용자가 OTP 앱에서 입력한 6자리 TOTP 코드
+          - `code` (String, required): 사용자가 OTP 앱에서 입력한 6자리 TOTP 코드
           
           #### Request Body 예시
           ```json
@@ -195,7 +195,7 @@ public interface AuthControllerDocs {
           - `X-PreAuth-Token` (String, required): `/login` 호출 시 받은 preAuthToken
           
           ### 요청 파라미터
-          - `code` (int, required): 사용자가 OTP 앱에서 입력한 6자리 TOTP 코드
+          - `code` (String, required): 사용자가 OTP 앱에서 입력한 6자리 TOTP 코드
           
           #### Request Body 예시
           ```json
