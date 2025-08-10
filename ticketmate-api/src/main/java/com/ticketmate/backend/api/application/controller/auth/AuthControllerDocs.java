@@ -124,8 +124,7 @@ public interface AuthControllerDocs {
           3. Google Authenticator 앱에서 QR 스캔 후 등록 완료
           
           ### 유의 사항
-          - 이미 TOTP가 설정된 사용자가 재호출할 경우, 기존 시크릿이 재발급되며 이전에 등록된 앱에서는 더 이상 코드가 유효하지 않습니다.
-          - 이미 등록된 사용자는 호출 시 에러 발생  
+          - 이미 TOTP가 설정된 사용자는 해당 API 호출 시 에러 발생
           - QR 코드 스캔 전에 URL을 외부에 노출하지 않도록 주의하세요.
           - `otpAuthUrl`은 발급 후 5분 이내에 사용해야 합니다
           """
@@ -160,7 +159,7 @@ public interface AuthControllerDocs {
           #### Request Body 예시
           ```json
           {
-            "code": 123456
+            "code": "123456"
           }
           ```
           
@@ -200,7 +199,7 @@ public interface AuthControllerDocs {
           #### Request Body 예시
           ```json
           {
-            "code": 123456
+            "code": "123456"
           }
           ```
           
