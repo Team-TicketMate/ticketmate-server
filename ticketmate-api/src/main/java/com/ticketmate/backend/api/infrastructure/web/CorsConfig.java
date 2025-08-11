@@ -33,6 +33,10 @@ public class CorsConfig {
       "http://localhost:8080", // 로컬 API 서버
       "http://localhost:3000", // 로컬 웹 서버
       "http://localhost:3001", // 채팅 테스트 전용 로컬 웹 서버
+      "http://localhost:3002",
+      "http://localhost:3003",
+      "http://localhost:3004",
+      "http://localhost:3005",
 
       "http://10.*:*", // 10.0.0.0/8
       "http://172.*:*", // 172.16.0.0/12 전체 (16~31)
