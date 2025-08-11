@@ -22,6 +22,7 @@ dependencies {
     implementation project(':ticketmate-notification')
     implementation project(':ticketmate-redis')
     implementation project(':ticketmate-sms')
+    implementation project(':ticketmate-totp')
     implementation project(':ticketmate-websocket')
 
     // Swagger UI

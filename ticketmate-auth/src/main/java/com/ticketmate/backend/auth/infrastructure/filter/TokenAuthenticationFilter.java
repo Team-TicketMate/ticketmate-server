@@ -31,7 +31,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-  private static final AntPathMatcher pathMatcher = new AntPathMatcher();
+  private final AntPathMatcher pathMatcher = new AntPathMatcher();
   private final TokenProvider tokenProvider;
   private final CustomOAuth2UserService customOAuth2UserService;
 

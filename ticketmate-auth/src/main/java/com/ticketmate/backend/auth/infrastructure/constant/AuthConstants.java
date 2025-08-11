@@ -29,4 +29,11 @@ public final class AuthConstants {
   public static final long SMS_CODE_TTL_MIN = 5;
   public static final String REDIS_VERIFICATION_KEY = "VERIF_CODE:";
   public static final String SMS_VERIFICATION_MESSAGE = "[Ticketmate] 인증번호 [{code}]를 입력해주세요.";
+
+  // TOTP
+  public static final long TOTP_PENDING_SECRET_TTL_MIN = 5;
+  public static final String TOTP_PENDING_SECRET_KEY_PREFIX = "2FA:PENDING:";
+  public static final String PRE_AUTH_KEY_PREFIX = "PRE_AUTH:";
+  public static final long PRE_AUTH_TTL_MIN = 5;
+  public static final String HEADER_PRE_AUTH = "X-PreAuth-Token";
 }

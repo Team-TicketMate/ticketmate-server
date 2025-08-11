@@ -36,9 +36,21 @@ public enum ErrorCode {
 
   VERIFY_CODE_NOT_SAME(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
 
+  // TOTP
+
+  INVALID_TOTP_SECRET(HttpStatus.BAD_REQUEST, "TOTP 시크릿이 유효하지 않습니다."),
+
+  TOTP_ALREADY_ENABLED(HttpStatus.CONFLICT, "TOTP 2차인증이 이미 활성화 되어있습니다."),
+
+  TOTP_NOT_ENABLED(HttpStatus.BAD_REQUEST, "TOTP 2차인증이 활성화 되어있지 않습니다."),
+
+  INVALID_TOTP_CODE(HttpStatus.BAD_REQUEST, "TOTP 2차인증에 실패했습니다."),
+
+  PENDING_TOTP_SECRET_NOT_FOUND(HttpStatus.NOT_FOUND, "TOTP 활성화를 위한 시크릿 키가 존재하지 않습니다."),
+
   // ADMIN
 
-  ADMIN_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "관리자 계정을 찾을 수 없습니다."),
+  ADMIN_MEMBER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "관리자 계정을 찾을 수 없습니다."),
 
   // OAUTH2
 

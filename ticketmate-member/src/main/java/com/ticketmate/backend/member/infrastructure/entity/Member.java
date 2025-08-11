@@ -107,11 +107,9 @@ public class Member extends BasePostgresEntity {
   /** 관리자 **/
   private String password;
 
-  // 2차 인증 설정 여부 (관리자만 사용)
   @Builder.Default
   @Column(nullable = false)
-  private Boolean totpEnabled = false;
+  private boolean totpEnabled = false;
 
-  // TOTP 비밀키 (관리자만 사용)
   private String totpSecret;
 }

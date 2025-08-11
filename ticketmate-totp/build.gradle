@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+dependencies {
+    implementation project(':ticketmate-common')
+    implementation project(':ticketmate-member')
+
+    // Google Authenticator
+    implementation libs.google.authenticator
+}
