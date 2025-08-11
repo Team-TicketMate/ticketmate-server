@@ -1,6 +1,5 @@
 package com.ticketmate.backend.concert.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.concert.core.constant.ConcertType;
 import com.ticketmate.backend.concert.core.constant.TicketReservationSite;
@@ -29,7 +28,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Concert extends BasePostgresEntity {
 
   @Id

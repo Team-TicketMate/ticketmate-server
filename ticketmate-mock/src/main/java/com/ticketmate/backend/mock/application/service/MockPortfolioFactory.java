@@ -5,7 +5,7 @@ import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
-import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
+import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
@@ -87,7 +87,7 @@ public class MockPortfolioFactory {
 
   // Mock 의뢰인 생성 및 저장
   private Member createClientMember() {
-    Member member = mockMemberFactory.generate(LoginRequest.builder()
+    Member member = mockMemberFactory.generate(MockLoginRequest.builder()
         .role(Role.ROLE_TEST)
         .memberType(MemberType.CLIENT)
         .build());

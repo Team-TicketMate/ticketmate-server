@@ -1,14 +1,9 @@
 package com.ticketmate.backend.auth.infrastructure.handler;
 
-import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.ACCESS_TOKEN_KEY;
-import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.REFRESH_TOKEN_KEY;
-
+import com.ticketmate.backend.auth.application.service.JwtManager;
+import com.ticketmate.backend.auth.core.dto.TokenPair;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
-import com.ticketmate.backend.auth.core.service.TokenStore;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.auth.infrastructure.properties.JwtProperties;
-import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
-import com.ticketmate.backend.auth.infrastructure.util.CookieUtil;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
@@ -28,8 +23,7 @@ import org.springframework.stereotype.Component;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final TokenProvider tokenProvider;
-  private final TokenStore tokenStore;
-  private final JwtProperties jwtProperties;
+  private final JwtManager jwtManager;
   @Value("${spring.security.app.redirect-uri.dev}")
   private String devRedirectUri;
   @Value("${spring.security.app.redirect-uri.prod}")
@@ -40,19 +34,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     // CustomOAuth2User
     Member member = ((CustomOAuth2User) authentication.getPrincipal()).getMember();
-    String accessToken = tokenProvider.createAccessToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
-    String refreshToken = tokenProvider.createRefreshToken(member.getMemberId().toString(), member.getUsername(), member.getRole().name());
+    TokenPair tokenPair = jwtManager.generateTokenPair(member);
 
     log.debug("로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
-    log.debug("accessToken = {}", accessToken);
-    log.debug("refreshToken = {}", refreshToken);
+    log.debug("accessToken = {}", tokenPair.accessToken());
+    log.debug("refreshToken = {}", tokenPair.refreshToken());
 
-    // RefreshToken을 Redis에 저장 (key: RT:memberId)
-    tokenStore.save(AuthUtil.getRefreshTokenTtlKey(member.getMemberId().toString()), refreshToken, jwtProperties.refreshExpMillis());
-
-    // 쿠키에 accessToken, refreshToken 추가
-    response.addCookie(CookieUtil.createCookie(ACCESS_TOKEN_KEY, accessToken, jwtProperties.accessExpMillis() / 1000));
-    response.addCookie(CookieUtil.createCookie(REFRESH_TOKEN_KEY, refreshToken, jwtProperties.refreshExpMillis() / 1000));
+    jwtManager.saveAndAttachTokenPair(member, tokenPair, response);
 
     // 로그인 성공 후 메인 페이지로 리다이렉트
     try {

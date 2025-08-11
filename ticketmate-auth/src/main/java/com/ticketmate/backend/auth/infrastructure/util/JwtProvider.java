@@ -18,8 +18,8 @@ import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class JwtProvider implements TokenProvider {
 
   private final SecretKey secretKey;

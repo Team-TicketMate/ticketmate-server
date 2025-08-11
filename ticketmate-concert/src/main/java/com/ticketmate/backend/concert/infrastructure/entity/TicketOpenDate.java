@@ -1,7 +1,6 @@
 package com.ticketmate.backend.concert.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import jakarta.persistence.Column;
@@ -29,7 +28,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TicketOpenDate extends BasePostgresEntity {
 
   @Id

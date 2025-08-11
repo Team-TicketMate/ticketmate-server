@@ -1,7 +1,6 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
@@ -31,7 +30,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Member extends BasePostgresEntity {
 
   @Id
@@ -40,7 +38,6 @@ public class Member extends BasePostgresEntity {
   private UUID memberId;
 
   // 소셜 로그인 시 발급되는 ID
-  @Column(nullable = false)
   private String socialLoginId;
 
   // 이메일
@@ -55,8 +52,8 @@ public class Member extends BasePostgresEntity {
   @Column(nullable = false)
   private String name;
 
+  // 소셜 플랫폼
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
   private SocialPlatform socialPlatform;
 
   // 생일
@@ -76,7 +73,8 @@ public class Member extends BasePostgresEntity {
 
   // 권한 (유저, 관리자)
   @Enumerated(EnumType.STRING)
-  private Role role;
+  @Builder.Default
+  private Role role = Role.ROLE_USER;
 
   // 회원 종류 (대리인, 구매자)
   @Enumerated(EnumType.STRING)
@@ -105,4 +103,13 @@ public class Member extends BasePostgresEntity {
   @Builder.Default
   @Column(nullable = false)
   private long followerCount = 0L;
+
+  /** 관리자 **/
+  private String password;
+
+  @Builder.Default
+  @Column(nullable = false)
+  private boolean totpEnabled = false;
+
+  private String totpSecret;
 }

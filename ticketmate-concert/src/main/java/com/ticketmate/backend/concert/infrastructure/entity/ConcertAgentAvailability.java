@@ -1,6 +1,5 @@
 package com.ticketmate.backend.concert.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.Entity;
@@ -24,7 +23,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(callSuper = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ConcertAgentAvailability extends BasePostgresEntity {
 
   @Id

@@ -12,7 +12,7 @@ import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
-import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
+import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -53,7 +53,7 @@ public class MockMemberFactory {
    *                accountStatus 활성화/삭제
    *                isFirstLogin 첫 로그인 여부
    */
-  public Member generate(LoginRequest request) {
+  public Member generate(MockLoginRequest request) {
     // 테스트 회원 ROLE 검증
     isValidMemberRoleRequest(request.getRole());
 
@@ -65,14 +65,14 @@ public class MockMemberFactory {
   /**
    * 공통 필드 설정
    */
-  private Member.MemberBuilder<?, ?> baseBuilder(Optional<LoginRequest> requestOptional) {
+  private Member.MemberBuilder<?, ?> baseBuilder(Optional<MockLoginRequest> requestOptional) {
     LocalDate birth = koFaker.timeAndDate().birthday();
     String birthYear = Integer.toString(birth.getYear()); // YYYY
     String birthDay = String.format("%02d%02d", birth.getMonthValue(), birth.getDayOfMonth()); // MMDD
 
     // username 생성
     String username = requestOptional
-        .map(LoginRequest::getUsername)
+        .map(MockLoginRequest::getUsername)
         .filter(s -> !nvl(s, "").isEmpty())
         .orElseGet(() -> enFaker.internet()
             .emailAddress()
@@ -82,16 +82,16 @@ public class MockMemberFactory {
     String nickname = suhRandomKit.nicknameWithUuid();
     String name = koFaker.name().name().replaceAll(" ", "");
     SocialPlatform social = requestOptional
-        .map(LoginRequest::getSocialPlatform)
+        .map(MockLoginRequest::getSocialPlatform)
         .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
     MemberType memberType = requestOptional
-        .map(LoginRequest::getMemberType)
+        .map(MockLoginRequest::getMemberType)
         .orElseGet(() -> koFaker.options().option(MemberType.class));
     AccountStatus status = requestOptional
-        .map(LoginRequest::getAccountStatus)
+        .map(MockLoginRequest::getAccountStatus)
         .orElse(AccountStatus.ACTIVE_ACCOUNT);
     boolean firstLogin = requestOptional
-        .map(LoginRequest::getIsFirstLogin)
+        .map(MockLoginRequest::getIsFirstLogin)
         .orElseGet(() -> koFaker.random().nextBoolean());
 
     return Member.builder()

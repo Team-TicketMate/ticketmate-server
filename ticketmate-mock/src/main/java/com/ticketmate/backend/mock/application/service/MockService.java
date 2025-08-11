@@ -27,8 +27,8 @@ import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSumma
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
-import com.ticketmate.backend.mock.application.dto.request.LoginRequest;
-import com.ticketmate.backend.mock.application.dto.response.LoginResponse;
+import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import com.ticketmate.backend.portfolio.application.service.PortfolioService;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
@@ -89,7 +89,7 @@ public class MockService {
    *                isFirstLogin 첫 로그인 여부
    */
   @Transactional
-  public LoginResponse testSocialLogin(LoginRequest request) {
+  public MockLoginResponse testSocialLogin(MockLoginRequest request) {
 
     log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
@@ -107,7 +107,7 @@ public class MockService {
     log.debug("테스트 로그인 성공: 엑세스 토큰 및 리프레시 토큰 생성");
     log.debug("테스트 accessToken = {}", accessToken);
 
-    return LoginResponse.builder()
+    return MockLoginResponse.builder()
         .memberId(member.getMemberId())
         .memberType(member.getMemberType())
         .accessToken(accessToken)

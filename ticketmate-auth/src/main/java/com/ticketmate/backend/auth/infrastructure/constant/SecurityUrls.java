@@ -14,11 +14,18 @@ public class SecurityUrls {
    */
   public static final List<String> AUTH_WHITELIST = List.of(
 
-      // API
+      // AUTH
+      "/api/auth/login", // 로그인 (관리자)
       "/api/auth/reissue", // accessToken 재발급
+      "/api/auth/2fa/setup", // 2FA setup
+      "/api/auth/2fa/setup/verify", // 2FA setup verify
+      "/api/auth/2fa/login/verify", // 2FA Login verify
+      "/api/auth/2fa/reset", // 2FA Reset
       "/api/auth/send-code", // 인증문자 발송
       "/api/auth/verify", // 인증문자 검증
       "/api/oauth2/**", // 소셜 로그인
+
+      // API
       "/api/concert/**", // 공연 조회
       "/api/concert-hall/**", // 공연장 조회
 

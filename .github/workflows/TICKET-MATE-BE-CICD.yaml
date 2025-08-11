@@ -70,6 +70,11 @@ jobs:
         run: |
           echo "${{ secrets.SPRINGDOC_YML }}" > ticketmate-api/src/main/resources/springdoc.yml
 
+      # admin.yml 파일을 빌드 전에 생성
+      - name: Create springdoc.yml from secret
+        run: |
+          echo "${{ secrets.ADMIN_YML }}" > ticketmate-api/src/main/resources/admin.yml
+
       # application-prod.yml 파일을 빌드 전에 생성
       - name: Create application-prod.yml from secret
         run: |
