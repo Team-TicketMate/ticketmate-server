@@ -6,8 +6,11 @@ import static com.ticketmate.backend.member.core.constant.MemberType.CLIENT;
 import static com.ticketmate.backend.member.core.constant.Role.ROLE_TEST;
 import static com.ticketmate.backend.member.core.constant.Role.ROLE_TEST_ADMIN;
 
+import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
+import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
+import com.ticketmate.backend.applicationform.infrastructure.repository.RejectionReasonRepository;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -37,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -73,6 +77,7 @@ public class MockService {
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
   private final PortfolioService portfolioService;
+  private final RejectionReasonRepository rejectionReasonRepository;
 
     /*
     ======================================회원======================================
@@ -406,7 +411,17 @@ public class MockService {
 
           // 트랜잭션 내에서 배치 저장
           transactionTemplate.execute(status -> {
+            // 신청서 일괄 저장
             applicationFormRepository.saveAll(applicationFormList);
+
+            // '거절'상태의 신청서에 대해서 거절사유 엔티티 저장
+            List<RejectionReason> rejectionReasonList = applicationFormList.stream()
+                .filter(form -> form.getApplicationFormStatus().equals(ApplicationFormStatus.REJECTED))
+                .map(mockApplicationFormFactory::createRejectionReason)
+                .collect(Collectors.toList());
+            if (!CommonUtil.nullOrEmpty(rejectionReasonList)) {
+              rejectionReasonRepository.saveAll(rejectionReasonList);
+            }
             return null;
           });
         } catch (Exception e) {
