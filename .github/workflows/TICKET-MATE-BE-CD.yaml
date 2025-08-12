@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 코드 체크아웃
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -18,29 +18,67 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Gradle 최적 설정
-        uses: gradle/actions/setup-gradle@v4
+          cache: 'gradle'
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Github Secret 내부 설정 파일 동적 생성
-        shell: bash
+      # firebase sdk 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
+      - name: Create ticketmate-firebase-key.json from secret
+        env:
+          FIREBASE_KEY_JSON: ${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}
         run: |
-          echo "${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}" | sed 's/\\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-firebase-key.json
+          echo "$FIREBASE_KEY_JSON" | sed 's/\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-firebase-key.json
+
+      # firebase 서비스워커 파일을 빌드 전에 생성 ("" 따옴표 표기 삭제 방지)
+      - name: Create firebase-messaging-sw.js from secret
+        run: |
           cat << 'EOF' > ticketmate-api/src/main/resources/static/firebase-messaging-sw.js
           ${{ secrets.FIREBASE_MESSAGING_SW_JS }}
           EOF
-          echo "${{ secrets.TICKETMATE_EMBEDDING_JSON }}" | sed 's/\\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-embedding.json
+
+      # embedding.json 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
+      - name: Create ticketmate-embedding.json from secret
+        env:
+          EMBEDDING_JSON: ${{ secrets.TICKETMATE_EMBEDDING_JSON }}
+        run: |
+          echo "$EMBEDDING_JSON" | sed 's/\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-embedding.json
+
+      # config-imports.yml 파일을 빌드 전에 생성
+      - name: Create config-imports.yml from secret
+        run: |
           echo "${{ secrets.CONFIG_IMPORTS_YML }}" > ticketmate-api/src/main/resources/config-imports.yml
+
+      # oauth2.yml 파일을 빌드 전에 생성
+      - name: Create oauth2.yml from secret
+        run: |
           echo "${{ secrets.OAUTH2_YML }}" > ticketmate-api/src/main/resources/oauth2.yml
+
+      # aws-s3.yml 파일을 빌드 전에 생성
+      - name: Create aws-s3.yml from secret
+        run: |
           echo "${{ secrets.AWS_S3_YML }}" > ticketmate-api/src/main/resources/aws-s3.yml
+
+      # messaging.yml 파일을 빌드 전에 생성
+      - name: Create messaging.yml from secret
+        run: |
           echo "${{ secrets.MESSAGING_YML }}" > ticketmate-api/src/main/resources/messaging.yml
+
+      # springdoc.yml 파일을 빌드 전에 생성
+      - name: Create springdoc.yml from secret
+        run: |
           echo "${{ secrets.SPRINGDOC_YML }}" > ticketmate-api/src/main/resources/springdoc.yml
+
+      # admin.yml 파일을 빌드 전에 생성
+      - name: Create admin.yml from secret
+        run: |
           echo "${{ secrets.ADMIN_YML }}" > ticketmate-api/src/main/resources/admin.yml
+
+      # application-prod.yml 파일을 빌드 전에 생성
+      - name: Create application-prod.yml from secret
+        run: |
           echo "${{ secrets.APPLICATION_PROD_YML }}" > ticketmate-api/src/main/resources/application-prod.yml
 
       # prod 프로파일을 활성화하여 빌드 ( 테스트 코드 테스트 X )
       - name: Build with Gradle
-        run: ./gradlew build -x test -Dspring.profiles.active=prod
+        run: ./gradlew clean build -x test -Dspring.profiles.active=prod
