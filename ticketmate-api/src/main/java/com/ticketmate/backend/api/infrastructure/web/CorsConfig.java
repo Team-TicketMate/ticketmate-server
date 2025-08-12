@@ -24,6 +24,7 @@ public class CorsConfig {
 
       "https://www.ticketmate.site", // 프론트 배포
       "https://dev.ticketmate.site", // 프론트 test
+      "https://deploy.ticketmate.site", //프론트 deploy
 
       // API
       "https://api.ticketmate.site", // 메인 API 서버
