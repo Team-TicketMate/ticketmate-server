@@ -97,7 +97,7 @@ jobs:
           fi
 
       - name: Build with Gradle
-        run: ./gradlew build -x test -Dspring.profiles.active=${{ steps.profile.outputs.PROFILE }}
+        run: ./gradlew clean build -x test -Dspring.profiles.active=${{ steps.profile.outputs.PROFILE }}
 
       - name: Docker 빌드환경 설정
         uses: docker/setup-buildx-action@v3
