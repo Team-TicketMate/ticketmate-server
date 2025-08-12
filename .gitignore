@@ -65,6 +65,7 @@ Thumbs.db
 ### Develop Application Yml ###
 application-dev.yml
 application-prod.yml
+application-deploy.yml
 oauth2.yml
 springdoc.yml
 messaging.yml
