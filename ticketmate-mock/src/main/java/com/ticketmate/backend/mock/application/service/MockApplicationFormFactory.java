@@ -1,9 +1,11 @@
 package com.ticketmate.backend.mock.application.service;
 
+import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationFormDetail;
 import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
+import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
@@ -155,5 +157,17 @@ public class MockApplicationFormFactory {
     int randomNumber = koFaker.number().numberBetween(1, 31);
     // 문자열 결합
     return randomLetter + String.valueOf(randomNumber);
+  }
+
+  /**
+   * 신청서 거절사유 생성
+   * 거절사유가 'OTHER'이면 otherMemo 5자 이상 생성
+   */
+  public RejectionReason createRejectionReason(ApplicationForm applicationForm) {
+    return RejectionReason.builder()
+        .applicationForm(applicationForm)
+        .applicationFormRejectedType(koFaker.options().option(ApplicationFormRejectedType.class))
+        .otherMemo(koFaker.lorem().sentence(3, 5))
+        .build();
   }
 }
