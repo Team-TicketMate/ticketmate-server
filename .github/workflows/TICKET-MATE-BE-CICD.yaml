@@ -120,7 +120,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          port: 2022
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             set -e
             
