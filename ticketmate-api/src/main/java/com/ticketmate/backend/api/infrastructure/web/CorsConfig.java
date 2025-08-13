@@ -23,13 +23,14 @@ public class CorsConfig {
       "https://ticketmate-admin.vercel.app", // 프론트 관리자
 
       "https://www.ticketmate.site", // 프론트 배포
-      "https://dev.ticketmate.site", // 프론트 test
-      "https://deploy.ticketmate.site", //프론트 deploy
-      "https://admin.ticketmate.site", // 프론트 admin
+      "https://app.ticketmate.site", // 프론트 배포
+      "https://app.dev.ticketmate.site", // 프론트 dev
+      "https://admin.dev.ticketmate.site", // 프론트 admin dev
 
       // API
       "https://api.ticketmate.site", // 메인 API 서버
       "https://test.ticketmate.site", // 테스트 API 서버
+      "https://api.dev.ticketmate.site", // dev API 서버
 
       // Local
       "http://localhost:8080", // 로컬 API 서버
