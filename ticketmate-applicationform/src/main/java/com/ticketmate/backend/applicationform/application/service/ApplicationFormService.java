@@ -250,6 +250,10 @@ public class ApplicationFormService {
     // '수락' 가능여부 검증
     validateApplicationFormAction(applicationForm, agent, ApplicationFormAction.APPROVE);
 
+    // 신청서 상태 "APPROVED" 변경
+    applicationForm.setApplicationFormStatus(ApplicationFormStatus.APPROVED);
+    applicationFormRepository.save(applicationForm);
+
     // TODO: 아래 로직 수정필요 -> 채팅 리팩토링 진행 시 수정
     /**
      * 이미 다른 대리자에 의해 신청서가 수락상태가 됐을 경우 수락 자체가 불가합니다.
