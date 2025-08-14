@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - test
+      - deploy
 
 jobs:
   build:
@@ -80,8 +81,23 @@ jobs:
         run: |
           echo "${{ secrets.APPLICATION_PROD_YML }}" > ticketmate-api/src/main/resources/application-prod.yml
 
+      # application-deploy.yml 파일을 빌드 전에 생성
+      - name: Create application-deploy.yml from secret
+        run: |
+          echo "${{ secrets.APPLICATION_DEPLOY_YML }}" > ticketmate-api/src/main/resources/application-deploy.yml
+
+      # 브랜치 별 active profile 설정
+      - name: Decide active profile
+        id: profile
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "deploy" ]; then
+            echo "PROFILE=deploy" >> $GITHUB_OUTPUT
+          else
+            echo "PROFILE=prod" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build with Gradle
-        run: ./gradlew clean build -x test -Dspring.profiles.active=prod
+        run: ./gradlew clean build -x test -Dspring.profiles.active=${{ steps.profile.outputs.PROFILE }}
 
       - name: Docker 빌드환경 설정
         uses: docker/setup-buildx-action@v3
@@ -120,7 +136,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          port: 2022
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             set -e
             
@@ -130,20 +146,27 @@ jobs:
             BRANCH=${{ github.ref_name }}
             PORT=8080
             CONTAINER_NAME="ticket-mate-back"
+            PROFILE="prod"
+            IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
             
             if [ "$BRANCH" == "main" ]; then
               PORT=8087
             elif [ "$BRANCH" == "test" ]; then
               CONTAINER_NAME="ticket-mate-back-test"
               PORT=8088
+            elif [ "$BRANCH" == "deploy" ]; then
+              CONTAINER_NAME="ticket-mate-back-deploy"
+              PORT=8089
+              PROFILE="deploy"
             fi
             
             echo "브랜치: $BRANCH"
             echo "컨테이너 이름: $CONTAINER_NAME"
             echo "포트: $PORT"
+            echo "활성 프로필: $PROFILE"
             
-            echo "도커 이미지 풀 : ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}"
-            echo $PW | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
+            echo "도커 이미지 풀 : $IMAGE"
+            echo $PW | sudo -S docker pull $IMAGE
             
             echo "컨테이너 $CONTAINER_NAME 존재 여부 확인 중..."
             if sudo docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
@@ -157,10 +180,10 @@ jobs:
             echo "새로운 컨테이너 $CONTAINER_NAME 실행 중..."
             echo $PW | sudo -S docker run -d -p ${PORT}:8080 --name $CONTAINER_NAME \
               -e TZ=Asia/Seoul \
-              -e "SPRING_PROFILES_ACTIVE=prod" \
+              -e "SPRING_PROFILES_ACTIVE=${PROFILE}" \
               -v /etc/localtime:/etc/localtime:ro \
               -v /home/ticketmate98/Desktop/projects/ticket-mate:/mnt/ticket-mate \
-              ${{ secrets.DOCKERHUB_USERNAME }}/ticket-mate-back:${BRANCH}
+              ${IMAGE}
             
             # <none> 태그로 남은 이미지 정리
             echo "불필요한 dangling(<none>) 이미지 정리..."
