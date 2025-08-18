@@ -17,7 +17,7 @@ public class SearchEventListener {
   @Async
   @EventListener
   public void handleSearchEvent(SearchEvent searchEvent) {
-    log.info("검색어 저장 이벤트 수신 - 사용자 ID: {}, 키워드: '{}'",
+    log.debug("검색어 저장 이벤트 수신 - 사용자 ID: {}, 키워드: '{}'",
             searchEvent.memberId(), searchEvent.keyword());
     recentSearchService.addRecentSearch(searchEvent.memberId(), searchEvent.keyword());
   }
