@@ -31,8 +31,12 @@ public class RecentSearchService {
     zSetOperations.add(key, keyword, System.currentTimeMillis());
 
     // 가장 오래된 데이터 삭제 (최대 개수 초과 시)
-    zSetOperations.removeRange(key, 0, -(searchProperties.recent().maxSize() + 1));
-
+    int max = searchProperties.recent().maxSize();
+    Long size = zSetOperations.size(key);
+    if(size != null && size > max){
+      zSetOperations.remove(key, 0, size - max - 1);
+    }
+    
     // ttl 설정
     redisTemplate.expire(key, searchProperties.recent().ttlDays(), TimeUnit.DAYS);
   }
