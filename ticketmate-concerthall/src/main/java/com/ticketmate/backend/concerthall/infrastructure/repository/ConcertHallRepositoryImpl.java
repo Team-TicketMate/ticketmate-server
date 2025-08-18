@@ -45,6 +45,7 @@ public class ConcertHallRepositoryImpl implements ConcertHallRepositoryCustom {
             CONCERT_HALL.concertHallId,
             CONCERT_HALL.concertHallName,
             CONCERT_HALL.address,
+            CONCERT_HALL.city,
             CONCERT_HALL.webSiteUrl
         ))
         .from(CONCERT_HALL)
