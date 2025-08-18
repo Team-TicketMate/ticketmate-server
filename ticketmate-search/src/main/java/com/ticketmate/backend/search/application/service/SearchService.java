@@ -5,6 +5,7 @@ import com.ticketmate.backend.search.application.dto.IdScorePair;
 import com.ticketmate.backend.search.application.dto.request.SearchRequest;
 import com.ticketmate.backend.search.application.dto.response.SearchResponse;
 import com.ticketmate.backend.search.application.dto.response.SearchResult;
+import com.ticketmate.backend.search.application.event.SearchEvent;
 import com.ticketmate.backend.search.core.constant.SearchType;
 import com.ticketmate.backend.search.infrastructure.repository.SearchRepositoryCustom;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -26,13 +28,27 @@ public class SearchService {
 
   private final HybridSearchService hybridSearchService;
   private final SearchRepositoryCustom searchRepositoryCustom;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   /**
    * 사용자 요청을 처리하는 메인 검색 메서드
    */
-  public SearchResponse<?> search(SearchRequest request) {
+  public SearchResponse<?> search(SearchRequest request, UUID memberId) {
+    String keyword = request.getKeyword();
+
+    if(keyword == null || keyword.isBlank()){
+      return SearchResponse.empty();
+    }
+    // 양옆 공백 제거
+    keyword = keyword.trim();
+
+    // 최근 검색어 저장 (로그인 사용자)
+    if(memberId != null){
+      applicationEventPublisher.publishEvent(new SearchEvent(memberId, keyword));
+    }
+
     // 하이브리드 검색 결과 가져오기
-    CachedSearchResult results = hybridSearchService.executeHybridSearch(request.getKeyword());
+    CachedSearchResult results = hybridSearchService.executeHybridSearch(keyword);
     Pageable pageable = request.toPageable();
 
     Slice<? extends SearchResult> slice;
