@@ -1,5 +1,6 @@
 package com.ticketmate.backend.search.application.service;
 
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.search.application.dto.CachedSearchResult;
 import com.ticketmate.backend.search.application.dto.IdScorePair;
 import com.ticketmate.backend.search.application.dto.request.SearchRequest;
@@ -36,7 +37,7 @@ public class SearchService {
   public SearchResponse<?> search(SearchRequest request, UUID memberId) {
     String keyword = request.getKeyword();
 
-    if(keyword == null || keyword.isBlank()){
+    if(CommonUtil.nvl(keyword, "").isEmpty()){
       return SearchResponse.empty();
     }
     // 양옆 공백 제거

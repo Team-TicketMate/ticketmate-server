@@ -16,10 +16,6 @@ public class RecentSearchService {
   private final SearchProperties searchProperties;
   private static final String RECENT_SEARCH_KEY = "searches:recent:";
 
-  private String buildRecentSearchKey(UUID memberId){
-    return RECENT_SEARCH_KEY + memberId.toString();
-  }
-
   /**
    * 검색어 추가
    */
@@ -56,6 +52,10 @@ public class RecentSearchService {
    */
   public void deleteAllRecentSearches(UUID memberId){
       redisTemplate.delete(buildRecentSearchKey(memberId));
+  }
+
+  private String buildRecentSearchKey(UUID memberId){
+    return RECENT_SEARCH_KEY + memberId.toString();
   }
 }
 
