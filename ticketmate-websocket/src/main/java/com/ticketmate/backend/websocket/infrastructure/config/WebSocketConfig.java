@@ -41,7 +41,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         .setRelayHost(properties.host())  // // RabbitMQ 서버 주소
         .setRelayPort(properties.stompPort())
         .setClientLogin(properties.username())  // 계정
-        .setClientPasscode(properties.password());  // 비빌번호
+        .setClientPasscode(properties.password())
+        .setSystemLogin(properties.username())
+        .setSystemPasscode(properties.password());  // 비빌번호
 
     registry.setApplicationDestinationPrefixes("/pub");  // 클라이언트에서 메시지 송신 시 프리픽스
     registry.setPathMatcher(new AntPathMatcher("."));  // url을 chat/room/3 -> chat.room.3으로 참조하기 위한 설정
