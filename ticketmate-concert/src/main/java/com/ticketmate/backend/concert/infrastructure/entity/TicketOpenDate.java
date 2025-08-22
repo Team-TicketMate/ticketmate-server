@@ -49,4 +49,14 @@ public class TicketOpenDate extends BasePostgresEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private TicketOpenType ticketOpenType; // 선예매, 일반예매 여부
+
+  public static TicketOpenDate of(Concert concert, LocalDateTime openDate, Integer requestMaxCount, Boolean isBankTransfer, TicketOpenType ticketOpenType) {
+    return TicketOpenDate.builder()
+        .concert(concert)
+        .openDate(openDate)
+        .requestMaxCount(requestMaxCount)
+        .isBankTransfer(isBankTransfer)
+        .ticketOpenType(ticketOpenType)
+        .build();
+  }
 }

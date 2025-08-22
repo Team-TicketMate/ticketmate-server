@@ -42,5 +42,13 @@ public class ConcertDate extends BasePostgresEntity {
 
   @Column(nullable = false)
   @Builder.Default
-  private Integer session = 1; // 회차
+  private int session = 1; // 회차
+
+  public static ConcertDate of(Concert concert, LocalDateTime performanceDate, int session) {
+    return ConcertDate.builder()
+        .concert(concert)
+        .performanceDate(performanceDate)
+        .session(session)
+        .build();
+  }
 }
