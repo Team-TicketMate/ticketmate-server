@@ -120,11 +120,11 @@ public class AdminService {
 
     // 공연 날짜 검증 및 저장
     concertDateAdminService.validateConcertDateList(request.getConcertDateRequestList());
-    concertDateAdminService.saveConcertDateList(request.getConcertDateRequestList());
+    concertDateAdminService.saveConcertDateList(concert, request.getConcertDateRequestList());
 
     // 티켓 오픈일 검증 및 저장
     ticketOpenDateAdminService.validateTicketOpenDateList(request.getTicketOpenDateRequestList());
-    ticketOpenDateAdminService.saveTicketOpenDateList(request.getTicketOpenDateRequestList());
+    ticketOpenDateAdminService.saveTicketOpenDateList(concert, request.getTicketOpenDateRequestList());
 
     // 공연 임베딩 저장
     generateOrUpdateConcertEmbedding(concert, concertHall);

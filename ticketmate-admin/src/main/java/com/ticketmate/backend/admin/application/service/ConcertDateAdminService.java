@@ -1,11 +1,12 @@
 package com.ticketmate.backend.admin.application.service;
 
 import com.ticketmate.backend.admin.application.dto.request.ConcertDateRequest;
-import com.ticketmate.backend.admin.application.mapper.ConcertAdminMapper;
 import com.ticketmate.backend.admin.application.validator.ConcertDateValidator;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertDateRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class ConcertDateAdminService {
 
   private final ConcertDateRepository concertDateRepository;
-  private final ConcertAdminMapper concertAdminMapper;
 
   /**
    * 기존에 저장된 공연날짜를 모두 삭제하고 새로운 공연날짜를 저장
@@ -25,7 +25,7 @@ public class ConcertDateAdminService {
     log.debug("기존 공연 날짜를 모두 삭제하고, 새로운 공연 날짜를 저장합니다");
     validateConcertDateList(requestList);
     deleteAllConcertDateByConcert(concert);
-    saveConcertDateList(requestList);
+    saveConcertDateList(concert, requestList);
   }
 
   /**
@@ -33,8 +33,11 @@ public class ConcertDateAdminService {
    *
    * @param requestList 공연 날짜 DTO 리스트
    */
-  public void saveConcertDateList(List<ConcertDateRequest> requestList) {
-    concertDateRepository.saveAll(concertAdminMapper.toConcertDateList(requestList));
+  public void saveConcertDateList(Concert concert, List<ConcertDateRequest> requestList) {
+    List<ConcertDate> concertDateList = requestList.stream()
+        .map(request -> request.toEntity(concert))
+        .collect(Collectors.toList());
+    concertDateRepository.saveAll(concertDateList);
   }
 
   /**
