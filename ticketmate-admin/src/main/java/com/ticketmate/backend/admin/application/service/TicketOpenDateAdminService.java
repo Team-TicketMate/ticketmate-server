@@ -1,11 +1,12 @@
 package com.ticketmate.backend.admin.application.service;
 
 import com.ticketmate.backend.admin.application.dto.request.TicketOpenDateRequest;
-import com.ticketmate.backend.admin.application.mapper.ConcertAdminMapper;
 import com.ticketmate.backend.admin.application.validator.TicketOpenDateValidator;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
+import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
 import com.ticketmate.backend.concert.infrastructure.repository.TicketOpenDateRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class TicketOpenDateAdminService {
 
   private final TicketOpenDateRepository ticketOpenDateRepository;
-  private final ConcertAdminMapper concertAdminMapper;
 
   /**
    * 기존에 저장된 티켓 오픈일을 모두 삭제하고 새로운 티켓 오픈일을 저장
@@ -25,7 +25,7 @@ public class TicketOpenDateAdminService {
     log.debug("기존 티켓 오픈일을 모두 삭제하고, 새로운 티켓 오픈일을 저장합니다");
     validateTicketOpenDateList(requestList);
     deleteAllTicketOpenDateByConcert(concert);
-    saveTicketOpenDateList(requestList);
+    saveTicketOpenDateList(concert, requestList);
   }
 
   /**
@@ -33,8 +33,11 @@ public class TicketOpenDateAdminService {
    *
    * @param requestList 티켓 오픈일 DTO 리스트
    */
-  public void saveTicketOpenDateList(List<TicketOpenDateRequest> requestList) {
-    ticketOpenDateRepository.saveAll(concertAdminMapper.toTicketOpenDateList(requestList));
+  public void saveTicketOpenDateList(Concert concert, List<TicketOpenDateRequest> requestList) {
+    List<TicketOpenDate> ticketOpenDateList = requestList.stream()
+        .map(request -> request.toEntity(concert))
+        .collect(Collectors.toList());
+    ticketOpenDateRepository.saveAll(ticketOpenDateList);
   }
 
   /**

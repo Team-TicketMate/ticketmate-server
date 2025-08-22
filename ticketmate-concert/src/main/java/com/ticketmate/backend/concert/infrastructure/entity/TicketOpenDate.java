@@ -11,6 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class TicketOpenDate extends BasePostgresEntity {
   private UUID ticketOpenDateId;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   private Concert concert;
 
   @Column(columnDefinition = "TIMESTAMP(0)")

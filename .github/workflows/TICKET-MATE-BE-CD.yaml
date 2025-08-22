@@ -95,4 +95,4 @@ jobs:
           fi
 
       - name: Build with Gradle
-        run: ./gradlew clean build -x test -Dspring.profiles.active=prod
+        run: ./gradlew clean build -x test -Dspring.profiles.active=${{ steps.profile.outputs.PROFILE }}
