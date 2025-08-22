@@ -1,6 +1,5 @@
 package com.ticketmate.backend.admin.application.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
@@ -23,7 +22,6 @@ import lombok.ToString;
 @Builder
 public class TicketOpenDateRequest {
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime openDate; // 티켓 오픈일
 
   @Min(value = 1, message = "최대 예매 매수는 1 이상이여야 합니다")

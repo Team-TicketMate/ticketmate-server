@@ -1,6 +1,5 @@
 package com.ticketmate.backend.admin.application.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,9 +30,7 @@ public class PortfolioFilteredAdminResponse {
 
   private PortfolioType portfolioType;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime createdDate;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime updatedDate;
 }
