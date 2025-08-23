@@ -19,6 +19,7 @@ dependencies {
     implementation project(':ticketmate-concerthall')
     implementation project(':ticketmate-portfolio')
     implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-redis')
 
     // QueryDSL annotationProcessor
     annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }

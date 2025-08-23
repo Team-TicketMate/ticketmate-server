@@ -53,10 +53,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       String token = AuthUtil.extractAccessTokenFromRequest(request);
 
       // 토큰 검증: 토큰이 유효하면 인증 설정
-      if (tokenProvider.isValidToken(token)) {
+      if (token != null && tokenProvider.isValidToken(token)) {
         handleValidToken(request, response, filterChain, token, apiRequestType);
         return;
       }
+
+      // 선택적 인증 경로이고 토큰이 없는 경우 통과
+      if (isOptionalAuthPath(uri) && token == null) {
+        filterChain.doFilter(request, response);
+        return;
+      }
+
       handleInvalidToken(response, token);
     } catch (ExpiredJwtException e) {
       log.error("토큰 만료: {}", e.getMessage());
@@ -101,6 +108,17 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    */
   private boolean isWhitelistedPath(String uri) {
     return SecurityUrls.AUTH_WHITELIST.stream()
+        .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+  }
+
+  /**
+   * 선택적 인증 경로 확인
+   *
+   * @param uri 요청된 URI
+   * @return 선택적 인증 경로 여부
+   */
+  private boolean isOptionalAuthPath(String uri) {
+    return SecurityUrls.OPTIONAL_AUTH_PATHS.stream()
         .anyMatch(pattern -> pathMatcher.match(pattern, uri));
   }
 
