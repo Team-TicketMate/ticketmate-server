@@ -24,6 +24,5 @@ public class ConcertDateRequest {
 
   @Min(value = 1, message = "최대 예매 매수는 1 이상이여야 합니다")
   @Max(value = Integer.MAX_VALUE, message = "최대 예매 매수는 정수 최대 범위를 넘을 수 없습니다.")
-  @NotNull(message = "공연 회차를 입력해주세요")
   private int session;
 }

@@ -19,7 +19,7 @@ public class ConcertDateInfoResponse {
 
   private LocalDateTime performanceDate; // 공연일자
 
-  private Integer session; // 회차
+  private int session; // 회차
 
   public static ConcertDateInfoResponse from(ConcertDate concertDate) {
     return ConcertDateInfoResponse.builder()
