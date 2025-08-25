@@ -1,6 +1,5 @@
 package com.ticketmate.backend.applicationform.application.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -25,7 +24,6 @@ import lombok.ToString;
 public class ApplicationFormDetailRequest {
 
   @NotNull(message = "공연일자를 입력하세요")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime performanceDate; // 공연일자
 
   @NotNull(message = "티켓 요청 매수를 입력해주세요")

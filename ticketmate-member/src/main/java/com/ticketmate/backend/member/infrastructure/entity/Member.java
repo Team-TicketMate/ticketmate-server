@@ -1,6 +1,5 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
@@ -91,7 +90,6 @@ public class Member extends BasePostgresEntity {
 
   // 마지막 로그인 시간
   @Column(columnDefinition = "TIMESTAMP(0)")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)

@@ -1,6 +1,5 @@
 package com.ticketmate.backend.concert.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import jakarta.persistence.Column;
@@ -41,7 +40,6 @@ public class TicketOpenDate extends BasePostgresEntity {
   private Concert concert;
 
   @Column(columnDefinition = "TIMESTAMP(0)")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime openDate; // 티켓 오픈일
 
   private Integer requestMaxCount; // 최대 예매 매수
@@ -51,4 +49,14 @@ public class TicketOpenDate extends BasePostgresEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private TicketOpenType ticketOpenType; // 선예매, 일반예매 여부
+
+  public static TicketOpenDate of(Concert concert, LocalDateTime openDate, Integer requestMaxCount, Boolean isBankTransfer, TicketOpenType ticketOpenType) {
+    return TicketOpenDate.builder()
+        .concert(concert)
+        .openDate(openDate)
+        .requestMaxCount(requestMaxCount)
+        .isBankTransfer(isBankTransfer)
+        .ticketOpenType(ticketOpenType)
+        .build();
+  }
 }

@@ -232,6 +232,10 @@ public enum ErrorCode {
 
   SMS_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송 예외 발생"),
 
+  // JACKSON
+
+  INVALID_DATE_TIME_PARSE(HttpStatus.BAD_REQUEST, "날짜/시간 형식이 올바르지 않습니다."),
+
   ;
 
   private final HttpStatus status;

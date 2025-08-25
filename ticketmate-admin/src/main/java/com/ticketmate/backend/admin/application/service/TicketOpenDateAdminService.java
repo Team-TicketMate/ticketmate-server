@@ -35,7 +35,7 @@ public class TicketOpenDateAdminService {
    */
   public void saveTicketOpenDateList(Concert concert, List<TicketOpenDateRequest> requestList) {
     List<TicketOpenDate> ticketOpenDateList = requestList.stream()
-        .map(request -> request.toEntity(concert))
+        .map(request -> TicketOpenDate.of(concert, request.getOpenDate(), request.getRequestMaxCount(), request.getIsBankTransfer(), request.getTicketOpenType()))
         .collect(Collectors.toList());
     ticketOpenDateRepository.saveAll(ticketOpenDateList);
   }
