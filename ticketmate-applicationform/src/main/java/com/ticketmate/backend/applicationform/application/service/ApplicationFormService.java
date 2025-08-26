@@ -310,9 +310,9 @@ public class ApplicationFormService {
    */
   private void validateDuplicateApplicationForm(UUID clientId, UUID agentId, UUID concertId, TicketOpenType ticketOpenType) {
     applicationFormRepository.findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-        clientId, agentId, concertId, ticketOpenType).orElseThrow(() -> {
-      log.error("중복된 신청서 요청입니다.");
-      return new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
+        clientId, agentId, concertId, ticketOpenType).ifPresent(applicationForm -> {
+      log.error("중복된 신청서 요청입니다. 신청서 PK: {}", applicationForm.getApplicationFormId());
+      throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
     });
   }
 

@@ -35,7 +35,7 @@ public class ConcertDateAdminService {
    */
   public void saveConcertDateList(Concert concert, List<ConcertDateRequest> requestList) {
     List<ConcertDate> concertDateList = requestList.stream()
-        .map(request -> request.toEntity(concert))
+        .map(request -> ConcertDate.of(concert, request.getPerformanceDate(), request.getSession()))
         .collect(Collectors.toList());
     concertDateRepository.saveAll(concertDateList);
   }

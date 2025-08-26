@@ -1,16 +1,19 @@
 package com.ticketmate.backend.api.application.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
 import com.ticketmate.backend.common.application.exception.ValidErrorResponse;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -30,7 +33,7 @@ public class GlobalExceptionHandler {
   private final SimpMessagingTemplate template;
 
   /**
-   * 1) Validation 예외 처리
+   * Validation 예외 처리
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ValidErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
@@ -53,7 +56,7 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 2) 커스텀 예외 처리
+   * 커스텀 예외 처리
    */
   @ExceptionHandler(CustomException.class)
   public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
@@ -61,16 +64,13 @@ public class GlobalExceptionHandler {
 
     ErrorCode errorCode = e.getErrorCode();
 
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(errorCode)
-        .errorMessage(errorCode.getMessage())
-        .build();
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
 
     return ResponseEntity.status(errorCode.getStatus()).body(response);
   }
 
   /**
-   * 3) WebSocket 통신 중 발생한 예외(비즈니스 로직)처리
+   * WebSocket 통신 중 발생한 예외(비즈니스 로직)처리
    * StompExceptionInterceptor 내부에서 처리를 하지 못하는 상활일 때의 예외를 핸들링합니다.
    */
   @MessageExceptionHandler(CustomException.class)
@@ -79,27 +79,42 @@ public class GlobalExceptionHandler {
 
     ErrorCode errorCode = e.getErrorCode();
 
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(errorCode)
-        .errorMessage(errorCode.getMessage())
-        .build();
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
 
     template.convertAndSendToUser(principal.getName(), ERROR_DESTINATION, response);
   }
 
   /**
-   * 4) 그 외 예외 처리
+   * JSON 바디 파싱 실패 (ex. LocalDateTime 포맷 불일치 등)
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+    log.error("HttpMessageNotReadableException 발생: {}", e.getMessage());
+
+    if (e.getCause() instanceof InvalidFormatException invalidFormatException) {
+      // LocalDateTime 포맷 오류
+      if (invalidFormatException.getTargetType() != null && LocalDateTime.class.isAssignableFrom(invalidFormatException.getTargetType())) {
+        ErrorCode errorCode = ErrorCode.INVALID_DATE_TIME_PARSE;
+        ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(response);
+      }
+    }
+    // 그 외 JSON 파싱 오류는 400 응답
+    ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
+    return ResponseEntity.status(errorCode.getStatus()).body(response);
+  }
+
+  /**
+   * 그 외 예외 처리
    */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleException(Exception e) {
     log.error("Unhandled Exception 발생: {}", e.getMessage(), e);
 
     // 예상치 못한 에러 => 500
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
-        .errorMessage(ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
-        .build();
-
+    ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
   }
 }

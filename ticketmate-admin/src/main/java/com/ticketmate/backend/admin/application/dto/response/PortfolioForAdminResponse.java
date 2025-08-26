@@ -1,6 +1,5 @@
 package com.ticketmate.backend.admin.application.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,15 +20,22 @@ import lombok.ToString;
 public class PortfolioForAdminResponse {
 
   private UUID portfolioId;
+
   private UUID memberId;
+
   private String nickname;
+
   private String phone;
+
   private String profileUrl;
+
   private MemberType memberType;
+
   private String portfolioDescription;
+
   private List<String> portfolioImgList;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+
   private LocalDateTime createdDate;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+
   private LocalDateTime updatedDate;
 }

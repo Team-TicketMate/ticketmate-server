@@ -105,7 +105,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     }
     concertInfoResponse.setConcertDateInfoResponseList(
         dateMap.values().stream()
-            .sorted(Comparator.comparing(ConcertDateInfoResponse::getSession))
+            .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
             .toList()
     );
 
@@ -184,7 +184,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     }
     concertInfoResponse.setConcertDateInfoResponseList(
         dateMap.values().stream()
-            .sorted(Comparator.comparing(ConcertDateInfoResponse::getSession))
+            .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
             .toList()
     );
 
