@@ -1,8 +1,11 @@
 package com.ticketmate.backend.common.application.exception;
 
-import lombok.Builder;
+public record ErrorResponse(
+    ErrorCode errorCode,
+    String errorMessage
+) {
 
-@Builder
-public record ErrorResponse(ErrorCode errorCode, String errorMessage) {
-
+  public static ErrorResponse from(ErrorCode errorCode, String errorMessage) {
+    return new ErrorResponse(errorCode, errorMessage);
+  }
 }

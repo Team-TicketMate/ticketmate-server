@@ -64,10 +64,7 @@ public class GlobalExceptionHandler {
 
     ErrorCode errorCode = e.getErrorCode();
 
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(errorCode)
-        .errorMessage(errorCode.getMessage())
-        .build();
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
 
     return ResponseEntity.status(errorCode.getStatus()).body(response);
   }
@@ -82,10 +79,7 @@ public class GlobalExceptionHandler {
 
     ErrorCode errorCode = e.getErrorCode();
 
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(errorCode)
-        .errorMessage(errorCode.getMessage())
-        .build();
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
 
     template.convertAndSendToUser(principal.getName(), ERROR_DESTINATION, response);
   }
@@ -101,19 +95,13 @@ public class GlobalExceptionHandler {
       // LocalDateTime 포맷 오류
       if (invalidFormatException.getTargetType() != null && LocalDateTime.class.isAssignableFrom(invalidFormatException.getTargetType())) {
         ErrorCode errorCode = ErrorCode.INVALID_DATE_TIME_PARSE;
-        ErrorResponse response = ErrorResponse.builder()
-            .errorCode(errorCode)
-            .errorMessage(errorCode.getMessage())
-            .build();
+        ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
         return ResponseEntity.status(errorCode.getStatus()).body(response);
       }
     }
     // 그 외 JSON 파싱 오류는 400 응답
     ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(errorCode)
-        .errorMessage(errorCode.getMessage())
-        .build();
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
     return ResponseEntity.status(errorCode.getStatus()).body(response);
   }
 
@@ -125,11 +113,8 @@ public class GlobalExceptionHandler {
     log.error("Unhandled Exception 발생: {}", e.getMessage(), e);
 
     // 예상치 못한 에러 => 500
-    ErrorResponse response = ErrorResponse.builder()
-        .errorCode(ErrorCode.INTERNAL_SERVER_ERROR)
-        .errorMessage(ErrorCode.INTERNAL_SERVER_ERROR.getMessage())
-        .build();
-
+    ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
   }
 }
