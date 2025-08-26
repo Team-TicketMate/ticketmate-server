@@ -1,6 +1,5 @@
 package com.ticketmate.backend.concert.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,10 +38,17 @@ public class ConcertDate extends BasePostgresEntity {
   private Concert concert; // 공연
 
   @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime performanceDate; // 공연 일자
 
   @Column(nullable = false)
   @Builder.Default
-  private Integer session = 1; // 회차
+  private int session = 1; // 회차
+
+  public static ConcertDate of(Concert concert, LocalDateTime performanceDate, int session) {
+    return ConcertDate.builder()
+        .concert(concert)
+        .performanceDate(performanceDate)
+        .session(session)
+        .build();
+  }
 }
