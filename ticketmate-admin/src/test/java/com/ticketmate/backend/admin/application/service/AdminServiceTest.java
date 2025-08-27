@@ -7,12 +7,12 @@
 //import static org.mockito.Mockito.verify;
 //import static org.mockito.Mockito.when;
 //
-//import com.ticketmate.backend.admin.application.dto.request.ConcertDateRequest;
-//import com.ticketmate.backend.admin.application.dto.request.ConcertHallInfoRequest;
-//import com.ticketmate.backend.admin.application.dto.request.ConcertInfoRequest;
-//import com.ticketmate.backend.admin.application.dto.request.PortfolioStatusUpdateRequest;
-//import com.ticketmate.backend.admin.application.dto.request.TicketOpenDateRequest;
-//import com.ticketmate.backend.admin.application.dto.response.PortfolioForAdminResponse;
+//import com.ticketmate.backend.admin.concert.application.dto.request.ConcertDateRequest;
+//import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoRequest;
+//import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
+//import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
+//import com.ticketmate.backend.admin.concert.application.dto.request.TicketOpenDateRequest;
+//import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
 //import com.ticketmate.backend.common.application.exception.CustomException;
 //import com.ticketmate.backend.common.application.exception.ErrorCode;
 //import com.ticketmate.backend.concert.core.constant.ConcertType;
