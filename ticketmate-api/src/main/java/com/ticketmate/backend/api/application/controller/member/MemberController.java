@@ -68,7 +68,7 @@ public class MemberController implements MemberControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Slice<MemberFollowResponse>> filteredMemberFollow(
       @PathVariable(name = "client-id") UUID clientId,
-      @ParameterObject MemberFollowFilteredRequest request) {
+      @Valid @ParameterObject MemberFollowFilteredRequest request) {
     return ResponseEntity.ok(memberFollowService.filteredMemberFollow(clientId, request));
   }
 }
