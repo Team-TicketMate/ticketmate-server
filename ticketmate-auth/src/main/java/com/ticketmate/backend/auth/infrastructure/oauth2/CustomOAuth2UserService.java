@@ -62,13 +62,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .birthDay(oAuth2Response.getBirthDay())
           .birthYear(oAuth2Response.getBirthYear())
           .phone(oAuth2Response.getPhone())
-          .gender(oAuth2Response.getGender())
           .profileUrl(null)
+          .gender(oAuth2Response.getGender())
           .role(Role.ROLE_USER)
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
           .lastLoginTime(LocalDateTime.now(clock))
+          .followingCount(0L)
+          .followerCount(0L)
           .build();
     } else { // 첫 로그인이 아닌경우
       member = optionalMember.get();
