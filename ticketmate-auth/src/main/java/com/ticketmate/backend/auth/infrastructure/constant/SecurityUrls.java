@@ -48,8 +48,7 @@ public class SecurityUrls {
 
       // 채팅 test용 정적 리소스
       "/chat-jwt.html",
-      "/chat-jwt-local2.html",
-      "/chat-jwt-local3.html"
+      "/chat-jwt-local.html"
   );
 
   /**
