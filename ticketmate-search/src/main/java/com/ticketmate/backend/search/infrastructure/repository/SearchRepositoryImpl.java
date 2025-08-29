@@ -15,8 +15,8 @@ import com.ticketmate.backend.member.infrastructure.entity.QAgentPerformanceSumm
 import com.ticketmate.backend.member.infrastructure.entity.QMember;
 import com.ticketmate.backend.portfolio.infrastructure.entity.QPortfolio;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
-import com.ticketmate.backend.search.application.dto.response.AgentSearchResponse;
-import com.ticketmate.backend.search.application.dto.response.ConcertSearchResponse;
+import com.ticketmate.backend.search.application.dto.view.AgentSearchInfo;
+import com.ticketmate.backend.search.application.dto.view.ConcertSearchInfo;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +35,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   private static final QTicketOpenDate TICKET_OPEN_DATE = QTicketOpenDate.ticketOpenDate;
   private static final QConcertHall CONCERT_HALL = QConcertHall.concertHall;
   private static final QPortfolio PORTFOLIO = QPortfolio.portfolio;
+
   private final JPAQueryFactory queryFactory;
 
   /**
@@ -44,12 +45,12 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
    * @return 공연 상세 정보가 담긴 DTO 리스트
    */
   @Override
-  public List<ConcertSearchResponse> findConcertDetailsByIds(List<UUID> concertIds) {
+  public List<ConcertSearchInfo> findConcertDetailsByIds(List<UUID> concertIds) {
     if (concertIds == null || concertIds.isEmpty()) {
       return Collections.emptyList();
     }
     return queryFactory
-        .select(Projections.constructor(ConcertSearchResponse.class,
+        .select(Projections.constructor(ConcertSearchInfo.class,
             CONCERT.concertId,
             CONCERT.concertName,
             CONCERT_HALL.concertHallName,
@@ -73,7 +74,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
             ).as("ticketGeneralOpenDate"),
             CONCERT_DATE.performanceDate.min().as("startDate"),
             CONCERT_DATE.performanceDate.max().as("endDate"),
-            CONCERT.concertThumbnailUrl,
+            CONCERT.concertThumbnailStoredPath,
             Expressions.constant(0.0)
         ))
         .from(CONCERT)
@@ -84,7 +85,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
         .groupBy(CONCERT.concertId,
             CONCERT.concertName,
             CONCERT_HALL.concertHallName,
-            CONCERT.concertThumbnailUrl
+            CONCERT.concertThumbnailStoredPath
         )
         .fetch();
   }
@@ -96,15 +97,15 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
    * @return 대리인 상세 정보가 담긴 DTO 리스트
    */
   @Override
-  public List<AgentSearchResponse> findAgentDetailsByIds(List<UUID> agentIds) {
+  public List<AgentSearchInfo> findAgentDetailsByIds(List<UUID> agentIds) {
     if (agentIds == null || agentIds.isEmpty()) {
       return Collections.emptyList();
     }
     return queryFactory
-        .select(Projections.constructor(AgentSearchResponse.class,
+        .select(Projections.constructor(AgentSearchInfo.class,
             MEMBER.memberId,
             MEMBER.nickname,
-            MEMBER.profileUrl,
+            MEMBER.profileImgStoredPath,
             PORTFOLIO.portfolioDescription,
             AGENT_PERFORMANCE_SUMMARY.averageRating,
             AGENT_PERFORMANCE_SUMMARY.reviewCount
