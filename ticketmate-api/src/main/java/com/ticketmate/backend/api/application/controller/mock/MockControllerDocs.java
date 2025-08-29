@@ -3,6 +3,7 @@ package com.ticketmate.backend.api.application.controller.mock;
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockChatRoomResponse;
 import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.concurrent.CompletableFuture;
@@ -195,4 +196,30 @@ public interface MockControllerDocs {
           """
   )
   CompletableFuture<ResponseEntity<String>> createPortfolioMockData(Integer count);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-08-28",
+          author = "mr6208",
+          description = "채팅방 Mock 데이터 생성 API 개발",
+          issueUrl = ""
+      )
+  })
+  @Operation(
+      summary = "채팅방 Mock 데이터 생성",
+      description = """
+          ### 응답 데이터 (MockChatRoomResponse)
+          - agentAccessToken
+          - clientAccessToken
+          - chatRoomId
+          
+          ### 사용 방법 & 유의 사항
+          - 이 API는 기존 DB초기화시 1:1 채팅 테스트를 위해 채팅방을 생성하기까지의 복잡한 작업을 대신 수행시켜주기 위해 개발되었습니다. 
+          - 내부적으로 채팅방 전용 클라이언트 + 에이전트 회원을 각각 생성, 해당 회원이 매칭되어있는 신청서 생성, 채팅방 생성 작업을 모두 수행합니다. 
+          - 테스트용 html 내부에 필요한 정보들을 뿌려주어 동적으로 토큰을 세팅합니다.
+          - 테스트용 html의 경우 기존 토큰이 존재한다면 계속 사용하며, 만약 DB가 초기화되거나 토큰이 만료되면 해당 API를 직접 호출하여 새로운 Mock 데이터를 받아와 다시 세팅시킵니다.
+          - **편의**를 위해 개발되었으며 운영환경에서는 절대 사용하지 않는것을 권장드립니다.
+          """
+  )
+  MockChatRoomResponse createChatRoomMockData();
 }
