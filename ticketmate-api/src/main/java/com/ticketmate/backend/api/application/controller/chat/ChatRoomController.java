@@ -1,6 +1,6 @@
 package com.ticketmate.backend.api.application.controller.chat;
 
-import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
@@ -66,7 +66,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @Override
   @GetMapping("/{chat-room-id}/application-form")
   @LogMonitoringInvocation
-  public ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(
+  public ResponseEntity<ApplicationFormInfoResponse> chatRoomApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId) {
     return ResponseEntity.ok(chatRoomService.getChatRoomApplicationFormInfo(customOAuth2User.getMember(), chatRoomId));
