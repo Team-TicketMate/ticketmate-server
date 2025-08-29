@@ -281,9 +281,51 @@
   const API = "https://api.ticketmate.site";
   const BEARER = true;
   const TOKENS = {
-    client: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXtgbTrnbxAbmF2ZXIuY29tMzMzIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2Mhe2BtOudvEBuYXZlci5jb20zMzMiLCJtZW1iZXJJZCI6ImY4Njk4OThlLWRmZGYtNDNmNy04MGNhLTk1OTY5MTI3MzlmOCIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MzI3MzkyMCwiZXhwIjoxNzU1ODY1OTIwfQ.zK3iJuU2v1D0CXAMPZC7r60J_DmlJVBse7y-HOd1o0w4R-hKpKH6zYuIyK5jleNz",
-    agent: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXsl5DsnbRAbmF2ZXIuY29tNzUzIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2MheyXkOydtEBuYXZlci5jb203NTMiLCJtZW1iZXJJZCI6Ijc1MGFlMGRiLWRmZWQtNGFiNS1hMzYwLTgzNDY4MTMwODU2ZiIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MzI3Mzk0OSwiZXhwIjoxNzU1ODY1OTQ5fQ.2aO1W11pcXV-cJkjWwzPMdwZvI7o6IebhD8n0H1OCPd7j960ogK4C1FMVb-TtkY2",
+    client: "",
+    agent:  ""
   };
+
+
+  // ✅ dev 전용: 한 번만 토큰/roomId 받아서 세션에 캐싱
+  const DEV_INIT_KEY = "dev.mock.init";  // {roomId, tokens:{client,agent}}
+
+  async function initDevOnce() {
+    // 1) 캐시 있으면 재사용
+    const cached = sessionStorage.getItem(DEV_INIT_KEY);
+    if (cached) {
+      const data = JSON.parse(cached);
+      window.__DEV = data;
+      TOKENS.client = data.tokens.client;
+      TOKENS.agent  = data.tokens.agent;
+      return data;
+    }
+
+    // 2) 최초 1회 서버에서 발급 (엔드포인트는 실제 경로로 교체)
+    const res = await fetch(`${API}/mock/chat-room`, { method: "GET" });
+    if (!res.ok) throw new Error("init api failed: " + res.status);
+    const dto = await res.json(); // {agentAccessToken, clientAccessToken, chatRoomId}
+
+    const data = {
+      roomId: dto.chatRoomId,
+      tokens: {
+        client: dto.clientAccessToken,
+        agent:  dto.agentAccessToken
+      }
+    };
+
+    sessionStorage.setItem(DEV_INIT_KEY, JSON.stringify(data));
+    window.__DEV = data;
+    TOKENS.client = data.tokens.client;
+    TOKENS.agent  = data.tokens.agent;
+    return data;
+  }
+
+  // (선택) 강제 재발급하고 싶을 때 호출하는 유틸
+  async function resetDevInit() {
+    sessionStorage.removeItem(DEV_INIT_KEY);
+    await initDevOnce();
+  }
+
 
   /* ===============================================
    * GLOBAL STATE
@@ -1017,7 +1059,25 @@
   /* ===============================================
    * 초기화
    =============================================== */
-  window.addEventListener("DOMContentLoaded", () => {
+  window.addEventListener("DOMContentLoaded", async () => {
+    // ✅ 페이지 로드시 1회 초기화 (캐시 있으면 API 호출 안 함)
+    const init = await initDevOnce(); // {roomId, tokens:{...}}
+
+    document.getElementById('clientLoginButton').onclick = async () => {
+      Token.set(TOKENS.client);          // 서버에서 받은 client 토큰
+      await connectStomp();
+      await loadRooms();
+      // 바로 고정 방으로 입장 (리스트 갱신 기다릴 필요 없이)
+      await enterRoom(init.roomId);
+    };
+
+    document.getElementById('agentLoginButton').onclick = async () => {
+      Token.set(TOKENS.agent);           // 서버에서 받은 agent 토큰
+      await connectStomp();
+      await loadRooms();
+      await enterRoom(init.roomId);
+    };
+
     // 로그인 버튼
     document.getElementById('clientLoginButton').onclick = async () => {
       Token.set(TOKENS.client);
