@@ -12,7 +12,7 @@
 //import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
 //import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
 //import com.ticketmate.backend.admin.concert.application.dto.request.TicketOpenDateRequest;
-//import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
+//import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 //import com.ticketmate.backend.common.application.exception.CustomException;
 //import com.ticketmate.backend.common.application.exception.ErrorCode;
 //import com.ticketmate.backend.concert.core.constant.ConcertType;
@@ -30,7 +30,7 @@
 //import com.ticketmate.backend.member.infrastructure.entity.Member;
 //import com.ticketmate.backend.notification.application.util.NotificationUtil;
 //import com.ticketmate.backend.notification.infrastructure.service.FcmTokenService;
-//import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
+//import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 //import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 //import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 //import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
@@ -138,11 +138,11 @@
 //        .build();
 //  }
 //
-//  private static Portfolio createPortfolio(UUID portfolioId, UUID memberId, PortfolioType portfolioType) {
+//  private static Portfolio createPortfolio(UUID portfolioId, UUID memberId, PortfolioStatus portfolioStatus) {
 //    Portfolio portfolio = Portfolio.builder()
 //        .portfolioId(portfolioId)
 //        .portfolioDescription("포트폴리오 소개")
-//        .portfolioType(portfolioType)
+//        .portfolioStatus(portfolioStatus)
 //        .member(Member.builder()
 //            .memberId(memberId)
 //            .memberType(MemberType.CLIENT)
@@ -495,27 +495,27 @@
 //    // given
 //    UUID portfolioId = UUID.randomUUID();
 //    UUID memberId = UUID.randomUUID();
-//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.PENDING_REVIEW);
+//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioStatus.PENDING_REVIEW);
 //
 //    // when
 //    when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
 //    when(entityMapper.toPortfolioForAdminResponse(portfolio))
-//        .thenReturn(PortfolioForAdminResponse.builder()
+//        .thenReturn(PortfolioAdminResponse.builder()
 //            .portfolioId(portfolioId)
 //            .build());
 //
 //    // then
-//    PortfolioForAdminResponse response = adminService.getPortfolio(portfolioId);
+//    PortfolioAdminResponse response = adminService.getPortfolio(portfolioId);
 //
 //    assertThat(response).isNotNull();
 //    assertThat(response.getPortfolioId()).isEqualTo(portfolioId);
 //    verify(portfolioRepository).findById(portfolioId);
 //
 //    // 포트폴리오 상태가 IN_REVIEW로 변경되었는지 확인
-//    assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.REVIEWING);
+//    assertThat(portfolio.getPortfolioStatus()).isEqualTo(PortfolioStatus.REVIEWING);
 //
 //    // 알림 전송 확인
-////    verify(notificationUtil).portfolioNotification(eq(PortfolioType.REVIEWING), eq(portfolio));
+////    verify(notificationUtil).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
 ////    verify(fcmTokenService).sendNotification(eq(memberId), any());
 //  }
 //
@@ -524,28 +524,28 @@
 //    // given
 //    UUID portfolioId = UUID.randomUUID();
 //    UUID memberId = UUID.randomUUID();
-//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.APPROVED);
+//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioStatus.APPROVED);
 //
 //    // when
 //    when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
 //    when(entityMapper.toPortfolioForAdminResponse(portfolio))
-//        .thenReturn(PortfolioForAdminResponse.builder()
+//        .thenReturn(PortfolioAdminResponse.builder()
 //            .portfolioId(portfolioId)
 //            .build());
 //
 //    // then
-//    PortfolioForAdminResponse response = adminService.getPortfolio(portfolioId);
+//    PortfolioAdminResponse response = adminService.getPortfolio(portfolioId);
 //
 //    assertThat(response).isNotNull();
 //    assertThat(response.getPortfolioId()).isEqualTo(portfolioId);
 //    verify(portfolioRepository).findById(portfolioId);
 //
 //    // 포트폴리오 상태가 IN_REVIEW로 변경되지 않았는지 확인
-//    assertThat(portfolio.getPortfolioType()).isNotEqualTo(PortfolioType.REVIEWING);
-//    assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.APPROVED);
+//    assertThat(portfolio.getPortfolioStatus()).isNotEqualTo(PortfolioStatus.REVIEWING);
+//    assertThat(portfolio.getPortfolioStatus()).isEqualTo(PortfolioStatus.APPROVED);
 //
 //    // 알림 전송 확인
-////    verify(notificationUtil, never()).portfolioNotification(eq(PortfolioType.REVIEWING), eq(portfolio));
+////    verify(notificationUtil, never()).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
 ////    verify(fcmTokenService, never()).sendNotification(eq(memberId), any());
 //  }
 //
@@ -554,11 +554,11 @@
 //    // given
 //    UUID portfolioId = UUID.randomUUID();
 //    UUID memberId = UUID.randomUUID();
-//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioType.REVIEWING);
+//    Portfolio portfolio = createPortfolio(portfolioId, memberId, PortfolioStatus.REVIEWING);
 //
 //    when(portfolioRepository.findById(portfolioId)).thenReturn(Optional.of(portfolio));
 //    PortfolioStatusUpdateRequest request = PortfolioStatusUpdateRequest.builder()
-//        .portfolioType(PortfolioType.APPROVED)
+//        .portfolioStatus(PortfolioStatus.APPROVED)
 //        .build();
 //
 //    // when
@@ -566,9 +566,9 @@
 //
 //    // then
 ////    assertThat(returnId).isEqualTo(portfolioId);
-////    assertThat(portfolio.getPortfolioType()).isEqualTo(PortfolioType.APPROVED);
+////    assertThat(portfolio.getPortfolioStatus()).isEqualTo(PortfolioStatus.APPROVED);
 ////    assertThat(portfolio.getMember().getMemberType()).isEqualTo(MemberType.AGENT);
-////    verify(notificationUtil).portfolioNotification(PortfolioType.APPROVED, eq(portfolio));
+////    verify(notificationUtil).portfolioNotification(PortfolioStatus.APPROVED, eq(portfolio));
 ////    verify(fcmTokenService).sendNotification(eq(memberId), any());
 //  }
 //
