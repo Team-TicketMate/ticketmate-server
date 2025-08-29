@@ -17,6 +17,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
@@ -26,9 +27,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Getter
@@ -36,25 +35,27 @@ import lombok.extern.slf4j.Slf4j;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
-@Slf4j
 public class ApplicationForm extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false, unique = true)
   private UUID applicationFormId;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   private Member client; // 의뢰인
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   private Member agent; // 대리인
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   private Concert concert; // 공연
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   private TicketOpenDate ticketOpenDate; // 티켓 예매일
 
   @OneToMany(mappedBy = "applicationForm", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -68,14 +69,24 @@ public class ApplicationForm extends BasePostgresEntity {
   @Column(nullable = false)
   private TicketOpenType ticketOpenType; // 선예매, 일반예매 구분
 
+  public static ApplicationForm create(Member client, Member agent, Concert concert, TicketOpenDate ticketOpenDate, TicketOpenType ticketOpenType) {
+    return ApplicationForm.builder()
+        .client(client)
+        .agent(agent)
+        .concert(concert)
+        .ticketOpenDate(ticketOpenDate)
+        .applicationFormDetailList(new ArrayList<>())
+        .applicationFormStatus(ApplicationFormStatus.PENDING) // 신청서는 기본 "대기" 상태
+        .ticketOpenType(ticketOpenType)
+        .build();
+  }
+
   // 신청서 세부사항 추가 메서드
   public void addApplicationFormDetail(ApplicationFormDetail applicationFormDetail) {
     if (applicationFormDetail == null) {
-      log.error("신청서 세부사항 데이터가 null 입니다.");
       throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_NOT_FOUND);
     }
     if (applicationFormDetailList.contains(applicationFormDetail)) {
-      log.error("이미 존재하는 신청서 세부사항입니다.");
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FORM_DETAIL);
     }
     applicationFormDetailList.add(applicationFormDetail);
