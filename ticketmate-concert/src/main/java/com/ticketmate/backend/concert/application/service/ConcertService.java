@@ -5,6 +5,9 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
+import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
+import com.ticketmate.backend.concert.application.mapper.ConcertMapper;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
@@ -30,6 +33,7 @@ public class ConcertService {
   private final ConcertDateRepository concertDateRepository;
   private final TicketOpenDateRepository ticketOpenDateRepository;
   private final ConcertRepositoryCustom concertRepositoryCustom;
+  private final ConcertMapper concertMapper;
 
   /**
    * 공연 필터링 조회 로직
@@ -45,13 +49,14 @@ public class ConcertService {
    */
   @Transactional(readOnly = true)
   public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
-    return concertRepositoryCustom.filteredConcert(
+    Page<ConcertFilteredInfo> concertFilteredInfoPage = concertRepositoryCustom.filteredConcert(
         request.getConcertName(),
         request.getConcertHallName(),
         request.getConcertType(),
         request.getTicketReservationSite(),
         request.toPageable()
     );
+    return concertMapper.toConcertFilteredResponsePage(concertFilteredInfoPage);
   }
 
   /**
@@ -62,7 +67,8 @@ public class ConcertService {
    */
   @Transactional(readOnly = true)
   public ConcertInfoResponse getConcertInfo(UUID concertId) {
-    return concertRepositoryCustom.findConcertInfoResponseByConcertId(concertId);
+    ConcertInfo concertInfo = concertRepositoryCustom.findConcertInfoByConcertId(concertId);
+    return concertMapper.toConcertInfoResponse(concertInfo);
   }
 
   /**
