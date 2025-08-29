@@ -17,7 +17,7 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, UUID> {
       where (trim(:username) = '' or lower(m.username) like lower(concat('%', :username, '%')))
       and (trim(:nickname) = '' or lower(m.nickname) like lower(concat('%', :nickname, '%')))
       and (trim(:name) = '' or lower(m.name) like lower(concat('%', :name, '%')))
-      and (:portfolioType = '' or p.portfolio_type = :portfolioType)
+      and (:portfolioStatus = '' or p.portfolio_type = :portfolioStatus)
       """, countQuery = """
       select count(p.portfolio_id)
       from portfolio p
@@ -25,12 +25,12 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, UUID> {
       where (trim(:username) = '' or lower(m.username) like lower(concat('%', :username, '%')))
       and (trim(:nickname) = '' or lower(m.nickname) like lower(concat('%', :nickname, '%')))
       and (trim(:name) = '' or lower(m.name) like lower(concat('%', :name, '%')))
-      and (:portfolioType = '' or p.portfolio_type = :portfolioType)
+      and (:portfolioStatus = '' or p.portfolio_type = :portfolioStatus)
       """, nativeQuery = true)
   Page<Portfolio> filteredPortfolio(
       @Param("username") String username,
       @Param("nickname") String nickname,
       @Param("name") String name,
-      @Param("portfolioType") String portfolioType,
+      @Param("portfolioStatus") String portfolioStatus,
       Pageable pageable);
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum PortfolioType {
+public enum PortfolioStatus {
 
   PENDING_REVIEW("검토 대기"),  // 관리자가 아직 보지않은 포트폴리오 (최초 업로드시 모두 해당상태로 저장됩니다.)
 
