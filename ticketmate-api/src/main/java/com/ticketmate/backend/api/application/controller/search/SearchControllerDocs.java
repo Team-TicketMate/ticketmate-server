@@ -14,6 +14,12 @@ public interface SearchControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-08-29",
+          author = "Chuseok22",
+          description = "검색 request DTO 기본값 수정",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
+      ),
+      @ApiChangeLog(
           date = "2025-07-19",
           author = "Yooonjeong",
           description = "공연, 대리인 임베딩 기반 하이브리드 검색 구현",
@@ -35,10 +41,9 @@ public interface SearchControllerDocs {
           
           ### 요청 파라미터
           - **keyword** (String, Query) : 검색어 [필수]
-          - **type** (SearchType, Query)
+          - **searchType** (SearchType, Query) : 검색 타입 [필수]
             - `CONCERT` : 공연
             - `AGENT`   : 대리인
-            - 기본값: `CONCERT`
           - **pageNumber** (int, Query) : 페이지 번호 [선택, 기본값 `1` ]
           - **pageSize** (int, Query) : 페이지 사이즈 [선택, 기본값 `10`]
           
@@ -52,8 +57,8 @@ public interface SearchControllerDocs {
               - **concertHallName** (String)        : 공연장 이름
               - **ticketPreOpenDate** (LocalDateTime) : 선예매 오픈일 (`yyyy-MM-dd'T'HH:mm:ss`)
               - **ticketGeneralOpenDate** (LocalDateTime) : 일반 예매 오픈일 (`yyyy-MM-dd'T'HH:mm:ss`)
-              - **startDate** (LocalDateTime) : 공연 시작일 (`yyyy.MM.dd`)
-              - **endDate** (LocalDateTime) : 공연 종료일 (`yyyy.MM.dd`)
+              - **startDate** (LocalDateTime) : 공연 시작일 (`yyyy-MM-dd'T'HH:mm:ss`)
+              - **endDate** (LocalDateTime) : 공연 종료일 (`yyyy-MM-dd'T'HH:mm:ss`)
               - **concertThumbnailUrl** (String)        : 썸네일 이미지 URL
               - **score** (double)        : 검색 순위 점수
           
@@ -72,7 +77,7 @@ public interface SearchControllerDocs {
           - **agentCount** (Integer) : 전체 대리인 결과 수 (첫 페이지에만)
           
           ### 사용 방법 & 유의사항
-          - `type`을 생략하면 공연(`CONCERT`) 검색이 수행됩니다.
+          - `keyword`, `searchType` 은 `필수` 값 입니다.
           - `pageNumber`/`pageSize`를 `null` 또는 생략 시 기본값이 적용됩니다.
           - 반환 타입이 `Slice`이므로, `first`/`last` 플래그를 보고 무한 스크롤 구현이 가능합니다.
           - **score** 필드로 결과 랭킹을 판단할 수 있습니다.
