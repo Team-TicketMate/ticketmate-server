@@ -19,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -28,7 +27,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Member extends BasePostgresEntity {
 
   @Id
@@ -65,7 +63,7 @@ public class Member extends BasePostgresEntity {
   private String phone;
 
   // 프로필 이미지
-  private String profileUrl;
+  private String profileImgStoredPath;
 
   // 성별
   private String gender;

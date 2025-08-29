@@ -63,7 +63,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .birthYear(oAuth2Response.getBirthYear())
           .phone(oAuth2Response.getPhone())
           .gender(oAuth2Response.getGender())
-          .profileUrl(null)
+          .profileImgStoredPath(null)
           .role(Role.ROLE_USER)
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
