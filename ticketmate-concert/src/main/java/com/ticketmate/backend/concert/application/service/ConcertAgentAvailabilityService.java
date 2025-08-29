@@ -3,6 +3,8 @@ package com.ticketmate.backend.concert.application.service;
 import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.concert.application.mapper.ConcertMapper;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepository;
@@ -12,7 +14,6 @@ import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class ConcertAgentAvailabilityService {
   private final ConcertAgentAvailabilityRepositoryCustom concertAgentAvailabilityRepositoryCustom;
   private final ConcertService concertService;
   private final MemberService memberService;
+  private final ConcertMapper concertMapper;
 
   /**
    * 공연별 대리인 수락 설정
@@ -63,7 +65,11 @@ public class ConcertAgentAvailabilityService {
    */
   @Transactional(readOnly = true)
   public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentFilteredRequest request) {
-    Pageable pageable = request.toPageable();
-    return concertAgentAvailabilityRepositoryCustom.findAcceptingAgentByConcert(concertId, pageable);
+    Slice<ConcertAcceptingAgentInfo> concertAcceptingAgentInfoSlice =
+        concertAgentAvailabilityRepositoryCustom.findAcceptingAgentByConcert(
+            concertId,
+            request.toPageable()
+        );
+    return concertMapper.toConcertAcceptingAgentResponseSlice(concertAcceptingAgentInfoSlice);
   }
 }
