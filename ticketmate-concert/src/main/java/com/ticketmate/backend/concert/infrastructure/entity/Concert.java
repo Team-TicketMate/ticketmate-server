@@ -48,12 +48,13 @@ public class Concert extends BasePostgresEntity {
   @Column(nullable = false)
   private ConcertType concertType;
 
-  // 공연 썸네일 이미지 url
-  @Column(nullable = false)
-  private String concertThumbnailUrl;
+  // 공연 썸네일 이미지 저장 경로
+  @Column(nullable = false, unique = true)
+  private String concertThumbnailStoredPath;
 
-  // 좌석 배치도 이미지 url
-  private String seatingChartUrl;
+  // 좌석 배치도 이미지 저장 경로
+  @Column(unique = true)
+  private String seatingChartStoredPath;
 
   // 예매처
   @Enumerated(EnumType.STRING)
