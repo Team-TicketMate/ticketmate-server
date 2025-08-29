@@ -6,7 +6,7 @@ import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
-import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
+import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 import java.util.ArrayList;
@@ -36,13 +36,13 @@ public class MockPortfolioFactory {
         .portfolioDescription(portfolioDescription)
         .member(client)
         .portfolioImgList(new ArrayList<>())
-        .portfolioType(koFaker.options().option(PortfolioType.class))
+        .portfolioStatus(koFaker.options().option(PortfolioStatus.class))
         .build();
 
     // 포트폴리오 이미지 추가 (양방향 관계 설정)
     List<PortfolioImg> portfolioImgList = generatePortfolioImgList(portfolio);
     if (!CommonUtil.nullOrEmpty(portfolioImgList)) {
-      portfolioImgList.forEach(portfolio::addImg);
+      portfolioImgList.forEach(portfolio::addPortfolioImg);
     }
     return portfolio;
   }
@@ -57,13 +57,13 @@ public class MockPortfolioFactory {
         .portfolioDescription(portfolioDescription)
         .member(agent)
         .portfolioImgList(new ArrayList<>())
-        .portfolioType(PortfolioType.APPROVED)
+        .portfolioStatus(PortfolioStatus.APPROVED)
         .build();
 
     // 포트폴리오 이미지 추가 (양방향 관계 설정)
     List<PortfolioImg> portfolioImgList = generatePortfolioImgList(portfolio);
     if (!CommonUtil.nullOrEmpty(portfolioImgList)) {
-      portfolioImgList.forEach(portfolio::addImg);
+      portfolioImgList.forEach(portfolio::addPortfolioImg);
     }
     return portfolio;
   }
@@ -77,7 +77,7 @@ public class MockPortfolioFactory {
 
     for (int i = 0; i < count; i++) {
       PortfolioImg portfolioImg = PortfolioImg.builder()
-          .filePath(koFaker.internet().image())
+          .storedPath(koFaker.internet().image())
           .build();
       portfolioImgList.add(portfolioImg);
     }

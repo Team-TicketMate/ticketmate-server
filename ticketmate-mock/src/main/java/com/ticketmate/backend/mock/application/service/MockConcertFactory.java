@@ -56,8 +56,8 @@ public class MockConcertFactory {
         .concertName(concertName)
         .concertHall(concertHall)
         .concertType(concertType)
-        .concertThumbnailUrl(concertThumbnailUrl)
-        .seatingChartUrl(seatingChartUrl)
+        .concertThumbnailStoredPath(concertThumbnailUrl)
+        .seatingChartStoredPath(seatingChartUrl)
         .ticketReservationSite(ticketReservationSite)
         .build();
   }
