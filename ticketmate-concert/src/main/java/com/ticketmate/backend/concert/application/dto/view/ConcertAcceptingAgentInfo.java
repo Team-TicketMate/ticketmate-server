@@ -1,11 +1,11 @@
-package com.ticketmate.backend.concert.application.dto.response;
+package com.ticketmate.backend.concert.application.dto.view;
 
 import java.util.UUID;
 
-public record ConcertAcceptingAgentResponse(
+public record ConcertAcceptingAgentInfo(
     UUID agentId,
     String nickname,
-    String profileUrl,
+    String profileImgStoredPath,
     String introduction,
     double averageRating,
     int reviewCount
