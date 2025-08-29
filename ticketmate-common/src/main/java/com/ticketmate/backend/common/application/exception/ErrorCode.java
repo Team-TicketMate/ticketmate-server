@@ -202,7 +202,7 @@ public enum ErrorCode {
 
   MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "메시지를 찾지 못했습니다."),
 
-  NO_AUTH_TO_ROOM(HttpStatus.FORBIDDEN, "해당 사용자는 이 채팅방에 들어갈 수 없습니다."),
+  NO_AUTH_TO_ROOM(HttpStatus.FORBIDDEN, "현재 사용자는 이 채팅방에 대한 권한이 없습니다."),
 
   CHAT_PICTURE_EMPTY(HttpStatus.NOT_FOUND, "전송할 이미지가 없습니다."),
 
