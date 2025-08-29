@@ -35,5 +35,6 @@ public class ApplicationFormDetailRequest {
   @Size(max = 10, message = "희망 구역은 최대 10개까지 등록 가능합니다.")
   private List<HopeAreaRequest> hopeAreaList; // 희망구역 리스트
 
-  private String requestDetails; // 요청사항
+  @Size(max = 100, message = "요청사항은 최대 100자까지만 작성 가능합니다.")
+  private String requirement; // 요청사항
 }
