@@ -56,19 +56,19 @@ public class SearchService {
 
     if (request.getType() == SearchType.CONCERT) {
       slice = getPaginatedResults(
-          results.concertResults(),
+          results.getConcertResults(),
           pageable,
           searchRepositoryCustom::findConcertDetailsByIds
       );
     } else {
       slice = getPaginatedResults(
-          results.agentResults(),
+          results.getAgentResults(),
           pageable,
           searchRepositoryCustom::findAgentDetailsByIds
       );
     }
     if (pageable.getPageNumber() == 0) {
-      return SearchResponse.firstPage(slice, results.concertResults().size(), results.agentResults().size());
+      return SearchResponse.firstPage(slice, results.getConcertResults().size(), results.getAgentResults().size());
     }
     return SearchResponse.nextPage(slice);
   }
@@ -97,7 +97,7 @@ public class SearchService {
     }
 
     // 페이징된 id로 dto 조회
-    List<T> unorderedDtoList = detailsFetcher.apply(paginatedPairList.stream().map(IdScorePair::id).collect(Collectors.toList()));
+    List<T> unorderedDtoList = detailsFetcher.apply(paginatedPairList.stream().map(IdScorePair::getId).collect(Collectors.toList()));
 
     // db 조회 결과 Map으로 변환
     Map<UUID, T> dtoMap = unorderedDtoList.stream()
@@ -106,9 +106,9 @@ public class SearchService {
     // 정렬 순서대로 최종 리스트 생성 + score 주입
     List<T> results = paginatedPairList.stream()
         .map(pair -> {
-          T dto = dtoMap.get(pair.id());
+          T dto = dtoMap.get(pair.getId());
           if (dto != null) {
-            dto.setScore(pair.score());
+            dto.setScore(pair.getScore());
           }
           return dto;
         })
