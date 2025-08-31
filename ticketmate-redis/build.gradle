@@ -19,4 +19,7 @@ dependencies {
 
     // Redission
     api libs.redisson
+
+    // LocalDateTime 직렬화
+    implementation libs.jackson.jsr310
 }
