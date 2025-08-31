@@ -1,5 +1,7 @@
 package com.ticketmate.backend.search.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CachedSearchResult {
-  private List<IdScorePair> concertResults;
-  private List<IdScorePair> agentResults;
+  @JsonSetter(nulls = Nulls.AS_EMPTY)
+  private List<IdScorePair> concertResults = List.of();
+
+  @JsonSetter(nulls = Nulls.AS_EMPTY)
+  private List<IdScorePair> agentResults = List.of();
 }
