@@ -6,12 +6,15 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,41 +27,51 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedisConfig {
 
+  private ObjectMapper redisObjectMapper() {
+    PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+        .allowIfSubType("com.ticketmate.backend")
+        .allowIfSubType("java.util.")
+        .build();
+
+    return new ObjectMapper()
+        .registerModule(new JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
+  }
+
   @Bean
+  @Primary
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+    ObjectMapper objectMapper = redisObjectMapper();
+    GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
     RedisTemplate<String, Object> template = new RedisTemplate<>();
     template.setConnectionFactory(factory);
-
-    // 직렬화 설정
     template.setKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    template.setValueSerializer(redisSerializer);
     template.setHashKeySerializer(new StringRedisSerializer());
-    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
-
+    template.setHashValueSerializer(redisSerializer);
+    template.afterPropertiesSet();
     return template;
   }
 
   @Bean
   public CacheManager cacheManager(RedisConnectionFactory cf) {
-    ObjectMapper objectMapper = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    ObjectMapper objectMapper = redisObjectMapper();
+    GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
     RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
         .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-        .entryTtl(Duration.ofMinutes(30));
+        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
+        .entryTtl(Duration.ofMinutes(30))
+        .disableCachingNullValues();
 
-    // 캐시별 TTL 설정
     Map<String, RedisCacheConfiguration> configs = new HashMap<>();
-    // embeddings 캐시는 TTL 7일로 설정
-    configs.put("embeddings", defaultConfig.entryTtl(Duration.ofDays(7)).disableCachingNullValues());
+    configs.put("embeddings", defaultConfig.entryTtl(Duration.ofDays(7)));
 
-    return RedisCacheManager.RedisCacheManagerBuilder
-        .fromConnectionFactory(cf)
+    return RedisCacheManager.builder(cf)
         .cacheDefaults(defaultConfig)
         .withInitialCacheConfigurations(configs)
         .build();
   }
-
 }
