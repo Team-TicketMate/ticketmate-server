@@ -8,6 +8,10 @@ import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoE
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportListResponse;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
@@ -18,7 +22,9 @@ import com.ticketmate.backend.concert.application.dto.response.ConcertInfoRespon
 import com.ticketmate.backend.concerthall.application.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
 import io.swagger.v3.oas.annotations.Operation;
+
 import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
@@ -526,4 +532,12 @@ public interface AdminControllerDocs {
   )
   ResponseEntity<CoolSmsBalanceResponse> getBalance(
       CustomOAuth2User customOAuth2User);
+
+  ResponseEntity<Page<ReportListResponse>> getReports(ReportFilteredRequest request);
+
+  ResponseEntity<ReportDetailResponse> getReport(UUID reportId);
+
+  ResponseEntity<Void> updateReport(UUID reportId, ReportUpdateRequest request);
+
+  ResponseEntity<Void> deleteReport(UUID reportId);
 }

@@ -11,6 +11,11 @@ import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioS
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.service.PortfolioAdminService;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportListResponse;
+import com.ticketmate.backend.admin.report.application.service.ReportAdminService;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.admin.sms.application.service.SmsAdminService;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
@@ -22,6 +27,7 @@ import com.ticketmate.backend.concerthall.application.dto.request.ConcertHallFil
 import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -30,14 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,6 +51,7 @@ public class AdminController implements AdminControllerDocs {
   private final ConcertHallAdminService concertHallAdminService;
   private final PortfolioAdminService portfolioAdminService;
   private final SmsAdminService smsAdminService;
+  private final ReportAdminService reportAdminService;
 
   /*
   ======================================공연장======================================
@@ -172,5 +172,39 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<CoolSmsBalanceResponse> getBalance(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok(smsAdminService.getBalance());
+  }
+
+  /*
+  ======================================REPORT======================================
+   */
+
+  @Override
+  @GetMapping("/report")
+  @LogMonitoringInvocation
+  public ResponseEntity<Page<ReportListResponse>> getReports(@ParameterObject @Valid ReportFilteredRequest request) {
+    return ResponseEntity.ok(reportAdminService.getReports(request));
+  }
+
+  @Override
+  @GetMapping("/report/{report-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<ReportDetailResponse> getReport(@PathVariable(value = "report-id") UUID reportId) {
+    return ResponseEntity.ok(reportAdminService.getReport(reportId));
+  }
+
+  @Override
+  @PutMapping("/report/{report-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> updateReport(@PathVariable(value = "report-id") UUID reportId, @ParameterObject @Valid ReportUpdateRequest request) {
+    reportAdminService.updateReport(reportId, request);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  @DeleteMapping("/report/{report-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> deleteReport(@PathVariable(value = "report-id") UUID reportId) {
+    reportAdminService.deleteReport(reportId);
+    return ResponseEntity.noContent().build();
   }
 }
