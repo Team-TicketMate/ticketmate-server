@@ -35,7 +35,7 @@ public class TicketOpenDate extends BasePostgresEntity {
   @Column(nullable = false, updatable = false)
   private UUID ticketOpenDateId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private Concert concert;
 

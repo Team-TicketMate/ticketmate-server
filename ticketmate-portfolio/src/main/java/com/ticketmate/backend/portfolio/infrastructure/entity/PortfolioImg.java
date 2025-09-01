@@ -34,7 +34,7 @@ public class PortfolioImg extends BasePostgresEntity {
   @Column(updatable = false, nullable = false)
   private UUID portfolioImgId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private Portfolio portfolio;
 

@@ -34,7 +34,7 @@ public class HopeArea extends BasePostgresEntity {
   @Column(updatable = false, nullable = false, unique = true)
   private UUID hopeAreaId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private ApplicationFormDetail applicationFormDetail;
 

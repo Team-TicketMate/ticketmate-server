@@ -40,11 +40,11 @@ public class ApplicationFormDetail extends BasePostgresEntity {
   @Column(updatable = false, nullable = false, unique = true)
   private UUID applicationFormDetailId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private ApplicationForm applicationForm; // 신청서
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private ConcertDate concertDate; // 공연일자
 
