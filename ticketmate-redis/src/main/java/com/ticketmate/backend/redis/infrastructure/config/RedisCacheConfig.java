@@ -30,7 +30,7 @@ public class RedisCacheConfig {
     // 캐시별 TTL 설정
     Map<String, RedisCacheConfiguration> configurationMap = new HashMap<>();
     // Embedding 캐시는 TTL 7일 설정
-    configurationMap.put("embeddings", cacheConfiguration.entryTtl(Duration.ofDays(7)).disableCachingNullValues());
+    configurationMap.put("embeddings", cacheConfiguration.entryTtl(Duration.ofDays(7)));
 
     return RedisCacheManager.builder(connectionFactory)
         .cacheDefaults(cacheConfiguration)
