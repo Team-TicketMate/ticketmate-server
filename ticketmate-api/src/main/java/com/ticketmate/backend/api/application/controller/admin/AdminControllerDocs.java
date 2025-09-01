@@ -386,7 +386,7 @@ public interface AdminControllerDocs {
           - `username` (선택): 사용자 이메일 (like 검색, 부분 일치 허용)
           - `nickname` (선택): 사용자 닉네임 (like 검색, 부분 일치 허용)
           - `name` (선택): 사용자 이름 (like 검색, 부분 일치 허용)
-          - `portfolioStatus` (선택): 포트폴리오 타입
+          - `portfolioStatus` (선택): 포트폴리오 상태
           - `pageNumber` (선택, 기본값: 1): 페이지 번호 (1부터 시작)
           - `pageSize` (선택, 기본값: 10): 페이지당 항목 수
           - `sortField` (선택, 기본값: CREATED_DATE): 정렬 기준 필드 (현재는 CREATED_DATE 지원)
