@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -52,6 +53,7 @@ public class ApplicationFormDetail extends BasePostgresEntity {
   @Column(nullable = false)
   private int requestCount; // 요청 매수
 
+  @Size(max = REQUIREMENT_MAX_LENGTH)
   @Column(length = REQUIREMENT_MAX_LENGTH)
   private String requirement; // 요청 사항 // TODO: 추후 VO 로 분리
 
