@@ -77,7 +77,7 @@ public class MockPortfolioFactory {
 
     for (int i = 0; i < count; i++) {
       PortfolioImg portfolioImg = PortfolioImg.builder()
-          .storedPath(koFaker.internet().image())
+          .storedPath(koFaker.internet().image() + UUID.randomUUID())
           .build();
       portfolioImgList.add(portfolioImg);
     }

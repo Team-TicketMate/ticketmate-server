@@ -103,7 +103,7 @@ public class MockMemberFactory {
         .birthYear(birthYear)
         .birthDay(birthDay)
         .phone(koFaker.phoneNumber().cellPhone())
-        .profileImgStoredPath(koFaker.internet().image())
+        .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
         .gender(koFaker.options().option("male", "female"))
         .memberType(memberType)
         .accountStatus(status)
