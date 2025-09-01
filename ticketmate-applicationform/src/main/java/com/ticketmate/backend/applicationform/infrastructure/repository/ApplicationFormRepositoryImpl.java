@@ -69,8 +69,8 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
             APPLICATION_FORM.applicationFormId,
             CONCERT.concertName,
             CONCERT.concertThumbnailStoredPath,
-            CLIENT.nickname,
             AGENT.nickname,
+            CLIENT.nickname,
             APPLICATION_FORM.updatedDate,
             APPLICATION_FORM.applicationFormStatus,
             APPLICATION_FORM.ticketOpenType
@@ -85,8 +85,8 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
             APPLICATION_FORM.applicationFormId,
             CONCERT.concertName,
             CONCERT.concertThumbnailStoredPath,
-            CLIENT.nickname,
             AGENT.nickname,
+            CLIENT.nickname,
             APPLICATION_FORM.updatedDate,
             APPLICATION_FORM.applicationFormStatus,
             APPLICATION_FORM.ticketOpenType
