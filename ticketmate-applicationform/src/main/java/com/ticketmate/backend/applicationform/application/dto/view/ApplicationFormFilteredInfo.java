@@ -8,7 +8,7 @@ import java.util.UUID;
 public record ApplicationFormFilteredInfo(
     UUID applicationFormId, // 신청서 PK
     String concertName, // 공연 제목
-    String concertThumbnailImgStoredPath, // 공연 썸네일 저장 경로
+    String concertThumbnailStoredPath, // 공연 썸네일 저장 경로
     String agentNickname, // 대리인 닉네임
     String clientNickname, // 의뢰인 닉네임
     LocalDateTime submittedDate, // 신청 일자

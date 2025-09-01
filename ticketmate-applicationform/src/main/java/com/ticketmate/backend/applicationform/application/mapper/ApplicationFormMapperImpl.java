@@ -54,7 +54,7 @@ public class ApplicationFormMapperImpl implements ApplicationFormMapper {
     return new ApplicationFormFilteredResponse(
         info.applicationFormId(),
         info.concertName(),
-        storageService.generatePublicUrl(info.concertThumbnailImgStoredPath()),
+        storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
         info.agentNickname(),
         info.clientNickname(),
         info.submittedDate(),
