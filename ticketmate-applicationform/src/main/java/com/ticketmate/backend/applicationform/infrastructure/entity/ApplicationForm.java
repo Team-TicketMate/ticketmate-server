@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -61,9 +62,10 @@ public class ApplicationForm extends BasePostgresEntity {
   @OneToMany(mappedBy = "applicationForm", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ApplicationFormDetail> applicationFormDetailList = new ArrayList<>();
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ApplicationFormStatus applicationFormStatus; // 신청서 상태
+  private ApplicationFormStatus applicationFormStatus = ApplicationFormStatus.PENDING; // 신청서 상태
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
