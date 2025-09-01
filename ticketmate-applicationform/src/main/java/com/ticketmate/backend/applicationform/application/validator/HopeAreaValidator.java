@@ -39,7 +39,7 @@ public class HopeAreaValidator {
    * 희망구역 우선순위 검증
    */
   public HopeAreaValidator priorityUnique() {
-    if (!CommonUtil.nullOrEmpty(requestList)) {
+    if (CommonUtil.nullOrEmpty(requestList)) {
       return this;
     }
     Set<Integer> prioritySet = new HashSet<>();
