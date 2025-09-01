@@ -30,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -174,6 +173,7 @@ public class ConcertAdminService {
 
     // 공연 썸네일 이미지 업데이트
     if (!FileUtil.isNullOrEmpty(request.getConcertThumbNail())) {
+      storageService.deleteFile(concert.getConcertThumbnailStoredPath());
       FileMetadata newThumbnailMetadata = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
       String newThumbnailStoredPath = newThumbnailMetadata.storedPath();
       log.debug("공연 썸네일 이미지 업데이트: {}", newThumbnailStoredPath);
@@ -182,6 +182,7 @@ public class ConcertAdminService {
 
     // 좌석 배치도 업데이트
     if (!FileUtil.isNullOrEmpty(request.getSeatingChart())) {
+      storageService.deleteFile(concert.getSeatingChartStoredPath());
       FileMetadata newSeatingChartMetadata = storageService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
       String newSeatingChartStoredPath = newSeatingChartMetadata.storedPath();
       log.debug("좌석 배치도 이미지 업데이트: {}", newSeatingChartStoredPath);
