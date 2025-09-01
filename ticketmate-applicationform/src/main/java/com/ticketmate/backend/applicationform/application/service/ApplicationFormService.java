@@ -1,6 +1,7 @@
 package com.ticketmate.backend.applicationform.application.service;
 
 import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
 import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.REQUIREMENT_MAX_LENGTH;
 import static com.ticketmate.backend.member.core.constant.MemberType.AGENT;
 import static com.ticketmate.backend.member.core.constant.MemberType.CLIENT;
@@ -357,7 +358,8 @@ public class ApplicationFormService {
         .of(detailRequestList)
         .performanceDateNonNullAndDistinct()
         .requestCountRange(APPLICATION_FORM_MIN_REQUEST_COUNT, ticketOpenDate.getRequestMaxCount())
-        .requirementMaxLength(REQUIREMENT_MAX_LENGTH);
+        .requirementMaxLength(REQUIREMENT_MAX_LENGTH)
+        .hopeAreaList(HOPE_AREA_MAX_SIZE);
 
     for (ApplicationFormDetailRequest detailRequest : detailRequestList) {
       // 공연일자 엔티티 조회

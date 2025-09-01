@@ -74,4 +74,17 @@ public class ApplicationFormDetailValidator {
     }
     return this;
   }
+
+  /**
+   * 희망구역(HopeArea) 리스트 검증
+   */
+  public ApplicationFormDetailValidator hopeAreaList(int maxSize) {
+    for (ApplicationFormDetailRequest request : requestList) {
+      HopeAreaValidator
+          .of(request.getHopeAreaList())
+          .maxSize(maxSize)
+          .priorityUnique();
+    }
+    return this;
+  }
 }

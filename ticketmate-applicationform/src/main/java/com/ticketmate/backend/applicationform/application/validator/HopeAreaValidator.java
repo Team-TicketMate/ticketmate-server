@@ -20,7 +20,7 @@ public class HopeAreaValidator {
     this.requestList = requestList;
   }
 
-  public HopeAreaValidator of(List<HopeAreaRequest> requestList) {
+  public static HopeAreaValidator of(List<HopeAreaRequest> requestList) {
     return new HopeAreaValidator(requestList);
   }
 
