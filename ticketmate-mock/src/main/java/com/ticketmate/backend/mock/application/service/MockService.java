@@ -464,6 +464,55 @@ public class MockService {
         });
   }
 
+
+      /*
+    ======================================포트폴리오======================================
+     */
+
+  /**
+   * 사용자로부터 원하는 개수를 입력받아 포트폴리오 Mock 데이터를 추가합니다
+   * 해당 메서드는 멀티스레드를 사용하여 동작합니다
+   */
+  @Transactional
+  public CompletableFuture<Void> generateMockPortfoliosAsync(int count) {
+    long startMs = System.currentTimeMillis();
+    List<CompletableFuture<Void>> futures = new ArrayList<>();
+    List<Portfolio> portfolioList = Collections.synchronizedList(new ArrayList<>());
+
+    // 각 포트폴리오 생성을 별도 스레드에서 처리
+    for (int i = 0; i < count; i++) {
+      CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+        try {
+          Portfolio portfolio = mockPortfolioFactory.generate();
+          synchronized (this) {
+            portfolioList.add(portfolio);
+          }
+        } catch (Exception e) {
+          log.error("포트폴리오 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
+          throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
+        }
+      }, taskExecutor);
+      futures.add(future);
+    }
+
+    // 모든 비동기 작업이 완료될 때까지 대기
+    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+        .thenApply(v -> {
+          try {
+            // 트랜잭션 내에서 일괄 저장
+            List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
+            long endMs = System.currentTimeMillis();
+            log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+                savedPortfolioList.size(), endMs - startMs);
+            return null;
+          } catch (Exception e) {
+            log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+          }
+        });
+  }
+
+
       /*
     ======================================채팅방======================================
      */
