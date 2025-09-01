@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -522,6 +523,11 @@ public class MockService {
   public MockChatRoomResponse createChatRoomMockData() {
     // 캐시가 있고 아직 유효하면 그대로 반환
     CachedConfig cached = cachedConfigAtomicReference.get();
+
+    if (!isCacheValid(cached)) {
+      cachedConfigAtomicReference.set(null);
+    }
+
     if (isCacheValid(cached)) {
       return cached.toResponse();
     }
@@ -541,6 +547,8 @@ public class MockService {
             .socialPlatform(SocialPlatform.KAKAO)
             .build()
     );
+    log.debug("대리인 회원 생성 완료");
+
     MockLoginResponse clientLogin = testSocialLogin(
         MockLoginRequest.builder()
             .username(DEV_CLIENT_USERNAME)
@@ -549,6 +557,7 @@ public class MockService {
             .socialPlatform(SocialPlatform.NAVER)
             .build()
     );
+    log.debug("의뢰인 회원 생성 완료");
 
     Member agent  = memberRepository.findById(agentLogin.getMemberId())
         .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -584,18 +593,29 @@ public class MockService {
   private boolean isCacheValid(CachedConfig cached) {
     if (cached == null) return false;
     try {
-      if (!tokenProvider.isValidToken(cached.agentToken()) || !tokenProvider.isValidToken(cached.clientToken())) {
+      if (!tokenProvider.isValidToken(cached.agentToken()) ||
+          !tokenProvider.isValidToken(cached.clientToken())) {
         return false;
       }
-    } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-      return false;
-    } catch (Exception ignore) {
-      // 유효성 실패 시 재발급
+
+      // memberId 추출
+      UUID agentId = UUID.fromString(tokenProvider.getMemberId(cached.agentToken()));
+      UUID clientId = UUID.fromString(tokenProvider.getMemberId(cached.clientToken()));
+
+      // DB에 정말 존재하는지 확인
+      if (!memberRepository.existsById(agentId) || !memberRepository.existsById(clientId)) {
+        return false;
+      }
+
+      // 만료 임박 토큰 방지
+      Instant threshold = clock.instant().plusSeconds(60);
+      return cached.expiresAt().isAfter(threshold);
+
+    } catch (Exception e) {
       return false;
     }
-    Instant threshold = clock.instant().plusSeconds(60);
-    return cached.expiresAt().isAfter(threshold);
   }
+
 
   private ChatRoom ensureChatRoom(Member agent, Member client, Concert concert, ApplicationForm applicationForm) {
     TicketOpenType ticketOpenType = applicationForm.getTicketOpenType();

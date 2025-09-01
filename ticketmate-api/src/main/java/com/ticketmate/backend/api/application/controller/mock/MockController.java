@@ -107,7 +107,7 @@ public class MockController implements MockControllerDocs {
         });
   }
 
-  @GetMapping("/chat-room")
+  @PostMapping("/chat-room")
   @Override
   @LogMonitoringInvocation
   public MockChatRoomResponse createChatRoomMockData() {
