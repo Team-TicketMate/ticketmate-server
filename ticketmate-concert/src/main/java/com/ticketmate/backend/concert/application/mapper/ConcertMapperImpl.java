@@ -8,11 +8,7 @@ import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgent
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
 import com.ticketmate.backend.storage.core.service.StorageService;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -63,14 +59,6 @@ public class ConcertMapperImpl implements ConcertMapper{
         concertThumbnailUrl,
         seatingChartUrl
     );
-  }
-
-  @Override
-  public Page<ConcertFilteredResponse> toConcertFilteredResponsePage(Page<ConcertFilteredInfo> infoPage) {
-    List<ConcertFilteredResponse> content = infoPage.getContent().stream()
-        .map(this::toConcertFilteredResponse)
-        .collect(Collectors.toList());
-    return new PageImpl<>(content, infoPage.getPageable(), infoPage.getTotalElements());
   }
 
   @Override

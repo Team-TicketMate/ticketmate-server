@@ -129,7 +129,7 @@ public class ApplicationFormService {
             request.getApplicationFormStatusSet(),
             request.toPageable()
         );
-    return applicationFormMapper.toApplicationFormFilteredResponsePage(applicationFormFilteredInfoPage);
+    return applicationFormFilteredInfoPage.map(applicationFormMapper::toApplicationFormFilteredResponse);
   }
 
   /**

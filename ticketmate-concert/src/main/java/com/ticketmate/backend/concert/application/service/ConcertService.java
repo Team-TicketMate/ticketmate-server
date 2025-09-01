@@ -56,7 +56,7 @@ public class ConcertService {
         request.getTicketReservationSite(),
         request.toPageable()
     );
-    return concertMapper.toConcertFilteredResponsePage(concertFilteredInfoPage);
+    return concertFilteredInfoPage.map(concertMapper::toConcertFilteredResponse);
   }
 
   /**

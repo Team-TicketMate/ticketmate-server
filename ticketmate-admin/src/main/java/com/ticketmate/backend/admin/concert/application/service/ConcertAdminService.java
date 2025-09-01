@@ -116,7 +116,7 @@ public class ConcertAdminService {
         request.getTicketReservationSite(),
         request.toPageable()
     );
-    return concertMapper.toConcertFilteredResponsePage(concertFilteredInfoPage);
+    return concertFilteredInfoPage.map(concertMapper::toConcertFilteredResponse);
   }
 
   /**

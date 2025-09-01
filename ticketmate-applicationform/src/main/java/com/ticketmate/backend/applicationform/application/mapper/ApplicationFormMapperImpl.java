@@ -11,10 +11,7 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -61,14 +58,6 @@ public class ApplicationFormMapperImpl implements ApplicationFormMapper {
         info.applicationFormStatus(),
         info.ticketOpenType()
     );
-  }
-
-  @Override
-  public Page<ApplicationFormFilteredResponse> toApplicationFormFilteredResponsePage(Page<ApplicationFormFilteredInfo> infoPage) {
-    List<ApplicationFormFilteredResponse> content = infoPage.getContent().stream()
-        .map(this::toApplicationFormFilteredResponse)
-        .collect(Collectors.toList());
-    return new PageImpl<>(content, infoPage.getPageable(), infoPage.getTotalElements());
   }
 
   @Override

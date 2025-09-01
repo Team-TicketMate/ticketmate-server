@@ -10,7 +10,6 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationF
 import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import java.util.List;
-import org.springframework.data.domain.Page;
 
 public interface ApplicationFormMapper {
 
@@ -30,8 +29,6 @@ public interface ApplicationFormMapper {
   List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList);
 
   ApplicationFormFilteredResponse toApplicationFormFilteredResponse(ApplicationFormFilteredInfo info);
-
-  Page<ApplicationFormFilteredResponse> toApplicationFormFilteredResponsePage(Page<ApplicationFormFilteredInfo> infoPage);
 
   // RejectionReason -> RejectionReasonResponse (엔티티 -> DTO)
   RejectionReasonResponse toRejectionReasonResponse(RejectionReason rejectionReason);
