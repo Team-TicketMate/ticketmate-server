@@ -1,5 +1,7 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -34,7 +38,8 @@ public class HopeArea extends BasePostgresEntity {
   @JoinColumn(nullable = false)
   private ApplicationFormDetail applicationFormDetail;
 
-  @Positive
+  @Min(1)
+  @Max(HOPE_AREA_MAX_SIZE)
   @Column(nullable = false)
   private int priority; // 순위 (1~10)
 
