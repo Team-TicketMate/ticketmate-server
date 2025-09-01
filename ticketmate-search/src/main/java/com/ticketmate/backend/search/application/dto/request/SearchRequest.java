@@ -7,23 +7,23 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.domain.Pageable;
 
-@ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class SearchRequest {
 
   @NotBlank(message = "검색어를 입력하세요.")
+  @Size(max = 20, message = "검색어는 최대 20자까지 입력 가능합니다.")
   private String keyword; // 검색 키워드
 
   @NotNull(message = "검색 타입을 입력하세요.")
