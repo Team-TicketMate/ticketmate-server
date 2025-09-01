@@ -94,4 +94,8 @@ public class ApplicationForm extends BasePostgresEntity {
     applicationFormDetailList.add(applicationFormDetail);
     applicationFormDetail.setApplicationForm(this);
   }
+
+  public void unAssignAgent() {
+    this.agent = null;
+  }
 }

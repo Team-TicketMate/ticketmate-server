@@ -12,9 +12,12 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionRea
 import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
 import com.ticketmate.backend.applicationform.infrastructure.repository.RejectionReasonRepository;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
+import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
+import com.ticketmate.backend.chat.infrastructure.repository.ChatRoomRepository;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
@@ -26,20 +29,30 @@ import com.ticketmate.backend.concert.infrastructure.repository.TicketOpenDateRe
 import com.ticketmate.backend.concerthall.core.constant.City;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepository;
+import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.constant.Role;
+import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockChatRoomResponse;
 import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
+import com.ticketmate.backend.mock.infrastructure.config.CachedConfig;
 import com.ticketmate.backend.portfolio.application.service.PortfolioService;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +91,12 @@ public class MockService {
   private final ConcertAgentAvailabilityRepository concertAgentAvailabilityRepository;
   private final PortfolioService portfolioService;
   private final RejectionReasonRepository rejectionReasonRepository;
+  private final ChatRoomRepository chatRoomRepository;
+  private final MockChatRoomFactory mockChatRoomFactory;
+  private static final String DEV_AGENT_USERNAME  = "test-chat-agent@ticketmate.com";
+  private static final String DEV_CLIENT_USERNAME = "test-chat-client@ticketmate.com";
+  private final AtomicReference<CachedConfig> cachedConfigAtomicReference = new AtomicReference<>();
+  private final Clock clock;
 
     /*
     ======================================회원======================================
@@ -445,7 +464,8 @@ public class MockService {
         });
   }
 
-    /*
+
+      /*
     ======================================포트폴리오======================================
      */
 
@@ -488,6 +508,131 @@ public class MockService {
           } catch (Exception e) {
             log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
             throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+          }
+        });
+  }
+
+
+      /*
+    ======================================채팅방======================================
+     */
+
+  /**
+   * 채팅방 전용 클라이언트/에이전트 사용자를 생성합니다.
+   * 또한 신청서세팅 + 채팅방 데이터를 생성합니다.
+   */
+  @Transactional
+  public MockChatRoomResponse createChatRoomMockData() {
+    // 캐시가 있고 아직 유효하면 그대로 반환
+    CachedConfig cached = cachedConfigAtomicReference.get();
+
+    if (!isCacheValid(cached)) {
+      cachedConfigAtomicReference.set(null);
+    }
+
+    if (isCacheValid(cached)) {
+      return cached.toResponse();
+    }
+
+    synchronized (this) {
+      cached = cachedConfigAtomicReference.get();
+      if (isCacheValid(cached)) {
+        return cached.toResponse();
+      }
+    }
+
+    MockLoginResponse agentLogin = testSocialLogin(
+        MockLoginRequest.builder()
+            .username(DEV_AGENT_USERNAME)
+            .role(Role.ROLE_TEST)
+            .memberType(MemberType.AGENT)
+            .socialPlatform(SocialPlatform.KAKAO)
+            .build()
+    );
+    log.debug("대리인 회원 생성 완료");
+
+    MockLoginResponse clientLogin = testSocialLogin(
+        MockLoginRequest.builder()
+            .username(DEV_CLIENT_USERNAME)
+            .role(Role.ROLE_TEST)
+            .memberType(MemberType.CLIENT)
+            .socialPlatform(SocialPlatform.NAVER)
+            .build()
+    );
+    log.debug("의뢰인 회원 생성 완료");
+
+    Member agent  = memberRepository.findById(agentLogin.getMemberId())
+        .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    Member client = memberRepository.findById(clientLogin.getMemberId())
+        .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<Concert> concerts = concertRepository.findAll();
+    if (concerts.isEmpty()) throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    Concert concert = concerts.get(0);
+
+    ApplicationForm applicationForm = mockApplicationFormFactory.generate(List.of(agent), List.of(client), List.of(concert));
+
+    applicationFormRepository.save(applicationForm);
+
+    if (ApplicationFormStatus.REJECTED.equals(applicationForm.getApplicationFormStatus())) {
+      rejectionReasonRepository.save(mockApplicationFormFactory.createRejectionReason(applicationForm));
+    }
+
+    ChatRoom chatRoom = ensureChatRoom(agent, client, concert, applicationForm);
+
+    Date expAgentToken = tokenProvider.getExpiredAt(agentLogin.getAccessToken());
+    Date expClientToken = tokenProvider.getExpiredAt(clientLogin.getAccessToken());
+    Instant minExp = expAgentToken.toInstant()
+        .isBefore(expClientToken.toInstant()) ? expAgentToken.toInstant() : expClientToken.toInstant();
+
+    CachedConfig fresh = new CachedConfig(agentLogin.getAccessToken(), clientLogin.getAccessToken(),
+        chatRoom.getChatRoomId(), minExp);
+    cachedConfigAtomicReference.set(fresh);
+    return fresh.toResponse();
+  }
+
+  private boolean isCacheValid(CachedConfig cached) {
+    if (cached == null) return false;
+    try {
+      if (!tokenProvider.isValidToken(cached.agentToken()) ||
+          !tokenProvider.isValidToken(cached.clientToken())) {
+        return false;
+      }
+
+      // memberId 추출
+      UUID agentId = UUID.fromString(tokenProvider.getMemberId(cached.agentToken()));
+      UUID clientId = UUID.fromString(tokenProvider.getMemberId(cached.clientToken()));
+
+      // DB에 정말 존재하는지 확인
+      if (!memberRepository.existsById(agentId) || !memberRepository.existsById(clientId)) {
+        return false;
+      }
+
+      // 만료 임박 토큰 방지
+      Instant threshold = clock.instant().plusSeconds(60);
+      return cached.expiresAt().isAfter(threshold);
+
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+
+  private ChatRoom ensureChatRoom(Member agent, Member client, Concert concert, ApplicationForm applicationForm) {
+    TicketOpenType ticketOpenType = applicationForm.getTicketOpenType();
+
+    return chatRoomRepository
+        .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
+            agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
+        .orElseGet(() -> {
+          try {
+            return chatRoomRepository.save(mockChatRoomFactory.generateFrom(applicationForm));
+          } catch (org.springframework.dao.DuplicateKeyException e) {
+            return chatRoomRepository
+                .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
+                    agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
+                .orElseThrow();
           }
         });
   }

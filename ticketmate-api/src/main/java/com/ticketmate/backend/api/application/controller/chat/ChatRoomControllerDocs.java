@@ -238,4 +238,31 @@ public interface ChatRoomControllerDocs {
       CustomOAuth2User customOAuth2User,
       String chatRoomId
   );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-08-25",
+          author = "mr6208",
+          description = "채팅방 내부 진행취소 API 설계",
+          issueUrl = ""
+      )
+  })
+  @Operation(
+      summary = "채팅방 내부 진행취소 기능",
+      description = """
+          
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+          
+          ### 반환 데이터 
+          - 상태코드만을 반환합니다.
+          
+          ### 유의사항
+          - 채팅방 내부에서 대리인 혹은 의뢰인이 매칭되어있는 신청서에 대한 진행을 취소합니다.
+          - 진행취소된 신청서의 경우 신청서 상태가 CANCELED_IN_PROCESS 상태로 변경됩니다. 
+          """
+  )
+  ResponseEntity<Void> cancelProgress(CustomOAuth2User customOAuth2User, String chatRoomId);
 }

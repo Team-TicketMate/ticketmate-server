@@ -5,6 +5,7 @@ import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapper;
 import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
+import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
@@ -191,11 +192,57 @@ public class ChatRoomService {
   }
 
   /**
+   * @param chatRoomId 채팅방 고유 ID
+   * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
+   */
+  @Transactional(readOnly = true)
+  public ApplicationFormFilteredResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
+
+    // 요청된 채팅방 추출
+    ChatRoom chatRoom = chatRoomRepository
+        .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+    // 현재 사용자 검증
+    validateRoomMember(chatRoom, member);
+
+    // 메서드 체이닝
+    return Optional.of(chatRoom)
+        .map(ChatRoom::getApplicationFormId)
+        .flatMap(applicationFormRepository::findById)
+        .map(applicationFormMapper::toApplicationFormFilteredResponse)
+        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+  }
+
+  /**
+   * 채팅까지 진행된 후 진행취소를 위한 API
+   * @param member (진행 취소를 요청한 회원)
+   * @param chatRoomId (현재 채팅방 ID)
+   */
+  @Transactional
+  public void cancelProgress(Member member, String chatRoomId) {
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> {
+      log.error("진행 취소를 위한 채팅방을 찾지 못했습니다.");
+      return new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+    });
+
+    validateRoomMember(chatRoom, member);
+
+    ApplicationForm applicationForm = applicationFormRepository.findById(chatRoom.getApplicationFormId()).orElseThrow(() -> {
+      log.error("요청한 채팅방 {} 에 대한 신청서를 찾지 못했습니다.", chatRoom.getChatRoomId());
+      return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+    });
+
+    // 신청서의 불변 보장(추후 신청내역 조회를 위해)을 위해 상태만 변경
+    applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED_IN_PROCESS);
+  }
+
+  /**
    * 방 참가자 검증
    */
   private void validateRoomMember(ChatRoom room, Member member) {
     UUID id = member.getMemberId();
     if (!id.equals(room.getAgentMemberId()) && !id.equals(room.getClientMemberId())) {
+      log.error("현재 사용자는 해당 채팅방에 대한 권한이 없습니다.");
       throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
     }
   }

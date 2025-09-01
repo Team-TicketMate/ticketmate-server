@@ -69,6 +69,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
           .lastLoginTime(LocalDateTime.now(clock))
+          .followingCount(0L)
+          .followerCount(0L)
           .build();
     } else { // 첫 로그인이 아닌경우
       member = optionalMember.get();

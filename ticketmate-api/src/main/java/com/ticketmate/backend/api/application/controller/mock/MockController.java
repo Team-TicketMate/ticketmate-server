@@ -2,6 +2,7 @@ package com.ticketmate.backend.api.application.controller.mock;
 
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.response.MockChatRoomResponse;
 import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import com.ticketmate.backend.mock.application.service.MockService;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -104,4 +106,11 @@ public class MockController implements MockControllerDocs {
           throw new RuntimeException("포트폴리오 Mock 데이터 생성 실패: " + ex.getMessage());
         });
   }
-}
+
+  @PostMapping("/chat-room")
+  @Override
+  @LogMonitoringInvocation
+  public MockChatRoomResponse createChatRoomMockData() {
+      return mockService.createChatRoomMockData();
+    }
+  }
