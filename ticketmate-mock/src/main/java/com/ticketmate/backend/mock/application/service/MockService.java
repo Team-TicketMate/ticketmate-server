@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -463,53 +464,6 @@ public class MockService {
         });
   }
 
-    /*
-    ======================================포트폴리오======================================
-     */
-
-  /**
-   * 사용자로부터 원하는 개수를 입력받아 포트폴리오 Mock 데이터를 추가합니다
-   * 해당 메서드는 멀티스레드를 사용하여 동작합니다
-   */
-  @Transactional
-  public CompletableFuture<Void> generateMockPortfoliosAsync(int count) {
-    long startMs = System.currentTimeMillis();
-    List<CompletableFuture<Void>> futures = new ArrayList<>();
-    List<Portfolio> portfolioList = Collections.synchronizedList(new ArrayList<>());
-
-    // 각 포트폴리오 생성을 별도 스레드에서 처리
-    for (int i = 0; i < count; i++) {
-      CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-        try {
-          Portfolio portfolio = mockPortfolioFactory.generate();
-          synchronized (this) {
-            portfolioList.add(portfolio);
-          }
-        } catch (Exception e) {
-          log.error("포트폴리오 Mock 데이터 생성 중 오류 발생: {}", e.getMessage());
-          throw new CustomException(ErrorCode.GENERATE_MOCK_DATA_ERROR);
-        }
-      }, taskExecutor);
-      futures.add(future);
-    }
-
-    // 모든 비동기 작업이 완료될 때까지 대기
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .thenApply(v -> {
-          try {
-            // 트랜잭션 내에서 일괄 저장
-            List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
-            long endMs = System.currentTimeMillis();
-            log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
-                savedPortfolioList.size(), endMs - startMs);
-            return null;
-          } catch (Exception e) {
-            log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
-          }
-        });
-  }
-
       /*
     ======================================채팅방======================================
      */
@@ -522,6 +476,11 @@ public class MockService {
   public MockChatRoomResponse createChatRoomMockData() {
     // 캐시가 있고 아직 유효하면 그대로 반환
     CachedConfig cached = cachedConfigAtomicReference.get();
+
+    if (!isCacheValid(cached)) {
+      cachedConfigAtomicReference.set(null);
+    }
+
     if (isCacheValid(cached)) {
       return cached.toResponse();
     }
@@ -541,6 +500,8 @@ public class MockService {
             .socialPlatform(SocialPlatform.KAKAO)
             .build()
     );
+    log.debug("대리인 회원 생성 완료");
+
     MockLoginResponse clientLogin = testSocialLogin(
         MockLoginRequest.builder()
             .username(DEV_CLIENT_USERNAME)
@@ -549,6 +510,7 @@ public class MockService {
             .socialPlatform(SocialPlatform.NAVER)
             .build()
     );
+    log.debug("의뢰인 회원 생성 완료");
 
     Member agent  = memberRepository.findById(agentLogin.getMemberId())
         .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -584,18 +546,29 @@ public class MockService {
   private boolean isCacheValid(CachedConfig cached) {
     if (cached == null) return false;
     try {
-      if (!tokenProvider.isValidToken(cached.agentToken()) || !tokenProvider.isValidToken(cached.clientToken())) {
+      if (!tokenProvider.isValidToken(cached.agentToken()) ||
+          !tokenProvider.isValidToken(cached.clientToken())) {
         return false;
       }
-    } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-      return false;
-    } catch (Exception ignore) {
-      // 유효성 실패 시 재발급
+
+      // memberId 추출
+      UUID agentId = UUID.fromString(tokenProvider.getMemberId(cached.agentToken()));
+      UUID clientId = UUID.fromString(tokenProvider.getMemberId(cached.clientToken()));
+
+      // DB에 정말 존재하는지 확인
+      if (!memberRepository.existsById(agentId) || !memberRepository.existsById(clientId)) {
+        return false;
+      }
+
+      // 만료 임박 토큰 방지
+      Instant threshold = clock.instant().plusSeconds(60);
+      return cached.expiresAt().isAfter(threshold);
+
+    } catch (Exception e) {
       return false;
     }
-    Instant threshold = clock.instant().plusSeconds(60);
-    return cached.expiresAt().isAfter(threshold);
   }
+
 
   private ChatRoom ensureChatRoom(Member agent, Member client, Concert concert, ApplicationForm applicationForm) {
     TicketOpenType ticketOpenType = applicationForm.getTicketOpenType();
