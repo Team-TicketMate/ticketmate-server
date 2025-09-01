@@ -1,28 +1,29 @@
 package com.ticketmate.backend.redis.infrastructure.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisCacheConfig {
 
   @Bean
-  public RedisCacheManager redisCacheManager(RedisConnectionFactory connectionFactory, ObjectMapper springObjectMapper) {
-    ObjectMapper mapper = springObjectMapper.copy();
-
+  public RedisCacheManager redisCacheManager(
+      RedisConnectionFactory connectionFactory,
+      @Qualifier("redisJsonSerializer") GenericJackson2JsonRedisSerializer serializer
+  ) {
     RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-        .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer()))
-        .serializeValuesWith(SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(mapper)))
+        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
         .disableCachingNullValues()
         .entryTtl(Duration.ofMinutes(30));
 
@@ -34,6 +35,7 @@ public class RedisCacheConfig {
     return RedisCacheManager.builder(connectionFactory)
         .cacheDefaults(cacheConfiguration)
         .withInitialCacheConfigurations(configurationMap)
+        .transactionAware()
         .build();
   }
 }

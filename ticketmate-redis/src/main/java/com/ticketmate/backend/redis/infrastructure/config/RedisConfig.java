@@ -1,6 +1,6 @@
 package com.ticketmate.backend.redis.infrastructure.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,16 +15,19 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
   @Bean
-  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory, ObjectMapper springObjectMapper) {
-
+  public RedisTemplate<String, Object> redisTemplate(
+      RedisConnectionFactory factory,
+      @Qualifier("redisJsonSerializer") GenericJackson2JsonRedisSerializer serializer
+  ) {
+    StringRedisSerializer stringSerializer = new StringRedisSerializer();
     RedisTemplate<String, Object> template = new RedisTemplate<>();
-    template.setConnectionFactory(factory);
 
+    template.setConnectionFactory(factory);
     // 직렬화 설정
-    template.setKeySerializer(new StringRedisSerializer());
-    template.setHashKeySerializer(new StringRedisSerializer());
-    template.setValueSerializer(new GenericJackson2JsonRedisSerializer(springObjectMapper.copy()));
-    template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+    template.setKeySerializer(stringSerializer);
+    template.setHashKeySerializer(stringSerializer);
+    template.setValueSerializer(serializer);
+    template.setHashValueSerializer(serializer);
     template.afterPropertiesSet();
     return template;
   }
