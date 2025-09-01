@@ -236,6 +236,12 @@ public enum ErrorCode {
 
   INVALID_DATE_TIME_PARSE(HttpStatus.BAD_REQUEST, "날짜/시간 형식이 올바르지 않습니다."),
 
+  // REPORT
+
+  REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고 내역을 찾을 수 없습니다."),
+
+  INVALID_REPORT_REASON(HttpStatus.BAD_REQUEST, "유효하지 않은 신고 사유입니다."),
+
   ;
 
   private final HttpStatus status;
