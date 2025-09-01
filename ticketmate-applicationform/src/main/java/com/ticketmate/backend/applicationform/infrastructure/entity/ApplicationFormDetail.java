@@ -21,6 +21,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -75,7 +76,7 @@ public class ApplicationFormDetail extends BasePostgresEntity {
       throw new CustomException(ErrorCode.HOPE_AREAS_SIZE_EXCEED, HOPE_AREA_MAX_SIZE);
     }
     if (hopeAreaList.stream().anyMatch(area ->
-        area.getPriority() == hopeArea.getPriority())) {
+        Objects.equals(area.getPriority(), hopeArea.getPriority()))) {
       throw new CustomException(ErrorCode.PRIORITY_ALREADY_EXISTS);
     }
     hopeAreaList.add(hopeArea);
