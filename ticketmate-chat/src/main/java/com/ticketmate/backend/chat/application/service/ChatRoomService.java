@@ -3,7 +3,6 @@ package com.ticketmate.backend.chat.application.service;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
-import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapper;
 import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
@@ -55,7 +54,6 @@ public class ChatRoomService {
   private final ApplicationFormRepository applicationFormRepository;
   private final ChatMessageRepository chatMessageRepository;
   private final ChatMapper chatMapper;
-  private final ApplicationFormMapper applicationFormMapper;
   private final RedisTemplate<String, String> redisTemplate;
 
   /**
@@ -196,7 +194,7 @@ public class ChatRoomService {
    * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
    */
   @Transactional(readOnly = true)
-  public ApplicationFormFilteredResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
+  public ApplicationFormInfoResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
 
     // 요청된 채팅방 추출
     ChatRoom chatRoom = chatRoomRepository
@@ -208,8 +206,7 @@ public class ChatRoomService {
     // 메서드 체이닝
     return Optional.of(chatRoom)
         .map(ChatRoom::getApplicationFormId)
-        .flatMap(applicationFormRepository::findById)
-        .map(applicationFormMapper::toApplicationFormFilteredResponse)
+        .map(applicationFormService::getApplicationFormInfo)
         .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
   }
 
@@ -258,26 +255,5 @@ public class ChatRoomService {
       return Integer.parseInt(new String(b));
     }
     return Integer.parseInt(object.toString());
-  }
-
-  /**
-   * @param chatRoomId 채팅방 고유 ID
-   * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
-   */
-  @Transactional(readOnly = true)
-  public ApplicationFormInfoResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
-
-    // 요청된 채팅방 추출
-    ChatRoom chatRoom = chatRoomRepository
-        .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
-    // 현재 사용자 검증
-    validateRoomMember(chatRoom, member);
-
-    // 메서드 체이닝
-    return Optional.of(chatRoom)
-        .map(ChatRoom::getApplicationFormId)
-        .map(applicationFormService::getApplicationFormInfo)
-        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
   }
 }
