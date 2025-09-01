@@ -87,7 +87,7 @@ public class S3Service implements StorageService {
     if (CommonUtil.nvl(storedPath, "").isEmpty()) {
       return null;
     }
-    return s3Properties.s3().domain() + storedPath; // 예: "https://domain.com/prefix/yyyyMMdd-UUID-파일명.jpg"
+    return FileUtil.combineBaseAndPath(s3Properties.s3().domain(), storedPath); // 예: "https://domain.com/prefix/yyyyMMdd-UUID-파일명.jpg"
   }
 
 
