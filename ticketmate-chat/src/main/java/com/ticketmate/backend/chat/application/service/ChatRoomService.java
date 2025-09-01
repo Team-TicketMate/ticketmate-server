@@ -230,10 +230,8 @@ public class ChatRoomService {
       return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
     });
 
+    // 신청서의 불변 보장(추후 신청내역 조회를 위해)을 위해 상태만 변경
     applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED_IN_PROCESS);
-
-    // 진행취소 -> 업자가 취소하든 손님이 취소하든 티켓팅을 하는 주체에 대해서만 삭제처리
-    applicationForm.unAssignAgent();
   }
 
   /**
