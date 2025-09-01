@@ -159,8 +159,10 @@ public class S3Service implements StorageService {
    */
   private String generateStoredPath(String originalFilename, String prefix) {
     String datePart = LocalDateTime.now(clock).format(DATE_TIME_FORMATTER);
-    // 파일명에서 경로 구분자와 특수 문자 제거
-    String sanitizedFilename = originalFilename.replaceAll("[/\\\\:*?\"<>|]", "_");
+    // 파일명에서 경로 구분자와 특수 문자 제거 + 공백류를 언더스코어로 치환
+    String sanitizedFilename = originalFilename
+        .replaceAll("[/\\\\:*?\"<>|]", "_")
+        .replaceAll("\\s+", "_");
     return String.format("%s/%s-%s-%s", prefix, datePart, UUID.randomUUID(), sanitizedFilename);
   }
 
