@@ -2,7 +2,7 @@ package com.ticketmate.backend.applicationform.application.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,9 +21,9 @@ public class HopeAreaRequest {
   @Max(value = 10, message = "순위는 1부터 10 사이의 정수만 입력 가능합니다.")
   private int priority; // 순위
 
-  @NotNull(message = "희망 구역을 입력하세요.")
+  @NotBlank(message = "희망 구역을 입력하세요.")
   private String location; // 구역
 
-  @Positive(message = "가격은 0 이상의 정수만 입력 가능합니다.")
+  @Positive(message = "가격은 1 이상의 정수만 입력 가능합니다.")
   private int price; // 가격
 }
