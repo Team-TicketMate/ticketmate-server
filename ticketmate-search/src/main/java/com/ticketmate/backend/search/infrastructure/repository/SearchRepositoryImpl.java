@@ -39,7 +39,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   /**
-   * 제공된 ID 목록에 해당하는 공연들의 상세 정보를 조회하여 ConcertSearchResponse DTO 리스트로 반환합니다.
+   * 제공된 ID 목록에 해당하는 공연들의 상세 정보를 조회하여 ConcertSearchInfo DTO 리스트로 반환합니다.
    *
    * @param concertIds 상세 정보를 조회할 공연의 UUID 리스트
    * @return 공연 상세 정보가 담긴 DTO 리스트
@@ -91,7 +91,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   }
 
   /**
-   * 제공된 ID 목록에 해당하는 대리인의 상세 정보를 조회하여 AgentSearchResponse DTO 리스트로 반환합니다.
+   * 제공된 ID 목록에 해당하는 대리인의 상세 정보를 조회하여 AgentSearchInfo DTO 리스트로 반환합니다.
    *
    * @param agentIds 상세 정보를 조회할 대리인의 UUID 리스트
    * @return 대리인 상세 정보가 담긴 DTO 리스트
