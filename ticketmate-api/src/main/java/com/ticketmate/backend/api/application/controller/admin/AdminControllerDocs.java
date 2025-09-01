@@ -458,7 +458,7 @@ public interface AdminControllerDocs {
           - 포트폴리오의 고유한 id
           
           ### 유의사항
-          - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관라지에게 필요한 데이터를 반환합니다.
+          - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관리자에게 필요한 데이터를 반환합니다.
           """
   )
   ResponseEntity<PortfolioAdminResponse> getPortfolioInfo(
@@ -503,7 +503,7 @@ public interface AdminControllerDocs {
           - 검토 대기(PENDING_REVIEW)로의 상태 변경은 불가능합니다.
           - 검토 중(REVIEWING)으로의 변경은 검토 대기(PENDING_REVIEW) 상태의 포트폴리오만 가능합니다.
           - 승인(APPROVED)으로의 변경은 검토 중(REVIEWING) 상태의 포트폴리오만 가능합니다
-          - 승인(APPROVEW) 시 해당 의뢰인의 MemberType이 대리인으로 변경되며, 알림이 발송됩니다.
+          - 승인(APPROVED) 시 해당 의뢰인의 MemberType이 대리인으로 변경되며, 알림이 발송됩니다.
           - 반려(REJECTED)으로의 변경은 검토 중(REVIEWING) 상태의 포트폴리오만 가능합니다.
           - 반려(REJECTED) 시 해당 의뢰인에게 알림이 발송됩니다.
           
