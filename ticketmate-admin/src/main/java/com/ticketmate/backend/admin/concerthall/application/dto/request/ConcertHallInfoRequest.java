@@ -1,7 +1,6 @@
 package com.ticketmate.backend.admin.concerthall.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +21,5 @@ public class ConcertHallInfoRequest {
 
   private String address;
 
-  @Pattern(regexp = "^(https://|http://).*$", message = "웹사이트 URL 형식이 올바르지 않습니다.")
   private String webSiteUrl;
 }
