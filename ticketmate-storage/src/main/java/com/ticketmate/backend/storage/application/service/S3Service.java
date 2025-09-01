@@ -84,6 +84,9 @@ public class S3Service implements StorageService {
     if (storedPath.startsWith("https://picsum.photos/")) {
       return storedPath;
     } // TODO: Mock 데이터 사진은 "https://picsum.photos/..." 고정이므로 Mock 데이터는 storedPath를 저장하는 것이 아닌 publicUrl 전체 저장 (개발 후 삭제 필요)
+    if (CommonUtil.nvl(storedPath, "").isEmpty()) {
+      return null;
+    }
     return s3Properties.s3().domain() + storedPath; // 예: "https://domain.com/prefix/yyyyMMdd-UUID-파일명.jpg"
   }
 
