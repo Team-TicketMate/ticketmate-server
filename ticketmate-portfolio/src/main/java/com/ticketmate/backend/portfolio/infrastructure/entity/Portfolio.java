@@ -40,8 +40,8 @@ public class Portfolio extends BasePostgresEntity {
   @Column(updatable = false, nullable = false)
   private UUID portfolioId;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(nullable = false)
+  @OneToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false, unique = true)
   private Member member;
 
   @Column(nullable = false)
