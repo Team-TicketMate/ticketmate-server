@@ -61,13 +61,13 @@ public class SearchService {
 
     switch (request.getSearchType()) {
       case CONCERT -> slice = getPaginatedResults(
-          results.concertResults(),
+          results.getConcertResults(),
           pageable,
           searchRepositoryCustom::findConcertDetailsByIds,
           searchMapper::toConcertSearchResponse
       );
       case AGENT -> slice = getPaginatedResults(
-          results.agentResults(),
+          results.getAgentResults(),
           pageable,
           searchRepositoryCustom::findAgentDetailsByIds,
           searchMapper::toAgentSearchResponse
@@ -79,7 +79,7 @@ public class SearchService {
     }
 
     if (pageable.getPageNumber() == 0) {
-      return SearchResponse.firstPage(slice, results.concertResults().size(), results.agentResults().size());
+      return SearchResponse.firstPage(slice, results.getConcertResults().size(), results.getAgentResults().size());
     }
     return SearchResponse.nextPage(slice);
   }
@@ -113,7 +113,7 @@ public class SearchService {
 
     // 페이징된 id로 dto 조회
     List<S> infoList = detailsFetcher.apply(paginatedPairList.stream()
-        .map(IdScorePair::id)
+        .map(IdScorePair::getId)
         .collect(Collectors.toList())
     );
 
@@ -128,9 +128,9 @@ public class SearchService {
     // 정렬 순서대로 최종 리스트 생성 + score 주입
     List<T> results = paginatedPairList.stream()
         .map(pair -> {
-          T dto = dtoMap.get(pair.id());
+          T dto = dtoMap.get(pair.getId());
           if (dto != null) {
-            dto.setScore(pair.score());
+            dto.setScore(pair.getScore());
           }
           return dto;
         })
