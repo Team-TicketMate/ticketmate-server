@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -85,13 +83,5 @@ public class ConcertMapperImpl implements ConcertMapper{
         info.averageRating(),
         info.reviewCount()
     );
-  }
-
-  @Override
-  public Slice<ConcertAcceptingAgentResponse> toConcertAcceptingAgentResponseSlice(Slice<ConcertAcceptingAgentInfo> infoSlice) {
-    List<ConcertAcceptingAgentResponse> content = infoSlice.getContent().stream()
-        .map(this::toConcertAcceptingAgentResponse)
-        .collect(Collectors.toList());
-    return new SliceImpl<>(content, infoSlice.getPageable(), infoSlice.hasNext());
   }
 }

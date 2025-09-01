@@ -65,11 +65,8 @@ public class ConcertAgentAvailabilityService {
    */
   @Transactional(readOnly = true)
   public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentFilteredRequest request) {
-    Slice<ConcertAcceptingAgentInfo> concertAcceptingAgentInfoSlice =
-        concertAgentAvailabilityRepositoryCustom.findAcceptingAgentByConcert(
-            concertId,
-            request.toPageable()
-        );
-    return concertMapper.toConcertAcceptingAgentResponseSlice(concertAcceptingAgentInfoSlice);
+    Slice<ConcertAcceptingAgentInfo> infoSlice = concertAgentAvailabilityRepositoryCustom
+        .findAcceptingAgentByConcert(concertId, request.toPageable());
+    return infoSlice.map(concertMapper::toConcertAcceptingAgentResponse);
   }
 }

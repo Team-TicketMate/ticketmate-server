@@ -7,7 +7,6 @@ import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgent
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
 
 public interface ConcertMapper {
 
@@ -34,10 +33,4 @@ public interface ConcertMapper {
    * 이미지 storedPath -> publicUrl 변환
    */
   ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info);
-
-  /**
-   * Slice<ConcertAcceptingAgentInfo> -> Slice<ConcertAcceptingAgentResponse> (DTO Slice -> DTO Slice)
-   * 이미지 storedPath -> publicUrl 변환
-   */
-  Slice<ConcertAcceptingAgentResponse> toConcertAcceptingAgentResponseSlice(Slice<ConcertAcceptingAgentInfo> infoSlice);
 }
