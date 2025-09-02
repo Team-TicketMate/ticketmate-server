@@ -212,7 +212,8 @@ public class ChatRoomService {
 
   /**
    * 채팅까지 진행된 후 진행취소를 위한 API
-   * @param member (진행 취소를 요청한 회원)
+   *
+   * @param member     (진행 취소를 요청한 회원)
    * @param chatRoomId (현재 채팅방 ID)
    */
   @Transactional

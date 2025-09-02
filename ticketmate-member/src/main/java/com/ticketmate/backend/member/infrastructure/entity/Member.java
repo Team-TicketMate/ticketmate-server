@@ -100,7 +100,9 @@ public class Member extends BasePostgresEntity {
   @Column(nullable = false)
   private long followerCount = 0L;
 
-  /** 관리자 **/
+  /**
+   * 관리자
+   **/
   private String password;
 
   @Builder.Default

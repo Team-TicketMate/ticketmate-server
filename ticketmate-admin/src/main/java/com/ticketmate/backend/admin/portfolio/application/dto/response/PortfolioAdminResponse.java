@@ -18,7 +18,8 @@ public record PortfolioAdminResponse(
     LocalDateTime createdDate,
     LocalDateTime updatedDate
 ) {
-  public PortfolioAdminResponse{
+
+  public PortfolioAdminResponse {
     portfolioImgList = CommonUtil.nullOrEmpty(portfolioImgList) ? List.of() : List.copyOf(portfolioImgList);
   }
 }

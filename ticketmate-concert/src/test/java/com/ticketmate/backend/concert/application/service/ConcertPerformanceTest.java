@@ -67,16 +67,16 @@
 //    concertService.filteredConcert(warmUpRequest);
 //  }
 //
-////    /**
-////     * 테스트를 진행하기 전 Concert의 PK를 사용하는 테이블 초기화 (ex.ApplicationForm)
-////     */
-////    @BeforeEach
-////    void setUp() {
-////        concertDateRepository.deleteAllInBatch();
-////        ticketOpenDateRepository.deleteAllInBatch();
-////        concertRepository.deleteAllInBatch();
-////        createConcertInBatch(100);
-////    }
+/// /    /**
+/// /     * 테스트를 진행하기 전 Concert의 PK를 사용하는 테이블 초기화 (ex.ApplicationForm)
+/// /     */
+/// /    @BeforeEach
+/// /    void setUp() {
+/// /        concertDateRepository.deleteAllInBatch();
+/// /        ticketOpenDateRepository.deleteAllInBatch();
+/// /        concertRepository.deleteAllInBatch();
+/// /        createConcertInBatch(100);
+/// /    }
 //
 //
 //  @Test

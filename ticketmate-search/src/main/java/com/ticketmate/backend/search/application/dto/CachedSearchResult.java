@@ -13,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CachedSearchResult {
+
   @JsonSetter(nulls = Nulls.AS_EMPTY)
   private List<IdScorePair> concertResults = List.of();
 

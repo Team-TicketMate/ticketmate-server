@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SearchMapperImpl implements SearchMapper{
+public class SearchMapperImpl implements SearchMapper {
 
   private final StorageService storageService;
 

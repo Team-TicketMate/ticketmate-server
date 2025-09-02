@@ -71,6 +71,8 @@ public class MockService {
 
   // 배치 사이즈
   private static final int BATCH_SIZE = 500;
+  private static final String DEV_AGENT_USERNAME = "test-chat-agent@ticketmate.com";
+  private static final String DEV_CLIENT_USERNAME = "test-chat-client@ticketmate.com";
   private final MemberRepository memberRepository;
   private final Faker koFaker = new Faker(new Locale("ko", "KR"));
   private final MockMemberFactory mockMemberFactory;
@@ -93,8 +95,6 @@ public class MockService {
   private final RejectionReasonRepository rejectionReasonRepository;
   private final ChatRoomRepository chatRoomRepository;
   private final MockChatRoomFactory mockChatRoomFactory;
-  private static final String DEV_AGENT_USERNAME  = "test-chat-agent@ticketmate.com";
-  private static final String DEV_CLIENT_USERNAME = "test-chat-client@ticketmate.com";
   private final AtomicReference<CachedConfig> cachedConfigAtomicReference = new AtomicReference<>();
   private final Clock clock;
 
@@ -561,14 +561,16 @@ public class MockService {
     );
     log.debug("의뢰인 회원 생성 완료");
 
-    Member agent  = memberRepository.findById(agentLogin.getMemberId())
+    Member agent = memberRepository.findById(agentLogin.getMemberId())
         .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
     Member client = memberRepository.findById(clientLogin.getMemberId())
         .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
     List<Concert> concerts = concertRepository.findAll();
-    if (concerts.isEmpty()) throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    if (concerts.isEmpty()) {
+      throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+    }
     Concert concert = concerts.get(0);
 
     ApplicationForm applicationForm = mockApplicationFormFactory.generate(List.of(agent), List.of(client), List.of(concert));
@@ -593,7 +595,9 @@ public class MockService {
   }
 
   private boolean isCacheValid(CachedConfig cached) {
-    if (cached == null) return false;
+    if (cached == null) {
+      return false;
+    }
     try {
       if (!tokenProvider.isValidToken(cached.agentToken()) ||
           !tokenProvider.isValidToken(cached.clientToken())) {

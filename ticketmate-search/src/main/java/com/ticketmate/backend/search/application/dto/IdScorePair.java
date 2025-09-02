@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IdScorePair {
+
   private UUID id;
   private Double score;
 }

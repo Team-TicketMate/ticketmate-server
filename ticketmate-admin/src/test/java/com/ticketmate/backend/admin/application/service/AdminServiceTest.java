@@ -515,8 +515,8 @@
 //    assertThat(portfolio.getPortfolioStatus()).isEqualTo(PortfolioStatus.REVIEWING);
 //
 //    // 알림 전송 확인
-////    verify(notificationUtil).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
-////    verify(fcmTokenService).sendNotification(eq(memberId), any());
+/// /    verify(notificationUtil).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
+/// /    verify(fcmTokenService).sendNotification(eq(memberId), any());
 //  }
 //
 //  @Test
@@ -545,8 +545,8 @@
 //    assertThat(portfolio.getPortfolioStatus()).isEqualTo(PortfolioStatus.APPROVED);
 //
 //    // 알림 전송 확인
-////    verify(notificationUtil, never()).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
-////    verify(fcmTokenService, never()).sendNotification(eq(memberId), any());
+/// /    verify(notificationUtil, never()).portfolioNotification(eq(PortfolioStatus.REVIEWING), eq(portfolio));
+/// /    verify(fcmTokenService, never()).sendNotification(eq(memberId), any());
 //  }
 //
 //  @Test

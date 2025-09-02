@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertMapperImpl implements ConcertMapper{
+public class ConcertMapperImpl implements ConcertMapper {
 
   private final ConcertMapStruct mapStruct;
   private final StorageService storageService;

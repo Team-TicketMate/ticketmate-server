@@ -35,27 +35,22 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class Portfolio extends BasePostgresEntity {
 
+  public static final int MAX_IMG_COUNT = 20;
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(updatable = false, nullable = false)
   private UUID portfolioId;
-
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false, unique = true)
   private Member member;
-
   @Column(nullable = false)
   private String portfolioDescription;  // 자기소개
-
   @Builder.Default
   @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PortfolioImg> portfolioImgList = new ArrayList<>();
-
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PortfolioStatus portfolioStatus;
-
-  public static final int MAX_IMG_COUNT = 20;
 
   public static Portfolio create(Member member, String portfolioDescription, PortfolioStatus portfolioStatus) {
     return Portfolio.builder()

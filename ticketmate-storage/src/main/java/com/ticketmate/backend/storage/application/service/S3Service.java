@@ -39,6 +39,28 @@ public class S3Service implements StorageService {
   private final S3Properties s3Properties;
   private final Clock clock;
 
+  /**
+   * 파일 검증 및 원본 파일명 반환
+   *
+   * @param file 요청된 MultipartFile
+   * @return 원본 파일명
+   */
+  private static String validateAndExtractFilename(MultipartFile file) {
+    // 파일 검증
+    if (FileUtil.isNullOrEmpty(file)) {
+      log.error("파일이 비어있거나 존재하지 않습니다.");
+      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
+    }
+
+    // 원본 파일 명 검증
+    String originalFilename = file.getOriginalFilename();
+    if (CommonUtil.nvl(originalFilename, "").isEmpty()) {
+      log.error("원본 파일명이 비어있거나 존재하지 않습니다.");
+      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
+    }
+    return originalFilename;
+  }
+
   @Override
   @Transactional
   public FileMetadata uploadFile(MultipartFile file, UploadType uploadType) {
@@ -90,7 +112,6 @@ public class S3Service implements StorageService {
     return FileUtil.combineBaseAndPath(s3Properties.s3().domain(), storedPath); // 예: "https://domain.com/prefix/yyyyMMdd-UUID-파일명.jpg"
   }
 
-
   @Override
   public String extractStoredPathFromPublicUrl(String publicUrl) {
     String storedPath = "";
@@ -131,28 +152,6 @@ public class S3Service implements StorageService {
       log.error("S3 파일 삭제 실패. 버킷: {}, 파일명: {}, 에러: {}", s3Properties.s3().bucket(), storedPath, e.getMessage());
       throw new CustomException(ErrorCode.S3_DELETE_ERROR);
     }
-  }
-
-  /**
-   * 파일 검증 및 원본 파일명 반환
-   *
-   * @param file 요청된 MultipartFile
-   * @return 원본 파일명
-   */
-  private static String validateAndExtractFilename(MultipartFile file) {
-    // 파일 검증
-    if (FileUtil.isNullOrEmpty(file)) {
-      log.error("파일이 비어있거나 존재하지 않습니다.");
-      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
-    }
-
-    // 원본 파일 명 검증
-    String originalFilename = file.getOriginalFilename();
-    if (CommonUtil.nvl(originalFilename, "").isEmpty()) {
-      log.error("원본 파일명이 비어있거나 존재하지 않습니다.");
-      throw new CustomException(ErrorCode.INVALID_FILE_REQUEST);
-    }
-    return originalFilename;
   }
 
   /**

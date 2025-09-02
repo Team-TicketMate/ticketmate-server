@@ -37,9 +37,9 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
   /**
    * 포트폴리오 필터링 조회
    *
-   * @param username      이메일
-   * @param nickname      닉네임
-   * @param name          이름
+   * @param username        이메일
+   * @param nickname        닉네임
+   * @param name            이름
    * @param portfolioStatus 포트폴리오 타입
    */
   @Override

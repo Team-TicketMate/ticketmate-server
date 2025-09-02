@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 public class MockChatRoomFactory {
+
   public ChatRoom generateFrom(ApplicationForm applicationForm) {
     if (applicationForm.getClient() == null || applicationForm.getAgent() == null
         || applicationForm.getConcert() == null || applicationForm.getTicketOpenType() == null) {
