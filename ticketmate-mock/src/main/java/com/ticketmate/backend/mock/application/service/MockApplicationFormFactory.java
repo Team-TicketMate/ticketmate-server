@@ -139,7 +139,7 @@ public class MockApplicationFormFactory {
       HopeArea hopeArea = HopeArea.builder()
           .priority(i + 1)
           .location(createRandomLocation())
-          .price(koFaker.number().numberBetween(1, 21) * 10000L)
+          .price(koFaker.number().numberBetween(1, 21) * 10000)
           .build();
       hopeAreaList.add(hopeArea);
     }

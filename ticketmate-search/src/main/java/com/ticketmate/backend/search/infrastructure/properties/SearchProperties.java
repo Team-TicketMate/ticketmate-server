@@ -6,6 +6,9 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "search")
-public record SearchProperties (Recent recent) {
-    public record Recent(@Min(1) int maxSize, @Min(1) long ttlDays) { }
+public record SearchProperties(Recent recent) {
+
+  public record Recent(@Min(1) int maxSize, @Min(1) long ttlDays) {
+
+  }
 }

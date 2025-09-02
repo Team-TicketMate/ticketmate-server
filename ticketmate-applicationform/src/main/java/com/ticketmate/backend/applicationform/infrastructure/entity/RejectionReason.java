@@ -30,7 +30,6 @@ public class RejectionReason extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID rejectionReasonId;
 
   @OneToOne(fetch = FetchType.LAZY)

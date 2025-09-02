@@ -43,7 +43,7 @@ public class MemberFollowRepositoryImpl implements MemberFollowRepositoryCustom 
         .select(Projections.constructor(
             MemberFollowResponse.class,
             AGENT.nickname,
-            AGENT.profileUrl,
+            AGENT.profileImgStoredPath,
             AGENT.followerCount
         ))
         .from(MEMBER_FOLLOW)

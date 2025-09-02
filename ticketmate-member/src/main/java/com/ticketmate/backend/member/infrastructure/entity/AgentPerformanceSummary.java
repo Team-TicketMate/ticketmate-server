@@ -7,12 +7,14 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Persistable;
 
@@ -22,7 +24,6 @@ import org.springframework.data.domain.Persistable;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class AgentPerformanceSummary extends BasePostgresEntity implements Persistable<UUID> {
 
   @Id
@@ -37,14 +38,18 @@ public class AgentPerformanceSummary extends BasePostgresEntity implements Persi
   private double totalScore;
 
   // 평균 별점
+  @DecimalMin(value = "0.0")
+  @DecimalMax(value = "5.0")
   @Column(nullable = false)
   private double averageRating;
 
   // 전체 후기 수
+  @PositiveOrZero
   @Column(nullable = false)
   private int reviewCount;
 
   // 최근 30일 성공 수
+  @PositiveOrZero
   @Column(nullable = false)
   private int recentSuccessCount;
 

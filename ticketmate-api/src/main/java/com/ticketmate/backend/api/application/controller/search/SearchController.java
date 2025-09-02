@@ -4,10 +4,12 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.search.application.dto.request.SearchRequest;
 import com.ticketmate.backend.search.application.dto.response.SearchResponse;
-import com.ticketmate.backend.search.infrastructure.service.RecentSearchService;
 import com.ticketmate.backend.search.application.service.SearchService;
+import com.ticketmate.backend.search.infrastructure.service.RecentSearchService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/search")
@@ -36,11 +35,11 @@ public class SearchController implements SearchControllerDocs {
   @GetMapping
   @LogMonitoringInvocation
   public ResponseEntity<SearchResponse<?>> search(
-          @ParameterObject @Valid SearchRequest request,
-          @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+      @ParameterObject @Valid SearchRequest request,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     UUID memberId = (customOAuth2User != null && customOAuth2User.getMember() != null)
-            ? customOAuth2User.getMember().getMemberId()
-            :  null;
+        ? customOAuth2User.getMember().getMemberId()
+        : null;
     return ResponseEntity.ok(searchService.search(request, memberId));
   }
 
