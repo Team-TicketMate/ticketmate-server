@@ -1,16 +1,16 @@
 package com.ticketmate.backend.search.infrastructure.repository;
 
-import com.ticketmate.backend.search.application.dto.response.AgentSearchResponse;
-import com.ticketmate.backend.search.application.dto.response.ConcertSearchResponse;
+import com.ticketmate.backend.search.application.dto.view.AgentSearchInfo;
+import com.ticketmate.backend.search.application.dto.view.ConcertSearchInfo;
 import java.util.List;
 import java.util.UUID;
 
 public interface SearchRepositoryCustom {
 
   /**
-   * ID 리스트 기반 ConcertSearchResponse DTO 리스트 반환
+   * ID 리스트 기반 ConcertSearchInfo DTO 리스트 반환
    */
-  public List<ConcertSearchResponse> findConcertDetailsByIds(List<UUID> concertIds);
+  public List<ConcertSearchInfo> findConcertDetailsByIds(List<UUID> concertIds);
 
   /**
    * 공연 키워드 LIKE 검색
@@ -19,9 +19,9 @@ public interface SearchRepositoryCustom {
   List<UUID> findConcertIdsByKeyword(String keyword, int limit);
 
   /**
-   * ID 리스트 기반 AgentSearchResponse DTO 리스트 반환
+   * ID 리스트 기반 AgentSearchInfo DTO 리스트 반환
    */
-  public List<AgentSearchResponse> findAgentDetailsByIds(List<UUID> agentIds);
+  public List<AgentSearchInfo> findAgentDetailsByIds(List<UUID> agentIds);
 
   /**
    * 대리인 키워드 LIKE 검색

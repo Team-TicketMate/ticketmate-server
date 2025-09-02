@@ -19,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -28,12 +27,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Member extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID memberId;
 
   // 소셜 로그인 시 발급되는 ID
@@ -65,7 +62,7 @@ public class Member extends BasePostgresEntity {
   private String phone;
 
   // 프로필 이미지
-  private String profileUrl;
+  private String profileImgStoredPath;
 
   // 성별
   private String gender;
@@ -102,7 +99,9 @@ public class Member extends BasePostgresEntity {
   @Column(nullable = false)
   private long followerCount = 0L;
 
-  /** 관리자 **/
+  /**
+   * 관리자
+   **/
   private String password;
 
   @Builder.Default

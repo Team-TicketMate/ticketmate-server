@@ -1,5 +1,8 @@
 package com.ticketmate.backend.applicationform.application.service;
 
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.REQUIREMENT_MAX_LENGTH;
 import static com.ticketmate.backend.member.core.constant.MemberType.AGENT;
 import static com.ticketmate.backend.member.core.constant.MemberType.CLIENT;
 
@@ -13,7 +16,9 @@ import com.ticketmate.backend.applicationform.application.dto.request.HopeAreaRe
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormDetailResponse;
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
+import com.ticketmate.backend.applicationform.application.dto.view.ApplicationFormFilteredInfo;
 import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapper;
+import com.ticketmate.backend.applicationform.application.validator.ApplicationFormDetailValidator;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormAction;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
@@ -39,11 +44,7 @@ import com.ticketmate.backend.notification.application.dto.request.NotificationP
 import com.ticketmate.backend.notification.application.type.ApplicationFormApproveNotificationType;
 import com.ticketmate.backend.notification.application.type.ApplicationFormRejectNotificationType;
 import com.ticketmate.backend.notification.core.service.NotificationService;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +99,7 @@ public class ApplicationFormService {
         .findTicketOpenDateByConcertIdAndTicketOpenType(concert.getConcertId(), request.getTicketOpenType());
 
     // ApplicationForm 생성
-    ApplicationForm applicationForm = createApplicationFormEntity(client, agent, concert, ticketOpenDate, request.getTicketOpenType());
+    ApplicationForm applicationForm = ApplicationForm.create(client, agent, concert, ticketOpenDate, request.getTicketOpenType());
 
     // 신청서 세부사항 요청 처리
     processApplicationFormDetailRequestList(applicationForm, request.getApplicationFormDetailRequestList(), ticketOpenDate);
@@ -120,7 +121,7 @@ public class ApplicationFormService {
    */
   @Transactional(readOnly = true)
   public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
-    return applicationFormRepositoryCustom
+    Page<ApplicationFormFilteredInfo> applicationFormFilteredInfoPage = applicationFormRepositoryCustom
         .filteredApplicationForm(
             request.getClientId(),
             request.getAgentId(),
@@ -128,6 +129,7 @@ public class ApplicationFormService {
             request.getApplicationFormStatusSet(),
             request.toPageable()
         );
+    return applicationFormFilteredInfoPage.map(applicationFormMapper::toApplicationFormFilteredResponse);
   }
 
   /**
@@ -148,10 +150,7 @@ public class ApplicationFormService {
     // 신청서 세부사항 조회
     List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
 
-    return ApplicationFormInfoResponse.builder()
-        .concertInfoResponse(concertInfoResponse)
-        .applicationFormDetailResponseList(applicationFormDetailResponseList)
-        .build();
+    return new ApplicationFormInfoResponse(concertInfoResponse, applicationFormDetailResponseList);
   }
 
   /**
@@ -328,43 +327,24 @@ public class ApplicationFormService {
   }
 
   /**
-   * 신청서(ApplicationForm) 엔티티 생성
-   */
-  private ApplicationForm createApplicationFormEntity(Member client, Member agent, Concert concert, TicketOpenDate ticketOpenDate, TicketOpenType ticketOpenType) {
-    return ApplicationForm.builder()
-        .client(client)
-        .agent(agent)
-        .concert(concert)
-        .ticketOpenDate(ticketOpenDate)
-        .applicationFormDetailList(new ArrayList<>())
-        .applicationFormStatus(ApplicationFormStatus.PENDING) // 신청서는 기본 '대기'상태
-        .ticketOpenType(ticketOpenType)
-        .build();
-  }
-
-  /**
    * 신청서 세부사항(ApplicationFormDetail) 엔티티 생성
    */
   private ApplicationFormDetail createApplicationFormDetailEntity(ApplicationFormDetailRequest detailRequest, ConcertDate concertDate) {
-    ApplicationFormDetail applicationFormDetail = ApplicationFormDetail.builder()
-        .concertDate(concertDate)
-        .requestCount(detailRequest.getRequestCount())
-        .requirement(detailRequest.getRequestDetails())
-        .hopeAreaList(new ArrayList<>())
-        .build();
+    ApplicationFormDetail applicationFormDetail = ApplicationFormDetail
+        .create(concertDate, detailRequest.getRequestCount(), detailRequest.getRequirement());
 
     // 희망구역 설정
     if (!CommonUtil.nullOrEmpty(detailRequest.getHopeAreaList())) {
       for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
-        HopeArea hopeArea = HopeArea.builder()
-            .priority(hopeAreaRequest.getPriority())
-            .location(hopeAreaRequest.getLocation())
-            .price(hopeAreaRequest.getPrice())
-            .build();
+        HopeArea hopeArea = HopeArea.create(
+            applicationFormDetail,
+            hopeAreaRequest.getPriority(),
+            hopeAreaRequest.getLocation(),
+            hopeAreaRequest.getPrice()
+        );
         applicationFormDetail.addHopeArea(hopeArea);
       }
     }
-
     return applicationFormDetail;
   }
 
@@ -373,13 +353,15 @@ public class ApplicationFormService {
    * 신청서 세부사항 요청 처리
    */
   private void processApplicationFormDetailRequestList(ApplicationForm applicationForm, List<ApplicationFormDetailRequest> detailRequestList, TicketOpenDate ticketOpenDate) {
-    // 신청서 세부사항 공연일자 검증
-    validatePerformanceDate(detailRequestList);
+    // 신청서 세부사항 검증
+    ApplicationFormDetailValidator
+        .of(detailRequestList)
+        .performanceDateNonNullAndDistinct()
+        .requestCountRange(APPLICATION_FORM_MIN_REQUEST_COUNT, ticketOpenDate.getRequestMaxCount())
+        .requirementMaxLength(REQUIREMENT_MAX_LENGTH)
+        .hopeAreaList(HOPE_AREA_MAX_SIZE);
 
     for (ApplicationFormDetailRequest detailRequest : detailRequestList) {
-      // 요청 매수 검증
-      validateRequestCount(detailRequest, ticketOpenDate.getRequestMaxCount());
-
       // 공연일자 엔티티 조회
       ConcertDate concertDate = concertService.findConcertDateByConcertIdAndPerformanceDate(
           applicationForm.getConcert().getConcertId(), detailRequest.getPerformanceDate()
@@ -390,49 +372,6 @@ public class ApplicationFormService {
 
       // ApplicationForm에 ApplicationFormDetail 추가
       applicationForm.addApplicationFormDetail(applicationFormDetail);
-    }
-  }
-
-  /**
-   * 신청서 세부사항 공연일자 검증
-   *
-   * @param requestList 신청서 세부사항 List
-   */
-  private void validatePerformanceDate(List<ApplicationFormDetailRequest> requestList) {
-    // 신청서 세부사항은 최소1개 이상
-    if (CommonUtil.nullOrEmpty(requestList)) {
-      log.error("신청서에는 최소 1개 이상의 공연일자가 포함되어야 합니다.");
-      throw new CustomException(ErrorCode.APPLICATION_FORM_DETAIL_REQUIRED);
-    }
-
-    // 공연일자 중복 검사
-    Set<LocalDateTime> performanceDateSet = new HashSet<>();
-    for (ApplicationFormDetailRequest request : requestList) {
-      // 공연일자 null 검증
-      if (request.getPerformanceDate() == null) {
-        log.error("요청된 신청서 세부사항 공연일자가 null 입니다.");
-        throw new CustomException(ErrorCode.INVALID_CONCERT_DATE);
-      }
-      // 중복 검사
-      if (!performanceDateSet.add(request.getPerformanceDate())) {
-        log.error("중복된 공연일자가 존재합니다: {}", request.getPerformanceDate());
-        throw new CustomException(ErrorCode.DUPLICATE_CONCERT_DATE);
-      }
-    }
-  }
-
-  /**
-   * 요청 매수 검증
-   *
-   * @param request         신청서 세부사항 dto
-   * @param requestMaxCount 최대 예매 가능 매수
-   */
-  private void validateRequestCount(ApplicationFormDetailRequest request, int requestMaxCount) {
-    if (request.getRequestCount() < ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT ||
-        request.getRequestCount() > requestMaxCount) {
-      log.error("대리 신청 매수는 최소 {}장, 최대 {}장까지 가능합니다. 요청된 예매 매수: {}",
-          ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT, requestMaxCount, request.getRequestCount());
-      throw new CustomException(ErrorCode.TICKET_REQUEST_COUNT_EXCEED);
     }
   }
 

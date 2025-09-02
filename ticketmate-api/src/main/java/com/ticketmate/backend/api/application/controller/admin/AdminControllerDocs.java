@@ -2,15 +2,15 @@ package com.ticketmate.backend.api.application.controller.admin;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoEditRequest;
-import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
+import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoEditRequest;
+import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
-import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
+import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
-import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
+import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
@@ -365,6 +365,12 @@ public interface AdminControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-08-29",
+          author = "Chuseok22",
+          description = "PortfolioType -> PortfolioStatus 클래스 명 변경",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
+      ),
+      @ApiChangeLog(
           date = "2025-07-07",
           author = "Chuseok22",
           description = "SortField 정렬 필드 리팩토링",
@@ -380,7 +386,7 @@ public interface AdminControllerDocs {
           - `username` (선택): 사용자 이메일 (like 검색, 부분 일치 허용)
           - `nickname` (선택): 사용자 닉네임 (like 검색, 부분 일치 허용)
           - `name` (선택): 사용자 이름 (like 검색, 부분 일치 허용)
-          - `portfolioType` (선택): 포트폴리오 타입
+          - `portfolioStatus` (선택): 포트폴리오 상태
           - `pageNumber` (선택, 기본값: 1): 페이지 번호 (1부터 시작)
           - `pageSize` (선택, 기본값: 10): 페이지당 항목 수
           - `sortField` (선택, 기본값: CREATED_DATE): 정렬 기준 필드 (현재는 CREATED_DATE 지원)
@@ -430,6 +436,12 @@ public interface AdminControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-08-29",
+          author = "Chuseok22",
+          description = "포트폴리오 상세 조회 시 'REVIEWING' 상태 변경 제거 (멱등성 보장)",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
+      ),
+      @ApiChangeLog(
           date = "2025-07-16",
           author = "Chuseok22",
           description = "상세 조회 시 '리뷰중' 알림전송 제거",
@@ -446,16 +458,19 @@ public interface AdminControllerDocs {
           - 포트폴리오의 고유한 id
           
           ### 유의사항
-          - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관라지에게 필요한 데이터를 반환합니다.
-          
-          ### 알림전송 특이사항
-          - **PENDING_REVIEW** 상태의 포트폴리오를 **REVIEWING** 상태로 변경합니다.
+          - 포트폴리오의 id를 활용해 포트폴리오 상세조회시 관리자에게 필요한 데이터를 반환합니다.
           """
   )
-  ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
+  ResponseEntity<PortfolioAdminResponse> getPortfolioInfo(
       CustomOAuth2User customOAuth2User, UUID portfolioId);
 
   @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-08-29",
+          author = "Chuseok22",
+          description = "PortfolioStatus 상태 변경 API 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
+      ),
       @ApiChangeLog(
           date = "2025-07-16",
           author = "Chuseok22",
@@ -464,25 +479,33 @@ public interface AdminControllerDocs {
       )
   })
   @Operation(
-      summary = "요청한 포트폴리오 승인, 반려처리",
+      summary = "포트폴리오 상태(PortfolioStatus) 변경 API",
       description = """
           
           이 API는 관리자 인증이 필요합니다
           
           ### 요청 파라미터
-          - 변경할 포트폴리오의 고유한 id
-          - 반려 및 승인의 Body 파라미터
+          - 변경할 포트폴리오의 고유한 id (Pathvariable)
+          - `PortfolioStatus`
           
-          ### PortfolioType
+          ### PortfolioStatus
           
-          APPROVED ("승인된 포트폴리오")
+          PENDING_REVIEW("검토 대기")
           
-          REJECTED ("반려된 포트폴리오")
+          REVIEWING("검토 중")
+          
+          APPROVED("승인")
+          
+          REJECTED("반려")
           
           ### 유의사항
-          - 관리자가 승인 요청이된 포트폴리오를 승인 및 반려하는 작업입니다.
-          - 승인(APPROVED)시 해당 포트폴리오의 상태가 "APPROVED("승인된 포트폴리오")" 로 변경됩니다.
-          - 반려(REJECTED)시 해당 포트폴리오의 상태가 "REJECTED("반려된 포트폴리오")" 로 변경됩니다.
+          - 포트폴리오 상태(PortfolioStatus)를 변경하는 API입니다.
+          - 검토 대기(PENDING_REVIEW)로의 상태 변경은 불가능합니다.
+          - 검토 중(REVIEWING)으로의 변경은 검토 대기(PENDING_REVIEW) 상태의 포트폴리오만 가능합니다.
+          - 승인(APPROVED)으로의 변경은 검토 중(REVIEWING) 상태의 포트폴리오만 가능합니다
+          - 승인(APPROVED) 시 해당 의뢰인의 MemberType이 대리인으로 변경되며, 알림이 발송됩니다.
+          - 반려(REJECTED)으로의 변경은 검토 중(REVIEWING) 상태의 포트폴리오만 가능합니다.
+          - 반려(REJECTED) 시 해당 의뢰인에게 알림이 발송됩니다.
           
           ### 알림전송 특이사항
           - 관리자가 포트폴리오를 승인 혹은 반려 상태로 변경합니다.
@@ -491,8 +514,10 @@ public interface AdminControllerDocs {
           - 푸시알림시 1:N 플랫폼의 사용자를 대비하기 위해 기존에 만들어놓은 RedisHash스키마를 활용하여 사용자의 모든 플랫폼에 알림을 전송합니다.
           """
   )
-  ResponseEntity<Void> reviewPortfolio(
-      CustomOAuth2User customOAuth2User, UUID portfolioId, PortfolioStatusUpdateRequest request);
+  ResponseEntity<Void> changePortfolioStatus(
+      UUID portfolioId,
+      PortfolioStatusUpdateRequest request
+  );
 
   /*
   ======================================SMS======================================

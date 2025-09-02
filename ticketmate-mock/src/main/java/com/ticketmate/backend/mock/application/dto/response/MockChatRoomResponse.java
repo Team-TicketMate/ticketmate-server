@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class MockChatRoomResponse {
+
   private String agentAccessToken;
   private String clientAccessToken;
   private String chatRoomId;

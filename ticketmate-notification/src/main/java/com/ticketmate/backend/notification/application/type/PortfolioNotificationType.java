@@ -17,7 +17,7 @@ public enum PortfolioNotificationType implements DomainNotificationType {
   */
   REVIEWING("포트폴리오 검토중", "관리자가 {nickname} 님의 포트폴리오를 검토중입니다."),
 
-  REVIEW_COMPLETED("포트폴리오 승인 완료", "{nickname} 님의 포트폴리오가 관리자에 의해 승인처리 되었습니다."),
+  APPROVED("포트폴리오 승인 완료", "{nickname} 님의 포트폴리오가 관리자에 의해 승인처리 되었습니다."),
 
   REJECTED("포트폴리오 반려", "{nickname} 님의 포트폴리오가 관리자에 의해 반려처리 되었습니다.");
 

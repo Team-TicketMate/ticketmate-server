@@ -2,11 +2,10 @@ package com.ticketmate.backend.search.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import java.util.Collections;
 import lombok.Getter;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-
-import java.util.Collections;
 
 @Getter
 public class SearchResponse<T> {

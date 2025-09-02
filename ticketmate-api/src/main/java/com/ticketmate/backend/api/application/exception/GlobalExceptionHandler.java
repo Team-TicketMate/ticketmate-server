@@ -6,6 +6,7 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
 import com.ticketmate.backend.common.application.exception.ValidErrorResponse;
 import java.security.Principal;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,8 +64,9 @@ public class GlobalExceptionHandler {
     log.error("CustomException 발생: {}", e.getMessage(), e);
 
     ErrorCode errorCode = e.getErrorCode();
+    String formattedMessage = formatMessage(errorCode.getMessage(), e.getArgs());
 
-    ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
+    ErrorResponse response = ErrorResponse.from(errorCode, formattedMessage);
 
     return ResponseEntity.status(errorCode.getStatus()).body(response);
   }
@@ -116,5 +118,12 @@ public class GlobalExceptionHandler {
     ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
     ErrorResponse response = ErrorResponse.from(errorCode, errorCode.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+  }
+
+  private String formatMessage(String message, Object[] args) {
+    if (args == null || args.length == 0) {
+      return message;
+    }
+    return new MessageFormat(message).format(args);
   }
 }

@@ -17,6 +17,7 @@ dependencies {
     implementation project(':ticketmate-member')
     implementation project(':ticketmate-notification')
     implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-storage')
 
     // QueryDSL annotationProcessor
     annotationProcessor(libs.querydsl.apt) { artifact { classifier = "jakarta" } }

@@ -146,7 +146,7 @@ public enum ErrorCode {
 
   INVALID_FILE_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 요청입니다."),
 
-  INVALID_FILE_PATH(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 URL 요청입니다."),
+  INVALID_PUBLIC_URL(HttpStatus.BAD_REQUEST, "유효하지 않은 파일 URL 요청입니다."),
 
   // PORTFOLIO
 
@@ -156,7 +156,11 @@ public enum ErrorCode {
 
   INVALID_PORTFOLIO_IMG_COUNT(HttpStatus.BAD_REQUEST, "포트폴리오 이미지 첨부파일은 최소 1개, 최대 20개까지 등록 가능합니다"),
 
-  INVALID_PORTFOLIO_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 포트폴리오 타입 입니다."),
+  INVALID_PORTFOLIO_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 포트폴리오 상태 입니다."),
+
+  PORTFOLIO_IMG_COUNT_EXCEED(HttpStatus.BAD_REQUEST, "포트폴리오 이미지 첨부파일 최대 개수를 초과했습니다."),
+
+  PORTFOLIO_STATUS_TRANSITION_ERROR(HttpStatus.BAD_REQUEST, "포트폴리오 상태를 변경할 수 없습니다."),
 
   // REDIS_LOCK
 
@@ -168,7 +172,7 @@ public enum ErrorCode {
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
 
-  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 10개까지만 등록 가능합니다."),
+  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 {0}개까지만 등록 가능합니다."),
 
   PRIORITY_ALREADY_EXISTS(HttpStatus.CONFLICT, "요청한 순위가 이미 설정되어있습니다."),
 
@@ -183,6 +187,8 @@ public enum ErrorCode {
   APPLICATION_FORM_DETAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "신청서 세부사항 값을 찾을 수 없습니다."),
 
   DUPLICATE_APPLICATION_FORM_DETAIL(HttpStatus.CONFLICT, "중복된 신청서 세부사항입니다."),
+
+  APPLICATION_FORM_REQUIREMENT_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "요청사항 최대 글자 수 {0}자를 초과했습니다."),
 
   // NOTIFICATION
 
@@ -231,6 +237,10 @@ public enum ErrorCode {
   SMS_UNKNOWN_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SMS 발송 - 알 수 없는 오류 발생"),
 
   SMS_SEND_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "SMS 전송 예외 발생"),
+
+  // SEARCH
+
+  INVALID_SEARCH_TYPE(HttpStatus.BAD_REQUEST, "잘못된 검색 타입입니다."),
 
   // JACKSON
 

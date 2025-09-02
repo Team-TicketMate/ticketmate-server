@@ -94,9 +94,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
         .ticketOpenType(room.getTicketOpenType())
         .lastChatMessage(room.getLastMessage())
-        .concertThumbnailUrl(applicationForm.getConcert().getConcertThumbnailUrl())
+        .concertThumbnailUrl(applicationForm.getConcert().getConcertThumbnailStoredPath())
         .lastChatSendTime(room.getLastMessageTime())
-        .profileUrl(other.getProfileUrl())
+        .profileUrl(other.getProfileImgStoredPath())
         .build();
   }
 }

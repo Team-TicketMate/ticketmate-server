@@ -2,7 +2,7 @@ package com.ticketmate.backend.applicationform.application.service;
 
 import com.ticketmate.backend.applicationform.application.dto.request.ApplicationFormRejectRequest;
 import com.ticketmate.backend.applicationform.application.dto.response.RejectionReasonResponse;
-import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapper;
+import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapStruct;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.applicationform.infrastructure.repository.RejectionReasonRepository;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RejectionReasonService {
 
   private final RejectionReasonRepository rejectionReasonRepository;
-  private final ApplicationFormMapper applicationFormMapper;
+  private final ApplicationFormMapStruct applicationFormMapStruct;
 
   /**
    * 신청서 거절 사유(RejectionReason) 저장 or 업데이트
@@ -45,7 +45,7 @@ public class RejectionReasonService {
   public RejectionReasonResponse getRejectionReasonInfo(UUID applicationFormId) {
     return rejectionReasonRepository
         .findByApplicationFormApplicationFormId(applicationFormId)
-        .map(applicationFormMapper::toRejectionReasonResponse)
+        .map(applicationFormMapStruct::toRejectionReasonResponse)
         .orElseThrow(() -> new CustomException(ErrorCode.REJECTION_REASON_NOT_FOUND));
   }
 

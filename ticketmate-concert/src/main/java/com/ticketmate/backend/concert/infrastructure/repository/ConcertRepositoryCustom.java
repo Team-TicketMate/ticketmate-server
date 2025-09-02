@@ -1,7 +1,7 @@
 package com.ticketmate.backend.concert.infrastructure.repository;
 
-import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
-import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
+import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
 import com.ticketmate.backend.concert.core.constant.ConcertType;
 import com.ticketmate.backend.concert.core.constant.TicketReservationSite;
 import java.util.UUID;
@@ -17,7 +17,7 @@ public interface ConcertRepositoryCustom {
    *
    * @param concertId 공연 PK
    */
-  ConcertInfoResponse findConcertInfoResponseByConcertId(UUID concertId);
+  ConcertInfo findConcertInfoByConcertId(UUID concertId);
 
   /**
    * 관리자 공연 상세 조회
@@ -25,13 +25,13 @@ public interface ConcertRepositoryCustom {
    *
    * @param concertId 공연 PK
    */
-  ConcertInfoResponse findConcertInfoResponseByConcertIdForAdmin(UUID concertId);
+  ConcertInfo findConcertInfoByConcertIdForAdmin(UUID concertId);
 
   /**
    * 공연 필터링 조회 (사용자)
    * 티켓 오픈일이 지난 공연 반환 X
    */
-  Page<ConcertFilteredResponse> filteredConcert(
+  Page<ConcertFilteredInfo> filteredConcert(
       String concertName,
       String concertHallName,
       ConcertType concertType,
@@ -43,7 +43,7 @@ public interface ConcertRepositoryCustom {
    * 공연 필터링 조회 (관리자)
    * 모든 공연 반환
    */
-  Page<ConcertFilteredResponse> filteredConcertForAdmin(
+  Page<ConcertFilteredInfo> filteredConcertForAdmin(
       String concertName,
       String concertHallName,
       ConcertType concertType,

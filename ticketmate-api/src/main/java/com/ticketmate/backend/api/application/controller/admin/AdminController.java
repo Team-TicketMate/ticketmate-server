@@ -8,8 +8,8 @@ import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertH
 import com.ticketmate.backend.admin.concerthall.application.service.ConcertHallAdminService;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
-import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioForAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.service.PortfolioAdminService;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.admin.sms.application.service.SmsAdminService;
@@ -145,20 +145,19 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @GetMapping(value = "/portfolio/{portfolio-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
+  public ResponseEntity<PortfolioAdminResponse> getPortfolioInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId) {
     return ResponseEntity.ok(portfolioAdminService.getPortfolio(portfolioId));
   }
 
   @Override
-  @PatchMapping(value = "/portfolio/{portfolio-id}")
+  @PatchMapping(value = "/portfolio/{portfolio-id}/status")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> reviewPortfolio(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+  public ResponseEntity<Void> changePortfolioStatus(
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
-    portfolioAdminService.reviewPortfolioCompleted(portfolioId, request);
+    portfolioAdminService.changePortfolioStatus(portfolioId, request);
     return ResponseEntity.ok().build();
   }
 

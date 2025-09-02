@@ -12,6 +12,9 @@ import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
+import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
+import com.ticketmate.backend.concert.application.mapper.ConcertMapper;
 import com.ticketmate.backend.concert.application.service.ConcertService;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepository;
@@ -19,6 +22,7 @@ import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepositor
 import com.ticketmate.backend.concerthall.application.service.ConcertHallService;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.storage.core.constant.UploadType;
+import com.ticketmate.backend.storage.core.model.FileMetadata;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import com.ticketmate.backend.storage.infrastructure.util.FileUtil;
 import java.util.UUID;
@@ -42,6 +46,7 @@ public class ConcertAdminService {
   private final TicketOpenDateAdminService ticketOpenDateAdminService;
   private final StorageService storageService;
   private final VertexAiEmbeddingService vertexAiEmbeddingService;
+  private final ConcertMapper concertMapper;
 
   /**
    * 공연 정보 저장
@@ -68,15 +73,18 @@ public class ConcertAdminService {
         : null;
 
     // 공연 썸네일 이미지 저장
-    String concertThumbnailUrl = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
+    FileMetadata concertThumbnailMetadata = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
+    String concertThumbnailStoredPath = concertThumbnailMetadata.storedPath();
 
     // 좌석 배치도 이미지 저장
-    String seatingChartUrl = !FileUtil.isNullOrEmpty(request.getSeatingChart())
-        ? storageService.uploadFile(request.getSeatingChart(), UploadType.CONCERT)
-        : null;
+    String seatingChartStoredPath = null;
+    if (!FileUtil.isNullOrEmpty(request.getSeatingChart())) {
+      FileMetadata seatingChartMetadata = storageService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
+      seatingChartStoredPath = seatingChartMetadata.storedPath();
+    }
 
     // 공연 정보 저장
-    Concert concert = concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailUrl, seatingChartUrl));
+    Concert concert = concertRepository.save(createConcertEntity(request, concertHall, concertThumbnailStoredPath, seatingChartStoredPath));
 
     // 공연 날짜 검증 및 저장
     concertDateAdminService.validateConcertDateList(request.getConcertDateRequestList());
@@ -101,13 +109,14 @@ public class ConcertAdminService {
    */
   @Transactional(readOnly = true)
   public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
-    return concertRepositoryCustom.filteredConcertForAdmin(
+    Page<ConcertFilteredInfo> concertFilteredInfoPage = concertRepositoryCustom.filteredConcertForAdmin(
         request.getConcertName(),
         request.getConcertHallName(),
         request.getConcertType(),
         request.getTicketReservationSite(),
         request.toPageable()
     );
+    return concertFilteredInfoPage.map(concertMapper::toConcertFilteredResponse);
   }
 
   /**
@@ -118,7 +127,8 @@ public class ConcertAdminService {
    */
   @Transactional(readOnly = true)
   public ConcertInfoResponse getConcertInfo(UUID concertId) {
-    return concertRepositoryCustom.findConcertInfoResponseByConcertIdForAdmin(concertId);
+    ConcertInfo concertInfo = concertRepositoryCustom.findConcertInfoByConcertIdForAdmin(concertId);
+    return concertMapper.toConcertInfoResponse(concertInfo);
   }
 
   /**
@@ -163,16 +173,20 @@ public class ConcertAdminService {
 
     // 공연 썸네일 이미지 업데이트
     if (!FileUtil.isNullOrEmpty(request.getConcertThumbNail())) {
-      String newThumbnailUrl = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
-      log.debug("공연 썸네일 이미지 업데이트: {}", newThumbnailUrl);
-      concert.setConcertThumbnailUrl(newThumbnailUrl);
+      storageService.deleteFile(concert.getConcertThumbnailStoredPath());
+      FileMetadata newThumbnailMetadata = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
+      String newThumbnailStoredPath = newThumbnailMetadata.storedPath();
+      log.debug("공연 썸네일 이미지 업데이트: {}", newThumbnailStoredPath);
+      concert.setConcertThumbnailStoredPath(newThumbnailStoredPath);
     }
 
     // 좌석 배치도 업데이트
     if (!FileUtil.isNullOrEmpty(request.getSeatingChart())) {
-      String newSeatingChartUrl = storageService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
-      log.debug("좌석 배치도 이미지 업데이트: {}", newSeatingChartUrl);
-      concert.setSeatingChartUrl(newSeatingChartUrl);
+      storageService.deleteFile(concert.getSeatingChartStoredPath());
+      FileMetadata newSeatingChartMetadata = storageService.uploadFile(request.getSeatingChart(), UploadType.CONCERT);
+      String newSeatingChartStoredPath = newSeatingChartMetadata.storedPath();
+      log.debug("좌석 배치도 이미지 업데이트: {}", newSeatingChartStoredPath);
+      concert.setSeatingChartStoredPath(newSeatingChartStoredPath);
     }
 
     // 예매 사이트 업데이트
@@ -210,19 +224,19 @@ public class ConcertAdminService {
   /**
    * Concert 엔티티 생성&반환
    *
-   * @param request             concertInfoRequest
-   * @param concertHall         공연장 엔티티 or null
-   * @param concertThumbnailUrl 공연 썸네일 url
-   * @param seatingChartUrl     좌석 배치도 url or null
+   * @param request                    concertInfoRequest
+   * @param concertHall                공연장 엔티티 or null
+   * @param concertThumbnailStoredPath 공연 썸네일 저장 경로
+   * @param seatingChartStoredPath     좌석 배치도 저장 경로 || null
    * @return Concert 엔티티
    */
-  private Concert createConcertEntity(ConcertInfoRequest request, ConcertHall concertHall, String concertThumbnailUrl, String seatingChartUrl) {
+  private Concert createConcertEntity(ConcertInfoRequest request, ConcertHall concertHall, String concertThumbnailStoredPath, String seatingChartStoredPath) {
     return Concert.builder()
         .concertName(request.getConcertName())
         .concertHall(concertHall)
         .concertType(request.getConcertType())
-        .concertThumbnailUrl(concertThumbnailUrl)
-        .seatingChartUrl(seatingChartUrl)
+        .concertThumbnailStoredPath(concertThumbnailStoredPath)
+        .seatingChartStoredPath(seatingChartStoredPath)
         .ticketReservationSite(request.getTicketReservationSite())
         .build();
   }
