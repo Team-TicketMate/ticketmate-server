@@ -32,7 +32,6 @@ public class TicketOpenDate extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(nullable = false, updatable = false)
   private UUID ticketOpenDateId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

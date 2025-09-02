@@ -28,7 +28,6 @@ public class ConcertHall extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(nullable = false, updatable = false)
   private UUID concertHallId;
 
   @Column(nullable = false)

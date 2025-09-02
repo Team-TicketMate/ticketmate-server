@@ -32,7 +32,6 @@ public class Concert extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID concertId;
 
   // 공연명

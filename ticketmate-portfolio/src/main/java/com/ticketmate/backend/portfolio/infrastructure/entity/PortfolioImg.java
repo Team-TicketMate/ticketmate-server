@@ -31,7 +31,6 @@ public class PortfolioImg extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID portfolioImgId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

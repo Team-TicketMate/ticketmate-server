@@ -27,7 +27,6 @@ public class ConcertAgentAvailability extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(nullable = false, updatable = false, unique = true)
   private UUID concertAgentOptionId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

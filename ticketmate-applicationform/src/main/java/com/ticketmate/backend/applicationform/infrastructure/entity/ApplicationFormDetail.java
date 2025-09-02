@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,7 +40,6 @@ public class ApplicationFormDetail extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false, unique = true)
   private UUID applicationFormDetailId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -58,6 +58,7 @@ public class ApplicationFormDetail extends BasePostgresEntity {
   @Column(length = REQUIREMENT_MAX_LENGTH)
   private String requirement; // 요청 사항 // TODO: 추후 VO 로 분리
 
+  @Builder.Default
   @OneToMany(mappedBy = "applicationFormDetail", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<HopeArea> hopeAreaList = new ArrayList<>();
 

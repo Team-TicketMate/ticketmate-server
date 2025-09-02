@@ -40,7 +40,6 @@ public class ApplicationForm extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false, unique = true)
   private UUID applicationFormId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

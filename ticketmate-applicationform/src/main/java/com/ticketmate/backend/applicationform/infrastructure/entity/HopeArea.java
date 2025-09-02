@@ -31,7 +31,6 @@ public class HopeArea extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false, unique = true)
   private UUID hopeAreaId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

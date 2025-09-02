@@ -28,7 +28,6 @@ public class MemberFollow extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID memberFollowId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

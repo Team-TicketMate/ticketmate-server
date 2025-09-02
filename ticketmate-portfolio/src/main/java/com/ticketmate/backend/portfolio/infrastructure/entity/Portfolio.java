@@ -1,5 +1,7 @@
 package com.ticketmate.backend.portfolio.infrastructure.entity;
 
+import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstant.MAX_IMG_COUNT;
+
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
@@ -35,19 +37,21 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class Portfolio extends BasePostgresEntity {
 
-  public static final int MAX_IMG_COUNT = 20;
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID portfolioId;
+
   @OneToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false, unique = true)
   private Member member;
+
   @Column(nullable = false)
   private String portfolioDescription;  // 자기소개
+
   @Builder.Default
   @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PortfolioImg> portfolioImgList = new ArrayList<>();
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PortfolioStatus portfolioStatus;
