@@ -1,5 +1,7 @@
 package com.ticketmate.backend.portfolio.application.service;
 
+import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstant.MAX_IMG_COUNT;
+
 import com.ticketmate.backend.ai.application.service.VertexAiEmbeddingService;
 import com.ticketmate.backend.ai.core.constant.EmbeddingType;
 import com.ticketmate.backend.common.application.exception.CustomException;
@@ -135,7 +137,7 @@ public class PortfolioService {
    * 요청된 첨부파일 개수 검증 (1~20개)
    */
   private void validatePortfolioImgCount(List<MultipartFile> imgList) {
-    if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > Portfolio.MAX_IMG_COUNT) {
+    if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > MAX_IMG_COUNT) {
       log.error("포트폴리오 이미지 첨부파일은 최소 1개 최대 20개까지 등록가능합니다. 요청개수: {}", imgList.size());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }
