@@ -233,7 +233,7 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileUrl())
+        .senderProfileUrl(sender.getProfileImgStoredPath())
         .message(message)
         .chatMessageType(chatMessageType)
         .isRead(false)
@@ -270,7 +270,7 @@ public class ChatMessageService {
         if (picture == null || picture.isEmpty()) {
           throw new CustomException(ErrorCode.CHAT_PICTURE_EMPTY);
         }
-        String pictureUrl = storageService.uploadFile(picture, UploadType.CHAT);
+        String pictureUrl = storageService.uploadFile(picture, UploadType.CHAT).storedPath();
         pictureUrlList.add(pictureUrl);
       }
     } catch (Exception e) {
@@ -284,7 +284,7 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileUrl())
+        .senderProfileUrl(sender.getProfileImgStoredPath())
         .message(null)
         .chatMessageType(ChatMessageType.PICTURE)
         .isRead(false)

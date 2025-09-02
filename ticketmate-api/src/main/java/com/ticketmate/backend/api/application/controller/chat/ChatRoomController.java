@@ -1,6 +1,6 @@
 package com.ticketmate.backend.api.application.controller.chat;
 
-import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
@@ -18,6 +18,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,9 +67,19 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @Override
   @GetMapping("/{chat-room-id}/application-form")
   @LogMonitoringInvocation
-  public ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(
+  public ResponseEntity<ApplicationFormInfoResponse> chatRoomApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId) {
     return ResponseEntity.ok(chatRoomService.getChatRoomApplicationFormInfo(customOAuth2User.getMember(), chatRoomId));
+  }
+
+  @Override
+  @PatchMapping("/{chat-room-id}/cancel-progress")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> cancelProgress(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @PathVariable("chat-room-id") String chatRoomId) {
+    chatRoomService.cancelProgress(customOAuth2User.getMember(), chatRoomId);
+    return ResponseEntity.ok().build();
   }
 }

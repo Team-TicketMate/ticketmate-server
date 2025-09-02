@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -43,10 +44,10 @@ public class MockConcertFactory {
     ConcertType concertType = ConcertType.values()[koFaker.random().nextInt(ConcertType.values().length)];
 
     // 4. 썸네일 이미지 URL (랜덤)
-    String concertThumbnailUrl = koFaker.internet().image();
+    String concertThumbnailUrl = koFaker.internet().image() + UUID.randomUUID();
 
     // 5. 좌석 배치도 이미지 URL (랜덤)
-    String seatingChartUrl = koFaker.internet().image();
+    String seatingChartUrl = koFaker.internet().image() + UUID.randomUUID();
 
     // 6. 예매처 (랜덤)
     TicketReservationSite ticketReservationSite = TicketReservationSite
@@ -56,8 +57,8 @@ public class MockConcertFactory {
         .concertName(concertName)
         .concertHall(concertHall)
         .concertType(concertType)
-        .concertThumbnailUrl(concertThumbnailUrl)
-        .seatingChartUrl(seatingChartUrl)
+        .concertThumbnailStoredPath(concertThumbnailUrl)
+        .seatingChartStoredPath(seatingChartUrl)
         .ticketReservationSite(ticketReservationSite)
         .build();
   }

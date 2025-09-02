@@ -1,15 +1,18 @@
 package com.ticketmate.backend.api.application.controller.admin;
 
-import com.ticketmate.backend.admin.application.dto.request.ConcertHallInfoEditRequest;
-import com.ticketmate.backend.admin.application.dto.request.ConcertHallInfoRequest;
-import com.ticketmate.backend.admin.application.dto.request.ConcertInfoEditRequest;
-import com.ticketmate.backend.admin.application.dto.request.ConcertInfoRequest;
-import com.ticketmate.backend.admin.application.dto.request.PortfolioFilteredRequest;
-import com.ticketmate.backend.admin.application.dto.request.PortfolioStatusUpdateRequest;
-import com.ticketmate.backend.admin.application.dto.response.CoolSmsBalanceResponse;
-import com.ticketmate.backend.admin.application.dto.response.PortfolioFilteredAdminResponse;
-import com.ticketmate.backend.admin.application.dto.response.PortfolioForAdminResponse;
-import com.ticketmate.backend.admin.application.service.AdminService;
+import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoEditRequest;
+import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
+import com.ticketmate.backend.admin.concert.application.service.ConcertAdminService;
+import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoEditRequest;
+import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoRequest;
+import com.ticketmate.backend.admin.concerthall.application.service.ConcertHallAdminService;
+import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioFilteredRequest;
+import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
+import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
+import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
+import com.ticketmate.backend.admin.portfolio.application.service.PortfolioAdminService;
+import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
+import com.ticketmate.backend.admin.sms.application.service.SmsAdminService;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
@@ -45,7 +48,10 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class AdminController implements AdminControllerDocs {
 
-  private final AdminService adminService;
+  private final ConcertAdminService concertAdminService;
+  private final ConcertHallAdminService concertHallAdminService;
+  private final PortfolioAdminService portfolioAdminService;
+  private final SmsAdminService smsAdminService;
 
   /*
   ======================================공연장======================================
@@ -57,7 +63,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Void> saveHallInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody ConcertHallInfoRequest request) {
-    adminService.saveConcertHallInfo(request);
+    concertHallAdminService.saveConcertHallInfo(request);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
@@ -67,7 +73,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertHallFilteredRequest request) {
-    return ResponseEntity.ok(adminService.filteredConcertHall(request));
+    return ResponseEntity.ok(concertHallAdminService.filteredConcertHall(request));
   }
 
   @Override
@@ -76,7 +82,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Void> editConcertHallInfo(
       @PathVariable("concert-hall-id") UUID concertHallId,
       @Valid @RequestBody ConcertHallInfoEditRequest request) {
-    adminService.editConcertHallInfo(concertHallId, request);
+    concertHallAdminService.editConcertHallInfo(concertHallId, request);
     return ResponseEntity.ok().build();
   }
 
@@ -90,7 +96,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Void> saveConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ModelAttribute ConcertInfoRequest request) {
-    adminService.saveConcert(request);
+    concertAdminService.saveConcert(request);
     return ResponseEntity.ok().build();
   }
 
@@ -100,7 +106,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertFilteredRequest request) {
-    return ResponseEntity.ok(adminService.filteredConcert(request));
+    return ResponseEntity.ok(concertAdminService.filteredConcert(request));
   }
 
   @Override
@@ -110,7 +116,7 @@ public class AdminController implements AdminControllerDocs {
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "concert-id") UUID concertId
   ) {
-    return ResponseEntity.ok(adminService.getConcertInfo(concertId));
+    return ResponseEntity.ok(concertAdminService.getConcertInfo(concertId));
   }
 
   @Override
@@ -119,7 +125,7 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Void> editConcertInfo(
       @PathVariable("concert-id") UUID concertId,
       @Valid @ModelAttribute ConcertInfoEditRequest request) {
-    adminService.editConcertInfo(concertId, request);
+    concertAdminService.editConcertInfo(concertId, request);
     return ResponseEntity.ok().build();
   }
 
@@ -133,26 +139,25 @@ public class AdminController implements AdminControllerDocs {
   public ResponseEntity<Page<PortfolioFilteredAdminResponse>> filteredPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid PortfolioFilteredRequest request) {
-    return ResponseEntity.ok(adminService.filteredPortfolio(request));
+    return ResponseEntity.ok(portfolioAdminService.filteredPortfolio(request));
   }
 
   @Override
   @GetMapping(value = "/portfolio/{portfolio-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<PortfolioForAdminResponse> getPortfolioInfo(
+  public ResponseEntity<PortfolioAdminResponse> getPortfolioInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId) {
-    return ResponseEntity.ok(adminService.getPortfolio(portfolioId));
+    return ResponseEntity.ok(portfolioAdminService.getPortfolio(portfolioId));
   }
 
   @Override
-  @PatchMapping(value = "/portfolio/{portfolio-id}")
+  @PatchMapping(value = "/portfolio/{portfolio-id}/status")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> reviewPortfolio(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+  public ResponseEntity<Void> changePortfolioStatus(
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
-    adminService.reviewPortfolioCompleted(portfolioId, request);
+    portfolioAdminService.changePortfolioStatus(portfolioId, request);
     return ResponseEntity.ok().build();
   }
 
@@ -165,6 +170,6 @@ public class AdminController implements AdminControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<CoolSmsBalanceResponse> getBalance(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-    return ResponseEntity.ok(adminService.getBalance());
+    return ResponseEntity.ok(smsAdminService.getBalance());
   }
 }

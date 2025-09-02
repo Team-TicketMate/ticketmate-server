@@ -2,7 +2,7 @@ package com.ticketmate.backend.api.application.controller.chat;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
@@ -110,7 +110,10 @@ public interface ChatRoomControllerDocs {
           - 검색키워드가 없을 시 공백으로 설정합니다. (전체조회입니다.)
           """
   )
-  ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(CustomOAuth2User customOAuth2User, ChatRoomFilteredRequest request);
+  ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(
+      CustomOAuth2User customOAuth2User,
+      ChatRoomFilteredRequest request
+  );
 
   @ApiChangeLogs({
       @ApiChangeLog(
@@ -176,7 +179,11 @@ public interface ChatRoomControllerDocs {
           - last 가 true일 경우 -> 마지막 페이지 (다음 데이터는 없음)
           """
   )
-  ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId, ChatMessageFilteredRequest request);
+  ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(
+      CustomOAuth2User customOAuth2User,
+      String chatRoomId,
+      ChatMessageFilteredRequest request
+  );
 
   @ApiChangeLogs({
       @ApiChangeLog(
@@ -195,34 +202,67 @@ public interface ChatRoomControllerDocs {
           ### 요청 파라미터
           - **chat-room-id (String)** : 채팅방 고유 ID [필수]
           
-          ### 반환 데이터
-          - ApplicationFormFilteredResponse: 현재 채팅방에서 진행중인 단일 신청서 정보
-            - applicationFormId: 신청서 PK
-            - clientId: 의뢰인 PK
-            - agentId: 대리인 PK
-            - concertId: 콘서트 PK
-            - openDate: 티켓 예매일
-            - applicationFormDetailResponseList: 신청서 세부사항 리스트
-            - applicationFormStatus: 신청서 상태
-            - ticketOpenType: 선예매/일반예매 타입
+          ### 반환 데이터 (ApplicationFormInfoResponse)
+          - **concertInfoResponse** (ConcertInfoResponse)
+            - concertName: 공연명
+            - concertHallName: 공연장 이름
+            - concertThumbnailUrl: 공연 썸네일 URL
+            - seatingChartUrl: 좌석 배치도 URL
+            - concertType: 공연 카테고리
+            - concertDateInfoResponseList: List<ConcertDateInfoResponse>
+              - performanceDate: 공연 일시
+              - session: 회차
+            - ticketOpenDateInfoResponseList: List<TicketOpenDateInfoResponse>
+              - openDate: 티켓 오픈일
+              - requestMaxCount: 최대 예매 매수
+              - isBankTransfer: 무통장 입금 여부
+              - ticketOpenType: 선예매/일반예매 구분
+            - ticketReservationSite: 예매처
           
-          
-          - applicationFormDetailResponseList: 현재 신청서에 적용된 N개의 회차들의 정보
-            - performanceDate: 공연 일자
+          - **applicationFormDetailResponseList**: List<ApplicationFormDetailResponse>
+            - performanceDate: 공연 일시
             - session: 회차
             - requestCount: 요청 매수
-            - hopeAreaResponseList: 희망 구역 리스트
+            - hopeAreaResponseList: List<HopeAreaResponse>
+              - priority: 우선순위
+              - location: 위치
+              - price: 가격
             - requirement: 요청 사항
-          
-          - hopeAreaResponseList: 회차당 희망구역 리스트
-            - priority: 우선 순위 (1~10)
-            - location: 위치 (예: A구역, B구역)
-            - price: 가격
           
           ### 유의사항
           - 선예매/일반예매 및 공연 기준 모두 각각의 채팅방에 존재합니다.
           - 신청서의 정보에는 모든 **회차**가 포함됩니다. (1:N, 신청서 : 회차)
           """
   )
-  ResponseEntity<ApplicationFormFilteredResponse> chatRoomApplicationFormInfo(CustomOAuth2User customOAuth2User, String chatRoomId);
+  ResponseEntity<ApplicationFormInfoResponse> chatRoomApplicationFormInfo(
+      CustomOAuth2User customOAuth2User,
+      String chatRoomId
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-08-25",
+          author = "mr6208",
+          description = "채팅방 내부 진행취소 API 설계",
+          issueUrl = ""
+      )
+  })
+  @Operation(
+      summary = "채팅방 내부 진행취소 기능",
+      description = """
+          
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+          
+          ### 반환 데이터 
+          - 상태코드만을 반환합니다.
+          
+          ### 유의사항
+          - 채팅방 내부에서 대리인 혹은 의뢰인이 매칭되어있는 신청서에 대한 진행을 취소합니다.
+          - 진행취소된 신청서의 경우 신청서 상태가 CANCELED_IN_PROCESS 상태로 변경됩니다. 
+          """
+  )
+  ResponseEntity<Void> cancelProgress(CustomOAuth2User customOAuth2User, String chatRoomId);
 }

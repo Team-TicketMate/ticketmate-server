@@ -48,8 +48,7 @@ public class SecurityUrls {
 
       // 채팅 test용 정적 리소스
       "/chat-jwt.html",
-      "/chat-jwt-local2.html",
-      "/chat-jwt-local3.html"
+      "/chat-jwt-local.html"
   );
 
   /**
@@ -61,5 +60,13 @@ public class SecurityUrls {
       "/admin/concert-hall/**",
       "/admin/portfolio/**",
       "/admin/cool-sms/**"
+  );
+
+  /**
+   * 선택적 인증 (비로그인/로그인 모두 지원) URL 패턴 목록
+   */
+  public static final List<String> OPTIONAL_AUTH_PATHS = List.of(
+      // API
+      "/api/search"
   );
 }

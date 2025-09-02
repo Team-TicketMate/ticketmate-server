@@ -1,6 +1,5 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
@@ -20,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -29,12 +27,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Member extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID memberId;
 
   // 소셜 로그인 시 발급되는 ID
@@ -66,7 +62,7 @@ public class Member extends BasePostgresEntity {
   private String phone;
 
   // 프로필 이미지
-  private String profileUrl;
+  private String profileImgStoredPath;
 
   // 성별
   private String gender;
@@ -91,7 +87,6 @@ public class Member extends BasePostgresEntity {
 
   // 마지막 로그인 시간
   @Column(columnDefinition = "TIMESTAMP(0)")
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)
@@ -104,7 +99,9 @@ public class Member extends BasePostgresEntity {
   @Column(nullable = false)
   private long followerCount = 0L;
 
-  /** 관리자 **/
+  /**
+   * 관리자
+   **/
   private String password;
 
   @Builder.Default
