@@ -233,12 +233,12 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileImgStoredPath())
+        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
         .message(message)
         .chatMessageType(chatMessageType)
         .isRead(false)
         .sendDate(LocalDateTime.now(clock))
-        .pictureMessageList(Collections.emptyList())
+        .pictureMessageStoredPathList(Collections.emptyList())
         .build();
 
     chatMessageRepository.save(chatMessage);
@@ -261,8 +261,8 @@ public class ChatMessageService {
       throw new CustomException(ErrorCode.CHAT_PICTURE_SIZE_EXCEED);
     }
 
-    // Url을 저장할 리스트 세팅
-    List<String> pictureUrlList = new ArrayList<>(pictureList.size());
+    // StoredPath를 저장할 리스트 세팅
+    List<String> pictureStoredPathList = new ArrayList<>(pictureList.size());
 
     // 파일 다중 저장
     try {
@@ -270,12 +270,12 @@ public class ChatMessageService {
         if (picture == null || picture.isEmpty()) {
           throw new CustomException(ErrorCode.CHAT_PICTURE_EMPTY);
         }
-        String pictureUrl = storageService.uploadFile(picture, UploadType.CHAT).storedPath();
-        pictureUrlList.add(pictureUrl);
+        String storedPath = storageService.uploadFile(picture, UploadType.CHAT).storedPath();
+        pictureStoredPathList.add(storedPath);
       }
     } catch (Exception e) {
-      log.error("채팅 이미지 업로드 중 오류: {}, 업로드된 {}개 파일 롤백.", e.getMessage(), pictureUrlList.size(), e);
-      pictureUrlList.forEach(storageService::deleteFile);
+      log.error("채팅 이미지 업로드 중 오류: {}, 업로드된 {}개 파일 롤백.", e.getMessage(), pictureStoredPathList.size(), e);
+      pictureStoredPathList.forEach(storageService::deleteFile);
       throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
     }
 
@@ -284,12 +284,12 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileImgStoredPath())
+        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
         .message(null)
         .chatMessageType(ChatMessageType.PICTURE)
         .isRead(false)
         .sendDate(LocalDateTime.now(clock))
-        .pictureMessageList(pictureUrlList)
+        .pictureMessageStoredPathList(pictureStoredPathList)
         .build();
 
     return chatMessageRepository.save(chatMessage);
