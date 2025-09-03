@@ -1,14 +1,10 @@
 package com.ticketmate.backend.chat.infrastructure.repository;
 
-import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomListResponse;
-import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,29 +70,5 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
     return new PageImpl<>(chatRoomList,
         PageRequest.of(pageNumber, PageableConstants.DEFAULT_PAGE_SIZE),
         totalCount);
-  }
-
-  /**
-   * 내부 매퍼
-   */
-  public ChatRoomListResponse toResponse(ChatRoom room, Member member,
-      Map<UUID, ApplicationForm> applicationFormMap,
-      Map<UUID, Member> memberMap, int unRead) {
-
-    // 매핑을 위한 값 세팅
-    UUID opponentId = ChatRoomService.opponentIdOf(room, member);
-    Member other = memberMap.get(opponentId);
-    ApplicationForm applicationForm = applicationFormMap.get(room.getApplicationFormId());
-
-    return ChatRoomListResponse.builder()
-        .unReadMessageCount(unRead)
-        .chatRoomId(room.getChatRoomId())
-        .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
-        .ticketOpenType(room.getTicketOpenType())
-        .lastChatMessage(room.getLastMessage())
-        .concertThumbnailUrl(applicationForm.getConcert().getConcertThumbnailStoredPath())
-        .lastChatSendTime(room.getLastMessageTime())
-        .profileUrl(other.getProfileImgStoredPath())
-        .build();
   }
 }

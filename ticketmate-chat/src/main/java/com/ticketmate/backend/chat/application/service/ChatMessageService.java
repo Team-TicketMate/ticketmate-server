@@ -233,12 +233,12 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileImgStoredPath())
+        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
         .message(message)
         .chatMessageType(chatMessageType)
         .isRead(false)
         .sendDate(LocalDateTime.now(clock))
-        .pictureMessageList(Collections.emptyList())
+        .pictureMessageStoredPathList(Collections.emptyList())
         .build();
 
     chatMessageRepository.save(chatMessage);
@@ -284,12 +284,12 @@ public class ChatMessageService {
         .senderId(sender.getMemberId())
         .senderNickName(sender.getNickname())
         .senderEmail(sender.getUsername())
-        .senderProfileUrl(sender.getProfileImgStoredPath())
+        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
         .message(null)
         .chatMessageType(ChatMessageType.PICTURE)
         .isRead(false)
         .sendDate(LocalDateTime.now(clock))
-        .pictureMessageList(pictureUrlList)
+        .pictureMessageStoredPathList(pictureUrlList)
         .build();
 
     return chatMessageRepository.save(chatMessage);
