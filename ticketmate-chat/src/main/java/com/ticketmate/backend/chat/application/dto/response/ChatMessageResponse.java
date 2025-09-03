@@ -7,12 +7,15 @@ import com.ticketmate.backend.chat.core.constant.ChatMessageType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ChatMessageResponse {
 
   private String chatRoomId;
@@ -37,24 +40,7 @@ public class ChatMessageResponse {
   private ChatMessageType chatMessageType;  // 채팅메시지 종류 (이미지 or 텍스트)
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)  // 사진이 없는 텍스트 메시지면 제외
-  private List<String> pictureMessageList;  // 사진 리스트
-
-  @Builder
-  public ChatMessageResponse(String chatRoomId, String messageId, UUID senderId, String senderNickname,
-      String message, LocalDateTime sendDate, boolean read, String profileUrl,
-      boolean mine, ChatMessageType chatMessageType, List<String> pictureMessageList) {
-    this.chatRoomId = chatRoomId;
-    this.messageId = messageId;
-    this.senderId = senderId;
-    this.senderNickname = senderNickname;
-    this.message = message;
-    this.sendDate = sendDate;
-    this.read = read;
-    this.profileUrl = profileUrl;
-    this.mine = mine;
-    this.chatMessageType = chatMessageType;
-    this.pictureMessageList = pictureMessageList;
-  }
+  private List<String> pictureMessageUrlList;  // 사진 URL 리스트
 
   @JsonProperty("isRead")
   public boolean isRead() {
