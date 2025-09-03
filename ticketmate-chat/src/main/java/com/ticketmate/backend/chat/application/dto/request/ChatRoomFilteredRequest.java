@@ -16,11 +16,11 @@ import lombok.Setter;
 @Setter
 public class ChatRoomFilteredRequest {
 
+  @Size(max = 30, message = "검색어는 최대 30자 입니다.")
+  private String searchKeyword;  // 검색 키워드
+
   private TicketOpenType ticketOpenType;  // 선예매 일반예매
 
   @Min(value = 1, message = "페이지 번호는 최소 1부터 입니다.")
   private Integer pageNumber;  // 페이지 번호 (1부터 시작)
-
-  @Size(max = 30, message = "검색어는 최대 30자 입니다.")
-  private String searchKeyword;  // 검색 키워드
 }
