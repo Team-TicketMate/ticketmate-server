@@ -10,24 +10,26 @@ spring:
 
   autoconfigure:
     exclude:
-      # Security / OAuth2 (servlet & reactive 모두 차단)
+      # 보안/리액티브 OAuth2 충돌 제거
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
-      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration
-      # WebFlux / Websocket 등 웹 관련
-      - org.springframework.boot.autoconfigure.web.reactive.WebFluxAutoConfiguration
-      - org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration
-      # Mongo / Redis
+      # 외부 인프라(테스트에 불필요)
       - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
 
   jpa:
     hibernate:
       ddl-auto: validate  # [CHANGED] DB 변경 없이 매핑-스키마 호환성 검증
     properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
       # [CHANGED] 엔티티 기준 DDL 스냅샷 파일 생성 (DB에는 적용 안 함)
       jakarta:
         persistence:
