@@ -16,26 +16,15 @@ spring:
           schema-generation:
             create-source: metadata
             database:
-              action: none  # DB에는 적용하지 않음
+              action: none
             scripts:
               action: create
-              create-target: ${user.dir}/ticketmate-api/build/generated/hibernate-ddl.sql
-      hibernate:
-        format_sql: true
-        show_sql: false
-        # 스키마 생성을 강제로 활성화
-        hbm2ddl:
-          schema_generation:
-            script:
-              append: false
-
+              create-target: build/generated/hibernate-ddl.sql
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
-    baseline-version: 1
-    baseline-description: "Initial baseline"
 
   autoconfigure:
     exclude:
@@ -51,11 +40,3 @@ spring:
       - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
       - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
-
-  # 로깅 레벨 조정으로 디버깅 정보 확인
-logging:
-  level:
-    org.hibernate: DEBUG
-    org.hibernate.tool.schema: DEBUG
-    org.flywaydb: DEBUG
-    org.springframework.orm.jpa: DEBUG

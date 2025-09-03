@@ -114,78 +114,30 @@ jobs:
             sleep 2
           done
 
-      # DDL 생성용 디렉토리 미리 생성
-      - name: DDL 출력 디렉토리 생성
-        run: |
-          mkdir -p ticketmate-api/build/generated
-          mkdir -p ticketmate-api/build/schema
-
       # ticketmate-api 모듈만 컨텍스트 기동 → Flyway migrate + Hibernate validate + DDL 스냅샷 생성
       - name: Flyway migrate + Hibernate validate (profile=schema-verify)
         run: ./gradlew :ticketmate-api:clean :ticketmate-api:schemaVerifyTest --info
-
-      # Hibernate DDL 파일이 실제로 생성되었는지 확인
-      - name: Hibernate DDL 파일 확인
-        run: |
-          if [ -f ticketmate-api/build/generated/hibernate-ddl.sql ]; then
-            echo "✅ Hibernate DDL 파일 생성됨:"
-            ls -la ticketmate-api/build/generated/hibernate-ddl.sql
-            echo "파일 크기: $(wc -l < ticketmate-api/build/generated/hibernate-ddl.sql) lines"
-            echo "첫 몇 줄:"
-            head -10 ticketmate-api/build/generated/hibernate-ddl.sql
-          else
-            echo "❌ Hibernate DDL 파일이 생성되지 않았습니다."
-            echo "build/generated 디렉토리 내용:"
-            ls -la ticketmate-api/build/generated/ || echo "디렉토리가 존재하지 않습니다."
-            exit 1
-          fi
 
       # Flyway 적용 후 실제 DB 스키마 덤프 (모듈 내부 경로로 저장)
       - name: Flyway 적용 후 실제 DB 스키마 덤프
         env:
           PGPASSWORD: postgres
         run: |
-          echo "📋 데이터베이스 스키마 덤프 시작..."
+          mkdir -p ticketmate-api/build/schema
           pg_dump -h localhost -U postgres -d postgres --schema-only --no-owner --no-privileges > ticketmate-api/build/schema/flyway-db.sql
-          
-          if [ -s ticketmate-api/build/schema/flyway-db.sql ]; then
-            echo "✅ DB 스키마 덤프 완료:"
-            ls -la ticketmate-api/build/schema/flyway-db.sql
-            echo "파일 크기: $(wc -l < ticketmate-api/build/schema/flyway-db.sql) lines"
-            echo "첫 몇 줄:"
-            head -10 ticketmate-api/build/schema/flyway-db.sql
-          else
-            echo "❌ DB 스키마 덤프 파일이 비어있거나 생성되지 않았습니다."
-            exit 1
-          fi
+          test -s ticketmate-api/build/schema/flyway-db.sql || (echo "flyway-db.sql is empty" && exit 1)
 
       # Hibernate DDL vs Flyway DB 스키마 검증 (모듈 내부 파일끼리 비교)
       - name: Hibernate DDL vs Flyway DB 스키마 검증
         run: |
-          echo "🔍 스키마 비교 시작..."
-          echo "Hibernate DDL 파일:"
-          ls -la ticketmate-api/build/generated/hibernate-ddl.sql
-          echo "Flyway DB 덤프 파일:"
-          ls -la ticketmate-api/build/schema/flyway-db.sql
-          
-          echo "=== Hibernate DDL 내용 (처음 20줄) ==="
-          head -20 ticketmate-api/build/generated/hibernate-ddl.sql
-          
-          echo "=== Flyway DB 덤프 내용 (처음 20줄) ==="
-          head -20 ticketmate-api/build/schema/flyway-db.sql
-          
-          echo "=== 스키마 차이점 확인 ==="
-          if diff -u ticketmate-api/build/generated/hibernate-ddl.sql ticketmate-api/build/schema/flyway-db.sql; then
-            echo "✅ 스키마가 일치합니다!"
+          if [ -f ticketmate-api/build/generated/hibernate-ddl.sql ]; then
+            diff -u ticketmate-api/build/generated/hibernate-ddl.sql ticketmate-api/build/schema/flyway-db.sql || (echo "::error::DDL diff detected"; exit 1)
           else
-            echo "❌ 스키마에 차이점이 발견되었습니다."
-            echo "위의 diff 출력을 확인하여 Flyway 마이그레이션과 JPA 엔티티 간의 차이점을 해결하세요."
-            exit 1
+            echo "::error::No hibernate-ddl.sql found (script generation failed)"; exit 1
           fi
 
       - name: Schema artifacts 업로드
         uses: actions/upload-artifact@v4
-        if: always()  # 실패해도 아티팩트는 업로드
         with:
           name: schema-artifacts
           path: |
