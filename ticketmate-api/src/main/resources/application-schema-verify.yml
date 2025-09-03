@@ -28,8 +28,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         # (선택) 네이밍 전략을 명시하면 Flyway SQL과 이름 차이를 줄일 수 있음
-#        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-#        implicit_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        physical_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit_naming_strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
       # [CHANGED] 엔티티 기준 DDL 스냅샷 파일 생성 (DB에는 적용 안 함)
       jakarta:
         persistence:
