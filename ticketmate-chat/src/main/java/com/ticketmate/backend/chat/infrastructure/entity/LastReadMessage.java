@@ -14,20 +14,24 @@ import org.springframework.data.redis.core.index.Indexed;
 /**
  * 마지막으로 읽은 메시지의 포인터역할
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@RedisHash(value = "lastReadMessage", timeToLive = 2592000)
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RedisHash(value = "lastReadMessage", timeToLive = 2592000)
 public class LastReadMessage {
 
   @Id
   private String lastReadMessage; // "userLastRead:" + {roomId} + {memberId}
-  private String lastMessageId;  // 마지막으로 읽은 메시지의 ID [포인터용]
+
+  private String lastMessageId; // 마지막으로 읽은 메시지의 ID [포인터용]
+
   @Indexed
   private String chatRoomId;
+
   @Indexed
   private UUID memberId;
-  private LocalDateTime readDate;  // 마지막으로 읽은 시각
+
+  private LocalDateTime readDate; // 마지막으로 읽은 시각
 
   @Builder
   public LastReadMessage(String lastReadMessage, String chatRoomId, UUID memberId,
