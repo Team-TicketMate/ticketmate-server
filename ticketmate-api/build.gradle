@@ -36,3 +36,24 @@ dependencies {
     implementation libs.flyway.core
     implementation libs.flyway.postgres
 }
+
+tasks.register('schemaVerifyTest', Test) {
+    group = 'verification'
+    description = 'Run schema verification context only (Flyway migrate + JPA validate + DDL snapshot)'
+    useJUnitPlatform()
+
+    // 스키마 검증용 얇은 테스트 클래스만 실행
+    include '**/SchemaValidationTest.class'
+
+    // 프로파일 강제 (워크플로우/로컬 모두 동일하게 동작)
+    systemProperty 'spring.profiles.active', 'schema-verify'
+
+    // 보기 좋은 로그
+    testLogging {
+        events 'failed', 'skipped'
+        exceptionFormat 'full'
+        showCauses true
+        showExceptions true
+        showStackTraces true
+    }
+}
