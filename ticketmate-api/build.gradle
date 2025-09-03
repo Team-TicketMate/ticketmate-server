@@ -35,4 +35,16 @@ dependencies {
     // Flyway
     implementation libs.flyway.core
     implementation libs.flyway.postgres
+
+    // Hibernate
+    implementation libs.hibernate
+}
+
+// test 소스에 둔 main()을 실행할 JavaExec 태스크
+tasks.register('generateHibernateDdl', JavaExec) {
+    group = 'verification'
+    description = 'Generate DDL from JPA entities (no Spring)'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ticketmate.backend.api.schema.HibernateDdlGenerator'
+    doFirst { file("$buildDir/generated").mkdirs() }
 }

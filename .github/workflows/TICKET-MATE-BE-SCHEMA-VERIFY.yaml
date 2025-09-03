@@ -30,7 +30,7 @@ jobs:
 
       # JPA 엔티티만으로 경량 스키마 검증 실행 (Spring Context 로드 없음)
       - name: JPA 엔티티 기반 경량 스키마 검증
-        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test --info --tests "com.ticketmate.api.schema.LightweightSchemaVerificationTest"
+        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test --info --tests "com.ticketmate.api.schema.SchemaVerificationTest"
 
       # 생성된 DDL 파일들 확인 및 비교 결과 출력
       - name: DDL 검증 결과 확인
