@@ -1,5 +1,6 @@
 package com.ticketmate.api.schema;
 
+import com.ticketmate.backend.api.BackendApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -11,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
  * - JPA DDL 검증 (hibernate.ddl-auto=validate)
  * - DDL 스냅샷 생성
  */
-@SpringBootTest
+@SpringBootTest(classes = BackendApplication.class)
 @ActiveProfiles("schema-verify")
 @TestPropertySource(properties = {
     "spring.jpa.hibernate.ddl-auto=validate",
