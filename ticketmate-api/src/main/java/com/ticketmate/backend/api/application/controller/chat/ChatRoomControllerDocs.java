@@ -8,7 +8,7 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomListResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
@@ -110,7 +110,7 @@ public interface ChatRoomControllerDocs {
           - 검색키워드가 없을 시 공백으로 설정합니다. (전체조회입니다.)
           """
   )
-  ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(
+  ResponseEntity<Page<ChatRoomResponse>> getChatRoomList(
       CustomOAuth2User customOAuth2User,
       ChatRoomFilteredRequest request
   );

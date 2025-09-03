@@ -6,7 +6,7 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomListResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,7 +48,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @Override
   @GetMapping("")
   @LogMonitoringInvocation
-  public ResponseEntity<Page<ChatRoomListResponse>> getChatRoomList(
+  public ResponseEntity<Page<ChatRoomResponse>> getChatRoomList(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ChatRoomFilteredRequest request) {
     return ResponseEntity.ok(chatRoomService.getChatRoomList(customOAuth2User.getMember(), request));
