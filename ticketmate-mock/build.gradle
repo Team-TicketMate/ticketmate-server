@@ -21,6 +21,7 @@ dependencies {
     implementation project(':ticketmate-applicationform')
     implementation project(':ticketmate-chat')
     implementation project(':ticketmate-ai')
+    implementation project(':ticketmate-storage')
 
     // DataFaker
     implementation libs.datafaker
