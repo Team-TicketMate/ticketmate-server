@@ -1,5 +1,6 @@
 package com.ticketmate.backend.chat.application.service;
 
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.UN_READ_MESSAGE_COUNTER_KEY;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
@@ -11,7 +12,7 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomListResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.mapper.ChatMapper;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.chat.infrastructure.repository.ChatMessageRepository;
@@ -42,11 +43,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class ChatRoomService {
 
-  private static final String UN_READ_MESSAGE_COUNTER_KEY = "unRead:%s:%s";
   private final MemberService memberService;
   private final ChatRoomRepository chatRoomRepository;
   private final MemberRepository memberRepository;
@@ -118,7 +118,7 @@ public class ChatRoomService {
    * 사용자별 존재하는 채팅방 리스트를 불러오는 메서드입니다.
    */
   @Transactional(readOnly = true)
-  public Page<ChatRoomListResponse> getChatRoomList(Member member, ChatRoomFilteredRequest request) {
+  public Page<ChatRoomResponse> getChatRoomList(Member member, ChatRoomFilteredRequest request) {
     // 검색 키워드 관련 필드값 세팅
     String keyword = nvl(request.getSearchKeyword(), "");
 
@@ -126,14 +126,14 @@ public class ChatRoomService {
     int pageIndex = PageableUtil.convertToPageIndex(request.getPageNumber());
 
     // 채팅방 리스트 불러오기 (10개씩)
-    Page<ChatRoom> chatRoomList = chatRoomRepository.search(request.getTicketOpenType(), keyword, member, pageIndex);
+    Page<ChatRoom> chatRoomPage = chatRoomRepository.search(request.getTicketOpenType(), keyword, member, pageIndex);
 
     // 채팅방마다 존재하는 신청폼 Id 리스트에 저장
-    List<UUID> applicationFormIdList = chatRoomList.stream()
+    List<UUID> applicationFormIdList = chatRoomPage.stream()
         .map(ChatRoom::getApplicationFormId).collect(Collectors.toList());
 
     // 채팅방마다 존재하는 사용자 ID중 상대방 ID만 빼와서 리스트에 저장
-    Set<UUID> opponentIdList = chatRoomList.stream()
+    Set<UUID> opponentIdList = chatRoomPage.stream()
         .map(room -> opponentIdOf(room, member))
         .collect(Collectors.toSet());
 
@@ -150,7 +150,7 @@ public class ChatRoomService {
         .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
 
     List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
-      chatRoomList.forEach(r -> {
+      chatRoomPage.forEach(r -> {
         String redisKey = (UN_READ_MESSAGE_COUNTER_KEY).formatted(r.getChatRoomId(), member.getMemberId());
         con.stringCommands().get(redisKey.getBytes());
       });
@@ -158,15 +158,15 @@ public class ChatRoomService {
     });
 
     AtomicInteger i = new AtomicInteger();
-    List<ChatRoomListResponse> response = chatRoomList.stream()
+    List<ChatRoomResponse> response = chatRoomPage.stream()
         .map(r -> {
           int unReadMessageCount = parseInt(countList.get(i.getAndIncrement()));
-          return chatRoomRepository.toResponse(
+          return chatMapper.toChatRoomResponse(
               r, member, applicationFormMap, memberMap, unReadMessageCount);
         })
         .toList();
 
-    return new PageImpl<>(response, chatRoomList.getPageable(), chatRoomList.getTotalElements());
+    return new PageImpl<>(response, chatRoomPage.getPageable(), chatRoomPage.getTotalElements());
   }
 
   /**

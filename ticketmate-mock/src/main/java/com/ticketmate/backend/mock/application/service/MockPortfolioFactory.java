@@ -9,6 +9,7 @@ import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
+import com.ticketmate.backend.storage.core.constant.FileExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class MockPortfolioFactory {
         .build();
 
     // 포트폴리오 이미지 추가 (양방향 관계 설정)
-    List<PortfolioImg> portfolioImgList = generatePortfolioImgList(portfolio);
+    List<PortfolioImg> portfolioImgList = generatePortfolioImgList();
     if (!CommonUtil.nullOrEmpty(portfolioImgList)) {
       portfolioImgList.forEach(portfolio::addPortfolioImg);
     }
@@ -62,7 +63,7 @@ public class MockPortfolioFactory {
         .build();
 
     // 포트폴리오 이미지 추가 (양방향 관계 설정)
-    List<PortfolioImg> portfolioImgList = generatePortfolioImgList(portfolio);
+    List<PortfolioImg> portfolioImgList = generatePortfolioImgList();
     if (!CommonUtil.nullOrEmpty(portfolioImgList)) {
       portfolioImgList.forEach(portfolio::addPortfolioImg);
     }
@@ -72,13 +73,16 @@ public class MockPortfolioFactory {
   /**
    * 포트폴리오 이미지 List Mock 데이터 생성 (0 ~ 20개 랜덤)
    */
-  private List<PortfolioImg> generatePortfolioImgList(Portfolio portfolio) {
-    int count = koFaker.random().nextInt(21);
+  private List<PortfolioImg> generatePortfolioImgList() {
+    int count = koFaker.random().nextInt(1, 20);
     List<PortfolioImg> portfolioImgList = new ArrayList<>();
 
     for (int i = 0; i < count; i++) {
       PortfolioImg portfolioImg = PortfolioImg.builder()
+          .originalFilename(UUID.randomUUID().toString())
           .storedPath(koFaker.internet().image() + UUID.randomUUID())
+          .fileExtension(FileExtension.PNG)
+          .sizeBytes(1000)
           .build();
       portfolioImgList.add(portfolioImg);
     }
