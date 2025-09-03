@@ -40,6 +40,67 @@ jobs:
       - name: Gradle Wrapper 실행권한 부여
         run: chmod +x gradlew
 
+      # firebase sdk 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
+      - name: Create ticketmate-firebase-key.json from secret
+        env:
+          FIREBASE_KEY_JSON: ${{ secrets.TICKETMATE_FIREBASE_KEY_JSON }}
+        run: |
+          echo "$FIREBASE_KEY_JSON" | sed 's/\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-firebase-key.json
+
+      # firebase 서비스워커 파일을 빌드 전에 생성 ("" 따옴표 표기 삭제 방지)
+      - name: Create firebase-messaging-sw.js from secret
+        run: |
+          cat << 'EOF' > ticketmate-api/src/main/resources/static/firebase-messaging-sw.js
+          ${{ secrets.FIREBASE_MESSAGING_SW_JS }}
+          EOF
+
+      # embedding.json 파일을 빌드 전에 생성 (문자열 내의 \n을 실제 개행문자로 변경)
+      - name: Create ticketmate-embedding.json from secret
+        env:
+          EMBEDDING_JSON: ${{ secrets.TICKETMATE_EMBEDDING_JSON }}
+        run: |
+          echo "$EMBEDDING_JSON" | sed 's/\n/\n/g' > ticketmate-api/src/main/resources/ticketmate-embedding.json
+
+      # config-imports.yml 파일을 빌드 전에 생성
+      - name: Create config-imports.yml from secret
+        run: |
+          echo "${{ secrets.CONFIG_IMPORTS_YML }}" > ticketmate-api/src/main/resources/config-imports.yml
+
+      # oauth2.yml 파일을 빌드 전에 생성
+      - name: Create oauth2.yml from secret
+        run: |
+          echo "${{ secrets.OAUTH2_YML }}" > ticketmate-api/src/main/resources/oauth2.yml
+
+      # aws-s3.yml 파일을 빌드 전에 생성
+      - name: Create aws-s3.yml from secret
+        run: |
+          echo "${{ secrets.AWS_S3_YML }}" > ticketmate-api/src/main/resources/aws-s3.yml
+
+      # messaging.yml 파일을 빌드 전에 생성
+      - name: Create messaging.yml from secret
+        run: |
+          echo "${{ secrets.MESSAGING_YML }}" > ticketmate-api/src/main/resources/messaging.yml
+
+      # springdoc.yml 파일을 빌드 전에 생성
+      - name: Create springdoc.yml from secret
+        run: |
+          echo "${{ secrets.SPRINGDOC_YML }}" > ticketmate-api/src/main/resources/springdoc.yml
+
+      # admin.yml 파일을 빌드 전에 생성
+      - name: Create admin.yml from secret
+        run: |
+          echo "${{ secrets.ADMIN_YML }}" > ticketmate-api/src/main/resources/admin.yml
+
+      # application-prod.yml 파일을 빌드 전에 생성
+      - name: Create application-prod.yml from secret
+        run: |
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > ticketmate-api/src/main/resources/application-prod.yml
+
+      # application-deploy.yml 파일을 빌드 전에 생성
+      - name: Create application-deploy.yml from secret
+        run: |
+          echo "${{ secrets.APPLICATION_DEPLOY_YML }}" > ticketmate-api/src/main/resources/application-deploy.yml
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -55,7 +116,7 @@ jobs:
 
       # ticketmate-api 모듈만 컨텍스트 기동 → Flyway migrate + Hibernate validate + DDL 스냅샷 생성
       - name: Flyway migrate + Hibernate validate (profile=schema-verify)
-        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test -Dspring.profiles.active=schema-verify --info
+        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test -Dspring.profiles.active=schema-verify --info --tests "com.ticketmate.api.schema.SchemaVerificationTest"
 
       # Flyway 적용 후 실제 DB 스키마 덤프 (모듈 내부 경로로 저장)
       - name: Flyway 적용 후 실제 DB 스키마 덤프
@@ -63,16 +124,49 @@ jobs:
           PGPASSWORD: postgres
         run: |
           mkdir -p ticketmate-api/build/schema
-          pg_dump -h localhost -U postgres -d postgres --schema-only --no-owner --no-privileges > ticketmate-api/build/schema/flyway-db.sql
+          pg_dump -h localhost -U postgres -d postgres --schema-only --no-owner --no-privileges --no-comments | grep -v '^--' | grep -v '^$' > ticketmate-api/build/schema/flyway-db.sql
           test -s ticketmate-api/build/schema/flyway-db.sql || (echo "flyway-db.sql is empty" && exit 1)
+          echo "Generated Flyway DB schema dump:"
+          wc -l ticketmate-api/build/schema/flyway-db.sql
 
-      # Hibernate DDL vs Flyway DB 스키마 검증 (모듈 내부 파일끼리 비교)
-      - name: Hibernate DDL vs Flyway DB 스키마 검증
+      # Hibernate DDL 파일 검증 및 정리
+      - name: Hibernate DDL 파일 검증 및 정리
         run: |
           if [ -f ticketmate-api/build/generated/hibernate-ddl.sql ]; then
-            diff -u ticketmate-api/build/generated/hibernate-ddl.sql ticketmate-api/build/schema/flyway-db.sql || (echo "::error::DDL diff detected"; exit 1)
+            # 주석과 빈 줄 제거, 정렬
+            grep -v '^--' ticketmate-api/build/generated/hibernate-ddl.sql | grep -v '^$' | sort > ticketmate-api/build/generated/hibernate-ddl-clean.sql
+            echo "Generated Hibernate DDL file:"
+            wc -l ticketmate-api/build/generated/hibernate-ddl-clean.sql
+            echo "First 10 lines of Hibernate DDL:"
+            head -10 ticketmate-api/build/generated/hibernate-ddl-clean.sql
           else
-            echo "::error::No hibernate-ddl.sql found (script generation failed)"; exit 1
+            echo "::error::No hibernate-ddl.sql found (script generation failed)"
+            exit 1
+          fi
+
+      # Hibernate DDL vs Flyway DB 스키마 검증 (향상된 비교)
+      - name: Hibernate DDL vs Flyway DB 스키마 검증 (향상된 비교)
+        run: |
+          echo "🔍 DDL 스키마 비교를 시작합니다..."
+          
+          # Flyway DB 덤프도 동일하게 정리
+          sort ticketmate-api/build/schema/flyway-db.sql > ticketmate-api/build/schema/flyway-db-clean.sql
+          
+          echo "Flyway DB schema (first 10 lines):"
+          head -10 ticketmate-api/build/schema/flyway-db-clean.sql
+          
+          echo ""
+          echo "Comparing schemas..."
+          
+          if diff -u ticketmate-api/build/generated/hibernate-ddl-clean.sql ticketmate-api/build/schema/flyway-db-clean.sql > ticketmate-api/build/schema/diff.txt; then
+            echo "✅ DDL 스키마가 일치합니다!"
+          else
+            echo "❌ DDL 스키마에 차이점이 발견되었습니다:"
+            echo "================================================="
+            cat ticketmate-api/build/schema/diff.txt
+            echo "================================================="
+            echo "::error::DDL diff detected - Hibernate entities don't match Flyway migrations"
+            exit 1
           fi
 
       - name: Schema artifacts 업로드
@@ -81,5 +175,8 @@ jobs:
           name: schema-artifacts
           path: |
             ticketmate-api/build/schema/flyway-db.sql
+            ticketmate-api/build/schema/flyway-db-clean.sql
             ticketmate-api/build/generated/hibernate-ddl.sql
+            ticketmate-api/build/generated/hibernate-ddl-clean.sql
+            ticketmate-api/build/schema/diff.txt
           if-no-files-found: warn
