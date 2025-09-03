@@ -23,15 +23,19 @@ import org.springframework.context.annotation.FilterType;
     RedisRepositoriesAutoConfiguration.class
 })
 @ComponentScan(
+    // JPA 기반 모듈들만 추려서 스캔 (예시: common, member, concert, applicationform 등)
     basePackages = {
-        "com.ticketmate.backend" // 전체 모듈 루트
+        "com.ticketmate.backend.member",
+        "com.ticketmate.backend.concert",
+        "com.ticketmate.backend.applicationform",
+        "com.ticketmate.backend.concerthall",
+        "com.ticketmate.backend.portfolio",
     },
-    excludeFilters = {
-        // 애플리케이션 레이어(services, facades 등) 제외 → 인프라(엔티티/리포지토리/설정)만 띄움
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com\\.ticketmate\\.backend\\..*\\.application\\..*"),
-        // 웹/WebSocket 등도 혹시 있을 수 있는 구성요소 제외
-        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "com\\.ticketmate\\.backend\\..*\\.repository\\..*")
-    }
+    // API 컨트롤러/채팅/메시징 등 외부 인프라 의존 강한 패키지는 통째로 제외
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.REGEX,
+        pattern = "com\\.ticketmate\\.backend\\.(api\\.application\\.controller|admin|api|auth|chat|common|messaging|mock|notification|querydsl|redis|search|sms|storage|totp|websocket).*"
+    )
 )
 public class SchemaVerifyApplication {
 
