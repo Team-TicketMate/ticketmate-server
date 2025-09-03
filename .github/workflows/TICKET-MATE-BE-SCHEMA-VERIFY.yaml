@@ -116,7 +116,7 @@ jobs:
 
       # ticketmate-api 모듈만 컨텍스트 기동 → Flyway migrate + Hibernate validate + DDL 스냅샷 생성
       - name: Flyway migrate + Hibernate validate (profile=schema-verify)
-        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test -Dspring.profiles.active=schema-verify --info
+        run: ./gradlew :ticketmate-api:clean :ticketmate-api:schemaVerifyTest --info
 
       # Flyway 적용 후 실제 DB 스키마 덤프 (모듈 내부 경로로 저장)
       - name: Flyway 적용 후 실제 DB 스키마 덤프
