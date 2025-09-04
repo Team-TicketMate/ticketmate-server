@@ -68,6 +68,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: 스크립트 존재/권한 확인
+        run: |
+          echo "📁 scripts/sql 목록:"
+          ls -la "$WORK_DIR/scripts/sql" || true
+          chmod +x "$COMPARE_SH" || true
+
       - name: Postgres 준비 확인 (컨테이너 클라이언트)
         run: |
           for i in {1..30}; do
@@ -163,26 +169,33 @@ jobs:
           echo "❌ 정책상 최소 1개의 Flyway 마이그레이션이 필요합니다. (REQUIRE_MIGRATIONS=true)"
           exit 1
 
-      - name: 마이그레이션 없음 - 비교 생략
+      - name: 마이그레이션 없음 - 정규화만 수행(비교 생략, 요약 리포트 생성)
         if: env.MIG_COUNT == '0'
         run: |
-          echo "ℹ️ 사용자 마이그레이션 파일이 없어 스키마 비교를 생략합니다."
+          echo "ℹ️ 사용자 마이그레이션 파일이 없어 비교는 생략합니다. 대신 정규화 및 요약 리포트를 생성합니다."
+          python3 "$NORMALIZE_PY" "$HIB_DDL" "$FLY_SCHEMA" || true
+          python3 "$DIFF_PY" "$HIB_DDL.norm" "$FLY_SCHEMA.norm" "$GEN_DIR/schema-compare-summary.md" || true
 
       - name: 비교 스크립트 실행 (정규화 + 비교 + 리포트)
         if: env.MIG_COUNT != '0'
         run: |
-          chmod +x "$COMPARE_SH"
           "$COMPARE_SH"
         shell: bash
+
+      - name: 산출물 목록(업로드 직전)
+        if: always()
+        run: |
+          echo "📂 $GEN_DIR 내용:"
+          ls -la "$GEN_DIR" || true
+          echo ""
+          echo "📏 파일 크기:"
+          du -ah "$GEN_DIR" || true
 
       - name: 아티팩트 업로드
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: schema-compare-artifacts
-          path: |
-            ${{ env.GEN_DIR }}/*.sql         # 원본 두 개
-            ${{ env.GEN_DIR }}/*.norm        # 정규화본 두 개
-            ${{ env.GEN_DIR }}/schema.diff
-            ${{ env.GEN_DIR }}/only-in-*.txt
-            ${{ env.GEN_DIR }}/schema-compare-summary.md
+          path: ${{ env.GEN_DIR }}
+          if-no-files-found: error
+          retention-days: 14
