@@ -13,7 +13,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -44,7 +44,11 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: psql 클라이언트 설치
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          psql --version
+          pg_dump --version
 
       - name: Postgres 준비 확인
         run: |
