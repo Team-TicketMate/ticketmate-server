@@ -52,6 +52,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # 🔎 Flyway 파일명 규칙 검사 (VyyyyMMdd_HHmmss__xxx.sql)
+      - name: Flyway 파일명 규칙 검사
+        run: |
+          if [ -d "$MIG_DIR" ]; then
+            chmod +x "$WORK_DIR/scripts/sql/check_flyway_filenames.sh"
+            "$WORK_DIR/scripts/sql/check_flyway_filenames.sh" "$MIG_DIR"
+          else
+            echo "ℹ️ 마이그레이션 디렉터리가 없어 파일명 검사를 생략합니다: $MIG_DIR"
+          fi
+
       - name: 디렉터리 준비
         run: mkdir -p "$GEN_DIR"
 
