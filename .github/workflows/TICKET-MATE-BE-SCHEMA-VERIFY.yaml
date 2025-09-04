@@ -27,7 +27,7 @@ jobs:
       FLY_SCHEMA: ${{ github.workspace }}/ticketmate-api/build/generated/flyway-schema.sql
       NORMALIZE_PY: ${{ github.workspace }}/scripts/sql/normalize_sql.py
       DIFF_PY: ${{ github.workspace }}/scripts/sql/make_sql_diff_report.py
-      COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema-compare.sh
+      COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema_compare.sh
       MIG_DIR: ${{ github.workspace }}/ticketmate-api/src/main/resources/db/migration
       REQUIRE_MIGRATIONS: "false"
 
