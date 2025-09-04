@@ -74,6 +74,8 @@ public final class HibernateDdlGenerator {
     log("Hibernate Registry 생성 중...");
     return new StandardServiceRegistryBuilder()
         .applySetting(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect")
+        .applySetting("hibernate.boot.allow_jdbc_metadata_access", "false")   // ✅ JDBC 메타데이터 접근 금지
+        .applySetting("hibernate.temp.use_jdbc_metadata_defaults", "false")   // ✅ 구버전 호환 옵션
         .build();
   }
 
