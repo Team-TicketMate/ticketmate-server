@@ -30,6 +30,9 @@ jobs:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
+      - name: 디렉터리 준비
+        run: mkdir -p ticketmate-api/build/generated
+
       - name: JDK 설정
         uses: actions/setup-java@v4
         with:
@@ -43,17 +46,14 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: psql 클라이언트 설치
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
-          psql --version
-          pg_dump --version
-
-      - name: Postgres 준비 확인
+      - name: Postgres 준비 확인 (컨테이너 클라이언트)
         run: |
           for i in {1..30}; do
-            pg_isready -h localhost -p 5432 -U postgres && exit 0
+            if docker run --rm --network=host postgres:17-alpine \
+              pg_isready -h localhost -p 5432 -U postgres; then
+              echo "✅ Postgres 준비 완료"
+              exit 0
+            fi
             echo "⏳ DB 준비 대기중... ($i/30)"
             sleep 2
           done
@@ -73,7 +73,8 @@ jobs:
       - name: Flyway 결과 스키마 덤프
         run: |
           mkdir -p ticketmate-api/build/generated
-          PGPASSWORD=postgres pg_dump -s -h localhost -U postgres -d postgres \
+          docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+            pg_dump -s -h localhost -U postgres -d postgres \
             > ticketmate-api/build/generated/flyway-schema.sql
           echo "📝 Flyway 스키마 라인 수:" $(wc -l < ticketmate-api/build/generated/flyway-schema.sql)
 
