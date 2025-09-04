@@ -52,6 +52,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 타임스탬프 생성 (KST, 항상 실행)
+        id: ts
+        if: always()
+        run: |
+          TS=$(TZ=Asia/Seoul date '+%Y%m%d_%H%M%S')
+          echo "ts=$TS" >> "$GITHUB_OUTPUT"   # steps.ts.outputs.ts 로 사용
+          echo "TS=$TS" >> "$GITHUB_ENV"
+          echo "📌 Artifact timestamp(KST): $TS"
+
       # 🔎 Flyway 파일명 규칙 검사 (VyyyyMMdd_HHmmss__xxx.sql)
       - name: Flyway 파일명 규칙 검사
         run: |
@@ -87,7 +96,7 @@ jobs:
       - name: Postgres 준비 확인 (컨테이너 클라이언트)
         run: |
           for i in {1..30}; do
-            if docker run --rm --network=host postgres:17-alpine \
+            if docker run --rm --network=host pgvector/pgvector:pg17 \
               pg_isready -h localhost -p 5432 -U postgres; then
               echo "✅ Postgres 준비 완료"
               exit 0
@@ -188,6 +197,8 @@ jobs:
 
       - name: 비교 스크립트 실행 (정규화 + 비교 + 리포트)
         if: env.MIG_COUNT != '0'
+        env:
+          STRICT_ENUM_CHECK: "true"   # ← 기본은 false
         run: |
           "$COMPARE_SH"
         shell: bash
@@ -201,17 +212,11 @@ jobs:
           echo "📏 파일 크기:"
           du -ah "$GEN_DIR" || true
 
-      - name: 타임스탬프 생성 (KST 서울 기준)
-        run: |
-          # KST(서울) 기준
-          echo "TS=$(TZ=Asia/Seoul date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
-          echo "📌 Artifact timestamp(KTS): $TS"
-
       - name: 아티팩트 업로드
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: schema-compare-artifacts-${{ env.TS }}   # ✅ 타임스탬프 포함
+          name: schema-compare-artifacts-${{ steps.ts.outputs.ts || github.run_id }}
           path: ${{ env.GEN_DIR }}
           if-no-files-found: error
           retention-days: 14
