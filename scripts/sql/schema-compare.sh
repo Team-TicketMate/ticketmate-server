@@ -1,33 +1,53 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HIB="${HIB_DDL:?HIB_DDL env가 필요합니다}"
-FLY="${FLY_SCHEMA:?FLY_SCHEMA env가 필요합니다}"
-NORM="${NORMALIZE_PY:?NORMALIZE_PY env가 필요합니다}"
-MIG="${MIG_COUNT:-0}"
+# ⬇️ 워크플로 env에서 주입됨
+: "${GEN_DIR:?}"; : "${HIB_DDL:?}"; : "${FLY_SCHEMA:?}"
+: "${NORMALIZE_PY:?}"; : "${DIFF_PY:?}"
 
-echo "🔍 스키마 정규화 & 비교를 시작합니다."
-echo "   - Hibernate DDL : $HIB"
-echo "   - Flyway Schema : $FLY"
-echo "   - Normalizer    : $NORM"
+HIB_NORM="${HIB_DDL}.norm"
+FLY_NORM="${FLY_SCHEMA}.norm"
 
-# 마이그레이션 0개면 비교 생략
-if [ "$MIG" = "0" ]; then
-  echo "ℹ️ 사용자 마이그레이션이 없어 비교를 생략합니다. (MIG_COUNT=0)"
+echo "🔍 스키마 비교를 시작합니다 (SRP 분리: 정규화 → 비교)"
+echo "   - Hibernate DDL : $HIB_DDL"
+echo "   - Flyway Schema : $FLY_SCHEMA"
+
+# 1) 정규화 (각각 독립 실행)
+python3 "$NORMALIZE_PY" "$HIB_DDL" "$HIB_NORM"
+python3 "$NORMALIZE_PY" "$FLY_SCHEMA" "$FLY_NORM"
+
+# 2) 비교 리포트 생성 (diff/요약/only-in-*.txt)
+if python3 "$DIFF_PY" "$HIB_NORM" "$FLY_NORM" "$GEN_DIR"; then
+  echo "✅ 스키마 일치"
+  if [ -n "${GITHUB_STEP_SUMMARY:-}" ] && [ -f "$GEN_DIR/schema-compare-summary.md" ]; then
+    {
+      echo "## 스키마 비교 결과"
+      echo ""
+      echo "✅ **일치합니다**"
+    } >> "$GITHUB_STEP_SUMMARY"
+  fi
   exit 0
 fi
 
-# 파일 체크
-[ -f "$HIB" ] || { echo "❌ 파일 없음: $HIB"; exit 1; }
-[ -s "$HIB" ] || { echo "❌ 파일이 비어있음: $HIB"; exit 1; }
-[ -f "$FLY" ] || { echo "❌ 파일 없음: $FLY"; exit 1; }
-[ -s "$FLY" ] || { echo "❌ 파일이 비어있음: $FLY"; exit 1; }
+# 불일치 시, 요약/일부 diff를 보여주고 실패
+echo "❌ 스키마가 다릅니다."
+if [ -f "$GEN_DIR/schema-compare-summary.md" ]; then
+  echo "----- 요약 (상위 항목) -----"
+  sed -n '1,120p' "$GEN_DIR/schema-compare-summary.md" || true
+fi
+if [ -f "$GEN_DIR/schema.diff" ]; then
+  echo "----- unified diff (상위 200줄) -----"
+  sed -n '1,200p' "$GEN_DIR/schema.diff" || true
+fi
 
-python3 "$NORM" "$HIB" "$FLY" && {
-  echo "✅ 스키마 일치"
-  exit 0
-}
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ] && [ -f "$GEN_DIR/schema-compare-summary.md" ]; then
+  {
+    echo "## 스키마 비교 결과 ❌ 불일치"
+    echo ""
+    echo "- 원본/정규화/차이 파일은 **Artifacts: \`schema-compare-artifacts\`**로 다운로드 가능"
+    echo ""
+    cat "$GEN_DIR/schema-compare-summary.md"
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
 
-echo "❌ 스키마가 다릅니다. 정규화 결과(diff) 출력:"
-diff -u "${HIB}.norm" "${FLY}.norm" || true
 exit 1

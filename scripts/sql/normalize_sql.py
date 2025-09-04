@@ -3,40 +3,39 @@ import re, sys, pathlib
 
 DROP_PREFIXES = (
   'set ', 'select pg_catalog.set_config', 'alter schema ',
-  'create extension', 'comment on extension', '\\connect ',
-  '\\restrict', '\\unrestrict',
-  'grant ', 'revoke ',
+  'create extension', 'comment on extension', '\\connect',
+  '\\restrict', '\\unrestrict', 'grant ', 'revoke ',
+)
+
+OWNER_STMT = re.compile(
+    r'^alter\s+table\s+(if\s+exists\s+)?(only\s+)?[a-z0-9_.]+\s+owner\s+to\s+[a-z0-9_]+$'
 )
 
 def normalize(sql: str) -> str:
-  # remove comments
+  # 주석 제거
   sql = re.sub(r'--.*', '', sql)
   sql = re.sub(r'/\*.*?\*/', '', sql, flags=re.S)
-  # unquote + lowercase
+  # 인용부호 제거 + 소문자화
   sql = sql.replace('"', '').lower()
 
-  # line-level sanitize
+  # 라인 단위 정리 + 잡음 제거
   lines = [l.strip() for l in sql.splitlines()]
   lines = [l for l in lines if l and not any(l.startswith(p) for p in DROP_PREFIXES)]
   sql = ' '.join(lines)
-
-  # whitespace normalize
   sql = re.sub(r'\s+', ' ', sql).strip()
 
-  # split statements
+  # 문장 분리
   stmts = [s.strip() for s in sql.split(';') if s.strip()]
 
   filtered = []
   for s in stmts:
-    # flyway meta table and related statements 제거
-    if 'flyway_schema_history' in s:
+    if 'flyway_schema_history' in s:  # flyway 메타테이블 제거
       continue
-    # OWNER 변경 제거
-    if re.search(r'alter table .* owner to ', s):
+    if OWNER_STMT.match(s):           # OWNER TO 제거
       continue
     filtered.append(s)
 
-  # anonymize names
+  # 제약/인덱스 이름 익명화
   filtered = [re.sub(r'\bconstraint\s+[a-z0-9_]+\b', 'constraint _', x) for x in filtered]
   filtered = [re.sub(r'\bindex\s+[a-z0-9_]+\b', 'index _', x) for x in filtered]
 
@@ -44,12 +43,8 @@ def normalize(sql: str) -> str:
 
 if __name__ == '__main__':
   if len(sys.argv) != 3:
-    print('usage: normalize_sql.py <hibernate-ddl.sql> <flyway-schema.sql>', file=sys.stderr)
+    print('usage: normalize_sql.py <in.sql> <out.sql.norm>', file=sys.stderr)
     sys.exit(2)
-  a_path, b_path = sys.argv[1], sys.argv[2]
-  a = pathlib.Path(a_path).read_text(encoding='utf-8')
-  b = pathlib.Path(b_path).read_text(encoding='utf-8')
-  a_norm, b_norm = normalize(a), normalize(b)
-  pathlib.Path(a_path + '.norm').write_text(a_norm, encoding='utf-8')
-  pathlib.Path(b_path + '.norm').write_text(b_norm, encoding='utf-8')
-  sys.exit(0 if a_norm == b_norm else 1)
+  in_path = pathlib.Path(sys.argv[1])
+  out_path = pathlib.Path(sys.argv[2])
+  out_path.write_text(normalize(in_path.read_text(encoding='utf-8')), encoding='utf-8')
