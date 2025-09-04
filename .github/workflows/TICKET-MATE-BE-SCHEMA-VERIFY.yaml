@@ -137,7 +137,9 @@ jobs:
         if: env.MIG_COUNT != '0'
         run: |
           docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
-            pg_dump -s -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
+          pg_dump --schema-only --no-owner --no-privileges --no-comments \
+          --exclude-table=flyway_schema_history \
+          -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
           echo "📝 Flyway 스키마 라인 수:" $(wc -l < "$FLY_SCHEMA")
 
       - name: 빈 Flyway 스키마 파일 생성(마이그레이션 없음)

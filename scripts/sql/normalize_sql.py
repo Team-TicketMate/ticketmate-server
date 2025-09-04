@@ -4,21 +4,20 @@ normalize_sql.py
 ----------------
 Hibernate DDL vs pg_dump -s 결과를 "의미적으로" 동등 비교가 가능하도록 정규화합니다.
 
-핵심 정규화 포인트
+핵심 포인트
 - 스키마 접두어(public.), ALTER TABLE ONLY → 제거
-- 타입 표기 통일: character varying → varchar, timestamp without time zone → timestamp(0)
-- pg_dump가 PK/UNIQUE를 ALTER/INDEX로 분리하는 관행을 흡수:
-  * CREATE TABLE의 inline PRIMARY KEY → "pk <table> (<cols>)" 라인으로 추출
-  * ALTER TABLE .. ADD CONSTRAINT .. PRIMARY KEY → 위와 동일 표현으로 치환
-  * CREATE UNIQUE INDEX → "unique <table> (<cols>)" 로 치환
-  * CREATE TABLE의 inline UNIQUE → 위와 동일 표현으로 추출
-- 외래키를 한 줄 요약: "fk <table> (<cols>) -> <ref_table> (<ref_cols>)"
-- Flyway 메타테이블 및 소음 제거: flyway_schema_history, SET/OWNER/GRANT/REVOKE 등 제거
-- (옵션) ENUM check(...) 제거: STRICT_ENUM_CHECK=false (기본)일 때 check(...) 제거
+- 타입 통일: character varying → varchar, timestamp without time zone → timestamp(0),
+            double precision/float8 → float(53)
+- PK/UNIQUE/FK 표준화:
+  * CREATE TABLE의 inline PRIMARY KEY/UNIQUE → "pk/unique <table> (...)" 추출
+  * 컬럼 인라인 FK (constraint ... references ...) → "fk <table> ( <col> ) -> <ref_table>"
+  * ALTER TABLE ADD CONSTRAINT PRIMARY/FOREIGN/UNIQUE → 동일 포맷으로 치환
+- Flyway 메타/노이즈 제거: flyway_schema_history, SET/OWNER/GRANT/REVOKE/psql meta(\...) 제거
+- STRICT_ENUM_CHECK=true면 check(...) 유지, false면 제거
 
 사용법:
   normalize_sql.py <hibernate-ddl.sql> <flyway-schema.sql>
-  정상 종료코드: 0(동일), 1(다름), 2(사용법 오류/입력파일 없음)
+  종료코드: 0(동일), 1(다름), 2(오류)
 """
 import os, re, sys, pathlib
 
@@ -36,92 +35,125 @@ def _coarse_cleanup(s: str) -> str:
   s = _strip_comments(s)
   s = s.replace('"', '')
   s = s.replace('\r', '')
-  # 한 줄씩 소음 제거
   lines = []
   for line in s.splitlines():
     l = line.strip()
     if not l:
       continue
+    # [CHANGED] psql meta-lines 제거
+    if l.startswith('\\'):
+      continue
     ll = l.lower()
     if any(ll.startswith(p) for p in DROP_PREFIXES):
       continue
-    if ' flyway_schema_history' in ll:
+    # [CHANGED] flyway meta table 라인 제거 (단어 경계)
+    if re.search(r'\bflyway_schema_history\b', ll):
       continue
+    # OWNER TO 제거
     if ' owner to ' in ll:
       continue
     lines.append(l)
+
   s = '\n'.join(lines)
-  # 전역 치환
+  # 전역 치환/정규화
   s = s.lower()
   s = s.replace('public.', '')
   s = re.sub(r'\balter\s+table\s+only\b', 'alter table', s)
   s = re.sub(r'\bif\s+exists\b', '', s)
+
   # 타입 정규화
   s = s.replace('character varying', 'varchar')
   s = re.sub(r'timestamp\(\s*0\s*\)\s+without\s+time\s+zone', 'timestamp(0)', s)
   s = re.sub(r'timestamp\s+without\s+time\s+zone', 'timestamp(0)', s)
+  # [CHANGED] float 동치화
+  s = s.replace('double precision', 'float(53)')
+  s = s.replace('float8', 'float(53)')
+
   # FK 옵션 소거
   s = re.sub(r'\s*match\s+simple\s+on\s+update\s+no\s+action\s+on\s+delete\s+no\s+action', '', s)
   s = re.sub(r'\s*on\s+update\s+no\s+action\s+on\s+delete\s+no\s+action', '', s)
-  # 불필요 공백 정리
+
+  # 공백 정리
   s = re.sub(r'\s+', ' ', s).strip()
   return s
 
 def _split_statements(s: str):
-  # 세미콜론 기준 분리하되, 마지막 ; 없어도 허용
   parts = [p.strip() for p in s.split(';')]
   return [p for p in parts if p]
 
 def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
-  # create table t ( ... )
   m = re.match(r'create table\s+(\w+)\s*\((.*)\)\s*$', stmt)
   if not m:
     out_lines.append(stmt)
     return
   tname, body = m.group(1), m.group(2)
 
-  # 컬럼 파트에서 pk/unique/check 분리
-  # (패턴 단순 가정하에 split(',') 사용)
+  # naive split by comma (전제: hibernate/pg_dump 포맷에서 괄호 중첩이 단순)
   cols = [c.strip() for c in body.split(',') if c.strip()]
 
   pk_cols = None
-  uniques = []    # list of column-name unique
+  uniques = []
+  fks = []  # [CHANGED] 인라인 FK 수집
   new_cols = []
+
   for c in cols:
-    # PRIMARY KEY (col,...)
-    mpk = re.match(r'primary key\s*\(([^)]+)\)', c)
-    if mpk:
-      pk_cols = mpk.group(1).strip()
+    # [CHANGED] 테이블 수준 PK (primary key (a,b))
+    mpk_tbl = re.match(r'primary key\s*\(([^)]+)\)', c)
+    if mpk_tbl:
+      pk_cols = mpk_tbl.group(1).strip()
       continue
 
-    # column unique (inline)
+    # [CHANGED] 컬럼명
     mcol = re.match(r'(\w+)\s+.*', c)
-    if mcol and re.search(r'\bunique\b', c):
-      colname = mcol.group(1)
+    colname = mcol.group(1) if mcol else None
+
+    # [CHANGED] 컬럼 인라인 PK (col ... primary key)
+    if colname and re.search(r'\bprimary\s+key\b', c):
+      pk_cols = colname
+
+      # 컬럼표현에서 primary key 토큰 제거
+      c = re.sub(r'\bprimary\s+key\b', '', c)
+
+    # 인라인 UNIQUE
+    if colname and re.search(r'\bunique\b', c):
       uniques.append(colname)
-      # unique 키워드 제거
       c = re.sub(r'\s+unique\b', '', c)
 
-    # check(...) 제거(기본)
+    # [CHANGED] 인라인 FK: (optional) constraint <name> references <table> [(cols)]
+    # 예: "constraint fkxxxx references member", "references concert(concert_id)"
+    fk_match = re.search(r'(?:constraint\s+\S+\s+)?references\s+(\w+)(?:\s*\(([^)]+)\))?', c)
+    if colname and fk_match:
+      ref_table = fk_match.group(1)
+      # ref_cols = (fk_match.group(2) or '').strip()  # 컬럼은 비교 표준화에서 생략
+      fks.append((tname, colname, ref_table))
+      # 컬럼 정의에서 FK 구문 제거
+      c = re.sub(r'\s*(?:constraint\s+\S+\s+)?references\s+\w+(?:\s*\([^)]+\))?', '', c)
+
+    # enum check 제거/유지
     if not strict_enums:
       c = re.sub(r'\bcheck\s*\((?:[^()]*|\([^()]*\))*\)', '', c)
 
+    # 공백 정리
     c = re.sub(r'\s+', ' ', c).strip().rstrip()
-    new_cols.append(c)
+    if c:
+      new_cols.append(c)
 
   # 재조립된 CREATE TABLE (제약 제거본)
   body2 = ', '.join(new_cols)
   out_lines.append(f'create table {tname} ( {body2} )')
 
-  # 파생 라인 추가: pk / unique
+  # 파생 라인: pk / unique / fk
   if pk_cols:
     out_lines.append(f'pk {tname} ( {pk_cols} )')
   for u in uniques:
     out_lines.append(f'unique {tname} ( {u} )')
+  for (_t, _c, _rt) in fks:
+    # [CHANGED] 참조 컬럼은 통일성/단순화를 위해 생략 (ALTER 기반과 동일 포맷)
+    out_lines.append(f'fk {_t} ( {_c} ) -> {_rt}')
 
 def _normalize_alter_primary(stmt: str, out_lines: list):
-  # alter table <t> add constraint _ primary key (cols)
-  m = re.match(r'alter table\s+(\w+)\s+add constraint\s+_\s+primary key\s*\(([^)]+)\)', stmt)
+  # alter table <t> add constraint <name> primary key (cols)
+  m = re.match(r'alter table\s+(\w+)\s+add constraint\s+\S+\s+primary key\s*\(([^)]+)\)', stmt)
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'pk {t} ( {cols} )')
@@ -129,8 +161,8 @@ def _normalize_alter_primary(stmt: str, out_lines: list):
   return False
 
 def _normalize_unique_index(stmt: str, out_lines: list):
-  # create unique index _ on <t> using btree (cols)
-  m = re.match(r'create unique index\s+_\s+on\s+(\w+)\s+(?:using btree\s*)?\(([^)]+)\)', stmt)
+  # create unique index <name> on <t> using btree (cols)
+  m = re.match(r'create unique index\s+\S+\s+on\s+(\w+)\s+(?:using btree\s*)?\(([^)]+)\)', stmt)
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'unique {t} ( {cols} )')
@@ -138,11 +170,15 @@ def _normalize_unique_index(stmt: str, out_lines: list):
   return False
 
 def _normalize_fk(stmt: str, out_lines: list):
-  # alter table <t> add constraint _ foreign key (a) references <r>(b)
-  m = re.match(r'alter table\s+(\w+)\s+add constraint\s+_\s+foreign key\s*\(([^)]+)\)\s+references\s+(\w+)\s*\(([^)]+)\)', stmt)
+  # ALTER FK: alter table <t> add constraint <name> foreign key (a) references <rt> [(b)]
+  m = re.match(
+      r'alter table\s+(\w+)\s+add constraint\s+\S+\s+foreign key\s*\(([^)]+)\)\s+references\s+(\w+)(?:\s*\(([^)]+)\))?',
+      stmt
+  )
   if m:
-    t, cols, rt, rcols = m.group(1), m.group(2).strip(), m.group(3), m.group(4).strip()
-    out_lines.append(f'fk {t} ( {cols} ) -> {rt} ( {rcols} )')
+    t, cols, rt = m.group(1), m.group(2).strip(), m.group(3)
+    # [CHANGED] 참조 컬럼은 생략해 표준화(인라인 FK와 동일 포맷)
+    out_lines.append(f'fk {t} ( {cols} ) -> {rt}')
     return True
   return False
 
@@ -156,24 +192,17 @@ def normalize(sql: str, strict_enums_env: str = None) -> str:
     st = st.strip()
     if not st:
       continue
-
-    # 우선 간단한 치환 규칙들 시도
     if _normalize_alter_primary(st, out):
       continue
     if _normalize_unique_index(st, out):
       continue
     if _normalize_fk(st, out):
       continue
-
-    # CREATE TABLE은 제약 추출/제거
     if st.startswith('create table '):
       _normalize_create_table(st, out, strict_enums)
       continue
-
-    # 그 외 문장
     out.append(st)
 
-  # 후처리: 공백 정리 + 정렬
   out = [re.sub(r'\s+', ' ', x).strip() for x in out if x.strip()]
   out = sorted(set(out))
   return '\n'.join(out)
