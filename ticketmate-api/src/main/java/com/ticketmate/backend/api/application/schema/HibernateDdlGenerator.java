@@ -1,4 +1,4 @@
-package com.ticketmate.backend.api.schema;
+package com.ticketmate.backend.api.application.schema;
 
 import com.ticketmate.backend.ai.infrastructure.entity.Embedding;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;

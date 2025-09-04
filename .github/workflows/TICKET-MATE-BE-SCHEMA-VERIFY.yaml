@@ -80,7 +80,9 @@ jobs:
 
       - name: Hibernate DDL 생성 (스프링 미사용)
         run: |
-          ./gradlew :ticketmate-api:test --tests "*HibernateDdlSmokeTest" --info
+          ./gradlew :ticketmate-api:test \
+            --tests "com.ticketmate.backend.api.application.schema.HibernateDdlGeneratorTest" \
+            --info
           echo "📝 Hibernate DDL 라인 수:" $(wc -l < ticketmate-api/build/generated/hibernate-ddl.sql)
 
       - name: 정규화 & 비교
