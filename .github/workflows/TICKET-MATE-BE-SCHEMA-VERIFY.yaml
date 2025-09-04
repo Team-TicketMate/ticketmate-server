@@ -191,11 +191,17 @@ jobs:
           echo "📏 파일 크기:"
           du -ah "$GEN_DIR" || true
 
+      - name: 타임스탬프 생성 (KST 서울 기준)
+        run: |
+          # KST(서울) 기준
+          echo "TS=$(TZ=Asia/Seoul date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+          echo "📌 Artifact timestamp(KTS): $TS"
+
       - name: 아티팩트 업로드
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: schema-compare-artifacts
+          name: schema-compare-artifacts-${{ env.TS }}   # ✅ 타임스탬프 포함
           path: ${{ env.GEN_DIR }}
           if-no-files-found: error
           retention-days: 14
