@@ -3,12 +3,22 @@ name: TICKET-MATE-BE-SCHEMA-VERIFY
 on:
   pull_request:
     branches: [deploy, main, test]
+    paths:
+      - 'ticketmate-api/**'
+      - 'scripts/sql/**'
+      - '.github/workflows/TICKET-MATE-BE-SCHEMA-VERIFY.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schema-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   schema-verify:
     runs-on: ubuntu-latest
 
-    # 🔧 모든 경로를 한 곳(env)에서 정의
     env:
       WORK_DIR: ${{ github.workspace }}
       MODULE: ticketmate-api
@@ -18,7 +28,7 @@ jobs:
       NORMALIZE_PY: ${{ github.workspace }}/scripts/sql/normalize_sql.py
       COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema-compare.sh
       MIG_DIR: ${{ github.workspace }}/ticketmate-api/src/main/resources/db/migration
-      REQUIRE_MIGRATIONS: "false"   # 필요하면 "true"로 바꿔서 강제 실패하도록
+      REQUIRE_MIGRATIONS: "false"
 
     services:
       postgres:
@@ -38,6 +48,8 @@ jobs:
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 디렉터리 준비
         run: mkdir -p "$GEN_DIR"
@@ -68,12 +80,21 @@ jobs:
           done
           echo "❌ Postgres가 준비되지 않았습니다." && exit 1
 
-      - name: 마이그레이션 파일 개수 확인
+      - name: 마이그레이션 파일 개수 확인 (디렉토리 유무 포함)
         id: migcheck
         run: |
-          count=$(find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' | wc -l | xargs)
+          if [ -d "$MIG_DIR" ]; then
+            count=$(find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' | wc -l | xargs)
+          else
+            echo "ℹ️ 마이그레이션 디렉터리가 없으므로 0개로 간주합니다: $MIG_DIR"
+            count=0
+          fi
           echo "MIG_COUNT=$count" >> $GITHUB_ENV
           echo "🔎 발견된 마이그레이션 파일 수: $count"
+          if [ "$count" != "0" ]; then
+            echo "📄 목록:"
+            find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' -print | sort
+          fi
 
       - name: Flyway 마이그레이션 적용 (Docker)
         if: env.MIG_COUNT != '0'
@@ -83,7 +104,6 @@ jobs:
             flyway/flyway:10 \
             -url=jdbc:postgresql://localhost:5432/postgres \
             -user=postgres -password=postgres \
-            -baselineOnMigrate=true \
             -locations=filesystem:/flyway/sql \
             migrate
 
@@ -114,25 +134,27 @@ jobs:
             exit 1
           fi
 
-      - name: Hibernate DDL 생성 (스프링 미사용)
+      - name: Hibernate DDL 생성 (스프링 미사용, 해당 테스트만 실행)
         run: |
-          ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info
+          ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info --no-build-cache
           echo "📝 Hibernate DDL 라인 수:" $(wc -l < "$HIB_DDL")
 
-      - name: Hibernate DDL 스냅샷 확인/출력
+      - name: Hibernate DDL 스냅샷 확인/출력 (존재/용량 검증)
         run: |
-          if [ -f "$HIB_DDL" ]; then
-            echo "✅ Hibernate DDL 존재: $HIB_DDL"
-            echo "----- [처음 60줄] -----"
-            sed -n '1,60p' "$HIB_DDL"
-            echo "----- [마지막 30줄] -----"
-            tail -n 30 "$HIB_DDL"
-          else
+          if [ ! -f "$HIB_DDL" ]; then
             echo "❌ Hibernate DDL 파일을 찾을 수 없습니다: $HIB_DDL"
-            echo "📂 현재 생성 디렉터리 목록:"
             ls -la "$GEN_DIR" || true
             exit 1
           fi
+          if [ ! -s "$HIB_DDL" ]; then
+            echo "❌ Hibernate DDL 파일이 비어 있습니다: $HIB_DDL"
+            exit 1
+          fi
+          echo "✅ Hibernate DDL 존재 및 유효: $HIB_DDL"
+          echo "----- [처음 60줄] -----"
+          sed -n '1,60p' "$HIB_DDL"
+          echo "----- [마지막 30줄] -----"
+          tail -n 30 "$HIB_DDL"
 
       - name: 정책 검사 (마이그레이션 필수 여부)
         if: env.MIG_COUNT == '0' && env.REQUIRE_MIGRATIONS == 'true'
