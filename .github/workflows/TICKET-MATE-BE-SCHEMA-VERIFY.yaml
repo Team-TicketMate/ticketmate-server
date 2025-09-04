@@ -83,10 +83,40 @@ jobs:
             pg_dump -s -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
           echo "📝 Flyway 스키마 라인 수:" $(wc -l < "$FLY_SCHEMA")
 
+      - name: Flyway DDL 스냅샷 확인/출력
+        run: |
+          if [ -f "$FLY_SCHEMA" ]; then
+            echo "✅ Flyway 스키마 덤프 존재: $FLY_SCHEMA"
+            echo "----- [처음 60줄] -----"
+            sed -n '1,60p' "$FLY_SCHEMA"
+            echo "----- [마지막 30줄] -----"
+            tail -n 30 "$FLY_SCHEMA"
+          else
+            echo "❌ Flyway 스키마 파일을 찾을 수 없습니다: $FLY_SCHEMA"
+            echo "📂 현재 생성 디렉터리 목록:"
+            ls -la "$GEN_DIR" || true
+            exit 1
+          fi
+
       - name: Hibernate DDL 생성 (스프링 미사용)
         run: |
           ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info
           echo "📝 Hibernate DDL 라인 수:" $(wc -l < "$HIB_DDL")
+
+      - name: Hibernate DDL 스냅샷 확인/출력
+        run: |
+          if [ -f "$HIB_DDL" ]; then
+            echo "✅ Hibernate DDL 존재: $HIB_DDL"
+            echo "----- [처음 60줄] -----"
+            sed -n '1,60p' "$HIB_DDL"
+            echo "----- [마지막 30줄] -----"
+            tail -n 30 "$HIB_DDL"
+          else
+            echo "❌ Hibernate DDL 파일을 찾을 수 없습니다: $HIB_DDL"
+            echo "📂 현재 생성 디렉터리 목록:"
+            ls -la "$GEN_DIR" || true
+            exit 1
+          fi
 
       - name: 비교 스크립트 실행 (정규화 + 비교 + diff)
         run: |
