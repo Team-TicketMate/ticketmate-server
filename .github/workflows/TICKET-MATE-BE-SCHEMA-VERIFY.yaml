@@ -195,12 +195,21 @@ jobs:
           python3 "$NORMALIZE_PY" "$HIB_DDL" "$FLY_SCHEMA" || true
           python3 "$DIFF_PY" "$HIB_DDL.norm" "$FLY_SCHEMA.norm" "$GEN_DIR/schema-compare-summary.md" || true
 
+      - name: 비교 입력 파일 확인(디버깅)
+        if: env.MIG_COUNT != '0'
+        run: |
+          echo "HIB_DDL=$HIB_DDL"
+          echo "FLY_SCHEMA=$FLY_SCHEMA"
+          ls -la "$GEN_DIR" || true
+          test -f "$HIB_DDL"
+          test -f "$FLY_SCHEMA"
+
       - name: 비교 스크립트 실행 (정규화 + 비교 + 리포트)
         if: env.MIG_COUNT != '0'
         env:
           STRICT_ENUM_CHECK: "true"   # ← 기본은 false
         run: |
-          "$COMPARE_SH"
+          bash "$COMPARE_SH" "$HIB_DDL" "$FLY_SCHEMA" "$NORMALIZE_PY" "$DIFF_PY"
         shell: bash
 
       - name: 산출물 목록(업로드 직전)
