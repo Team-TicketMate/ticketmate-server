@@ -2,14 +2,21 @@ name: TICKET-MATE-BE-SCHEMA-VERIFY
 
 on:
   pull_request:
-    branches:
-      - deploy
-      - main
-      - test
+    branches: [deploy, main, test]
 
 jobs:
   schema-verify:
     runs-on: ubuntu-latest
+
+    # 🔧 모든 경로를 한 곳(env)에서 정의
+    env:
+      WORK_DIR: ${{ github.workspace }}
+      MODULE: ticketmate-api
+      GEN_DIR: ${{ github.workspace }}/ticketmate-api/build/generated
+      HIB_DDL: ${{ github.workspace }}/ticketmate-api/build/generated/hibernate-ddl.sql
+      FLY_SCHEMA: ${{ github.workspace }}/ticketmate-api/build/generated/flyway-schema.sql
+      NORMALIZE_PY: ${{ github.workspace }}/scripts/sql/normalize_sql.py
+      COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema-compare.sh
 
     services:
       postgres:
@@ -31,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 디렉터리 준비
-        run: mkdir -p ticketmate-api/build/generated
+        run: mkdir -p "$GEN_DIR"
 
       - name: JDK 설정
         uses: actions/setup-java@v4
@@ -62,7 +69,7 @@ jobs:
       - name: Flyway 마이그레이션 적용 (Docker)
         run: |
           docker run --rm --network=host \
-            -v "$PWD/ticketmate-api/src/main/resources/db/migration":/flyway/sql \
+            -v "$WORK_DIR/${MODULE}/src/main/resources/db/migration":/flyway/sql \
             flyway/flyway:10 \
             -url=jdbc:postgresql://localhost:5432/postgres \
             -user=postgres -password=postgres \
@@ -72,34 +79,20 @@ jobs:
 
       - name: Flyway 결과 스키마 덤프
         run: |
-          mkdir -p ticketmate-api/build/generated
           docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
-            pg_dump -s -h localhost -U postgres -d postgres \
-            > ticketmate-api/build/generated/flyway-schema.sql
-          echo "📝 Flyway 스키마 라인 수:" $(wc -l < ticketmate-api/build/generated/flyway-schema.sql)
+            pg_dump -s -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
+          echo "📝 Flyway 스키마 라인 수:" $(wc -l < "$FLY_SCHEMA")
 
       - name: Hibernate DDL 생성 (스프링 미사용)
         run: |
-          ./gradlew :ticketmate-api:test \
-            --tests '*HibernateDdlGeneratorTest' \
-            --info
-          echo "📝 Hibernate DDL 라인 수:" $(wc -l < ticketmate-api/build/generated/hibernate-ddl.sql)
+          ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info
+          echo "📝 Hibernate DDL 라인 수:" $(wc -l < "$HIB_DDL")
 
-      - name: 정규화 & 비교
+      - name: 비교 스크립트 실행 (정규화 + 비교 + diff)
         run: |
-          python3 scripts/normalize_sql.py \
-            ticketmate-api/build/generated/hibernate-ddl.sql \
-            ticketmate-api/build/generated/flyway-schema.sql \
-          && echo "✅ 스키마 일치"
+          chmod +x "$COMPARE_SH"
+          "$COMPARE_SH"
         shell: bash
-
-      - name: 차이 출력(불일치 시)
-        if: failure()
-        run: |
-          echo "❌ 스키마가 다릅니다. 정규화 결과(diff) 출력:"
-          diff -u \
-            ticketmate-api/build/generated/hibernate-ddl.sql.norm \
-            ticketmate-api/build/generated/flyway-schema.sql.norm || true
 
       - name: 아티팩트 업로드
         if: always()
@@ -107,5 +100,5 @@ jobs:
         with:
           name: schema-compare-artifacts
           path: |
-            ticketmate-api/build/generated/*.sql
-            ticketmate-api/build/generated/*.norm
+            ${{ env.GEN_DIR }}/*.sql
+            ${{ env.GEN_DIR }}/*.norm
