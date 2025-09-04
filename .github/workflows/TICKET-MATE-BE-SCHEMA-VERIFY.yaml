@@ -17,6 +17,8 @@ jobs:
       FLY_SCHEMA: ${{ github.workspace }}/ticketmate-api/build/generated/flyway-schema.sql
       NORMALIZE_PY: ${{ github.workspace }}/scripts/sql/normalize_sql.py
       COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema-compare.sh
+      MIG_DIR: ${{ github.workspace }}/ticketmate-api/src/main/resources/db/migration
+      REQUIRE_MIGRATIONS: "false"   # 필요하면 "true"로 바꿔서 강제 실패하도록
 
     services:
       postgres:
@@ -66,7 +68,15 @@ jobs:
           done
           echo "❌ Postgres가 준비되지 않았습니다." && exit 1
 
+      - name: 마이그레이션 파일 개수 확인
+        id: migcheck
+        run: |
+          count=$(find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' | wc -l | xargs)
+          echo "MIG_COUNT=$count" >> $GITHUB_ENV
+          echo "🔎 발견된 마이그레이션 파일 수: $count"
+
       - name: Flyway 마이그레이션 적용 (Docker)
+        if: env.MIG_COUNT != '0'
         run: |
           docker run --rm --network=host \
             -v "$WORK_DIR/${MODULE}/src/main/resources/db/migration":/flyway/sql \
@@ -78,10 +88,16 @@ jobs:
             migrate
 
       - name: Flyway 결과 스키마 덤프
+        if: env.MIG_COUNT != '0'
         run: |
           docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
             pg_dump -s -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
           echo "📝 Flyway 스키마 라인 수:" $(wc -l < "$FLY_SCHEMA")
+
+      - name: 빈 Flyway 스키마 파일 생성(마이그레이션 없음)
+        if: env.MIG_COUNT == '0'
+        run: |
+          echo "-- no user migrations" > "$FLY_SCHEMA"
 
       - name: Flyway DDL 스냅샷 확인/출력
         run: |
@@ -120,6 +136,10 @@ jobs:
 
       - name: 비교 스크립트 실행 (정규화 + 비교 + diff)
         run: |
+          if [ "${REQUIRE_MIGRATIONS}" = "true" ] && [ "${MIG_COUNT}" = "0" ]; then
+            echo "❌ 마이그레이션이 없어서 비교를 진행할 수 없습니다. (REQUIRE_MIGRATIONS=true)"
+            exit 1
+          fi
           chmod +x "$COMPARE_SH"
           "$COMPARE_SH"
         shell: bash

@@ -4,7 +4,8 @@ import re, sys, pathlib
 DROP_PREFIXES = (
   'set ', 'select pg_catalog.set_config', 'alter schema ',
   'create extension', 'comment on extension', '\\connect ',
-  'grant ', 'revoke ', 'owner to '
+  '\\restrict', '\\unrestrict',  # pg_dump 17 메타 라인 제거
+  'grant ', 'revoke ',
 )
 
 def normalize(sql: str) -> str:
@@ -13,18 +14,35 @@ def normalize(sql: str) -> str:
   sql = re.sub(r'/\*.*?\*/', '', sql, flags=re.S)
   # remove quotes
   sql = sql.replace('"', '')
-  # strip lines + drop noisy lines
+  # lower for easier matching
+  sql = sql.lower()
+
+  # line-based drops
   lines = [l.strip() for l in sql.splitlines()]
-  lines = [l for l in lines if l and not any(l.lower().startswith(p) for p in DROP_PREFIXES)]
+  lines = [l for l in lines if l and not any(l.startswith(p) for p in DROP_PREFIXES)]
   sql = ' '.join(lines)
-  # whitespace + case normalize
-  sql = re.sub(r'\s+', ' ', sql).strip().lower()
-  # anonymize constraint/index names
-  sql = re.sub(r'\bconstraint\s+[a-z0-9_]+\b', 'constraint _', sql)
-  sql = re.sub(r'\bindex\s+[a-z0-9_]+\b', 'index _', sql)
-  # split by ';' and sort
+
+  # collapse whitespace
+  sql = re.sub(r'\s+', ' ', sql).strip()
+
+  # split statements
   stmts = [s.strip() for s in sql.split(';') if s.strip()]
-  return '\n'.join(sorted(stmts))
+
+  filtered = []
+  for s in stmts:
+    # 1) Flyway 메타 테이블 관련 DDL/인덱스/소유자 변경 전부 무시
+    if 'flyway_schema_history' in s:
+      continue
+    # 2) OWNER 변경 같은 환경 잡음 제거
+    if re.search(r'alter table .* owner to ', s):
+      continue
+    filtered.append(s)
+
+  # anonymize constraint/index names (남은 문장에 대해서만)
+  filtered = [re.sub(r'\bconstraint\s+[a-z0-9_]+\b', 'constraint _', x) for x in filtered]
+  filtered = [re.sub(r'\bindex\s+[a-z0-9_]+\b', 'index _', x) for x in filtered]
+
+  return '\n'.join(sorted(filtered))
 
 if __name__ == '__main__':
   if len(sys.argv) != 3:
