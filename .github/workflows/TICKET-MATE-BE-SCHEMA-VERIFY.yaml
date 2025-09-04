@@ -11,6 +11,21 @@ jobs:
   schema-verify:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
@@ -28,42 +43,62 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # JPA 엔티티만으로 경량 스키마 검증 실행 (Spring Context 로드 없음)
-      - name: JPA 엔티티 기반 경량 스키마 검증
-        run: ./gradlew :ticketmate-api:clean :ticketmate-api:test --info --tests "com.ticketmate.api.schema.SchemaVerificationTest"
+      - name: psql 클라이언트 설치
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # 생성된 DDL 파일들 확인 및 비교 결과 출력
-      - name: DDL 검증 결과 확인
+      - name: Postgres 준비 확인
         run: |
-          echo "🔍 DDL 검증 결과를 확인합니다..."
-          
-          if [ -f ticketmate-api/build/generated/hibernate-ddl-direct.sql ]; then
-            echo "✅ Hibernate DDL 파일 생성됨:"
-            wc -l ticketmate-api/build/generated/hibernate-ddl-direct.sql
-            echo ""
-            echo "=== Hibernate DDL 샘플 (처음 5줄) ==="
-            head -5 ticketmate-api/build/generated/hibernate-ddl-direct.sql
-          else
-            echo "❌ Hibernate DDL 파일이 생성되지 않았습니다"
-          fi
-          
-          echo ""
-          if [ -f ticketmate-api/src/main/resources/db/migration/V1__Initial_schema.sql ]; then
-            echo "✅ Flyway 마이그레이션 파일 존재:"
-            wc -l ticketmate-api/src/main/resources/db/migration/V1__Initial_schema.sql
-            echo ""
-            echo "=== Flyway DDL 샘플 (처음 5줄) ==="
-            head -5 ticketmate-api/src/main/resources/db/migration/V1__Initial_schema.sql
-          else
-            echo "❌ Flyway 마이그레이션 파일이 없습니다"
-          fi
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U postgres && exit 0
+            echo "⏳ DB 준비 대기중... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Postgres가 준비되지 않았습니다." && exit 1
 
-      # DDL 파일들을 아티팩트로 업로드 (디버깅용)
-      - name: Schema artifacts 업로드
+      - name: Flyway 마이그레이션 적용 (Docker)
+        run: |
+          docker run --rm --network=host \
+            -v "$PWD/ticketmate-api/src/main/resources/db/migration":/flyway/sql \
+            flyway/flyway:10 \
+            -url=jdbc:postgresql://localhost:5432/postgres \
+            -user=postgres -password=postgres \
+            -baselineOnMigrate=true \
+            -locations=filesystem:/flyway/sql \
+            migrate
+
+      - name: Flyway 결과 스키마 덤프
+        run: |
+          mkdir -p ticketmate-api/build/generated
+          PGPASSWORD=postgres pg_dump -s -h localhost -U postgres -d postgres \
+            > ticketmate-api/build/generated/flyway-schema.sql
+          echo "📝 Flyway 스키마 라인 수:" $(wc -l < ticketmate-api/build/generated/flyway-schema.sql)
+
+      - name: Hibernate DDL 생성 (스프링 미사용)
+        run: |
+          ./gradlew :ticketmate-api:test --tests "*HibernateDdlSmokeTest" --info
+          echo "📝 Hibernate DDL 라인 수:" $(wc -l < ticketmate-api/build/generated/hibernate-ddl.sql)
+
+      - name: 정규화 & 비교
+        run: |
+          python3 scripts/normalize_sql.py \
+            ticketmate-api/build/generated/hibernate-ddl.sql \
+            ticketmate-api/build/generated/flyway-schema.sql \
+          && echo "✅ 스키마 일치"
+        shell: bash
+
+      - name: 차이 출력(불일치 시)
+        if: failure()
+        run: |
+          echo "❌ 스키마가 다릅니다. 정규화 결과(diff) 출력:"
+          diff -u \
+            ticketmate-api/build/generated/hibernate-ddl.sql.norm \
+            ticketmate-api/build/generated/flyway-schema.sql.norm || true
+
+      - name: 아티팩트 업로드
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: schema-verification-results
+          name: schema-compare-artifacts
           path: |
-            ticketmate-api/build/generated/hibernate-ddl-direct.sql
-            ticketmate-api/src/main/resources/db/migration/*.sql
-          if-no-files-found: warn
+            ticketmate-api/build/generated/*.sql
+            ticketmate-api/build/generated/*.norm
