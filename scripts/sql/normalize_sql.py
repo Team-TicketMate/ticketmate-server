@@ -19,17 +19,40 @@ Hibernate DDL vs pg_dump -s 결과를 "의미적으로" 동등 비교가 가능�
   normalize_sql.py <hibernate-ddl.sql> <flyway-schema.sql>
   종료코드: 0(동일), 1(다름), 2(오류)
 """
-import os, re, sys, pathlib
+import os
+import pathlib
+import re
+
+import sys
 
 DROP_PREFIXES = (
   'set ', 'select pg_catalog.set_config', '\\connect ', 'grant ', 'revoke ',
   'comment on extension', 'create extension', 'alter schema '
 )
 
+
+def _split_top_level(s: str) -> list[str]:
+  out, buf, depth = [], [], 0
+  for ch in s:
+    if ch == '(':
+      depth += 1
+    elif ch == ')':
+      depth = max(0, depth - 1)
+    if ch == ',' and depth == 0:
+      out.append(''.join(buf).strip())
+      buf = []
+    else:
+      buf.append(ch)
+  if buf:
+    out.append(''.join(buf).strip())
+  return out
+
+
 def _strip_comments(s: str) -> str:
-  s = re.sub(r'--.*', '', s)                        # line comments
-  s = re.sub(r'/\*.*?\*/', '', s, flags=re.S)       # block comments
+  s = re.sub(r'--.*', '', s)  # line comments
+  s = re.sub(r'/\*.*?\*/', '', s, flags=re.S)  # block comments
   return s
+
 
 def _coarse_cleanup(s: str) -> str:
   s = _strip_comments(s)
@@ -70,16 +93,32 @@ def _coarse_cleanup(s: str) -> str:
   s = s.replace('float8', 'float(53)')
 
   # FK 옵션 소거
-  s = re.sub(r'\s*match\s+simple\s+on\s+update\s+no\s+action\s+on\s+delete\s+no\s+action', '', s)
+  s = re.sub(
+      r'\s*match\s+simple\s+on\s+update\s+no\s+action\s+on\s+delete\s+no\s+action',
+      '', s)
   s = re.sub(r'\s*on\s+update\s+no\s+action\s+on\s+delete\s+no\s+action', '', s)
 
   # 공백 정리
   s = re.sub(r'\s+', ' ', s).strip()
   return s
 
+
+def _normalize_alter_unique(stmt: str, out_lines: list):
+  # alter table <t> add constraint <name> unique (cols)
+  m = re.match(
+      r'alter table\s+(\w+)\s+add constraint\s+\S+\s+unique\s*\(([^)]+)\)',
+      stmt)
+  if m:
+    t, cols = m.group(1), m.group(2).strip()
+    out_lines.append(f'unique {t} ( {cols} )')
+    return True
+  return False
+
+
 def _split_statements(s: str):
   parts = [p.strip() for p in s.split(';')]
   return [p for p in parts if p]
+
 
 def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
   m = re.match(r'create table\s+(\w+)\s*\((.*)\)\s*$', stmt)
@@ -89,7 +128,7 @@ def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
   tname, body = m.group(1), m.group(2)
 
   # naive split by comma (전제: hibernate/pg_dump 포맷에서 괄호 중첩이 단순)
-  cols = [c.strip() for c in body.split(',') if c.strip()]
+  cols = _split_top_level(body)
 
   pk_cols = None
   uniques = []
@@ -98,9 +137,10 @@ def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
 
   for c in cols:
     # [CHANGED] 테이블 수준 PK (primary key (a,b))
-    mpk_tbl = re.match(r'primary key\s*\(([^)]+)\)', c)
-    if mpk_tbl:
-      pk_cols = mpk_tbl.group(1).strip()
+    # UNIQUE (a, b) - table-level
+    mu = re.match(r'unique\s*\(([^)]+)\)', c)
+    if mu:
+      out_lines.append(f'unique {tname} ( {mu.group(1).strip()} )')
       continue
 
     # [CHANGED] 컬럼명
@@ -121,13 +161,16 @@ def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
 
     # [CHANGED] 인라인 FK: (optional) constraint <name> references <table> [(cols)]
     # 예: "constraint fkxxxx references member", "references concert(concert_id)"
-    fk_match = re.search(r'(?:constraint\s+\S+\s+)?references\s+(\w+)(?:\s*\(([^)]+)\))?', c)
+    fk_match = re.search(
+        r'(?:constraint\s+\S+\s+)?references\s+(\w+)(?:\s*\(([^)]+)\))?', c)
     if colname and fk_match:
       ref_table = fk_match.group(1)
       # ref_cols = (fk_match.group(2) or '').strip()  # 컬럼은 비교 표준화에서 생략
       fks.append((tname, colname, ref_table))
       # 컬럼 정의에서 FK 구문 제거
-      c = re.sub(r'\s*(?:constraint\s+\S+\s+)?references\s+\w+(?:\s*\([^)]+\))?', '', c)
+      c = re.sub(
+          r'\s*(?:constraint\s+\S+\s+)?references\s+\w+(?:\s*\([^)]+\))?', '',
+          c)
 
     # enum check 제거/유지
     if not strict_enums:
@@ -151,23 +194,30 @@ def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
     # [CHANGED] 참조 컬럼은 통일성/단순화를 위해 생략 (ALTER 기반과 동일 포맷)
     out_lines.append(f'fk {_t} ( {_c} ) -> {_rt}')
 
+
 def _normalize_alter_primary(stmt: str, out_lines: list):
   # alter table <t> add constraint <name> primary key (cols)
-  m = re.match(r'alter table\s+(\w+)\s+add constraint\s+\S+\s+primary key\s*\(([^)]+)\)', stmt)
+  m = re.match(
+      r'alter table\s+(\w+)\s+add constraint\s+\S+\s+primary key\s*\(([^)]+)\)',
+      stmt)
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'pk {t} ( {cols} )')
     return True
   return False
 
+
 def _normalize_unique_index(stmt: str, out_lines: list):
   # create unique index <name> on <t> using btree (cols)
-  m = re.match(r'create unique index\s+\S+\s+on\s+(\w+)\s+(?:using btree\s*)?\(([^)]+)\)', stmt)
+  m = re.match(
+      r'create unique index\s+\S+\s+on\s+(\w+)\s+(?:using btree\s*)?\(([^)]+)\)',
+      stmt)
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'unique {t} ( {cols} )')
     return True
   return False
+
 
 def _normalize_fk(stmt: str, out_lines: list):
   # ALTER FK: alter table <t> add constraint <name> foreign key (a) references <rt> [(b)]
@@ -182,8 +232,10 @@ def _normalize_fk(stmt: str, out_lines: list):
     return True
   return False
 
+
 def normalize(sql: str, strict_enums_env: str = None) -> str:
-  strict_enums = (strict_enums_env or os.getenv('STRICT_ENUM_CHECK') or 'false').lower() == 'true'
+  strict_enums = (strict_enums_env or os.getenv(
+      'STRICT_ENUM_CHECK') or 'false').lower() == 'true'
   s = _coarse_cleanup(sql)
   stmts = _split_statements(s)
 
@@ -193,6 +245,8 @@ def normalize(sql: str, strict_enums_env: str = None) -> str:
     if not st:
       continue
     if _normalize_alter_primary(st, out):
+      continue
+    if _normalize_alter_unique(st, out):
       continue
     if _normalize_unique_index(st, out):
       continue
@@ -207,9 +261,11 @@ def normalize(sql: str, strict_enums_env: str = None) -> str:
   out = sorted(set(out))
   return '\n'.join(out)
 
+
 if __name__ == '__main__':
   if len(sys.argv) != 3:
-    print('usage: normalize_sql.py <hibernate-ddl.sql> <flyway-schema.sql>', file=sys.stderr)
+    print('usage: normalize_sql.py <hibernate-ddl.sql> <flyway-schema.sql>',
+          file=sys.stderr)
     sys.exit(2)
   a_path, b_path = sys.argv[1], sys.argv[2]
   if not (pathlib.Path(a_path).exists() and pathlib.Path(b_path).exists()):

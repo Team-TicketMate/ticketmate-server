@@ -194,8 +194,9 @@ jobs:
         if: env.MIG_COUNT == '0'
         run: |
           echo "ℹ️ 사용자 마이그레이션 파일이 없어 비교는 생략합니다. 대신 정규화 및 요약 리포트를 생성합니다."
-          python3 "$NORMALIZE_PY" "$HIB_DDL" "$FLY_SCHEMA" || true
-          python3 "$DIFF_PY" "$HIB_DDL.norm" "$FLY_SCHEMA.norm" "$GEN_DIR/schema-compare-summary.md" || true
+          python3 "$NORMALIZE_PY" "$HIB_DDL" "$HIB_DDL.norm" || true
+          python3 "$NORMALIZE_PY" "$FLY_SCHEMA" "$FLY_SCHEMA.norm" || true
+          python3 "$DIFF_PY" "$HIB_DDL.norm" "$FLY_SCHEMA.norm" "$GEN_DIR" || true
 
       - name: 비교 입력 파일 확인(디버깅)
         if: env.MIG_COUNT != '0'
