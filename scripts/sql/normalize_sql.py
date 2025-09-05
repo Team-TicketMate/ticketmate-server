@@ -30,6 +30,83 @@ DROP_PREFIXES = (
   'comment on extension', 'create extension', 'alter schema '
 )
 
+# [SNAKE] 스네이크 케이스 치유 on/off
+SNAKECASE_HEALING = (os.getenv('SNAKECASE_HEALING') or 'true').lower() == 'true'
+
+# [SNAKE] 하이버네이트 산출물에서 자주 등장하는 비-snake 식별자 매핑(테이블/컬럼/조인키)
+#   - 모두 소문자 기준으로 작성 (coarse cleanup에서 이미 lower())
+SNAKE_CASE_MAP = {
+  # --- 테이블 ---
+  'agentperformancesummary': 'agent_performance_summary',
+  'applicationform': 'application_form',
+  'applicationformdetail': 'application_form_detail',
+  'concertagentavailability': 'concert_agent_availability',
+  'concertdate': 'concert_date',
+  'concerthall': 'concert_hall',
+  'hopearea': 'hope_area',
+  'memberfollow': 'member_follow',
+  'portfolioimg': 'portfolio_img',
+  'rejectionreason': 'rejection_reason',
+  'ticketopendate': 'ticket_open_date',
+  # --- 일반 컬럼 ---
+  'createddate': 'created_date',
+  'updateddate': 'updated_date',
+  'lastlogintime': 'last_login_time',
+  'performancedate': 'performance_date',
+  'averagerating': 'average_rating',
+  'recentsuccesscount': 'recent_success_count',
+  'reviewcount': 'review_count',
+  'totalscore': 'total_score',
+  'accountstatus': 'account_status',
+  'birthyear': 'birth_year',
+  'birthday': 'birth_day',
+  'membertype': 'member_type',
+  'profileimgstoredpath': 'profile_img_stored_path',
+  'socialloginid': 'social_login_id',
+  'socialplatform': 'social_platform',
+  'totpsecret': 'totp_secret',
+  'isfirstlogin': 'is_first_login',
+  'followercount': 'follower_count',
+  'followingcount': 'following_count',
+  'concertthumbnailstoredpath': 'concert_thumbnail_stored_path',
+  'seatingchartstoredpath': 'seating_chart_stored_path',
+  'ticketreservationsite': 'ticket_reservation_site',
+  'websiteurl': 'web_site_url',
+  'fileextension': 'file_extension',
+  'originalfilename': 'original_filename',
+  'sizebytes': 'size_bytes',
+  'storedpath': 'stored_path',
+  'embeddingid': 'embedding_id',
+  'embeddingtype': 'embedding_type',
+  'embeddingvector': 'embedding_vector',
+  'targetid': 'target_id',
+  'applicationformstatus': 'application_form_status',
+  'ticketopentype': 'ticket_open_type',
+  'applicationformrejectedtype': 'application_form_rejected_type',
+  'othermemo': 'other_memo',
+  'requestmaxcount': 'request_max_count',
+  'opendate': 'open_date',
+  'isbanktransfer': 'is_bank_transfer',
+  # --- id/조인키 계열 ---
+  'memberid': 'member_id',
+  'concerthallid': 'concert_hall_id',
+  'concertid': 'concert_id',
+  'applicationformid': 'application_form_id',
+  'applicationformdetailid': 'application_form_detail_id',
+  'portfolioid': 'portfolio_id',
+  'portfolioimgid': 'portfolio_img_id',
+  'client_memberid': 'client_member_id',
+  'agent_memberid': 'agent_member_id',
+  'followee_memberid': 'followee_member_id',
+  'follower_memberid': 'follower_member_id',
+  'concert_concertid': 'concert_concert_id',
+  'concerthall_concerthallid': 'concert_hall_concert_hall_id',
+  'concertdate_concertdateid': 'concert_date_concert_date_id',
+  'portfolio_portfolioid': 'portfolio_portfolio_id',
+  'ticketopendate_ticketopendateid': 'ticket_open_date_ticket_open_date_id',
+  'applicationform_applicationformid': 'application_form_application_form_id',
+}
+
 
 def _split_top_level(s: str) -> list[str]:
   out, buf, depth = [], [], 0
@@ -51,6 +128,18 @@ def _split_top_level(s: str) -> list[str]:
 def _strip_comments(s: str) -> str:
   s = re.sub(r'--.*', '', s)  # line comments
   s = re.sub(r'/\*.*?\*/', '', s, flags=re.S)  # block comments
+  return s
+
+
+def _apply_snake_healing(s: str) -> str:
+  """[SNAKE] 사전 기반으로 비-snake 식별자를 snake_case로 치유한다."""
+  if not SNAKECASE_HEALING:
+    return s
+  # 긴 키워드부터 적용(부분치환 방지)
+  for bad in sorted(SNAKE_CASE_MAP.keys(), key=len, reverse=True):
+    good = SNAKE_CASE_MAP[bad]
+    # 양옆 단어 경계에서만 치환 (식별자 토큰 전체에만 매칭)
+    s = re.sub(rf'\b{re.escape(bad)}\b', good, s)
   return s
 
 
@@ -84,6 +173,9 @@ def _coarse_cleanup(s: str) -> str:
   s = re.sub(r'\balter\s+table\s+only\b', 'alter table', s)
   s = re.sub(r'\bif\s+exists\b', '', s)
 
+  # [SNAKE] 식별자 스네이크 케이스 치유 (lower 이후 수행)
+  s = _apply_snake_healing(s)
+
   # 타입 정규화
   s = s.replace('character varying', 'varchar')
   s = re.sub(r'timestamp\(\s*0\s*\)\s+without\s+time\s+zone', 'timestamp(0)', s)
@@ -105,9 +197,7 @@ def _coarse_cleanup(s: str) -> str:
 
 def _normalize_alter_unique(stmt: str, out_lines: list):
   # alter table <t> add constraint <name> unique (cols)
-  m = re.match(
-      r'alter table\s+(\w+)\s+add constraint\s+\S+\s+unique\s*\(([^)]+)\)',
-      stmt)
+  m = re.match(r'alter table\s+(\w+)\s+add constraint\s+\S+\s+unique\s*\(([^)]+)\)', stmt)
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'unique {t} ( {cols} )')
@@ -136,7 +226,11 @@ def _normalize_create_table(stmt: str, out_lines: list, strict_enums: bool):
   new_cols = []
 
   for c in cols:
-    # [CHANGED] 테이블 수준 PK (primary key (a,b))
+    # 테이블 수준 PK
+    mpk_tbl = re.match(r'(?:constraint\s+\S+\s+)?primary\s+key\s*\(([^)]+)\)', c)
+    if mpk_tbl:
+      pk_cols = mpk_tbl.group(1).strip()
+      continue
     # UNIQUE (a, b) - table-level
     mu = re.match(r'unique\s*\(([^)]+)\)', c)
     if mu:
@@ -208,10 +302,11 @@ def _normalize_alter_primary(stmt: str, out_lines: list):
 
 
 def _normalize_unique_index(stmt: str, out_lines: list):
-  # create unique index <name> on <t> using btree (cols)
+  # create unique index [concurrently] [if not exists] <name> on <t> [using btree] (cols) [where ...]
   m = re.match(
-      r'create unique index\s+\S+\s+on\s+(\w+)\s+(?:using btree\s*)?\(([^)]+)\)',
-      stmt)
+      r'create\s+unique\s+index\s+(?:concurrently\s+)?(?:if\s+not\s+exists\s+)?\S+\s+on\s+(\w+)\s*(?:using\s+btree\s*)?\(([^)]+)\)',
+      stmt
+  )
   if m:
     t, cols = m.group(1), m.group(2).strip()
     out_lines.append(f'unique {t} ( {cols} )')
