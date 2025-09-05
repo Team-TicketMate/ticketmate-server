@@ -25,11 +25,13 @@ jobs:
       GEN_DIR: ${{ github.workspace }}/ticketmate-api/build/generated
       HIB_DDL: ${{ github.workspace }}/ticketmate-api/build/generated/hibernate-ddl.sql
       FLY_SCHEMA: ${{ github.workspace }}/ticketmate-api/build/generated/flyway-schema.sql
-      NORMALIZE_PY: ${{ github.workspace }}/scripts/sql/normalize_sql.py
-      DIFF_PY: ${{ github.workspace }}/scripts/sql/make_sql_diff_report.py
-      COMPARE_SH: ${{ github.workspace }}/scripts/sql/schema_compare.sh
       MIG_DIR: ${{ github.workspace }}/ticketmate-api/src/main/resources/db/migration
       REQUIRE_MIGRATIONS: "false"
+
+      # Vertex AI
+      VERTEX_PROJECT_ID: ${{ secrets.VERTEX_PROJECT_ID }}
+      VERTEX_LOCATION: ${{ vars.VERTEX_LOCATION }}
+      VERTEX_MODEL: ${{ vars.VERTEX_MODEL }}
 
     services:
       postgres:
@@ -190,30 +192,41 @@ jobs:
           echo "❌ 정책상 최소 1개의 Flyway 마이그레이션이 필요합니다. (REQUIRE_MIGRATIONS=true)"
           exit 1
 
-      - name: 마이그레이션 없음 - 정규화만 수행(비교 생략, 요약 리포트 생성)
-        if: env.MIG_COUNT == '0'
-        run: |
-          echo "ℹ️ 사용자 마이그레이션 파일이 없어 비교는 생략합니다. 대신 정규화 및 요약 리포트를 생성합니다."
-          python3 "$NORMALIZE_PY" "$HIB_DDL" "$HIB_DDL.norm" || true
-          python3 "$NORMALIZE_PY" "$FLY_SCHEMA" "$FLY_SCHEMA.norm" || true
-          python3 "$DIFF_PY" "$HIB_DDL.norm" "$FLY_SCHEMA.norm" "$GEN_DIR" || true
+      - name: Google Cloud 인증(ACD 파일 생성)
+        if: env.MIG_COUNT != '0'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.TICKETMATE_EMBEDDING_JSON }}
+          create_credentials_file: true
 
-      - name: 비교 입력 파일 확인(디버깅)
+      - name: Python 설치
+        if: env.MIG_COUNT != '0'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Vertex SDK 설치
         if: env.MIG_COUNT != '0'
         run: |
-          echo "HIB_DDL=$HIB_DDL"
-          echo "FLY_SCHEMA=$FLY_SCHEMA"
-          ls -la "$GEN_DIR" || true
-          test -f "$HIB_DDL"
-          test -f "$FLY_SCHEMA"
+          python -m pip install --upgrade pip
+          pip install "google-cloud-aiplatform>=1.63.0,<2"
 
-      - name: 비교 스크립트 실행 (정규화 + 비교 + 리포트)
+      - name: AI 비교 실행 (Vertex)
         if: env.MIG_COUNT != '0'
-        env:
-          STRICT_ENUM_CHECK: "true"   # ← 기본은 false
+        continue-on-error: true
         run: |
-          bash "$COMPARE_SH" "$HIB_DDL" "$FLY_SCHEMA" "$NORMALIZE_PY" "$DIFF_PY"
-        shell: bash
+          python3 "$WORK_DIR/scripts/sql/ai_schema_compare.py" \
+            "$HIB_DDL" "$FLY_SCHEMA" --out_dir "$GEN_DIR"
+
+      - name: 마이그레이션 없음 - AI 비교 스킵 리포트
+        if: env.MIG_COUNT == '0' && env.REQUIRE_MIGRATIONS != 'true'
+        run: |
+          cat > "$GEN_DIR/schema-compare-summary.md" << 'EOF'
+          # Schema compare skipped
+          No user migrations were found, so AI comparison was skipped.
+          - To enforce presence of migrations, set REQUIRE_MIGRATIONS=true.
+          EOF
+          echo "skip" > "$GEN_DIR/ai_verdict.txt"
 
       - name: 산출물 목록(업로드 직전)
         if: always()
@@ -232,3 +245,15 @@ jobs:
           path: ${{ env.GEN_DIR }}
           if-no-files-found: error
           retention-days: 14
+
+      - name: 결과에 따른 실패 처리
+        if: always()
+        run: |
+          if [ -f "$GEN_DIR/ai_verdict.txt" ]; then
+            verdict=$(tr -d '\r\n' < "$GEN_DIR/ai_verdict.txt")
+            echo "AI verdict: ${verdict}"
+            if [ "$verdict" = "no" ]; then
+              echo "❌ 스키마 논리 불일치 - 실패 처리"
+              exit 1
+            fi
+          fi
