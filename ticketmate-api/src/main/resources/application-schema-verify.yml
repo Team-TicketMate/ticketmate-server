@@ -7,6 +7,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate  # [CHANGED] DB 변경 없이 매핑-스키마 호환성 검증
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
