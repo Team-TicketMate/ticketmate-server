@@ -1,18 +1,18 @@
-name: LOCAL-SCHEMA-VERIFY
+name: TICKET-MATE-BE-SCHEMA-VERIFY-LOCAL
 
 on:
   pull_request:
-    branches: [test]
+    branches: [test] # ⬅️ PR 대상은 test 브랜치만
     paths:
-      - 'scripts/sql/**'
-      - '.github/workflows/LOCAL-SCHEMA-VERIFY.yml'
-      - 'ticketmate-api/src/main/resources/db/migration/**'
+      - 'scripts/sql/**' # 스크립트 변경 시
+      - 'LOCAL-SCHEMA-VERIFY.yaml' # 새 워크플로 파일 변경 시
+      - 'ticketmate-api/src/main/resources/db/migration/**' # 마이그레이션 변경 시
 
 permissions:
   contents: read
 
 concurrency:
-  group: local-schema-verify-${{ github.event.pull_request.number || github.ref }}
+  group: schema-verify-local-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -49,7 +49,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 타임스탬프 생성 (KST)
+      - name: 타임스탬프 생성 (KST, 항상 실행)
         id: ts
         if: always()
         run: |
@@ -72,15 +72,17 @@ jobs:
           done
           echo "❌ Postgres가 준비되지 않았습니다." && exit 1
 
-      - name: JDK & Gradle
+      - name: JDK/Gradle 준비
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Gradle 권한
-        run: chmod +x gradlew
+      - name: Gradle 권한/셋업
+        run: |
+          chmod +x gradlew
+        shell: bash
 
       - name: Flyway 파일명 규칙 검사
         run: |
@@ -106,17 +108,32 @@ jobs:
             echo "📄 목록:"; find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' -print | sort
           fi
 
-      - name: Hibernate DDL 생성 (해당 테스트만 실행)
+      - name: Hibernate DDL 생성 (테스트 한정 실행)
         run: |
           ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info --no-build-cache
-          test -s "$HIB_DDL"
+          echo "📝 Hibernate DDL 라인 수:" $(wc -l < "$HIB_DDL")
 
-      # === 비교용 임시 DB 생성/적용 ===
+      - name: Hibernate DDL 존재/용량 검증
+        run: |
+          test -f "$HIB_DDL" || (echo "❌ Hibernate DDL 파일 없음: $HIB_DDL" && exit 1)
+          test -s "$HIB_DDL" || (echo "❌ Hibernate DDL 파일 비어있음: $HIB_DDL" && exit 1)
+          echo "✅ Hibernate DDL 확인 완료"
+
+      # === 비교용 임시 DB 생성 ===
       - name: 비교용 DB 초기화 (cmp_hib / cmp_fly)
         run: |
           for DB in cmp_hib cmp_fly; do
-            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $DB;";
-            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $DB;";
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $DB;";
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $DB;";
+          done
+
+      - name: (옵션) cmp_hib 확장 설치 (pgvector 등)
+        run: |
+          for EXT in vector citext pg_trgm hstore btree_gin btree_gist; do
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d cmp_hib -v ON_ERROR_STOP=0 -c "CREATE EXTENSION IF NOT EXISTS $EXT;";
           done
 
       - name: Flyway 마이그레이션 적용 → cmp_fly
@@ -130,19 +147,40 @@ jobs:
             -locations=filesystem:/flyway/sql \
             migrate
 
+      - name: Flyway 결과 스키마 덤프 (optional)
+        if: env.MIG_COUNT != '0'
+        run: |
+          docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+          pg_dump --schema-only --no-owner --no-privileges --no-comments \
+          --exclude-table=flyway_schema_history \
+          -h localhost -U postgres -d cmp_fly > "$FLY_SCHEMA" || true
+
+      - name: 빈 Flyway 스키마 파일 생성(마이그레이션 없음)
+        if: env.MIG_COUNT == '0'
+        run: echo "-- no user migrations" > "$FLY_SCHEMA"
+
       - name: Hibernate DDL 적용 → cmp_hib
         run: |
           docker run --rm --network=host -i -e PGPASSWORD=postgres postgres:17-alpine \
             psql -h localhost -U postgres -d cmp_hib -v ON_ERROR_STOP=1 < "$HIB_DDL"
 
-      - name: Python 셋업 + deps
+      - name: 정책 검사 (마이그레이션 필수 여부)
+        if: env.MIG_COUNT == '0' && env.REQUIRE_MIGRATIONS == 'true'
+        run: |
+          echo "❌ 정책상 최소 1개의 Flyway 마이그레이션이 필요합니다. (REQUIRE_MIGRATIONS=true)"
+          exit 1
+
+      - name: Python 셋업
         uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: |
+        with:
+          python-version: '3.11'
+
+      - name: 로컬 비교 도구 설치 (psycopg2-binary)
+        run: |
           python -m pip install --upgrade pip
           pip install psycopg2-binary
 
-      - name: 카탈로그 스냅샷 (cmp_hib / cmp_fly)
+      - name: 카탈로그 스냅샷 생성 (cmp_hib / cmp_fly)
         run: |
           python3 "$WORK_DIR/scripts/sql/catalog_snapshot.py" "postgresql://postgres:postgres@localhost:5432/cmp_hib" "$GEN_DIR/hib.json"
           if [ "${MIG_COUNT}" != "0" ]; then
@@ -151,21 +189,32 @@ jobs:
             echo '{"tables":[],"columns":[],"constraints":[],"fkeys":[],"indexes":[]}' > "$GEN_DIR/fly.json"
           fi
 
-      - name: 로컬 논리 비교 + 개선 제안
+      - name: 로컬 논리 비교 + 개선 제안 생성
         run: |
           python3 "$WORK_DIR/scripts/sql/catalog_compare_local.py" "$GEN_DIR/hib.json" "$GEN_DIR/fly.json" "$GEN_DIR"
 
-      - name: 산출물 업로드 (LOCAL)
+      - name: 산출물 목록(업로드 직전)
+        if: always()
+        run: |
+          echo "📂 $GEN_DIR 내용:"; ls -la "$GEN_DIR" || true
+          echo ""; echo "📏 파일 크기:"; du -ah "$GEN_DIR" || true
+
+      - name: 아티팩트 업로드
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: schema-compare-local-${{ steps.ts.outputs.ts || github.run_id }}
+          name: schema-compare-local-artifacts-${{ steps.ts.outputs.ts || github.run_id }}
           path: ${{ env.GEN_DIR }}
           if-no-files-found: error
           retention-days: 14
 
-      - name: verdict로 실패 처리 (로컬 결과가 no면 실패)
+      - name: 결과에 따른 실패 처리
+        if: always()
         run: |
-          verdict=$(tr -d '\r\n' < "$GEN_DIR/ai_verdict.txt")
-          echo "Local verdict: $verdict"
-          test "$verdict" = "yes"
+          if [ -f "$GEN_DIR/ai_verdict.txt" ]; then
+            verdict=$(tr -d '\r\n' < "$GEN_DIR/ai_verdict.txt")
+            echo "Local verdict: ${verdict}"
+            if [ "$verdict" = "no" ]; then
+              echo "❌ 스키마 논리 불일치 - 실패 처리"; exit 1
+            fi
+          fi

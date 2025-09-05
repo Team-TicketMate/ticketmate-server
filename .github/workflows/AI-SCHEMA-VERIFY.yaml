@@ -1,20 +1,22 @@
 name: AI-SCHEMA-VERIFY
 
 on:
-  workflow_run:
-    workflows: ["LOCAL-SCHEMA-VERIFY"]
-    types: [completed]
+  pull_request:
+    branches: [test]
+    paths:
+      - 'scripts/sql/**' # 스크립트 변경 시
+      - '.github/workflows/AI-SCHEMA-VERIFY.yaml' # 워크플로 파일 변경 시
+      - 'ticketmate-api/src/main/resources/db/migration/**' # flyway-migration 변경 시
 
 permissions:
   contents: read
 
 concurrency:
-  group: ai-schema-verify-${{ github.event.pull_request.number || github.ref }}
+  group: schema-verify-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ai-schema-verify:
-    if: github.event.workflow_run.conclusion == 'failure' && 'false' # TODO: 추후 'false' 삭제
+  schema-verify:
     runs-on: ubuntu-latest
 
     env:
