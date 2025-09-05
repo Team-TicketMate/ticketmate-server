@@ -115,8 +115,25 @@ jobs:
       - name: 비교용 DB 초기화 (cmp_hib / cmp_fly)
         run: |
           for DB in cmp_hib cmp_fly; do
-            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $DB;";
-            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $DB;";
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $DB;";
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $DB;";
+          done
+
+      - name: 확장 설치 (pgvector 등) → cmp_hib / cmp_fly
+        run: |
+          # ⚠️ 확장은 DB마다 별도 설치 필요
+          for DB in cmp_hib cmp_fly; do
+            # pgvector (필수)
+            docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+              psql -h localhost -U postgres -d "$DB" -v ON_ERROR_STOP=1 -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+            # 선택 확장들 (있으면 편한 것들, 실패 허용)
+            for EXT in citext pg_trgm hstore btree_gin btree_gist; do
+              docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+                psql -h localhost -U postgres -d "$DB" -v ON_ERROR_STOP=0 -c "CREATE EXTENSION IF NOT EXISTS $EXT;";
+            done
           done
 
       - name: Flyway 마이그레이션 적용 → cmp_fly
