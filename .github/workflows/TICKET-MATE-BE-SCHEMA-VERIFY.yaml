@@ -1,11 +1,11 @@
-name: AI-SCHEMA-VERIFY
+name: TICKET-MATE-BE-SCHEMA-VERIFY
 
 on:
   pull_request:
     branches: [test]
     paths:
       - 'scripts/sql/**' # 스크립트 변경 시
-      - '.github/workflows/AI-SCHEMA-VERIFY.yaml' # 워크플로 파일 변경 시
+      - '.github/workflows/TICKET-MATE-BE-SCHEMA-VERIFY.yml' # 워크플로 파일 변경 시
       - 'ticketmate-api/src/main/resources/db/migration/**' # flyway-migration 변경 시
 
 permissions:
