@@ -73,18 +73,13 @@ def read_text(path: str, max_bytes: int = 800_000) -> str:
   return data.decode("utf-8", "ignore")
 
 
-# [ADDED] 모델이 JSON 외의 텍스트를 곁들이는 경우를 위한 복원기
 def _extract_json_loose(s: str) -> str | None:
-  """
-  느슨한 JSON 추출: 첫 '{'부터 마지막 '}'까지를 잡아보고, 코드펜스 제거 등도 시도.
-  """
+  """느슨한 JSON 추출: 코드펜스/접두 텍스트가 섞인 경우 복원."""
   if not s:
     return None
   s = s.strip()
-  # 코드펜스 제거
   s = re.sub(r"^```(?:json)?\s*", "", s)
   s = re.sub(r"\s*```$", "", s)
-  # 첫/마지막 중괄호 범위 추정
   first = s.find("{")
   last = s.rfind("}")
   if first != -1 and last != -1 and last > first:
@@ -92,14 +87,22 @@ def _extract_json_loose(s: str) -> str | None:
   return None
 
 
+def _fallback(val: str | None, default: str) -> str:
+  """빈 문자열/공백도 기본값으로 대체."""
+  if val is None:
+    return default
+  v = str(val).strip()
+  return v if v else default
+
+
 def main():
   ap = argparse.ArgumentParser()
   ap.add_argument("hibernate_sql", help="hibernate-ddl.sql 경로")
   ap.add_argument("flyway_sql", help="flyway-schema.sql 경로")
   ap.add_argument("--out_dir", default=None, help="산출물 디렉터리 (기본: 입력 파일 폴더)")
-  ap.add_argument("--model", default=os.environ.get("VERTEX_MODEL", "gemini-1.5-pro-002"))
+  ap.add_argument("--model", default=os.environ.get("VERTEX_MODEL"))
   ap.add_argument("--project", default=os.environ.get("VERTEX_PROJECT_ID"))
-  ap.add_argument("--location", default=os.environ.get("VERTEX_LOCATION", "us-central1"))
+  ap.add_argument("--location", default=os.environ.get("VERTEX_LOCATION"))
   args = ap.parse_args()
 
   hib = pathlib.Path(args.hibernate_sql)
@@ -111,13 +114,19 @@ def main():
   sql_a = read_text(str(hib))
   sql_b = read_text(str(fly))
 
-  # Vertex 초기화 (ADC 사용)
+  # 안전한 기본값 적용
+  effective_model = _fallback(args.model, "gemini-1.5-pro-002")
+  effective_location = _fallback(args.location, "us-central1")
+
   if not args.project:
     print("ERROR: VERTEX_PROJECT_ID 환경변수 또는 --project 인자가 필요합니다.", file=sys.stderr)
     sys.exit(2)
-  vertexai.init(project=args.project, location=args.location)
 
-  model = GenerativeModel(args.model)
+  # Vertex 초기화
+  vertexai.init(project=args.project, location=effective_location)
+
+  # 시스템 프롬프트는 system_instruction으로 전달
+  model = GenerativeModel(effective_model, system_instruction=SYSTEM_RULES)
   prompt = PROMPT_TMPL.format(sql_a=sql_a, sql_b=sql_b)
 
   gen_cfg = GenerationConfig(
@@ -131,15 +140,10 @@ def main():
   last_err = None
   for attempt in range(3):
     try:
-      resp = model.generate_content(
-          contents=[
-            {"role": "system", "parts": [SYSTEM_RULES]},
-            {"role": "user", "parts": [prompt]},
-          ],
-          generation_config=gen_cfg,
-      )
+      # 문자열 하나로 호출 (파트/컨텐츠 오브젝트 불필요)
+      resp = model.generate_content(prompt, generation_config=gen_cfg)
 
-      # [ADDED] 원시 응답 보존
+      # 원시 응답 보존
       raw_txt = ""
       if hasattr(resp, "text") and resp.text:
         raw_txt = resp.text
@@ -157,7 +161,7 @@ def main():
       if not txt:
         raise RuntimeError("빈 응답 수신")
 
-      # [CHANGED] JSON 복원력 향상
+      # JSON 파싱(느슨한 복원 포함)
       try:
         data = json.loads(txt)
       except Exception:
@@ -169,7 +173,7 @@ def main():
       match = str(data.get("match", "")).strip().lower()
       reasons = data.get("reasons", [])
 
-      # 산출물 저장(표준화 파일명)
+      # 산출물 저장
       (out_dir / "ai_schema_compare.json").write_text(
           json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
       )
@@ -177,8 +181,8 @@ def main():
 
       md = [
         f"# AI 스키마 비교 결과",
-        f"- 모델: `{args.model}`",
-        f"- 프로젝트: `{args.project}` / 리전: `{args.location}`",
+        f"- 모델: `{effective_model}`",
+        f"- 프로젝트: `{args.project}` / 리전: `{effective_location}`",
         f"- 결과(match): **{match.upper()}**",
         "",
       ]

@@ -30,8 +30,8 @@ jobs:
 
       # Vertex AI
       VERTEX_PROJECT_ID: ${{ secrets.VERTEX_PROJECT_ID }}
-      VERTEX_LOCATION: ${{ vars.VERTEX_LOCATION }}
-      VERTEX_MODEL: ${{ vars.VERTEX_MODEL }}
+      VERTEX_LOCATION: ${{ secrets.VERTEX_LOCATION }}
+      VERTEX_MODEL: ${{ secrets.VERTEX_MODEL }}
 
     services:
       postgres:
