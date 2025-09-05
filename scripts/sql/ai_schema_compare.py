@@ -36,7 +36,8 @@ not textually. Your **only** output must be a single JSON object with this exact
 
 {{
   "match": "yes" | "no",
-  "reasons": ["reason 1", "reason 2", ...]  // non-empty only when match == "no"
+  "reasons": ["reason 1", "reason 2", ...],      // non-empty only when match == "no"
+  "suggestions": ["actionable improvement 1", ...] // ALWAYS return 3-10 concise improvements for the Flyway DDL
 }}
 
 Rules for logical equivalence:
@@ -45,9 +46,17 @@ Rules for logical equivalence:
 - Consider the following **non-differences** (treat as equal, do not fail on them):
 {KNOWN_FALSE_POSITIVES}
 
+Improvement guidance (for "suggestions"):
+- Always write suggestions targeted at **the Flyway DDL** (Schema B), even when match == "yes".
+- Focus on production-ready migration best practices: idempotency, transactional safety, explicit data types/precision,
+  naming conventions (snake_case, constraint/index names), deterministic default values, NOT NULL + CHECK coverage,
+  index strategy for FKs & unique lookups, enum/check design, timestamp/timezone choices, extension usage hygiene,
+  and safe roll-forward/rollback considerations.
+- Keep each suggestion short (<= 160 chars) and actionable.
+
 Important:
-- If schemas are logically equivalent, return: {{ "match": "yes", "reasons": [] }}
-- If there is any semantic difference, return: {{ "match": "no", "reasons": [ ...specific reasons... ] }}
+- If schemas are logically equivalent, return: {{ "match": "yes", "reasons": [], "suggestions": [...] }}
+- If there is any semantic difference, return: {{ "match": "no", "reasons": [ ... ], "suggestions": [...] }}
 - Do **not** include backticks or code fences. Output **pure JSON only**.
 """.strip()
 
@@ -172,6 +181,7 @@ def main():
 
       match = str(data.get("match", "")).strip().lower()
       reasons = data.get("reasons", [])
+      suggestions = data.get("suggestions", [])  # [ADDED]
 
       # 산출물 저장
       (out_dir / "ai_schema_compare.json").write_text(
@@ -179,6 +189,7 @@ def main():
       )
       (out_dir / "ai_verdict.txt").write_text(f"{match}\n", encoding="utf-8")
 
+      # 요약
       md = [
         f"# AI 스키마 비교 결과",
         f"- 모델: `{effective_model}`",
@@ -195,8 +206,25 @@ def main():
           md.append("- (사유 미제공)")
       else:
         md.append("## ✅ 논리적으로 동일한 스키마로 판단되었습니다.")
+      # [ADDED] 개선 제안 섹션 (항상 출력)
+      md.append("")
+      md.append("## 🔧 개선 제안 (Flyway DDL)")
+      if isinstance(suggestions, list) and suggestions:
+        for i, s in enumerate(suggestions, 1):
+          md.append(f"{i}. {s}")
+      else:
+        md.append("- (모델이 별도 제안을 제공하지 않았습니다)")
 
       (out_dir / "schema-compare-summary.md").write_text("\n".join(md), encoding="utf-8")
+
+      # [ADDED] 별도 제안 파일도 생성 (가독성용)
+      sug_lines = []
+      if isinstance(suggestions, list) and suggestions:
+        for i, s in enumerate(suggestions, 1):
+          sug_lines.append(f"{i}. {s}")
+      else:
+        sug_lines.append("No suggestions provided.")
+      (out_dir / "ai_suggestions.md").write_text("\n".join(sug_lines), encoding="utf-8")
 
       # 종료 코드
       if match == "yes":
