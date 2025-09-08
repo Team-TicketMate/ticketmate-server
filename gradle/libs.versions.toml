@@ -1,5 +1,6 @@
 [versions]
 spring_boot = "3.5.4"
+hibernate = "6.1.4.Final"
 springdoc_openapi = "2.8.9"
 jjwt = "0.12.6"
 postgresql = "42.7.7"
@@ -36,6 +37,9 @@ spring_boot_starter_web = { module = "org.springframework.boot:spring-boot-start
 
 # Spring Stater Test
 spring_boot_starter_test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring_boot" }
+
+# Hibernate
+hibernate = { module = "org.hibernate.orm:hibernate-ant", version.ref = "hibernate" }
 
 # JPA
 spring_boot_starter_data_jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring_boot" }

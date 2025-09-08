@@ -1,0 +1,259 @@
+name: TICKET-MATE-BE-SCHEMA-VERIFY
+
+on:
+  pull_request:
+    branches: [test]
+    paths:
+      - 'scripts/sql/**' # 스크립트 변경 시
+      - '.github/workflows/TICKET-MATE-BE-SCHEMA-VERIFY.yml' # 워크플로 파일 변경 시
+      - 'ticketmate-api/src/main/resources/db/migration/**' # flyway-migration 변경 시
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schema-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  schema-verify:
+    runs-on: ubuntu-latest
+
+    env:
+      WORK_DIR: ${{ github.workspace }}
+      MODULE: ticketmate-api
+      GEN_DIR: ${{ github.workspace }}/ticketmate-api/build/generated
+      HIB_DDL: ${{ github.workspace }}/ticketmate-api/build/generated/hibernate-ddl.sql
+      FLY_SCHEMA: ${{ github.workspace }}/ticketmate-api/build/generated/flyway-schema.sql
+      MIG_DIR: ${{ github.workspace }}/ticketmate-api/src/main/resources/db/migration
+      REQUIRE_MIGRATIONS: "false"
+
+      # Vertex AI
+      VERTEX_PROJECT_ID: ${{ secrets.VERTEX_PROJECT_ID }}
+      VERTEX_LOCATION: ${{ secrets.VERTEX_LOCATION }}
+      VERTEX_MODEL: ${{ secrets.VERTEX_MODEL }}
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 타임스탬프 생성 (KST, 항상 실행)
+        id: ts
+        if: always()
+        run: |
+          TS=$(TZ=Asia/Seoul date '+%Y%m%d_%H%M%S')
+          echo "ts=$TS" >> "$GITHUB_OUTPUT"   # steps.ts.outputs.ts 로 사용
+          echo "TS=$TS" >> "$GITHUB_ENV"
+          echo "📌 Artifact timestamp(KST): $TS"
+
+      # 🔎 Flyway 파일명 규칙 검사 (VyyyyMMdd_HHmmss__xxx.sql)
+      - name: Flyway 파일명 규칙 검사
+        run: |
+          if [ -d "$MIG_DIR" ]; then
+            chmod +x "$WORK_DIR/scripts/sql/check_flyway_filenames.sh"
+            "$WORK_DIR/scripts/sql/check_flyway_filenames.sh" "$MIG_DIR"
+          else
+            echo "ℹ️ 마이그레이션 디렉터리가 없어 파일명 검사를 생략합니다: $MIG_DIR"
+          fi
+
+      - name: 디렉터리 준비
+        run: mkdir -p "$GEN_DIR"
+
+      - name: JDK 설정
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Gradle Wrapper 실행권한 부여
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 스크립트 존재/권한 확인
+        run: |
+          echo "📁 scripts/sql 목록:"
+          ls -la "$WORK_DIR/scripts/sql" || true
+          chmod +x "$COMPARE_SH" || true
+
+      - name: Postgres 준비 확인 (컨테이너 클라이언트)
+        run: |
+          for i in {1..30}; do
+            if docker run --rm --network=host pgvector/pgvector:pg17 \
+              pg_isready -h localhost -p 5432 -U postgres; then
+              echo "✅ Postgres 준비 완료"
+              exit 0
+            fi
+            echo "⏳ DB 준비 대기중... ($i/30)"
+            sleep 2
+          done
+          echo "❌ Postgres가 준비되지 않았습니다." && exit 1
+
+      - name: 마이그레이션 파일 개수 확인 (디렉토리 유무 포함)
+        id: migcheck
+        run: |
+          if [ -d "$MIG_DIR" ]; then
+            count=$(find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' | wc -l | xargs)
+          else
+            echo "ℹ️ 마이그레이션 디렉터리가 없으므로 0개로 간주합니다: $MIG_DIR"
+            count=0
+          fi
+          echo "MIG_COUNT=$count" >> $GITHUB_ENV
+          echo "🔎 발견된 마이그레이션 파일 수: $count"
+          if [ "$count" != "0" ]; then
+            echo "📄 목록:"
+            find "$MIG_DIR" -maxdepth 1 -type f -name '*.sql' -print | sort
+          fi
+
+      - name: Flyway 마이그레이션 적용 (Docker)
+        if: env.MIG_COUNT != '0'
+        run: |
+          docker run --rm --network=host \
+            -v "$WORK_DIR/${MODULE}/src/main/resources/db/migration":/flyway/sql \
+            flyway/flyway:10 \
+            -url=jdbc:postgresql://localhost:5432/postgres \
+            -user=postgres -password=postgres \
+            -locations=filesystem:/flyway/sql \
+            migrate
+
+      - name: Flyway 결과 스키마 덤프
+        if: env.MIG_COUNT != '0'
+        run: |
+          docker run --rm --network=host -e PGPASSWORD=postgres postgres:17-alpine \
+          pg_dump --schema-only --no-owner --no-privileges --no-comments \
+          --exclude-table=flyway_schema_history \
+          -h localhost -U postgres -d postgres > "$FLY_SCHEMA"
+          echo "📝 Flyway 스키마 라인 수:" $(wc -l < "$FLY_SCHEMA")
+
+      - name: 빈 Flyway 스키마 파일 생성(마이그레이션 없음)
+        if: env.MIG_COUNT == '0'
+        run: |
+          echo "-- no user migrations" > "$FLY_SCHEMA"
+
+      - name: Flyway DDL 스냅샷 확인/출력
+        run: |
+          if [ -f "$FLY_SCHEMA" ]; then
+            echo "✅ Flyway 스키마 덤프 존재: $FLY_SCHEMA"
+            echo "----- [처음 60줄] -----"
+            sed -n '1,60p' "$FLY_SCHEMA"
+            echo "----- [마지막 30줄] -----"
+            tail -n 30 "$FLY_SCHEMA"
+          else
+            echo "❌ Flyway 스키마 파일을 찾을 수 없습니다: $FLY_SCHEMA"
+            echo "📂 현재 생성 디렉터리 목록:"
+            ls -la "$GEN_DIR" || true
+            exit 1
+          fi
+
+      - name: Hibernate DDL 생성 (스프링 미사용, 해당 테스트만 실행)
+        run: |
+          ./gradlew :${MODULE}:test --tests '*HibernateDdlGeneratorTest' --info --no-build-cache
+          echo "📝 Hibernate DDL 라인 수:" $(wc -l < "$HIB_DDL")
+
+      - name: Hibernate DDL 스냅샷 확인/출력 (존재/용량 검증)
+        run: |
+          if [ ! -f "$HIB_DDL" ]; then
+            echo "❌ Hibernate DDL 파일을 찾을 수 없습니다: $HIB_DDL"
+            ls -la "$GEN_DIR" || true
+            exit 1
+          fi
+          if [ ! -s "$HIB_DDL" ]; then
+            echo "❌ Hibernate DDL 파일이 비어 있습니다: $HIB_DDL"
+            exit 1
+          fi
+          echo "✅ Hibernate DDL 존재 및 유효: $HIB_DDL"
+          echo "----- [처음 60줄] -----"
+          sed -n '1,60p' "$HIB_DDL"
+          echo "----- [마지막 30줄] -----"
+          tail -n 30 "$HIB_DDL"
+
+      - name: 정책 검사 (마이그레이션 필수 여부)
+        if: env.MIG_COUNT == '0' && env.REQUIRE_MIGRATIONS == 'true'
+        run: |
+          echo "❌ 정책상 최소 1개의 Flyway 마이그레이션이 필요합니다. (REQUIRE_MIGRATIONS=true)"
+          exit 1
+
+      - name: Google Cloud 인증(ACD 파일 생성)
+        if: env.MIG_COUNT != '0'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.TICKETMATE_EMBEDDING_JSON }}
+          create_credentials_file: true
+
+      - name: Python 설치
+        if: env.MIG_COUNT != '0'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Vertex SDK 설치
+        if: env.MIG_COUNT != '0'
+        run: |
+          python -m pip install --upgrade pip
+          pip install "google-cloud-aiplatform>=1.63.0,<2"
+
+      - name: AI 비교 실행 (Vertex)
+        if: env.MIG_COUNT != '0'
+        continue-on-error: true
+        run: |
+          python3 "$WORK_DIR/scripts/sql/ai_schema_compare.py" \
+            "$HIB_DDL" "$FLY_SCHEMA" --out_dir "$GEN_DIR"
+
+      - name: 마이그레이션 없음 - AI 비교 스킵 리포트
+        if: env.MIG_COUNT == '0' && env.REQUIRE_MIGRATIONS != 'true'
+        run: |
+          cat > "$GEN_DIR/schema-compare-summary.md" << 'EOF'
+          # Schema compare skipped
+          No user migrations were found, so AI comparison was skipped.
+          - To enforce presence of migrations, set REQUIRE_MIGRATIONS=true.
+          EOF
+          echo "skip" > "$GEN_DIR/ai_verdict.txt"
+
+      - name: 산출물 목록(업로드 직전)
+        if: always()
+        run: |
+          echo "📂 $GEN_DIR 내용:"
+          ls -la "$GEN_DIR" || true
+          echo ""
+          echo "📏 파일 크기:"
+          du -ah "$GEN_DIR" || true
+
+      - name: 아티팩트 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-compare-artifacts-${{ steps.ts.outputs.ts || github.run_id }}
+          path: ${{ env.GEN_DIR }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: 결과에 따른 실패 처리
+        if: always()
+        run: |
+          if [ -f "$GEN_DIR/ai_verdict.txt" ]; then
+            verdict=$(tr -d '\r\n' < "$GEN_DIR/ai_verdict.txt")
+            echo "AI verdict: ${verdict}"
+            if [ "$verdict" = "no" ]; then
+              echo "❌ 스키마 논리 불일치 - 실패 처리"
+              exit 1
+            fi
+          fi
