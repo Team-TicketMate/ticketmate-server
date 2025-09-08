@@ -108,7 +108,8 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
             MEMBER.profileImgStoredPath,
             PORTFOLIO.portfolioDescription,
             AGENT_PERFORMANCE_SUMMARY.averageRating,
-            AGENT_PERFORMANCE_SUMMARY.reviewCount
+            AGENT_PERFORMANCE_SUMMARY.reviewCount,
+            Expressions.nullExpression()
         ))
         .from(MEMBER)
         .leftJoin(PORTFOLIO).on(PORTFOLIO.member.eq(MEMBER))
