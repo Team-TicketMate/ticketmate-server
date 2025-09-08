@@ -37,7 +37,8 @@ public class SearchMapperImpl implements SearchMapper {
         storageService.generatePublicUrl(info.profileImgStoredPath()),
         info.introduction(),
         info.averageRating(),
-        info.reviewCount()
+        info.reviewCount(),
+        info.score()
     );
   }
 }
