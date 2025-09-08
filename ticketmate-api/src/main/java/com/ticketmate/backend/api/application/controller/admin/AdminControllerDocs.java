@@ -401,6 +401,16 @@ public interface AdminControllerDocs {
           - `createdDate` (String, ISO-8601): 포트폴리오 생성일시
           - `updatedDate` (String, ISO-8601): 포트폴리오 최종 수정일시
           
+          ## PortfolioStatus.java
+          
+          PENDING_REVIEW("검토 대기")
+        
+          REVIEWING("검토 중")
+        
+          APPROVED("승인")
+        
+          REJECTED("반려")
+          
           예시:
           ```json
           {
@@ -484,9 +494,9 @@ public interface AdminControllerDocs {
           
           이 API는 관리자 인증이 필요합니다
           
-          ### 요청 파라미터
-          - 변경할 포트폴리오의 고유한 id (Pathvariable)
-          - `PortfolioStatus`
+          ## 요청 파라미터
+          - **portfolioId** (UUID): 포트폴리오 PK (PathVariable) [필수]
+          - **portfolioStatus** (String): 변경하려는 포트폴리오 상태 (RequestBody) [필수]
           
           ### PortfolioStatus
           
