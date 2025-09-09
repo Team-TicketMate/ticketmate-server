@@ -12,10 +12,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
-import com.ticketmate.backend.concert.application.dto.response.ConcertDateInfoResponse;
-import com.ticketmate.backend.concert.application.dto.response.TicketOpenDateInfoResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertDateInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
+import com.ticketmate.backend.concert.application.dto.view.TicketOpenDateInfo;
 import com.ticketmate.backend.concert.core.constant.ConcertSortField;
 import com.ticketmate.backend.concert.core.constant.ConcertType;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
@@ -26,7 +26,6 @@ import com.ticketmate.backend.concert.infrastructure.entity.QConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.QTicketOpenDate;
 import com.ticketmate.backend.concerthall.infrastructure.entity.QConcertHall;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
@@ -88,35 +87,35 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Tuple firstRow = rows.get(0);
 
     // —— 공연 일자 중복 제거 (key: session) —— //
-    Map<Integer, ConcertDateInfoResponse> dateMap = new LinkedHashMap<>();
+    Map<Integer, ConcertDateInfo> dateMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
-      dateMap.putIfAbsent(session, new ConcertDateInfoResponse(
+      dateMap.putIfAbsent(session, new ConcertDateInfo(
           t.get(CONCERT_DATE.performanceDate),
           session
       ));
     }
-    List<ConcertDateInfoResponse> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
+    List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
+        .sorted(Comparator.comparing(ConcertDateInfo::session))
         .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
-    Map<TicketOpenType, TicketOpenDateInfoResponse> openMap = new LinkedHashMap<>();
+    Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       Instant openDate = t.get(TICKET_OPEN_DATE.openDate);
       if (openDate != null && openDate.isBefore(NOW)) {
         continue;
       }
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
-      openMap.putIfAbsent(type, new TicketOpenDateInfoResponse(
+      openMap.putIfAbsent(type, new TicketOpenDateInfo(
           t.get(TICKET_OPEN_DATE.openDate),
           t.get(TICKET_OPEN_DATE.requestMaxCount),
           t.get(TICKET_OPEN_DATE.isBankTransfer),
           type
       ));
     }
-    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfoResponse::openDate))
+    List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
+        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
         .toList();
 
     return new ConcertInfo(
@@ -164,23 +163,23 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Tuple firstRow = rows.get(0);
 
     // —— 공연 일자 중복 제거 (key: session) —— //
-    Map<Integer, ConcertDateInfoResponse> dateMap = new LinkedHashMap<>();
+    Map<Integer, ConcertDateInfo> dateMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
-      dateMap.putIfAbsent(session, new ConcertDateInfoResponse(
+      dateMap.putIfAbsent(session, new ConcertDateInfo(
           t.get(CONCERT_DATE.performanceDate),
           session
       ));
     }
-    List<ConcertDateInfoResponse> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
+    List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
+        .sorted(Comparator.comparing(ConcertDateInfo::session))
         .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
-    Map<TicketOpenType, TicketOpenDateInfoResponse> openMap = new LinkedHashMap<>();
+    Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
-      openMap.putIfAbsent(type, new TicketOpenDateInfoResponse(
+      openMap.putIfAbsent(type, new TicketOpenDateInfo(
           t.get(TICKET_OPEN_DATE.openDate),
           t.get(TICKET_OPEN_DATE.requestMaxCount),
           t.get(TICKET_OPEN_DATE.isBankTransfer),
@@ -188,8 +187,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
       ));
     }
 
-    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfoResponse::openDate))
+    List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
+        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
         .toList();
 
     return new ConcertInfo(
