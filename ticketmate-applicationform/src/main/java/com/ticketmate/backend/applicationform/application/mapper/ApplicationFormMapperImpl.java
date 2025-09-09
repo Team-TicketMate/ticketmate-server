@@ -9,6 +9,7 @@ import com.ticketmate.backend.applicationform.application.dto.view.ApplicationFo
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationFormDetail;
 import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class ApplicationFormMapperImpl implements ApplicationFormMapper {
         storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
         info.agentNickname(),
         info.clientNickname(),
-        info.submittedDate(),
+        TimeUtil.toLocalDateTime(info.submittedDate()),
         info.applicationFormStatus(),
         info.ticketOpenType()
     );
