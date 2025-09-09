@@ -3,7 +3,7 @@ package com.ticketmate.backend.common.infrastructure.persistence;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,10 +25,10 @@ public abstract class BasePostgresEntity {
   // 생성일
   @CreatedDate
   @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime createdDate;
+  private Instant createdDate;
 
   // 수정일
   @LastModifiedDate
   @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime updatedDate;
+  private Instant updatedDate;
 }

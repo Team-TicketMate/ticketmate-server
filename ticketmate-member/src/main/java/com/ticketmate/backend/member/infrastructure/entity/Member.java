@@ -12,7 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -87,7 +87,7 @@ public class Member extends BasePostgresEntity {
 
   // 마지막 로그인 시간
   @Column(columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime lastLoginTime;
+  private Instant lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)
   @Builder.Default
