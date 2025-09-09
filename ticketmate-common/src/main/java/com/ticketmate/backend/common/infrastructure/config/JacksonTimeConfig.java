@@ -16,7 +16,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 public class JacksonTimeConfig {
 
   private static final String PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
-  private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("Asia/Seoul");
+  private static final TimeZone KST = TimeZone.getTimeZone("Asia/Seoul");
 
   @Bean
   public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
@@ -28,7 +28,7 @@ public class JacksonTimeConfig {
       javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
 
       builder.modules(javaTimeModule);
-      builder.timeZone(TIME_ZONE);
+      builder.timeZone(KST);
       builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     };
   }
