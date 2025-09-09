@@ -17,7 +17,7 @@ import com.ticketmate.backend.portfolio.infrastructure.entity.QPortfolio;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import com.ticketmate.backend.search.application.dto.view.AgentSearchInfo;
 import com.ticketmate.backend.search.application.dto.view.ConcertSearchInfo;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -56,21 +56,21 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
             CONCERT_HALL.concertHallName,
             // 선예매 오픈일
             Expressions.dateTimeTemplate(
-                LocalDateTime.class,
+                Instant.class,
                 "min({0})",
                 new CaseBuilder()
                     .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
                     .then(TICKET_OPEN_DATE.openDate)
-                    .otherwise((LocalDateTime) null)
+                    .otherwise((Instant) null)
             ).as("ticketPreOpenDate"),
             // 일반 예매 오픈일
             Expressions.dateTimeTemplate(
-                LocalDateTime.class,
+                Instant.class,
                 "min({0})",
                 new CaseBuilder()
                     .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
                     .then(TICKET_OPEN_DATE.openDate)
-                    .otherwise((LocalDateTime) null)
+                    .otherwise((Instant) null)
             ).as("ticketGeneralOpenDate"),
             CONCERT_DATE.performanceDate.min().as("startDate"),
             CONCERT_DATE.performanceDate.max().as("endDate"),
