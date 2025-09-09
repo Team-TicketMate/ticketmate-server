@@ -12,7 +12,7 @@ import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
-import java.time.Clock;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
-  private final Clock clock;
+  private final ZoneId zoneId;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) {
@@ -84,7 +84,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
     Member savedMember = memberRepository.save(member);
 
-    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes(), clock);
+    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes(), zoneId);
   }
 
   // 회원 이메일을 통한 CustomOAuth2User 반환
@@ -96,6 +96,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
 
-    return new CustomOAuth2User(member, null, clock);
+    return new CustomOAuth2User(member, null, zoneId);
   }
 }

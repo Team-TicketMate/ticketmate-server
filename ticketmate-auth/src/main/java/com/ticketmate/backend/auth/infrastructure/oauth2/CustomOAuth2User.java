@@ -5,7 +5,6 @@ import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.security.Principal;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -25,7 +24,6 @@ public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
 
   private final Member member;
   private final Map<String, Object> attributes;
-  private final Clock clock;
   private final ZoneId zoneId;
 
   // JWT 액세스 토큰의 만료 시각 (채팅에서 사용할 기능입니다.)
