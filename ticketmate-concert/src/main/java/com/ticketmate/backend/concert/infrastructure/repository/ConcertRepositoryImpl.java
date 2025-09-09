@@ -47,8 +47,6 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   private static final QConcertDate CONCERT_DATE = QConcertDate.concertDate;
   private static final QTicketOpenDate TICKET_OPEN_DATE = QTicketOpenDate.ticketOpenDate;
 
-  private static final Instant NOW = TimeUtil.now();
-
   private final JPAQueryFactory queryFactory;
 
   /**
@@ -103,7 +101,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       Instant openDate = t.get(TICKET_OPEN_DATE.openDate);
-      if (openDate != null && openDate.isBefore(NOW)) {
+      if (openDate != null && openDate.isBefore(TimeUtil.now())) {
         continue;
       }
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
@@ -220,6 +218,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
       TicketReservationSite ticketReservationSite,
       Pageable pageable) {
 
+    Instant now = TimeUtil.now();
+
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
         QueryDslUtil.likeIgnoreCase(CONCERT.concertName, concertName),
@@ -230,16 +230,16 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
 
     // CASE WHEN 로직 추출
     DateTimeExpression<Instant> preOpenDateExpression = buildOpenDateExpression(
-        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, NOW
+        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
     );
     DateTimeExpression<Instant> generalOpenDateExpression = buildOpenDateExpression(
-        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, NOW
+        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
     );
     ComparableExpression<Boolean> preOpenBankTransfer = buildBackTransferExpression(
-        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, NOW
+        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
     );
     ComparableExpression<Boolean> generalOpenBankTransfer = buildBackTransferExpression(
-        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, NOW
+        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
     );
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)

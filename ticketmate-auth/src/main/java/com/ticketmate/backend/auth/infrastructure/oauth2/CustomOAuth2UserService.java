@@ -13,7 +13,6 @@ import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +29,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
   private final Clock clock;
-
-  private static final Instant NOW = TimeUtil.now();
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) {
@@ -71,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
-          .lastLoginTime(NOW)
+          .lastLoginTime(TimeUtil.now())
           .followingCount(0L)
           .followerCount(0L)
           .build();
@@ -83,7 +80,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
       }
       member.setIsFirstLogin(false);
-      member.setLastLoginTime(NOW);
+      member.setLastLoginTime(TimeUtil.now());
     }
     Member savedMember = memberRepository.save(member);
 
