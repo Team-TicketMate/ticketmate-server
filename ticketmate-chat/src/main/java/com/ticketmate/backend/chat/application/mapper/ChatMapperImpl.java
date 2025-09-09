@@ -6,6 +6,7 @@ import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatMessage;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.List;
@@ -34,7 +35,7 @@ public class ChatMapperImpl implements ChatMapper {
         .senderId(message.getSenderId())
         .senderNickname(message.getSenderNickName())
         .message(message.getMessage())
-        .sendDate(message.getSendDate())
+        .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
         .read(message.isRead())
         .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
         .mine(message.getSenderId().equals(currentMemberId))
@@ -59,7 +60,7 @@ public class ChatMapperImpl implements ChatMapper {
         .ticketOpenType(chatRoom.getTicketOpenType())
         .lastChatMessage(chatRoom.getLastMessage())
         .concertThumbnailUrl(storageService.generatePublicUrl(concertThumbnailStoredPath))
-        .lastChatSendTime(chatRoom.getLastMessageTime())
+        .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
         .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
         .build();
   }
