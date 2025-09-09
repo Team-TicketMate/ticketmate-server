@@ -55,6 +55,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   @Override
   public ConcertInfo findConcertInfoByConcertId(UUID concertId) {
 
+    Instant now = TimeUtil.now();
+
     List<Tuple> rows = queryFactory
         .select(
             CONCERT.concertId,
@@ -101,7 +103,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       Instant openDate = t.get(TICKET_OPEN_DATE.openDate);
-      if (openDate != null && openDate.isBefore(TimeUtil.now())) {
+      if (openDate != null && openDate.isBefore(now)) {
         continue;
       }
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
