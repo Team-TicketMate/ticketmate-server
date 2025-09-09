@@ -24,11 +24,11 @@ public abstract class BasePostgresEntity {
 
   // 생성일
   @CreatedDate
-  @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP(0)")
+  @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ(0)")
   private Instant createdDate;
 
   // 수정일
   @LastModifiedDate
-  @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
+  @Column(nullable = false, columnDefinition = "TIMESTAMPTZ(0)")
   private Instant updatedDate;
 }

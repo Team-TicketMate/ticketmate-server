@@ -38,7 +38,7 @@ public class TicketOpenDate extends BasePostgresEntity {
   @JoinColumn(nullable = false)
   private Concert concert;
 
-  @Column(columnDefinition = "TIMESTAMP(0)")
+  @Column(columnDefinition = "TIMESTAMPTZ(0)")
   private Instant openDate; // 티켓 오픈일
 
   private Integer requestMaxCount; // 최대 예매 매수

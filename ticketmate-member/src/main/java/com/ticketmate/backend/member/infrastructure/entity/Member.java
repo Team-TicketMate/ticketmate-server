@@ -86,7 +86,7 @@ public class Member extends BasePostgresEntity {
   private Boolean isFirstLogin = true;
 
   // 마지막 로그인 시간
-  @Column(columnDefinition = "TIMESTAMP(0)")
+  @Column(columnDefinition = "TIMESTAMPTZ(0)")
   private Instant lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)

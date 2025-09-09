@@ -36,7 +36,7 @@ public class ConcertDate extends BasePostgresEntity {
   @JoinColumn(nullable = false)
   private Concert concert; // 공연
 
-  @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
+  @Column(nullable = false, columnDefinition = "TIMESTAMPTZ(0)")
   private Instant performanceDate; // 공연 일자
 
   @Column(nullable = false)
