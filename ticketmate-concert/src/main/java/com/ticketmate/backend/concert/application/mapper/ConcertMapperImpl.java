@@ -1,6 +1,7 @@
 package com.ticketmate.backend.concert.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
@@ -50,12 +51,12 @@ public class ConcertMapperImpl implements ConcertMapper {
         info.concertHallName(),
         info.concertType(),
         info.ticketReservationSite(),
-        info.ticketPreOpenDate(),
+        TimeUtil.toLocalDateTime(info.ticketPreOpenDate()),
         info.preOpenBankTransfer(),
-        info.ticketGeneralOpenDate(),
+        TimeUtil.toLocalDateTime(info.ticketGeneralOpenDate()),
         info.generalOpenBankTransfer(),
-        info.startDate(),
-        info.endDate(),
+        TimeUtil.toLocalDateTime(info.startDate()),
+        TimeUtil.toLocalDateTime(info.endDate()),
         concertThumbnailUrl,
         seatingChartUrl
     );
