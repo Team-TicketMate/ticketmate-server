@@ -12,7 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,7 +39,7 @@ public class TicketOpenDate extends BasePostgresEntity {
   private Concert concert;
 
   @Column(columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime openDate; // 티켓 오픈일
+  private Instant openDate; // 티켓 오픈일
 
   private Integer requestMaxCount; // 최대 예매 매수
 
@@ -49,7 +49,7 @@ public class TicketOpenDate extends BasePostgresEntity {
   @Column(nullable = false)
   private TicketOpenType ticketOpenType; // 선예매, 일반예매 여부
 
-  public static TicketOpenDate of(Concert concert, LocalDateTime openDate, Integer requestMaxCount, Boolean isBankTransfer, TicketOpenType ticketOpenType) {
+  public static TicketOpenDate of(Concert concert, Instant openDate, Integer requestMaxCount, Boolean isBankTransfer, TicketOpenType ticketOpenType) {
     return TicketOpenDate.builder()
         .concert(concert)
         .openDate(openDate)
