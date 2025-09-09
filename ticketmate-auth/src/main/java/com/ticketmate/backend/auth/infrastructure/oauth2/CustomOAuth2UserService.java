@@ -5,6 +5,7 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.response.KakaoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.response.NaverResponse;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
@@ -12,7 +13,7 @@ import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
   private final Clock clock;
+
+  private static final Instant NOW = TimeUtil.now();
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) {
@@ -68,7 +71,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
-          .lastLoginTime(LocalDateTime.now(clock))
+          .lastLoginTime(NOW)
           .followingCount(0L)
           .followerCount(0L)
           .build();
@@ -80,7 +83,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
       }
       member.setIsFirstLogin(false);
-      member.setLastLoginTime(LocalDateTime.now(clock));
+      member.setLastLoginTime(NOW);
     }
     Member savedMember = memberRepository.save(member);
 
