@@ -38,11 +38,6 @@ public class ApplicationFormMapperImpl implements ApplicationFormMapper {
   }
 
   @Override
-  public ApplicationFormDetailResponse toApplicationFormDetailResponse(ApplicationFormDetail applicationFormDetail) {
-    return mapStruct.toApplicationFormDetailResponse(applicationFormDetail);
-  }
-
-  @Override
   public List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList) {
     return mapStruct.toApplicationFormDetailResponseList(applicationFormDetailList);
   }
