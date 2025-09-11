@@ -18,11 +18,11 @@ import com.ticketmate.backend.chat.infrastructure.repository.LastReadMessageRepo
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.messaging.infrastructure.properties.ChatRabbitMqProperties;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.service.StorageService;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -54,7 +54,6 @@ public class ChatMessageService {
   private final ChatMapper chatMapper;
   private final RedisTemplate<String, String> redisTemplate;
   private final StorageService storageService;
-  private final Clock clock;
 
   /**
    * 채팅 메시지를 보내는 메서드입니다.
@@ -87,7 +86,7 @@ public class ChatMessageService {
     log.debug("acknowledgeRead 메서드 동작");
     LastReadMessage lastReadMessagePointer = findLastReadMessage(ack, chatRoomId, reader);
 
-    lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), ack.getReadDate());
+    lastReadMessagePointer.updatePointer(ack.getLastReadMessageId(), TimeUtil.toInstant(ack.getReadDate()));
     lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
 
     // Redis 카운터 제거
@@ -123,7 +122,7 @@ public class ChatMessageService {
                 .readerId(reader.getMemberId())
                 .senderId(lastMessage.getSenderId())
                 .lastReadMessageId(ack.getLastReadMessageId())
-                .readDate(lastMessage.getSendDate())
+                .readDate(TimeUtil.toLocalDateTime(lastMessage.getSendDate()))
                 .build();
 
             Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId()).
@@ -148,7 +147,7 @@ public class ChatMessageService {
                 .chatRoomId(chatRoomId)
                 .memberId(reader.getMemberId())
                 .lastMessageId(request.getLastReadMessageId())
-                .readDate(request.getReadDate())
+                .readDate(TimeUtil.toInstant(request.getReadDate()))
                 .build()
         );
   }
@@ -177,7 +176,7 @@ public class ChatMessageService {
       Long count = redisTemplate.opsForValue().increment(key);
       redisTemplate.expire(key, ChatConstants.TTL);
 
-      String formattedSendDate = formattingSendDate(message.getSendDate());
+      String formattedSendDate = formattingSendDate(TimeUtil.toLocalDateTime(message.getSendDate()));
 
       rabbitTemplate.convertAndSend(
           "",
@@ -237,7 +236,7 @@ public class ChatMessageService {
         .message(message)
         .chatMessageType(chatMessageType)
         .isRead(false)
-        .sendDate(LocalDateTime.now(clock))
+        .sendDate(TimeUtil.now())
         .pictureMessageStoredPathList(Collections.emptyList())
         .build();
 
@@ -288,7 +287,7 @@ public class ChatMessageService {
         .message(null)
         .chatMessageType(ChatMessageType.PICTURE)
         .isRead(false)
-        .sendDate(LocalDateTime.now(clock))
+        .sendDate(TimeUtil.now())
         .pictureMessageStoredPathList(pictureStoredPathList)
         .build();
 

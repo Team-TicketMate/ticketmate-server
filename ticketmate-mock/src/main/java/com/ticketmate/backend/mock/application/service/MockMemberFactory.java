@@ -4,6 +4,7 @@ import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
@@ -15,7 +16,6 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -108,7 +108,7 @@ public class MockMemberFactory {
         .memberType(memberType)
         .accountStatus(status)
         .isFirstLogin(firstLogin)
-        .lastLoginTime(LocalDateTime.now(clock));
+        .lastLoginTime(TimeUtil.now());
   }
 
   // 테스트 회원 Role 검증

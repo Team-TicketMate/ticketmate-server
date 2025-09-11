@@ -2,6 +2,7 @@ package com.ticketmate.backend.admin.concert.application.service;
 
 import com.ticketmate.backend.admin.concert.application.dto.request.TicketOpenDateRequest;
 import com.ticketmate.backend.admin.concert.application.validator.TicketOpenDateValidator;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
 import com.ticketmate.backend.concert.infrastructure.repository.TicketOpenDateRepository;
@@ -35,7 +36,7 @@ public class TicketOpenDateAdminService {
    */
   public void saveTicketOpenDateList(Concert concert, List<TicketOpenDateRequest> requestList) {
     List<TicketOpenDate> ticketOpenDateList = requestList.stream()
-        .map(request -> TicketOpenDate.of(concert, request.getOpenDate(), request.getRequestMaxCount(), request.getIsBankTransfer(), request.getTicketOpenType()))
+        .map(request -> TicketOpenDate.of(concert, TimeUtil.toInstant(request.getOpenDate()), request.getRequestMaxCount(), request.getIsBankTransfer(), request.getTicketOpenType()))
         .collect(Collectors.toList());
     ticketOpenDateRepository.saveAll(ticketOpenDateList);
   }
