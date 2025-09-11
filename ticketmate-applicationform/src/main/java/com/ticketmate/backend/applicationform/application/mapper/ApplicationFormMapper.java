@@ -22,9 +22,6 @@ public interface ApplicationFormMapper {
   // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
   List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
 
-  // ApplicationFormDetail -> ApplicationFormDetailResponse (엔티티 -> DTO)
-  ApplicationFormDetailResponse toApplicationFormDetailResponse(ApplicationFormDetail applicationFormDetail);
-
   // List<ApplicationFormDetail> -> List<ApplicationFormDetailResponse> (엔티티 리스트 -> DTO 리스트)
   List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList);
 

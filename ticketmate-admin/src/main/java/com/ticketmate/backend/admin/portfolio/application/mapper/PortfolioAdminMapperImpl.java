@@ -3,6 +3,7 @@ package com.ticketmate.backend.admin.portfolio.application.mapper;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioAdminInfo;
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +36,8 @@ public class PortfolioAdminMapperImpl implements PortfolioAdminMapper {
         info.memberType(),
         info.portfolioDescription(),
         portfolioImgPublicUrlList,
-        info.createdDate(),
-        info.updatedDate()
+        TimeUtil.toLocalDateTime(info.createdDate()),
+        TimeUtil.toLocalDateTime(info.updatedDate())
     );
   }
 }
