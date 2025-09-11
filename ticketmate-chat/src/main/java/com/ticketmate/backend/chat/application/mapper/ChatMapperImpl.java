@@ -7,6 +7,7 @@ import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatMessage;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
