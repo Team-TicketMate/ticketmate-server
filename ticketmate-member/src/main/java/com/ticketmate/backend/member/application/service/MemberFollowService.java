@@ -1,15 +1,20 @@
 package com.ticketmate.backend.member.application.service;
 
-import com.ticketmate.backend.member.application.dto.request.FollowRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
+import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.validator.MemberFollowValidator;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.entity.MemberFollow;
 import com.ticketmate.backend.member.infrastructure.repository.MemberFollowRepository;
+import com.ticketmate.backend.member.infrastructure.repository.MemberFollowRepositoryCustom;
 import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
 import com.ticketmate.backend.notification.application.type.FollowingNotificationType;
 import com.ticketmate.backend.notification.core.service.NotificationService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberFollowService {
 
   private final MemberFollowRepository memberFollowRepository;
+  private final MemberFollowRepositoryCustom memberFollowRepositoryCustom;
   private final MemberService memberService;
   private final NotificationService notificationService;
 
@@ -28,7 +34,7 @@ public class MemberFollowService {
    * @param request followeeId 팔로우 대상 PK
    */
   @Transactional
-  public void follow(Member follower, FollowRequest request) {
+  public void follow(Member follower, MemberFollowRequest request) {
     Member followee = memberService.findMemberById(request.getFolloweeId());
 
     MemberFollowValidator.of(follower, followee)
@@ -49,7 +55,7 @@ public class MemberFollowService {
    * @param request followeeId 언팔로우 대상 PK
    */
   @Transactional
-  public void unfollow(Member follower, FollowRequest request) {
+  public void unfollow(Member follower, MemberFollowRequest request) {
     Member followee = memberService.findMemberById(request.getFolloweeId());
 
     MemberFollowValidator.of(follower, followee)
@@ -58,6 +64,14 @@ public class MemberFollowService {
         .validateUnfollowAble(memberFollowRepository);
 
     deleteMemberFollowEntity(follower, followee);
+  }
+
+  /**
+   * 팔로우 리스트 필터링 조회
+   */
+  @Transactional(readOnly = true)
+  public Slice<MemberFollowResponse> filteredMemberFollow(UUID clientId, MemberFollowFilteredRequest request) {
+    return memberFollowRepositoryCustom.filteredMemberFollow(clientId, request.toPageable());
   }
 
   /**
