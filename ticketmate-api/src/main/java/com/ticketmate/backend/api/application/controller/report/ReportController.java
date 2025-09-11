@@ -21,9 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
     name = "신고 API",
     description = "사용자 신고 관련 API 제공"
 )
-public class ReportController {
+public class ReportController implements ReportControllerDocs {
   private final ReportService reportService;
 
+  @Override
   @PostMapping
   public ResponseEntity<Void> createReport(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                            @ParameterObject @Valid ReportRequest request) {

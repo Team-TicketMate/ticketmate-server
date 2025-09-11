@@ -44,7 +44,9 @@ public class ReportAdminService {
 
   @Transactional
   public void deleteReport(UUID reportId) {
-    reportRepository.deleteById(reportId);
+    Report report = reportRepository.findById(reportId)
+            .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
+    reportRepository.delete(report);
     // TODO: soft delete 고려
   }
 }
