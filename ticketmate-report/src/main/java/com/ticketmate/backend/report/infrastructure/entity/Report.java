@@ -21,7 +21,6 @@ import java.util.UUID;
 public class Report extends BasePostgresEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID reportId;
 
   // 신고 작성자
@@ -34,6 +33,7 @@ public class Report extends BasePostgresEntity {
 
   // 신고 사유
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private ReportReason reason;
 
   // 상세 내용
@@ -41,6 +41,8 @@ public class Report extends BasePostgresEntity {
 
   // 처리 상태
   @Builder.Default
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private ReportStatus status = ReportStatus.PENDING;
 
   public static Report of(Member reporter, Member reportedUser, ReportRequest request) {
