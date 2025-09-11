@@ -12,16 +12,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-@ToString
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class ApplicationFormFilteredRequest {
 
   private UUID clientId; // 의뢰인 PK
