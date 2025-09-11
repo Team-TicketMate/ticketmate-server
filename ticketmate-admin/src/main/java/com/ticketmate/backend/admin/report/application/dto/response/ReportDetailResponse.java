@@ -4,6 +4,7 @@ import com.ticketmate.backend.report.core.constant.ReportReason;
 import com.ticketmate.backend.report.core.constant.ReportStatus;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class ReportDetailResponse {
   private ReportStatus status;
 
   // 신고 생성 일시
-  private LocalDateTime createdDate;
+  private Instant createdDate;
 
   // TODO: 추후 UI 확정되면 변경 (사용자도 ID 대신 dto로 변경)
 }
