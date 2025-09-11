@@ -17,9 +17,9 @@ import org.springframework.data.domain.Pageable;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SearchRequest {
 
   @NotBlank(message = "검색어를 입력하세요.")

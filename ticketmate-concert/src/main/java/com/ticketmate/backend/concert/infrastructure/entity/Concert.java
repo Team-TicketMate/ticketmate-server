@@ -18,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -27,7 +26,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Concert extends BasePostgresEntity {
 
   @Id
@@ -35,7 +33,7 @@ public class Concert extends BasePostgresEntity {
   private UUID concertId;
 
   // 공연명
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String concertName;
 
   // 공연장
