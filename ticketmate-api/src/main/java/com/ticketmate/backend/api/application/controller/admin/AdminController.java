@@ -194,7 +194,7 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @PutMapping("/report/{report-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> updateReport(@PathVariable(value = "report-id") UUID reportId, @ParameterObject @Valid ReportUpdateRequest request) {
+  public ResponseEntity<Void> updateReport(@PathVariable(value = "report-id") UUID reportId, @RequestBody @Valid ReportUpdateRequest request) {
     reportAdminService.updateReport(reportId, request);
     return ResponseEntity.noContent().build();
   }
