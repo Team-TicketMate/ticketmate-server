@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChatMessageResponse {
   private String messageId;  // 채팅 메시지 ID
-  private String senderNickname;  // 채팅을 보낸사람 닉네임 (상대방 닉네임 X)
+  private String senderNickname;  // 채팅을 보낸사람 닉네임 (나 또는 상대방의 닉네임)
   private String message;  // 채팅 메시지 (텍스트)
   private LocalDateTime sendDate;  // 보낸 시각
   @JsonIgnore

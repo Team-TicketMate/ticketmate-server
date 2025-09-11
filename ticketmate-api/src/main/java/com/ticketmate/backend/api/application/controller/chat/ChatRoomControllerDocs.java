@@ -165,7 +165,6 @@ public interface ChatRoomControllerDocs {
           
           ### 반환값 [LIST]
           - **messageId** : 채팅 메시지 ID
-          - **senderNickname** : 채팅 메시지를 보낸 사용자 ID
           - **senderNickname** : 채팅 메시지를 보낸 사용자 닉네임
           - **message** : 메시지 정보
           - **sendDate** : 채팅을 보낸 시간
