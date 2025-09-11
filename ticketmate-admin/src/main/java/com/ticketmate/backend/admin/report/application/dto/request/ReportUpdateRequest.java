@@ -1,8 +1,8 @@
 package com.ticketmate.backend.admin.report.application.dto.request;
 
 import com.ticketmate.backend.report.core.constant.ReportStatus;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.jetbrains.annotations.NotNull;
 
 @ToString
 @AllArgsConstructor
