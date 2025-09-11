@@ -603,7 +603,7 @@ public interface AdminControllerDocs {
         - UI가 확정되면 반환값이 변경될 예정입니다.
 
         ### 사용 방법
-        1. `GET /report`로 호출합니다.
+        1. `GET /admin/report`로 호출합니다.
         2. 페이지/정렬 파라미터를 쿼리스트링으로 전달합니다. (예: `?pageNumber=1&pageSize=10&sortField=CREATED_DATE&sortDirection=DESC`)
         3. 성공 시 **200 OK**와 함께 `Page<ReportListResponse>`를 반환합니다.
 
@@ -646,7 +646,7 @@ public interface AdminControllerDocs {
         - UI가 확정되면 반환값이 변경될 예정입니다.
 
         ### 사용 방법
-        1. `GET /report/{report-id}`로 호출합니다.
+        1. `GET /admin/report/{report-id}`로 호출합니다.
         2. 경로 변수에 실제 신고 ID(UUID)를 넣어 요청합니다.
         3. 성공 시 **200 OK**와 함께 `ReportDetailResponse`를 반환합니다.
 
@@ -683,7 +683,7 @@ public interface AdminControllerDocs {
         - 본문 없이 **204 No Content**를 반환합니다.
 
         ### 사용 방법
-        1. `PUT /report/{report-id}`로 호출합니다.
+        1. `PUT /admin/report/{report-id}`로 호출합니다.
         2. 쿼리 파라미터로 `reportStatus`를 전달합니다. (예: `?reportStatus=APPROVED`)
         3. 성공 시 **204 No Content** 응답을 받습니다.
 
@@ -717,7 +717,7 @@ public interface AdminControllerDocs {
         - 본문 없이 **204 No Content**를 반환합니다.
 
         ### 사용 방법
-        1. `DELETE /report/{report-id}`로 호출합니다.
+        1. `DELETE /admin/report/{report-id}`로 호출합니다.
         2. 성공 시 **204 No Content** 응답을 받습니다.
 
         ### 유의 사항
