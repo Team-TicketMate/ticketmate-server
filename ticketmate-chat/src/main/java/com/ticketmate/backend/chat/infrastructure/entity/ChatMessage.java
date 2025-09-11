@@ -2,7 +2,7 @@ package com.ticketmate.backend.chat.infrastructure.entity;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
 import com.ticketmate.backend.common.infrastructure.persistence.BaseMongoDocument;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +44,7 @@ public class ChatMessage extends BaseMongoDocument {
 
   private boolean isRead; // 읽음 여부 (필요시 세분화 가능)
 
-  private LocalDateTime sendDate; // 전송 시간
+  private Instant sendDate; // 전송 시간
 
   private ChatMessageType chatMessageType; // 채팅 종류 (텍스트 or 이미지)
 

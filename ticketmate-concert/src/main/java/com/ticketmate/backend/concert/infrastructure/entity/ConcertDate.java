@@ -9,7 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,14 +36,14 @@ public class ConcertDate extends BasePostgresEntity {
   @JoinColumn(nullable = false)
   private Concert concert; // 공연
 
-  @Column(nullable = false, columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime performanceDate; // 공연 일자
+  @Column(nullable = false, columnDefinition = "TIMESTAMPTZ(0)")
+  private Instant performanceDate; // 공연 일자
 
   @Column(nullable = false)
   @Builder.Default
   private int session = 1; // 회차
 
-  public static ConcertDate of(Concert concert, LocalDateTime performanceDate, int session) {
+  public static ConcertDate of(Concert concert, Instant performanceDate, int session) {
     return ConcertDate.builder()
         .concert(concert)
         .performanceDate(performanceDate)

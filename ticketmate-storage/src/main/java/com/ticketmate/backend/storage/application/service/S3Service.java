@@ -17,7 +17,8 @@ import com.ticketmate.backend.storage.infrastructure.util.FileUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class S3Service implements StorageService {
   private final AmazonS3 amazonS3;
   private final S3Properties s3Properties;
   private final Clock clock;
+  private final ZoneId zoneId;
 
   /**
    * 파일 검증 및 원본 파일명 반환
@@ -161,7 +163,7 @@ public class S3Service implements StorageService {
    * @return 저장 경로(storedPath) (prefix/yyyyMMdd-UUID-파일명.jpg)
    */
   private String generateStoredPath(String originalFilename, String prefix) {
-    String datePart = LocalDateTime.now(clock).format(DATE_TIME_FORMATTER);
+    String datePart = ZonedDateTime.now(zoneId).format(DATE_TIME_FORMATTER);
     // 파일명에서 경로 구분자와 특수 문자 제거 + 공백류를 언더스코어로 치환
     String sanitizedFilename = originalFilename
         .replaceAll("[/\\\\:*?\"<>|]", "_")

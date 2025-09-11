@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,8 +16,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 public abstract class BaseMongoDocument {
 
   @CreatedDate
-  private java.time.LocalDateTime createdDate;
+  private Instant createdDate;
 
   @LastModifiedDate
-  private java.time.LocalDateTime updatedDate;
+  private Instant updatedDate;
 }
