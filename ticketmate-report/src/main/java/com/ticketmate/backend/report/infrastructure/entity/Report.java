@@ -37,6 +37,7 @@ public class Report extends BasePostgresEntity {
   private ReportReason reason;
 
   // 상세 내용
+  @Column(columnDefinition = "TEXT")
   private String description;
 
   // 처리 상태
