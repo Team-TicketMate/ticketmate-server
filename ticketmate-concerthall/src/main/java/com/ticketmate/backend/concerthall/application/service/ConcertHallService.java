@@ -84,4 +84,14 @@ public class ConcertHallService {
       throw new CustomException(ErrorCode.DUPLICATE_CONCERT_HALL_NAME);
     }
   }
+
+  /**
+   * 중복된 공연장 웹사이트 URL 검증
+   */
+  public void validateDuplicateWebSiteUrl(String url) {
+    if (concertHallRepository.existsByWebSiteUrl(url)) {
+      log.error("중복된 웹사이트 URL입니다. 요청된 웹사이트 URL: {}", url);
+      throw new CustomException(ErrorCode.DUPLICATE_WEB_SITE_URL);
+    }
+  }
 }
