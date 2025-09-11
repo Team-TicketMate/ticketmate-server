@@ -8,6 +8,7 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.data.domain.Page;
@@ -139,10 +140,16 @@ public interface ChatRoomControllerDocs {
           author = "Chuseok22",
           description = "SortField 정렬 필드 리팩토링",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/393"
+      ),
+      @ApiChangeLog(
+          date = "2025-09-11",
+          author = "mr6208",
+          description = "API 분기에 따른 채팅 메시지 페이지네이션 반환값 리팩토링",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/518"
       )
   })
   @Operation(
-      summary = "채팅방 입장 및 채팅 메시지 페이지네이션",
+      summary = "채팅 메시지 페이지네이션",
       description = """
           
           이 API는 인증이 필요합니다.
@@ -157,15 +164,17 @@ public interface ChatRoomControllerDocs {
             - **sortDirection (String)** : 정렬 방향 [필수X]
           
           ### 반환값 [LIST]
-          - **chatRoomId** : 채팅방 고유 ID
           - **messageId** : 채팅 메시지 ID
-          - **senderId** : 채팅 메시지를 보낸 사용자 ID
+          - **senderNickname** : 채팅 메시지를 보낸 사용자 ID
           - **senderNickname** : 채팅 메시지를 보낸 사용자 닉네임
           - **message** : 메시지 정보
           - **sendDate** : 채팅을 보낸 시간
           - **read** : 채팅의 읽음 여부
           - **profileUrl** : 채팅을 보낸 사용자의 프로필 사진
           - **mine** : 메시지를 보낸 사람의 유무 (자신의 메시지이면 true/상대방의 메시지이면 false)
+          - **chatMessageType** : 채팅 메시지 타입 (텍스트/사진)
+          - **pictureMessageUrlList** : 사진 이미지 리스트
+          - **isRead** : 읽은 메시지인지 아닌지 플래그값
           
           ### 유의사항
           - 채팅방 입장시 가장 최근에 전송된 메시지 20개를 페이지 형태로 반환합니다 (Slice)
@@ -179,10 +188,48 @@ public interface ChatRoomControllerDocs {
           - last 가 true일 경우 -> 마지막 페이지 (다음 데이터는 없음)
           """
   )
-  ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(
+  ResponseEntity<Slice<ChatMessageResponse>> getChatMessages(
       CustomOAuth2User customOAuth2User,
       String chatRoomId,
       ChatMessageFilteredRequest request
+  );
+
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-11",
+          author = "mr6208",
+          description = "채팅방 입장 데이터 반환 API 설계",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/518"
+      )
+  })
+  @Operation(
+      summary = "채팅방 입장시 필요한 데이터 반환",
+      description = """
+          
+          이 API는 인증이 필요합니다.
+          
+          ### 요청 파라미터
+          - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+          
+          ### 반환값 [LIST]
+          - **chatRoomId** : 채팅방 ID
+          - **otherMemberId** : 상대방 ID
+          - **concertName** : 콘서트 이름
+          - **concertThumbnailImage** : 콘서트 썸네일 이미지
+          - **ticketOpenType** : 선예매/일반예매 구분
+          - **ticketOpenDateInfoResponseList** : 예매일 날짜 리스트
+          - **ticketReservationSite** : 예매처 정보
+          - **concertType** : 콘서트 카테고리
+          
+          ### 유의사항
+          - 채팅방 입장시 필요한 데이터를 반환하는 API 입니다.
+          - 기존 채팅방 입장 API와 분기처리하여 반환하는 데이터를 나눴습니다.
+          """
+  )
+  ResponseEntity<ChatRoomContextResponse> enterChatRoom(
+      CustomOAuth2User customOAuth2User,
+      String chatRoomId
   );
 
   @ApiChangeLogs({
