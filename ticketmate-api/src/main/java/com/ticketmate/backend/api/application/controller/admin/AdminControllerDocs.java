@@ -610,6 +610,7 @@ public interface AdminControllerDocs {
         ### 유의 사항
         - 현재 필터링 조건은 없습니다. (추후 UI에 따라 확장될 수 있습니다.)
         - `reason`, `status`는 각 enum에 정의된 값만 반환됩니다. (enum값 역시 기획에 따라 변경될 예정입니다.)
+        - `reason`은 영문 코드(code)와 한글 설명(description)을 포함하는 객체 형태로 반환됩니다.
         - `pageNumber`는 1부터 시작합니다.
         """
   )
@@ -651,6 +652,8 @@ public interface AdminControllerDocs {
 
         ### 유의 사항
         - `reason`, `status`는 각 enum에 정의된 값만 반환됩니다. (enum값은 기획에 따라 변경될 예정입니다.)
+        - `description` 필드는 null일 경우 ""으로 반환됩니다.
+        - `reason`은 영문 코드(code)와 한글 설명(description)을 포함하는 객체 형태로 반환됩니다.
         """
   )
 

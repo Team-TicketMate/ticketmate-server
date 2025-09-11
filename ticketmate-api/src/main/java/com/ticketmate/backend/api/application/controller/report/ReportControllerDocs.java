@@ -40,8 +40,8 @@ public interface ReportControllerDocs {
           - 기획에 따라 ReportReason 값이 변경될 예정입니다.
           
           ### 예외 처리
-          - `MEMBER_NOT_FOUND` (HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."):
-            - 신고자 ID 또는 신고 대상 사용자 ID가 DB에 존재하지 않을 경우 발생
+          - `MEMBER_NOT_FOUND` (HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."): 신고자 ID 또는 신고 대상 사용자 ID가 DB에 존재하지 않을 경우 발생
+          - `CANNOT_REPORT_SELF` (HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다."): 자신에 대한 ID로 요청했을 경우 발생
           """
   )
 
