@@ -1,6 +1,7 @@
 package com.ticketmate.backend.admin.report.infrastructure.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
@@ -62,7 +63,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
             REPORT.reporter.memberId,
             REPORT.reportedUser.memberId,
             REPORT.reason,
-            REPORT.description,
+            Expressions.stringTemplate("COALESCE({0}, '')", REPORT.description),
             REPORT.status,
             REPORT.createdDate
         ))
