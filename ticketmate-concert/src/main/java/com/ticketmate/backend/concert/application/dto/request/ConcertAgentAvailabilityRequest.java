@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ConcertAgentAvailabilityRequest {
 
   @NotNull(message = "concertId는 필수입니다.")

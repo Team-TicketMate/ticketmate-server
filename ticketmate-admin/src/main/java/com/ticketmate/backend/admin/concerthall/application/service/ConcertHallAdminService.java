@@ -6,6 +6,7 @@ import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertH
 import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertHallInfoRequest;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.concerthall.application.dto.request.ConcertHallFilteredRequest;
 import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
 import com.ticketmate.backend.concerthall.application.service.ConcertHallService;
@@ -43,6 +44,10 @@ public class ConcertHallAdminService {
 
     // 중복된 공연장이름 검증
     concertHallService.validateDuplicateConcertHallName(request.getConcertHallName());
+    // 중복된 웹사이트 URL 검증
+    if (!CommonUtil.nvl(request.getWebSiteUrl(), "").isEmpty()) {
+      concertHallService.validateDuplicateWebSiteUrl(request.getWebSiteUrl());
+    }
 
     concertHallRepository.save(ConcertHall.builder()
         .concertHallName(request.getConcertHallName())

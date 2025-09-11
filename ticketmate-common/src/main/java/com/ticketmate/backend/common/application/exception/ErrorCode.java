@@ -116,6 +116,8 @@ public enum ErrorCode {
 
   DUPLICATE_CONCERT_HALL_NAME(HttpStatus.CONFLICT, "중복된 공연장 이름입니다."),
 
+  DUPLICATE_WEB_SITE_URL(HttpStatus.CONFLICT, "중복된 웹사이트 URL입니다."),
+
   CONCERT_HALL_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "공연장 저장 중 오류가 발생했습니다."),
 
   CITY_NOT_FOUND(HttpStatus.BAD_REQUEST, "주소에 일치하는 city값이 없습니다."),

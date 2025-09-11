@@ -6,14 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConcertHallInfoRequest {
 
   @NotBlank(message = "공연장 명을 입력해주세요")
