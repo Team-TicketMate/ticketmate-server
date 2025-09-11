@@ -55,6 +55,7 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
 
   @Override
   public Optional<ReportDetailResponse> findReportById(UUID reportId){
+    // TODO: 반환값 추가 수정 필요
     ReportDetailResponse response = queryFactory
         .select(Projections.constructor(ReportDetailResponse.class,
             REPORT.reportId,
