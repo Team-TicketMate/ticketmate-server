@@ -9,7 +9,6 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import java.util.List;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ApplicationFormMapStruct {
@@ -22,12 +21,6 @@ public interface ApplicationFormMapStruct {
 
   // List<HopeArea> -> List<HopeAreaResponse> (엔티티 리스트 -> DTO 리스트)
   List<HopeAreaResponse> toHopeAreaResponseList(List<HopeArea> hopeAreaList);
-
-  // ApplicationFormDetail -> ApplicationFormDetailResponse (엔티티 -> DTO)
-  @Mapping(source = "concertDate.performanceDate", target = "performanceDate")
-  @Mapping(source = "concertDate.session", target = "session")
-  @Mapping(source = "hopeAreaList", target = "hopeAreaResponseList")
-  ApplicationFormDetailResponse toApplicationFormDetailResponse(ApplicationFormDetail applicationFormDetail);
 
   // List<ApplicationFormDetail> -> List<ApplicationFormDetailResponse> (엔티티 리스트 -> DTO 리스트)
   List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList);

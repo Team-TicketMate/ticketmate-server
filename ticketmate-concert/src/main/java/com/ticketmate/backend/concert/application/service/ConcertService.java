@@ -2,6 +2,7 @@ package com.ticketmate.backend.concert.application.service;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
@@ -107,7 +108,7 @@ public class ConcertService {
    */
   public ConcertDate findConcertDateByConcertIdAndPerformanceDate(UUID concertId, LocalDateTime performanceDate) {
     return concertDateRepository
-        .findByConcertConcertIdAndPerformanceDate(concertId, performanceDate)
+        .findByConcertConcertIdAndPerformanceDate(concertId, TimeUtil.toInstant(performanceDate))
         .orElseThrow(() -> {
           log.error("공연: {} 공연일자: {} 에 해당하는 ConcertDate를 찾을 수 없습니다.",
               concertId, performanceDate);

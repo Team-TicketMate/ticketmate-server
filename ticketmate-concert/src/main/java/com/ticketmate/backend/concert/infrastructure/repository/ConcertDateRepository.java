@@ -1,7 +1,7 @@
 package com.ticketmate.backend.concert.infrastructure.repository;
 
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,7 +13,7 @@ public interface ConcertDateRepository extends JpaRepository<ConcertDate, UUID> 
   List<ConcertDate> findAllByConcertConcertIdOrderByPerformanceDateAsc(UUID concertId);
 
   // 공연PK + 공연일자로 조회
-  Optional<ConcertDate> findByConcertConcertIdAndPerformanceDate(UUID concertId, LocalDateTime performanceDate);
+  Optional<ConcertDate> findByConcertConcertIdAndPerformanceDate(UUID concertId, Instant performanceDate);
 
   void deleteAllByConcertConcertId(UUID concertId);
 }
