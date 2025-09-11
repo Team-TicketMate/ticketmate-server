@@ -281,9 +281,66 @@
   const API = "https://api.ticketmate.site";
   const BEARER = true;
   const TOKENS = {
-    client: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXtgbTrnbxAbmF2ZXIuY29tMzMzIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2Mhe2BtOudvEBuYXZlci5jb20zMzMiLCJtZW1iZXJJZCI6ImY4Njk4OThlLWRmZGYtNDNmNy04MGNhLTk1OTY5MTI3MzlmOCIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MzI3MzkyMCwiZXhwIjoxNzU1ODY1OTIwfQ.zK3iJuU2v1D0CXAMPZC7r60J_DmlJVBse7y-HOd1o0w4R-hKpKH6zYuIyK5jleNz",
-    agent: "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiLssYTtjIXsl5DsnbRAbmF2ZXIuY29tNzUzIiwiY2F0ZWdvcnkiOiJhY2Nlc3MiLCJ1c2VybmFtZSI6IuyxhO2MheyXkOydtEBuYXZlci5jb203NTMiLCJtZW1iZXJJZCI6Ijc1MGFlMGRiLWRmZWQtNGFiNS1hMzYwLTgzNDY4MTMwODU2ZiIsInJvbGUiOiJST0xFX1RFU1QiLCJpc3MiOiJUSUNLRVRfTUFURSIsImlhdCI6MTc1MzI3Mzk0OSwiZXhwIjoxNzU1ODY1OTQ5fQ.2aO1W11pcXV-cJkjWwzPMdwZvI7o6IebhD8n0H1OCPd7j960ogK4C1FMVb-TtkY2",
+    client: "",
+    agent:  ""
   };
+
+
+  // ✅ dev 전용: 한 번만 토큰/roomId 받아서 세션에 캐싱
+  const DEV_INIT_KEY = "dev.mock.init";  // {roomId, tokens:{client,agent}}
+
+  function clearClientState() {
+    sessionStorage.removeItem(DEV_INIT_KEY); // 'dev.mock.init'
+    Token.clear();                           // 'at'
+  }
+
+
+  function isJwtExpiring(token, skewSec = 60) {
+    try { const { exp } = JSON.parse(atob(token.split('.')[1]));
+      return !exp || (exp * 1000 - Date.now()) <= skewSec * 1000;
+    } catch { return true; } // 파싱 실패도 재발급
+  }
+
+  async function initDevOnce() {
+    const cached = sessionStorage.getItem(DEV_INIT_KEY);
+    if (cached) {
+      const data = JSON.parse(cached);
+      // 🔸 토큰 만료 임박 시 캐시 무효화
+      if (!data?.tokens
+          || isJwtExpiring(data.tokens.client)
+          || isJwtExpiring(data.tokens.agent)) {
+        sessionStorage.removeItem(DEV_INIT_KEY);
+      } else {
+        window.__DEV = data;
+        TOKENS.client = data.tokens.client;
+        TOKENS.agent = data.tokens.agent;
+        return data;
+      }
+    }
+// 🔸 서버에서 새로 발급
+    const res = await fetch(`${API}/mock/chat-room`, {method: "POST"});
+    if (!res.ok) {
+      throw new Error("init api failed: " + res.status);
+    }
+    const dto = await res.json();
+    const data = {roomId: dto.chatRoomId, tokens: {client: dto.clientAccessToken, agent: dto.agentAccessToken}};
+    sessionStorage.setItem(DEV_INIT_KEY, JSON.stringify(data));
+    window.__DEV = data;
+    TOKENS.client = data.tokens.client;
+    TOKENS.agent = data.tokens.agent;
+    return data;
+  }
+
+  async function resetDevInit() {
+    clearClientState();                              // ← 토큰/캐시 동시 삭제
+    const init = await initDevOnce();                // 새 토큰/roomId 재발급
+    // 로그인된 역할이 있다면 그 역할 토큰을 다시 활성화
+    if (window.currentRole) {
+      Token.set(TOKENS[window.currentRole]);
+    }
+    return init;
+  }
+
 
   /* ===============================================
    * GLOBAL STATE
@@ -330,6 +387,20 @@
       return {};
     }
   };
+
+  async function apiFetch(url, opts = {}) {
+    const headers = { ...(opts.headers || {}), Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get() };
+    let res = await fetch(url, { ...opts, headers });
+
+    if (res.status === 401 || res.status === 403) {
+      console.warn('[API AUTH] invalid token. resetting...');
+      await resetDevInit();                           // 새 토큰/roomId 발급
+      const headers2 = { ...(opts.headers || {}), Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get() };
+      res = await fetch(url, { ...opts, headers: headers2 }); // 1회 자동 재시도
+    }
+    return res;
+  }
+
 
   // 날짜 파싱 (공백 → T 보정)
   const parseDate = (s) => {
@@ -439,7 +510,19 @@
             },
             (err) => {
               console.error('[STOMP ERROR]', err);
-              resolve();
+              const body = (err && err.body) || '';
+              // 서버에서 던진 문구에 맞게 키워드 확인
+              const needReset = body.includes('MEMBER_NOT_FOUND')
+                  || body.includes('unauthorized')
+                  || body.includes('회원을 찾을 수 없습니다');
+              if (needReset) {
+                (async () => {
+                  await resetDevInit();                       // 새 토큰/roomId
+                  // 재연결
+                  try { stomp?.disconnect(() => connectStomp()); }
+                  catch { connectStomp(); }
+                })();
+              }
             }
         );
       };
@@ -513,10 +596,12 @@
       qs.append('searchKeyword', searchKeyword);
     }
 
-    const res = await fetch(
-        `${API}/api/chat-room?` + qs.toString(),
-        {headers: {Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get()}}
-    );
+    // const res = await fetch(
+    //     `${API}/api/chat-room?` + qs.toString(),
+    //     {headers: {Authorization: BEARER ? 'Bearer ' + Token.get() : Token.get()}}
+    // );
+    const res = await apiFetch(`${API}/api/chat-room?` + qs.toString());
+
     const {content: rooms = []} = await res.json();
 
     const listEl = document.getElementById('roomList');
@@ -613,9 +698,11 @@
     loadingOlder = true;
 
     const url = `${API}/api/chat-room/${roomId}?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`;
-    const res = await fetch(url, {
-      headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
-    });
+    // const res = await fetch(url, {
+    //   headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
+    // });
+    const res = await apiFetch(`${API}/api/chat-room/${roomId}?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`);
+
     if (!res.ok) {
       loadingOlder = false;
       return;
@@ -658,9 +745,7 @@
    =============================================== */
   async function loadApplicationForm(roomId) {
     try {
-      const res = await fetch(`${API}/api/chat-room/${roomId}/application-form`, {
-        headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
-      });
+      const res = await apiFetch(`${API}/api/chat-room/${roomId}/application-form`);
       if (!res.ok) {
         throw new Error(res.status);
       }
@@ -928,14 +1013,16 @@
     files.forEach(f => fd.append(IMG_FIELD_MULTI, f));
 
     try {
-      const res = await fetch(
-          `${API}/api/chat-message/${roomId}/send/pictures`,
-          {
-            method: "POST",
-            headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
-            body: fd
-          }
-      );
+      const res = await apiFetch(`${API}/api/chat-message/${roomId}/send/pictures`, {method: "POST", body: fd});
+
+      // const res = await fetch(
+      //     `${API}/api/chat-message/${roomId}/send/pictures`,
+      //     {
+      //       method: "POST",
+      //       headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
+      //       body: fd
+      //     }
+      // );
       if (!res.ok) {
         throw new Error(res.status);
       }
@@ -1017,19 +1104,37 @@
   /* ===============================================
    * 초기화
    =============================================== */
-  window.addEventListener("DOMContentLoaded", () => {
-    // 로그인 버튼
+  window.addEventListener("DOMContentLoaded", async () => {
+    // ✅ 페이지 로드시 1회 초기화 (캐시 있으면 API 호출 안 함)
+    const init = await initDevOnce(); // {roomId, tokens:{...}}
+
     document.getElementById('clientLoginButton').onclick = async () => {
-      Token.set(TOKENS.client);
+      Token.set(TOKENS.client);          // 서버에서 받은 client 토큰
       await connectStomp();
       await loadRooms();
+      // 바로 고정 방으로 입장 (리스트 갱신 기다릴 필요 없이)
+      await enterRoom(init.roomId);
     };
 
     document.getElementById('agentLoginButton').onclick = async () => {
-      Token.set(TOKENS.agent);
+      Token.set(TOKENS.agent);           // 서버에서 받은 agent 토큰
       await connectStomp();
       await loadRooms();
+      await enterRoom(init.roomId);
     };
+
+    // // 로그인 버튼
+    // document.getElementById('clientLoginButton').onclick = async () => {
+    //   Token.set(TOKENS.client);
+    //   await connectStomp();
+    //   await loadRooms();
+    // };
+    //
+    // document.getElementById('agentLoginButton').onclick = async () => {
+    //   Token.set(TOKENS.agent);
+    //   await connectStomp();
+    //   await loadRooms();
+    // };
 
     // 사진 선택 버튼
     document.getElementById("imgSelectButton").onclick = () => {
@@ -1054,6 +1159,7 @@
       } catch {
       }
       Token.clear();
+      clearClientState();
       location.reload();
     };
     document.getElementById("toggleFormButton").onclick = async () => {

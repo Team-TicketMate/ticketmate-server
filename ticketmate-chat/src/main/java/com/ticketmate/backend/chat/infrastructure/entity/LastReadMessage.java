@@ -1,6 +1,6 @@
 package com.ticketmate.backend.chat.infrastructure.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,24 +14,28 @@ import org.springframework.data.redis.core.index.Indexed;
 /**
  * 마지막으로 읽은 메시지의 포인터역할
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@RedisHash(value = "lastReadMessage", timeToLive = 2592000)
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@RedisHash(value = "lastReadMessage", timeToLive = 2592000)
 public class LastReadMessage {
 
   @Id
   private String lastReadMessage; // "userLastRead:" + {roomId} + {memberId}
-  private String lastMessageId;  // 마지막으로 읽은 메시지의 ID [포인터용]
+
+  private String lastMessageId; // 마지막으로 읽은 메시지의 ID [포인터용]
+
   @Indexed
   private String chatRoomId;
+
   @Indexed
   private UUID memberId;
-  private LocalDateTime readDate;  // 마지막으로 읽은 시각
+
+  private Instant readDate; // 마지막으로 읽은 시각
 
   @Builder
   public LastReadMessage(String lastReadMessage, String chatRoomId, UUID memberId,
-      String lastMessageId, LocalDateTime readDate) {
+      String lastMessageId, Instant readDate) {
     this.lastReadMessage = lastReadMessage;
     this.chatRoomId = chatRoomId;
     this.memberId = memberId;
@@ -40,7 +44,7 @@ public class LastReadMessage {
   }
 
   // 새 포인터가 더 최신이면 갱신
-  public void updatePointer(String newMessageId, LocalDateTime at) {
+  public void updatePointer(String newMessageId, Instant at) {
     if (this.lastMessageId == null || this.lastMessageId.compareTo(newMessageId) < 0) {
       this.lastMessageId = newMessageId;
       this.readDate = at;

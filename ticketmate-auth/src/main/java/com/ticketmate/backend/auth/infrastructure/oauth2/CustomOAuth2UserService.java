@@ -5,14 +5,14 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.response.KakaoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.response.NaverResponse;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
-import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
   private final MemberRepository memberRepository;
-  private final Clock clock;
+  private final ZoneId zoneId;
 
   @Override
   public OAuth2User loadUser(OAuth2UserRequest request) {
@@ -62,13 +62,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .birthDay(oAuth2Response.getBirthDay())
           .birthYear(oAuth2Response.getBirthYear())
           .phone(oAuth2Response.getPhone())
-          .profileUrl(null)
           .gender(oAuth2Response.getGender())
+          .profileImgStoredPath(null)
           .role(Role.ROLE_USER)
           .memberType(MemberType.CLIENT)
           .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
-          .lastLoginTime(LocalDateTime.now(clock))
+          .lastLoginTime(TimeUtil.now())
           .followingCount(0L)
           .followerCount(0L)
           .build();
@@ -80,11 +80,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         throw new CustomException(ErrorCode.INVALID_SOCIAL_PLATFORM);
       }
       member.setIsFirstLogin(false);
-      member.setLastLoginTime(LocalDateTime.now(clock));
+      member.setLastLoginTime(TimeUtil.now());
     }
     Member savedMember = memberRepository.save(member);
 
-    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes(), clock);
+    return new CustomOAuth2User(savedMember, oAuth2User.getAttributes(), zoneId);
   }
 
   // 회원 이메일을 통한 CustomOAuth2User 반환
@@ -96,6 +96,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
 
-    return new CustomOAuth2User(member, null, clock);
+    return new CustomOAuth2User(member, null, zoneId);
   }
 }

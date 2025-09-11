@@ -6,6 +6,7 @@ plugins {
 // API 모듈은 모든 도메인 모듈 의존
 dependencies {
     implementation project(':ticketmate-admin')
+    implementation project(':ticketmate-ai')
     implementation project(':ticketmate-applicationform')
     implementation project(':ticketmate-auth')
     implementation project(':ticketmate-chat')
@@ -15,13 +16,13 @@ dependencies {
     implementation project(':ticketmate-member')
     implementation project(':ticketmate-messaging')
     implementation project(':ticketmate-mock')
+    implementation project(':ticketmate-notification')
     implementation project(':ticketmate-portfolio')
     implementation project(':ticketmate-querydsl')
-    implementation project(':ticketmate-search')
-    implementation project(':ticketmate-storage')
-    implementation project(':ticketmate-notification')
     implementation project(':ticketmate-redis')
+    implementation project(':ticketmate-search')
     implementation project(':ticketmate-sms')
+    implementation project(':ticketmate-storage')
     implementation project(':ticketmate-totp')
     implementation project(':ticketmate-websocket')
     implementation project(':ticketmate-report')
@@ -31,4 +32,20 @@ dependencies {
 
     // Chuseok22 API Change Log
     implementation libs.api.changelog
+
+    // Flyway
+    implementation libs.flyway.core
+    implementation libs.flyway.postgres
+
+    // Hibernate
+    implementation libs.hibernate
+}
+
+// test 소스에 둔 main()을 실행할 JavaExec 태스크
+tasks.register('generateHibernateDdl', JavaExec) {
+    group = 'verification'
+    description = 'Generate DDL from JPA entities (no Spring)'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ticketmate.backend.api.schema.HibernateDdlGenerator'
+    doFirst { file("$buildDir/generated").mkdirs() }
 }

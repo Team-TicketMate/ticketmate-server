@@ -5,7 +5,7 @@ import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concert.core.constant.ConcertAgentAvailabilitySortField;
 import com.ticketmate.backend.concert.infrastructure.entity.QConcertAgentAvailability;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
@@ -27,6 +27,7 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
   private static final QConcertAgentAvailability CONCERT_AGENT_AVAILABILITY = QConcertAgentAvailability.concertAgentAvailability;
   private static final QMember AGENT = QMember.member;
   private static final QAgentPerformanceSummary AGENT_PERFORMANCE_SUMMARY = QAgentPerformanceSummary.agentPerformanceSummary;
+
   private final JPAQueryFactory queryFactory;
 
   /**
@@ -34,17 +35,17 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
    *
    * @param concertId 조회 대상 콘서트
    * @param pageable  페이지 번호, 크기, 정렬 정보를 담은 Pageable
-   * @return DTO {@link ConcertAcceptingAgentResponse} Slice
+   * @return DTO {@link ConcertAcceptingAgentInfo} Slice
    */
   @Override
-  public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, Pageable pageable) {
+  public Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, Pageable pageable) {
 
-    JPAQuery<ConcertAcceptingAgentResponse> contentQuery = queryFactory
+    JPAQuery<ConcertAcceptingAgentInfo> contentQuery = queryFactory
         .select(Projections.constructor(
-            ConcertAcceptingAgentResponse.class,
+            ConcertAcceptingAgentInfo.class,
             AGENT.memberId,
             AGENT.nickname,
-            AGENT.profileUrl,
+            AGENT.profileImgStoredPath,
             CONCERT_AGENT_AVAILABILITY.introduction,
             AGENT_PERFORMANCE_SUMMARY.averageRating,
             AGENT_PERFORMANCE_SUMMARY.reviewCount

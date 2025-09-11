@@ -12,14 +12,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -28,12 +27,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Member extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(updatable = false, nullable = false)
   private UUID memberId;
 
   // 소셜 로그인 시 발급되는 ID
@@ -65,7 +62,7 @@ public class Member extends BasePostgresEntity {
   private String phone;
 
   // 프로필 이미지
-  private String profileUrl;
+  private String profileImgStoredPath;
 
   // 성별
   private String gender;
@@ -89,8 +86,8 @@ public class Member extends BasePostgresEntity {
   private Boolean isFirstLogin = true;
 
   // 마지막 로그인 시간
-  @Column(columnDefinition = "TIMESTAMP(0)")
-  private LocalDateTime lastLoginTime;
+  @Column(columnDefinition = "TIMESTAMPTZ(0)")
+  private Instant lastLoginTime;
 
   // 팔로잉 수 (내가 팔로잉하는 수)
   @Builder.Default
@@ -102,7 +99,9 @@ public class Member extends BasePostgresEntity {
   @Column(nullable = false)
   private long followerCount = 0L;
 
-  /** 관리자 **/
+  /**
+   * 관리자
+   **/
   private String password;
 
   @Builder.Default

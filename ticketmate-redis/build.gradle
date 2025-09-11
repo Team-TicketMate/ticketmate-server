@@ -19,4 +19,7 @@ dependencies {
 
     // Redission
     api libs.redisson
+
+    // Jackson jsr-310
+    api libs.jackson.jsr310
 }

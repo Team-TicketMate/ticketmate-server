@@ -10,9 +10,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TotpVerifyRequest {
 
   @NotBlank(message = "TOTP 코드를 입력해주세요")

@@ -1,5 +1,6 @@
 [versions]
 spring_boot = "3.5.4"
+hibernate = "6.1.4.Final"
 springdoc_openapi = "2.8.9"
 jjwt = "0.12.6"
 postgresql = "42.7.7"
@@ -27,6 +28,7 @@ jackson_databind = "2.15.2"
 suh_random_engine = "1.1.0"
 aop = "6.2.9"
 google_authenticator = "1.5.0"
+flyway_db = "11.11.2"
 
 [libraries]
 
@@ -35,6 +37,9 @@ spring_boot_starter_web = { module = "org.springframework.boot:spring-boot-start
 
 # Spring Stater Test
 spring_boot_starter_test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring_boot" }
+
+# Hibernate
+hibernate = { module = "org.hibernate.orm:hibernate-ant", version.ref = "hibernate" }
 
 # JPA
 spring_boot_starter_data_jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "spring_boot" }
@@ -136,3 +141,7 @@ aop = { module = "org.springframework:spring-aop", version.ref = "aop" }
 
 # Google Authenticator
 google_authenticator = { module = "com.warrenstrange:googleauth", version.ref = "google_authenticator" }
+
+# Flyway DB
+flyway_core = { module = "org.flywaydb:flyway-core", version.ref = "flyway_db" }
+flyway_postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway_db" }

@@ -3,23 +3,21 @@ package com.ticketmate.backend.admin.portfolio.application.dto.request;
 import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
 import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioSortField;
-import com.ticketmate.backend.portfolio.core.constant.PortfolioType;
+import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-@ToString
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class PortfolioFilteredRequest {
 
   private String username; // 사용자 이메일
@@ -28,7 +26,7 @@ public class PortfolioFilteredRequest {
 
   private String name; // 사용자 이름
 
-  private PortfolioType portfolioType; // 포트폴리오 타입
+  private PortfolioStatus portfolioStatus; // 포트폴리오 타입
 
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
   @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")

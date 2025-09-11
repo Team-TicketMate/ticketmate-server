@@ -6,7 +6,7 @@ import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
+import com.ticketmate.backend.applicationform.application.dto.view.ApplicationFormFilteredInfo;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormSortField;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
@@ -33,6 +33,7 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
   private static final QMember CLIENT = new QMember("clientAlias");
   private static final QMember AGENT = new QMember("agentAlias");
   private static final QConcert CONCERT = QConcert.concert;
+
   private final JPAQueryFactory queryFactory;
 
   /**
@@ -44,7 +45,7 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
    * @param applicationFormStatusSet 신청서 상태 Set (다중 선택 가능)
    */
   @Override
-  public Page<ApplicationFormFilteredResponse> filteredApplicationForm(
+  public Page<ApplicationFormFilteredInfo> filteredApplicationForm(
       UUID clientId,
       UUID agentId,
       UUID concertId,
@@ -62,14 +63,14 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
     );
 
     // contentQuery 생성
-    JPAQuery<ApplicationFormFilteredResponse> contentQuery = queryFactory
+    JPAQuery<ApplicationFormFilteredInfo> contentQuery = queryFactory
         .select(Projections.constructor(
-            ApplicationFormFilteredResponse.class,
+            ApplicationFormFilteredInfo.class,
             APPLICATION_FORM.applicationFormId,
             CONCERT.concertName,
-            CONCERT.concertThumbnailUrl,
-            CLIENT.nickname,
+            CONCERT.concertThumbnailStoredPath,
             AGENT.nickname,
+            CLIENT.nickname,
             APPLICATION_FORM.updatedDate,
             APPLICATION_FORM.applicationFormStatus,
             APPLICATION_FORM.ticketOpenType
@@ -83,9 +84,9 @@ public class ApplicationFormRepositoryImpl implements ApplicationFormRepositoryC
         .groupBy(
             APPLICATION_FORM.applicationFormId,
             CONCERT.concertName,
-            CONCERT.concertThumbnailUrl,
-            CLIENT.nickname,
+            CONCERT.concertThumbnailStoredPath,
             AGENT.nickname,
+            CLIENT.nickname,
             APPLICATION_FORM.updatedDate,
             APPLICATION_FORM.applicationFormStatus,
             APPLICATION_FORM.ticketOpenType

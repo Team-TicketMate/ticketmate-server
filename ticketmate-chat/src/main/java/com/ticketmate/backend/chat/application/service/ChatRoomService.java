@@ -1,16 +1,18 @@
 package com.ticketmate.backend.chat.application.service;
 
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.UN_READ_MESSAGE_COUNTER_KEY;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
-import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormFilteredResponse;
-import com.ticketmate.backend.applicationform.application.mapper.ApplicationFormMapper;
+import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
+import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
+import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomListResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.mapper.ChatMapper;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.chat.infrastructure.repository.ChatMessageRepository;
@@ -41,18 +43,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class ChatRoomService {
 
-  private static final String UN_READ_MESSAGE_COUNTER_KEY = "unRead:%s:%s";
   private final MemberService memberService;
   private final ChatRoomRepository chatRoomRepository;
   private final MemberRepository memberRepository;
+  private final ApplicationFormService applicationFormService;
   private final ApplicationFormRepository applicationFormRepository;
   private final ChatMessageRepository chatMessageRepository;
   private final ChatMapper chatMapper;
-  private final ApplicationFormMapper applicationFormMapper;
   private final RedisTemplate<String, String> redisTemplate;
 
   /**
@@ -117,7 +118,7 @@ public class ChatRoomService {
    * 사용자별 존재하는 채팅방 리스트를 불러오는 메서드입니다.
    */
   @Transactional(readOnly = true)
-  public Page<ChatRoomListResponse> getChatRoomList(Member member, ChatRoomFilteredRequest request) {
+  public Page<ChatRoomResponse> getChatRoomList(Member member, ChatRoomFilteredRequest request) {
     // 검색 키워드 관련 필드값 세팅
     String keyword = nvl(request.getSearchKeyword(), "");
 
@@ -125,14 +126,14 @@ public class ChatRoomService {
     int pageIndex = PageableUtil.convertToPageIndex(request.getPageNumber());
 
     // 채팅방 리스트 불러오기 (10개씩)
-    Page<ChatRoom> chatRoomList = chatRoomRepository.search(request.getTicketOpenType(), keyword, member, pageIndex);
+    Page<ChatRoom> chatRoomPage = chatRoomRepository.search(request.getTicketOpenType(), keyword, member, pageIndex);
 
     // 채팅방마다 존재하는 신청폼 Id 리스트에 저장
-    List<UUID> applicationFormIdList = chatRoomList.stream()
+    List<UUID> applicationFormIdList = chatRoomPage.stream()
         .map(ChatRoom::getApplicationFormId).collect(Collectors.toList());
 
     // 채팅방마다 존재하는 사용자 ID중 상대방 ID만 빼와서 리스트에 저장
-    Set<UUID> opponentIdList = chatRoomList.stream()
+    Set<UUID> opponentIdList = chatRoomPage.stream()
         .map(room -> opponentIdOf(room, member))
         .collect(Collectors.toSet());
 
@@ -149,7 +150,7 @@ public class ChatRoomService {
         .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
 
     List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
-      chatRoomList.forEach(r -> {
+      chatRoomPage.forEach(r -> {
         String redisKey = (UN_READ_MESSAGE_COUNTER_KEY).formatted(r.getChatRoomId(), member.getMemberId());
         con.stringCommands().get(redisKey.getBytes());
       });
@@ -157,15 +158,15 @@ public class ChatRoomService {
     });
 
     AtomicInteger i = new AtomicInteger();
-    List<ChatRoomListResponse> response = chatRoomList.stream()
+    List<ChatRoomResponse> response = chatRoomPage.stream()
         .map(r -> {
           int unReadMessageCount = parseInt(countList.get(i.getAndIncrement()));
-          return chatRoomRepository.toResponse(
+          return chatMapper.toChatRoomResponse(
               r, member, applicationFormMap, memberMap, unReadMessageCount);
         })
         .toList();
 
-    return new PageImpl<>(response, chatRoomList.getPageable(), chatRoomList.getTotalElements());
+    return new PageImpl<>(response, chatRoomPage.getPageable(), chatRoomPage.getTotalElements());
   }
 
   /**
@@ -189,11 +190,57 @@ public class ChatRoomService {
   }
 
   /**
+   * @param chatRoomId 채팅방 고유 ID
+   * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
+   */
+  @Transactional(readOnly = true)
+  public ApplicationFormInfoResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
+
+    // 요청된 채팅방 추출
+    ChatRoom chatRoom = chatRoomRepository
+        .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+    // 현재 사용자 검증
+    validateRoomMember(chatRoom, member);
+
+    // 메서드 체이닝
+    return Optional.of(chatRoom)
+        .map(ChatRoom::getApplicationFormId)
+        .map(applicationFormService::getApplicationFormInfo)
+        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+  }
+
+  /**
+   * 채팅까지 진행된 후 진행취소를 위한 API
+   *
+   * @param member     (진행 취소를 요청한 회원)
+   * @param chatRoomId (현재 채팅방 ID)
+   */
+  @Transactional
+  public void cancelProgress(Member member, String chatRoomId) {
+    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> {
+      log.error("진행 취소를 위한 채팅방을 찾지 못했습니다.");
+      return new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+    });
+
+    validateRoomMember(chatRoom, member);
+
+    ApplicationForm applicationForm = applicationFormRepository.findById(chatRoom.getApplicationFormId()).orElseThrow(() -> {
+      log.error("요청한 채팅방 {} 에 대한 신청서를 찾지 못했습니다.", chatRoom.getChatRoomId());
+      return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+    });
+
+    // 신청서의 불변 보장(추후 신청내역 조회를 위해)을 위해 상태만 변경
+    applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED_IN_PROCESS);
+  }
+
+  /**
    * 방 참가자 검증
    */
   private void validateRoomMember(ChatRoom room, Member member) {
     UUID id = member.getMemberId();
     if (!id.equals(room.getAgentMemberId()) && !id.equals(room.getClientMemberId())) {
+      log.error("현재 사용자는 해당 채팅방에 대한 권한이 없습니다.");
       throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
     }
   }
@@ -209,27 +256,5 @@ public class ChatRoomService {
       return Integer.parseInt(new String(b));
     }
     return Integer.parseInt(object.toString());
-  }
-
-  /**
-   * @param chatRoomId 채팅방 고유 ID
-   * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
-   */
-  @Transactional(readOnly = true)
-  public ApplicationFormFilteredResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
-
-    // 요청된 채팅방 추출
-    ChatRoom chatRoom = chatRoomRepository
-        .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-
-    // 현재 사용자 검증
-    validateRoomMember(chatRoom, member);
-
-    // 메서드 체이닝
-    return Optional.of(chatRoom)
-        .map(ChatRoom::getApplicationFormId)
-        .flatMap(applicationFormRepository::findById)
-        .map(applicationFormMapper::toApplicationFormFilteredResponse)
-        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
   }
 }

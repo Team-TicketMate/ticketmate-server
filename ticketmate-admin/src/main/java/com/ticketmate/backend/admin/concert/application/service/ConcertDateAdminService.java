@@ -2,6 +2,7 @@ package com.ticketmate.backend.admin.concert.application.service;
 
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertDateRequest;
 import com.ticketmate.backend.admin.concert.application.validator.ConcertDateValidator;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertDateRepository;
@@ -35,7 +36,7 @@ public class ConcertDateAdminService {
    */
   public void saveConcertDateList(Concert concert, List<ConcertDateRequest> requestList) {
     List<ConcertDate> concertDateList = requestList.stream()
-        .map(request -> ConcertDate.of(concert, request.getPerformanceDate(), request.getSession()))
+        .map(request -> ConcertDate.of(concert, TimeUtil.toInstant(request.getPerformanceDate()), request.getSession()))
         .collect(Collectors.toList());
     concertDateRepository.saveAll(concertDateList);
   }

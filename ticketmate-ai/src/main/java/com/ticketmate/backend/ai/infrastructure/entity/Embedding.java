@@ -30,7 +30,6 @@ public class Embedding extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(nullable = false, updatable = false)
   private UUID embeddingId;
 
   @Column(updatable = false)

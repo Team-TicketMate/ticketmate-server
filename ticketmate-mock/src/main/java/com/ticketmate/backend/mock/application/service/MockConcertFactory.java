@@ -1,6 +1,7 @@
 package com.ticketmate.backend.mock.application.service;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.core.constant.ConcertType;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.concert.core.constant.TicketReservationSite;
@@ -9,9 +10,11 @@ import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -43,10 +46,10 @@ public class MockConcertFactory {
     ConcertType concertType = ConcertType.values()[koFaker.random().nextInt(ConcertType.values().length)];
 
     // 4. 썸네일 이미지 URL (랜덤)
-    String concertThumbnailUrl = koFaker.internet().image();
+    String concertThumbnailUrl = koFaker.internet().image() + UUID.randomUUID();
 
     // 5. 좌석 배치도 이미지 URL (랜덤)
-    String seatingChartUrl = koFaker.internet().image();
+    String seatingChartUrl = koFaker.internet().image() + UUID.randomUUID();
 
     // 6. 예매처 (랜덤)
     TicketReservationSite ticketReservationSite = TicketReservationSite
@@ -56,8 +59,8 @@ public class MockConcertFactory {
         .concertName(concertName)
         .concertHall(concertHall)
         .concertType(concertType)
-        .concertThumbnailUrl(concertThumbnailUrl)
-        .seatingChartUrl(seatingChartUrl)
+        .concertThumbnailStoredPath(concertThumbnailUrl)
+        .seatingChartStoredPath(seatingChartUrl)
         .ticketReservationSite(ticketReservationSite)
         .build();
   }
@@ -71,12 +74,12 @@ public class MockConcertFactory {
     List<ConcertDate> concertDateList = new ArrayList<>();
 
     // 기준 날짜 (현재로부터 60~90 일 이후)
-    LocalDateTime baseDate = LocalDateTime.now(clock).plusDays(koFaker.number().numberBetween(60, 91));
+    Instant baseDate = TimeUtil.now().plus(koFaker.number().numberBetween(60, 91), ChronoUnit.DAYS);
 
     // 1. 공연 일자
     for (int i = 0; i < size; i++) {
       // 공연 날짜 (기준 날짜로 부터 하루 단위로 증가)
-      LocalDateTime concertDate = baseDate.plusDays(i);
+      Instant concertDate = baseDate.plus(i, ChronoUnit.DAYS);
 
       concertDateList.add(ConcertDate.builder()
           .concert(concert)
@@ -95,11 +98,11 @@ public class MockConcertFactory {
     List<TicketOpenDate> ticketOpenDateList = new ArrayList<>();
 
     // 기준 날짜 (현재로부터 10~30 일 이후)
-    LocalDateTime baseDate = LocalDateTime.now(clock).plusDays(koFaker.number().numberBetween(10, 31));
+    Instant baseDate = TimeUtil.now().plus(koFaker.number().numberBetween(10, 31), ChronoUnit.DAYS);
 
     // 1. 선예매 오픈일 (50% 확률로 생성)
     if (koFaker.random().nextBoolean()) {
-      LocalDateTime preOpenDate = baseDate.plusDays(koFaker.number().numberBetween(0, 5));
+      Instant preOpenDate = baseDate.plus(koFaker.number().numberBetween(0, 5), ChronoUnit.DAYS);
       TicketOpenDate preOpen = TicketOpenDate.builder()
           .concert(concert)
           .openDate(preOpenDate)
@@ -112,7 +115,7 @@ public class MockConcertFactory {
 
     // 2. 일반 예매 오픈일 (선예매 오픈일이 없다면 필수 생성 / 선예매 오픈일이 있다면 50% 확률로 생성)
     if (CommonUtil.nullOrEmpty(ticketOpenDateList) || koFaker.random().nextBoolean()) {
-      LocalDateTime generalOpenDate = baseDate.plusDays(koFaker.number().numberBetween(5, 10));
+      Instant generalOpenDate = baseDate.plus(koFaker.number().numberBetween(5, 10), ChronoUnit.DAYS);
       TicketOpenDate generalOpen = TicketOpenDate.builder()
           .concert(concert)
           .openDate(generalOpenDate)

@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -23,15 +22,13 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class ConcertHall extends BasePostgresEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(nullable = false, updatable = false)
   private UUID concertHallId;
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   private String concertHallName; // 공연장 명
 
   private String address; // 주소
@@ -39,5 +36,6 @@ public class ConcertHall extends BasePostgresEntity {
   @Enumerated(EnumType.STRING)
   private City city; // 지역
 
+  @Column(unique = true)
   private String webSiteUrl; // 사이트 URL
 }
