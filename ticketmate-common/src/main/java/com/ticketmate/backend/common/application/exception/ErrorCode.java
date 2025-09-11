@@ -254,6 +254,8 @@ public enum ErrorCode {
 
   INVALID_REPORT_REASON(HttpStatus.BAD_REQUEST, "유효하지 않은 신고 사유입니다."),
 
+  CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다.")
+
   ;
 
   private final HttpStatus status;

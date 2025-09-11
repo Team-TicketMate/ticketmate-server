@@ -24,6 +24,11 @@ public class ReportService {
 
   @Transactional
   public void createReport(UUID reporterId, ReportRequest request) {
+    // 자기 자신 신고 검증
+    if (reporterId.equals(request.getReportedUserId())) {
+      throw new CustomException(ErrorCode.CANNOT_REPORT_SELF);
+    }
+
     Member reporter = memberRepository.findById(reporterId)
             .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     Member reportedUser = memberRepository.findById(request.getReportedUserId())
