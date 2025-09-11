@@ -1,13 +1,20 @@
 package com.ticketmate.backend.concert.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concert.application.dto.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.application.dto.response.TicketOpenDateInfoResponse;
 import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.concert.application.dto.view.ConcertDateInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
+import com.ticketmate.backend.concert.application.dto.view.TicketOpenDateInfo;
 import com.ticketmate.backend.storage.core.service.StorageService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,14 +32,23 @@ public class ConcertMapperImpl implements ConcertMapper {
     if (!CommonUtil.nvl(info.seatingChartStoredPath(), "").isEmpty()) {
       seatingChartUrl = storageService.generatePublicUrl(info.seatingChartStoredPath());
     }
+    List<ConcertDateInfoResponse> concertDateInfoResponseList = info.concertDateInfoList()
+        .stream()
+        .map(this::toConcertDateInfoResponse)
+        .collect(Collectors.toList());
+    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = info.ticketOpenDateInfoList()
+        .stream()
+        .map(this::toTicketOpenDateInfoResponse)
+        .collect(Collectors.toList());
+
     return new ConcertInfoResponse(
         info.concertName(),
         info.concertHallName(),
         concertThumbnailUrl,
         seatingChartUrl,
         info.concertType(),
-        info.concertDateInfoResponseList(),
-        info.ticketOpenDateInfoResponseList(),
+        concertDateInfoResponseList,
+        ticketOpenDateInfoResponseList,
         info.ticketReservationSite()
     );
   }
@@ -50,12 +66,12 @@ public class ConcertMapperImpl implements ConcertMapper {
         info.concertHallName(),
         info.concertType(),
         info.ticketReservationSite(),
-        info.ticketPreOpenDate(),
+        TimeUtil.toLocalDateTime(info.ticketPreOpenDate()),
         info.preOpenBankTransfer(),
-        info.ticketGeneralOpenDate(),
+        TimeUtil.toLocalDateTime(info.ticketGeneralOpenDate()),
         info.generalOpenBankTransfer(),
-        info.startDate(),
-        info.endDate(),
+        TimeUtil.toLocalDateTime(info.startDate()),
+        TimeUtil.toLocalDateTime(info.endDate()),
         concertThumbnailUrl,
         seatingChartUrl
     );
@@ -70,6 +86,24 @@ public class ConcertMapperImpl implements ConcertMapper {
         info.introduction(),
         info.averageRating(),
         info.reviewCount()
+    );
+  }
+
+  @Override
+  public ConcertDateInfoResponse toConcertDateInfoResponse(ConcertDateInfo info) {
+    return new ConcertDateInfoResponse(
+        TimeUtil.toLocalDateTime(info.performanceDate()),
+        info.session()
+    );
+  }
+
+  @Override
+  public TicketOpenDateInfoResponse toTicketOpenDateInfoResponse(TicketOpenDateInfo info) {
+    return new TicketOpenDateInfoResponse(
+        TimeUtil.toLocalDateTime(info.openDate()),
+        info.requestMaxCount(),
+        info.isBankTransfer(),
+        info.ticketOpenType()
     );
   }
 }

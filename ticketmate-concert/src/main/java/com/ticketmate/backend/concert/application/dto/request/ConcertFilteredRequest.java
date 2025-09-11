@@ -10,17 +10,17 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-@ToString
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class ConcertFilteredRequest {
 
   private String concertName; // 공연 제목

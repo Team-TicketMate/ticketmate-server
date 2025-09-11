@@ -11,14 +11,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@ToString
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApplicationFormRequest {
 
   @NotNull(message = "대리인 PK 값을 입력해주세요")

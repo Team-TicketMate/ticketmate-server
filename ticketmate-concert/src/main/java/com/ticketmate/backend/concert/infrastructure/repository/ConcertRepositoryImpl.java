@@ -11,10 +11,11 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.concert.application.dto.response.ConcertDateInfoResponse;
-import com.ticketmate.backend.concert.application.dto.response.TicketOpenDateInfoResponse;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.concert.application.dto.view.ConcertDateInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
+import com.ticketmate.backend.concert.application.dto.view.TicketOpenDateInfo;
 import com.ticketmate.backend.concert.core.constant.ConcertSortField;
 import com.ticketmate.backend.concert.core.constant.ConcertType;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
@@ -25,8 +26,7 @@ import com.ticketmate.backend.concert.infrastructure.entity.QConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.QTicketOpenDate;
 import com.ticketmate.backend.concerthall.infrastructure.entity.QConcertHall;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
-import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -48,7 +48,6 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   private static final QTicketOpenDate TICKET_OPEN_DATE = QTicketOpenDate.ticketOpenDate;
 
   private final JPAQueryFactory queryFactory;
-  private final Clock clock;
 
   /**
    * 공연 상세 조회
@@ -56,7 +55,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   @Override
   public ConcertInfo findConcertInfoByConcertId(UUID concertId) {
 
-    LocalDateTime now = LocalDateTime.now(clock);
+    Instant now = TimeUtil.now();
 
     List<Tuple> rows = queryFactory
         .select(
@@ -88,35 +87,35 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Tuple firstRow = rows.get(0);
 
     // —— 공연 일자 중복 제거 (key: session) —— //
-    Map<Integer, ConcertDateInfoResponse> dateMap = new LinkedHashMap<>();
+    Map<Integer, ConcertDateInfo> dateMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
-      dateMap.putIfAbsent(session, new ConcertDateInfoResponse(
+      dateMap.putIfAbsent(session, new ConcertDateInfo(
           t.get(CONCERT_DATE.performanceDate),
           session
       ));
     }
-    List<ConcertDateInfoResponse> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
+    List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
+        .sorted(Comparator.comparing(ConcertDateInfo::session))
         .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
-    Map<TicketOpenType, TicketOpenDateInfoResponse> openMap = new LinkedHashMap<>();
+    Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
-      LocalDateTime openDate = t.get(TICKET_OPEN_DATE.openDate);
+      Instant openDate = t.get(TICKET_OPEN_DATE.openDate);
       if (openDate != null && openDate.isBefore(now)) {
         continue;
       }
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
-      openMap.putIfAbsent(type, new TicketOpenDateInfoResponse(
+      openMap.putIfAbsent(type, new TicketOpenDateInfo(
           t.get(TICKET_OPEN_DATE.openDate),
           t.get(TICKET_OPEN_DATE.requestMaxCount),
           t.get(TICKET_OPEN_DATE.isBankTransfer),
           type
       ));
     }
-    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfoResponse::getOpenDate))
+    List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
+        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
         .toList();
 
     return new ConcertInfo(
@@ -164,23 +163,23 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Tuple firstRow = rows.get(0);
 
     // —— 공연 일자 중복 제거 (key: session) —— //
-    Map<Integer, ConcertDateInfoResponse> dateMap = new LinkedHashMap<>();
+    Map<Integer, ConcertDateInfo> dateMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
-      dateMap.putIfAbsent(session, new ConcertDateInfoResponse(
+      dateMap.putIfAbsent(session, new ConcertDateInfo(
           t.get(CONCERT_DATE.performanceDate),
           session
       ));
     }
-    List<ConcertDateInfoResponse> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfoResponse::session))
+    List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
+        .sorted(Comparator.comparing(ConcertDateInfo::session))
         .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
-    Map<TicketOpenType, TicketOpenDateInfoResponse> openMap = new LinkedHashMap<>();
+    Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
-      openMap.putIfAbsent(type, new TicketOpenDateInfoResponse(
+      openMap.putIfAbsent(type, new TicketOpenDateInfo(
           t.get(TICKET_OPEN_DATE.openDate),
           t.get(TICKET_OPEN_DATE.requestMaxCount),
           t.get(TICKET_OPEN_DATE.isBankTransfer),
@@ -188,8 +187,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
       ));
     }
 
-    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfoResponse::getOpenDate))
+    List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
+        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
         .toList();
 
     return new ConcertInfo(
@@ -221,7 +220,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
       TicketReservationSite ticketReservationSite,
       Pageable pageable) {
 
-    LocalDateTime now = LocalDateTime.now(clock);
+    Instant now = TimeUtil.now();
 
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
@@ -232,10 +231,10 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     );
 
     // CASE WHEN 로직 추출
-    DateTimeExpression<LocalDateTime> preOpenDateExpression = buildOpenDateExpression(
+    DateTimeExpression<Instant> preOpenDateExpression = buildOpenDateExpression(
         TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
     );
-    DateTimeExpression<LocalDateTime> generalOpenDateExpression = buildOpenDateExpression(
+    DateTimeExpression<Instant> generalOpenDateExpression = buildOpenDateExpression(
         TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
     );
     ComparableExpression<Boolean> preOpenBankTransfer = buildBackTransferExpression(
@@ -290,8 +289,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
                 )
         );
 
-    ComparableExpression<LocalDateTime> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-        LocalDateTime.class,
+    ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
+        Instant.class,
         "least({0}, {1})",
         preOpenDateExpression,
         generalOpenDateExpression
@@ -348,22 +347,22 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         QueryDslUtil.eqIfNotNull(CONCERT.ticketReservationSite, ticketReservationSite)
     );
 
-    ComparableExpression<LocalDateTime> preOpenDateExpression = Expressions.dateTimeTemplate(
-        LocalDateTime.class,
+    ComparableExpression<Instant> preOpenDateExpression = Expressions.dateTimeTemplate(
+        Instant.class,
         "min({0})",
         new CaseBuilder()
             .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
             .then(TICKET_OPEN_DATE.openDate)
-            .otherwise((LocalDateTime) null)
+            .otherwise((Instant) null)
     ).as("ticketPreOpenDate");
 
-    ComparableExpression<LocalDateTime> generalOpenDateExpression = Expressions.dateTimeTemplate(
-        LocalDateTime.class,
+    ComparableExpression<Instant> generalOpenDateExpression = Expressions.dateTimeTemplate(
+        Instant.class,
         "min({0})",
         new CaseBuilder()
             .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
             .then(TICKET_OPEN_DATE.openDate)
-            .otherwise((LocalDateTime) null)
+            .otherwise((Instant) null)
     ).as("ticketGeneralOpenDate");
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
@@ -417,8 +416,8 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
             CONCERT.seatingChartStoredPath
         );
 
-    ComparableExpression<LocalDateTime> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-        LocalDateTime.class,
+    ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
+        Instant.class,
         "least({0}, {1})",
         preOpenDateExpression,
         generalOpenDateExpression
@@ -457,19 +456,19 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    * @param now            현재 기준 시각
    * @return 지정한 openType의 openDate 중 now 이후인 값의 최소값을 반환하는 DateTimeExpression
    */
-  private DateTimeExpression<LocalDateTime> buildOpenDateExpression(
+  private DateTimeExpression<Instant> buildOpenDateExpression(
       QTicketOpenDate ticketOpenDate,
       TicketOpenType ticketOpenType,
-      LocalDateTime now
+      Instant now
   ) {
     return Expressions.dateTimeTemplate(
-        LocalDateTime.class,
+        Instant.class,
         "min({0})",
         new CaseBuilder()
             .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
                 .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
             .then(ticketOpenDate.openDate)
-            .otherwise((LocalDateTime) null)
+            .otherwise((Instant) null)
     );
   }
 
@@ -484,7 +483,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   private ComparableExpression<Boolean> buildBackTransferExpression(
       QTicketOpenDate ticketOpenDate,
       TicketOpenType ticketOpenType,
-      LocalDateTime now
+      Instant now
   ) {
     return new CaseBuilder()
         .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
