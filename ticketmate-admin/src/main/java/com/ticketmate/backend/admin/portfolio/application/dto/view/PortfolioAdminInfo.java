@@ -1,7 +1,7 @@
 package com.ticketmate.backend.admin.portfolio.application.dto.view;
 
 import com.ticketmate.backend.member.core.constant.MemberType;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,8 +14,8 @@ public record PortfolioAdminInfo(
     MemberType memberType,
     String portfolioDescription,
     List<String> portfolioImgStoredPathList, // 포트폴리오 이미지 저장 경로 List
-    LocalDateTime createdDate,
-    LocalDateTime updatedDate
+    Instant createdDate,
+    Instant updatedDate
 ) {
 
 }

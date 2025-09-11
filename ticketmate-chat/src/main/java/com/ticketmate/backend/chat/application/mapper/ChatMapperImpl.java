@@ -35,7 +35,7 @@ public class ChatMapperImpl implements ChatMapper {
         .messageId(message.getChatMessageId())
         .senderNickname(message.getSenderNickName())
         .message(message.getMessage())
-        .sendDate(message.getSendDate())
+        .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
         .read(message.isRead())
         .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
         .mine(message.getSenderId().equals(currentMemberId))
@@ -60,7 +60,7 @@ public class ChatMapperImpl implements ChatMapper {
         .ticketOpenType(chatRoom.getTicketOpenType())
         .lastChatMessage(chatRoom.getLastMessage())
         .concertThumbnailUrl(storageService.generatePublicUrl(concertThumbnailStoredPath))
-        .lastChatSendTime(chatRoom.getLastMessageTime())
+        .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
         .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
         .build();
   }

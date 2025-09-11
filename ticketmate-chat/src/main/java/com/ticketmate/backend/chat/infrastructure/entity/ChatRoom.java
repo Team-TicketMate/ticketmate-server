@@ -3,7 +3,7 @@ package com.ticketmate.backend.chat.infrastructure.entity;
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
 import com.ticketmate.backend.common.infrastructure.persistence.BaseMongoDocument;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -52,7 +52,7 @@ public class ChatRoom extends BaseMongoDocument {
   private UUID applicationFormId; // 신청폼 PK
 
   @Indexed
-  private LocalDateTime lastMessageTime; // 마지막 메시지가 온 시간
+  private Instant lastMessageTime; // 마지막 메시지가 온 시간
 
   @Indexed
   private String lastMessage; // 마지막 메시지
@@ -72,7 +72,7 @@ public class ChatRoom extends BaseMongoDocument {
     this.lastMessage = message;
   }
 
-  public void updateLastMessageTime(LocalDateTime lastMessageTime) {
+  public void updateLastMessageTime(Instant lastMessageTime) {
     this.lastMessageTime = lastMessageTime;
   }
 

@@ -16,9 +16,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ApplicationFormDetailRequest {
 
   @NotNull(message = "공연일자를 입력하세요")

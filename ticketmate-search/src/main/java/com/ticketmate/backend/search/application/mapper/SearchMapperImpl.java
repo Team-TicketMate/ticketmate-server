@@ -1,5 +1,6 @@
 package com.ticketmate.backend.search.application.mapper;
 
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.search.application.dto.response.AgentSearchResponse;
 import com.ticketmate.backend.search.application.dto.response.ConcertSearchResponse;
 import com.ticketmate.backend.search.application.dto.view.AgentSearchInfo;
@@ -20,10 +21,10 @@ public class SearchMapperImpl implements SearchMapper {
         info.concertId(),
         info.concertName(),
         info.concertHallName(),
-        info.ticketPreOpenDate(),
-        info.ticketGeneralOpenDate(),
-        info.startDate(),
-        info.endDate(),
+        TimeUtil.toLocalDateTime(info.ticketPreOpenDate()),
+        TimeUtil.toLocalDateTime(info.ticketGeneralOpenDate()),
+        TimeUtil.toLocalDateTime(info.startDate()),
+        TimeUtil.toLocalDateTime(info.endDate()),
         storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
         info.score()
     );

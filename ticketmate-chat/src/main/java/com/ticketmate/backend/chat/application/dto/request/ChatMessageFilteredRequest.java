@@ -8,15 +8,16 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class ChatMessageFilteredRequest {
 
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
