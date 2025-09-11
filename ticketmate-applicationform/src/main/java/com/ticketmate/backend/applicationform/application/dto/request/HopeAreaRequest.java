@@ -12,9 +12,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class HopeAreaRequest {
 
   @Min(value = 1, message = "순위는 1부터 10 사이의 정수만 입력 가능합니다.")
