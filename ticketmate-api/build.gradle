@@ -25,6 +25,7 @@ dependencies {
     implementation project(':ticketmate-storage')
     implementation project(':ticketmate-totp')
     implementation project(':ticketmate-websocket')
+    implementation project(':ticketmate-report')
 
     // Swagger UI
     implementation libs.springdoc.openapi.ui

@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.Optional;
+
+import com.ticketmate.backend.report.infrastructure.entity.Report;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -98,6 +100,7 @@ public final class HibernateDdlGenerator {
     sources.addAnnotatedClass(RejectionReason.class);
     sources.addAnnotatedClass(Portfolio.class);
     sources.addAnnotatedClass(PortfolioImg.class);
+    sources.addAnnotatedClass(Report.class);
     // ===============================
   }
 
