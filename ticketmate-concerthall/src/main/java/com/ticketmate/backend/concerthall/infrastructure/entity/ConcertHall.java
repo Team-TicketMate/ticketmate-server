@@ -1,8 +1,10 @@
 package com.ticketmate.backend.concerthall.infrastructure.entity;
 
+import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.concerthall.core.constant.City;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -37,5 +39,6 @@ public class ConcertHall extends BasePostgresEntity {
   private City city; // 지역
 
   @Column(unique = true)
+  @Convert(converter = NullIfBlankConverter.class)
   private String webSiteUrl; // 사이트 URL
 }
