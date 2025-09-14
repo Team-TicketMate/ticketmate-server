@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
+import com.ticketmate.backend.admin.report.application.dto.view.ReportInfo;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import com.ticketmate.backend.report.infrastructure.entity.QReport;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
@@ -25,15 +26,16 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Page<ReportFilteredResponse> filteredReports(Pageable pageable){
+  public Page<ReportInfo> filteredReports(Pageable pageable){
     // TODO: 필터링 로직, 반환값 추가 등 수정 필요
-    JPAQuery<ReportFilteredResponse> contentQuery = queryFactory
-        .select(Projections.constructor(ReportFilteredResponse.class,
+    JPAQuery<ReportInfo> contentQuery = queryFactory
+        .select(Projections.constructor(ReportInfo.class,
             REPORT.reportId,
             REPORT.reporter.memberId,
-            REPORT.reportedUser.memberId,
-            REPORT.reason,
-            REPORT.status,
+            REPORT.reportedMember.memberId,
+            REPORT.reportReason,
+            Expressions.constant(""),
+            REPORT.reportStatus,
             REPORT.createdDate
         ))
         .from(REPORT);
@@ -55,16 +57,16 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
   }
 
   @Override
-  public Optional<ReportInfoResponse> findReportById(UUID reportId){
+  public Optional<ReportInfo> findReportById(UUID reportId){
     // TODO: 반환값 추가 수정 필요
-    ReportInfoResponse response = queryFactory
-        .select(Projections.constructor(ReportInfoResponse.class,
+      ReportInfo response = queryFactory
+        .select(Projections.constructor(ReportInfo.class,
             REPORT.reportId,
             REPORT.reporter.memberId,
-            REPORT.reportedUser.memberId,
-            REPORT.reason,
+            REPORT.reportedMember.memberId,
+            REPORT.reportReason,
             Expressions.stringTemplate("COALESCE({0}, '')", REPORT.description),
-            REPORT.status,
+            REPORT.reportStatus,
             REPORT.createdDate
         ))
         .from(REPORT)
