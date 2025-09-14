@@ -4,7 +4,7 @@ CREATE TABLE public.report
     report_id               UUID           NOT NULL PRIMARY KEY,
     reporter_member_id      UUID           NOT NULL
         CONSTRAINT FK4u358afc7n9mo843563w364lp REFERENCES member,
-    reported_user_member_id UUID           NOT NULL
+    reported_member_member_id UUID           NOT NULL
         CONSTRAINT FKcdhkgbi9qbj1gnpqg2o1f3ido REFERENCES member,
     report_reason           VARCHAR(255)   NOT NULL
         CONSTRAINT report_reason_check
