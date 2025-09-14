@@ -20,8 +20,8 @@ public interface ReportControllerDocs {
       summary = "사용자 신고",
       description = """
           ### 요청 파라미터
-          - `reportedUserId` (UUID, required): 신고 대상 사용자 ID
-          - `reason` (ReportReason, required): 신고 사유 (ReportReason Enum 값)
+          - `reportedMemberId` (UUID, required): 신고 대상 사용자 ID
+          - `reportReason` (ReportReason, required): 신고 사유 (ReportReason Enum 값)
           - `description` (String, optional): 신고 상세 설명
           
           ### 응답 데이터
@@ -29,19 +29,19 @@ public interface ReportControllerDocs {
           
           ### 사용 방법
           1. 로그인한 사용자가 특정 사용자를 신고할 때 사용합니다.
-          2. 클라이언트는 JSON 형식으로 `reportedUserId`, `reason`, `description`을 담아 요청합니다.
+          2. 클라이언트는 JSON 형식으로 `reportedMemberId`, `reportReason`, `description`을 담아 요청합니다.
           3. 서버는 신고자를 인증 정보(`AuthenticationPrincipal`)에서 확인한 후 신고 내용을 저장합니다.
           4. 저장이 성공하면 201 Created 상태 코드를 반환합니다.
           
           ### 유의 사항
-          - `reportedUserId`와 `reason` 값은 필수입니다.
+          - `reportedMemberId`와 `reportReason` 값은 필수입니다.
           - `description`은 선택값으로, 필요 시 신고 상세 내용을 작성할 수 있습니다.
           - 신고자는 반드시 로그인된 사용자여야 하며, 인증 정보가 없으면 접근이 불가능합니다.
           - 기획에 따라 ReportReason 값이 변경될 예정입니다.
           
           ### 예외 처리
-          - `MEMBER_NOT_FOUND` (HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."): 신고자 ID 또는 신고 대상 사용자 ID가 DB에 존재하지 않을 경우 발생
-          - `CANNOT_REPORT_SELF` (HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다."): 자신에 대한 ID로 요청했을 경우 발생
+          - `MEMBER_NOT_FOUND` (HttpStatus.BAD_REQUEST, "회원을 찾을 수 없습니다."): 신고 대상 사용자 ID가 DB에 존재하지 않을 경우 발생
+          - `SELF_REPORT_NOT_ALLOWED` (HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다."): 자신에 대한 ID로 요청했을 경우 발생
           """
   )
 
