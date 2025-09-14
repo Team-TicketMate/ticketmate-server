@@ -24,13 +24,13 @@ public class ReportInfoResponse {
   private UUID reportedMemberId;
 
   // 신고 사유
-  private ReportReason reason;
+  private ReportReason reportReason;
 
   // 신고 상세 내용
   private String description;
 
   // 신고 처리 상태
-  private ReportStatus status;
+  private ReportStatus reportStatus;
 
   // 신고 생성 일시
   private LocalDateTime createdDate;
