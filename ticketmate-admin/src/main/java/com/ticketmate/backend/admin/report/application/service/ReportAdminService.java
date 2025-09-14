@@ -4,6 +4,8 @@ import com.ticketmate.backend.admin.report.application.dto.request.ReportFiltere
 import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
+import com.ticketmate.backend.admin.report.application.dto.view.ReportInfo;
+import com.ticketmate.backend.admin.report.application.mapper.ReportMapper;
 import com.ticketmate.backend.admin.report.infrastructure.repository.ReportRepositoryCustom;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class ReportAdminService {
   private final ReportRepository reportRepository;
   private final ReportRepositoryCustom reportRepositoryCustom;
+  private final ReportMapper reportMapper;
 
     /**
      * 신고 내역 전체 조회
@@ -36,7 +39,8 @@ public class ReportAdminService {
      */
   @Transactional(readOnly = true)
   public Page<ReportFilteredResponse> getReports(ReportFilteredRequest request) {
-    return reportRepositoryCustom.filteredReports(request.toPageable());
+    Page<ReportInfo> reportInfoPage = reportRepositoryCustom.filteredReports(request.toPageable());
+    return reportInfoPage.map(reportMapper::toReportFilteredResponse);
   }
 
     /**
@@ -46,8 +50,9 @@ public class ReportAdminService {
      */
   @Transactional(readOnly = true)
   public ReportInfoResponse getReport(UUID reportId) {
-    return reportRepositoryCustom.findReportById(reportId)
+    ReportInfo reportInfo = reportRepositoryCustom.findReportById(reportId)
         .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
+    return reportMapper.toReportInfoResponse(reportInfo);
   }
 
     /**
