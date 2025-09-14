@@ -2,8 +2,8 @@ package com.ticketmate.backend.admin.report.application.service;
 
 import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportListResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
 import com.ticketmate.backend.admin.report.infrastructure.repository.ReportRepositoryCustom;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -24,29 +24,42 @@ public class ReportAdminService {
   private final ReportRepository reportRepository;
   private final ReportRepositoryCustom reportRepositoryCustom;
 
+    /**
+     * 신고 내역 전체 조회
+     *
+     * @param request reportId
+     *                reporterId
+     *                reportedMemberId
+     *                reportReason
+     *                reportStatus
+     *                createdDate
+     */
   @Transactional(readOnly = true)
-  public Page<ReportListResponse> getReports(ReportFilteredRequest request) {
+  public Page<ReportFilteredResponse> getReports(ReportFilteredRequest request) {
     return reportRepositoryCustom.filteredReports(request.toPageable());
   }
 
+    /**
+     * 신고 내역 상세 조회
+     *
+     * @param reportId
+     */
   @Transactional(readOnly = true)
-  public ReportDetailResponse getReport(UUID reportId) {
+  public ReportInfoResponse getReport(UUID reportId) {
     return reportRepositoryCustom.findReportById(reportId)
         .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
   }
 
+    /**
+     * 신고 수정 (상태 변경)
+     *
+     * @param reportId
+     * @param request reportStatus
+     */
   @Transactional
   public void updateReport(UUID reportId, ReportUpdateRequest request) {
     Report report = reportRepository.findById(reportId)
         .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
-    report.updateStatus(request.getReportStatus());
-  }
-
-  @Transactional
-  public void deleteReport(UUID reportId) {
-    Report report = reportRepository.findById(reportId)
-            .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
-    reportRepository.delete(report);
-    // TODO: soft delete 고려
+    report.transitionReportStatus(request.getReportStatus());
   }
 }

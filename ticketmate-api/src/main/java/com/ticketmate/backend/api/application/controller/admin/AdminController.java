@@ -13,8 +13,8 @@ import com.ticketmate.backend.admin.portfolio.application.dto.response.Portfolio
 import com.ticketmate.backend.admin.portfolio.application.service.PortfolioAdminService;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportListResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
 import com.ticketmate.backend.admin.report.application.service.ReportAdminService;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.admin.sms.application.service.SmsAdminService;
@@ -180,14 +180,14 @@ public class AdminController implements AdminControllerDocs {
   @Override
   @GetMapping("/report")
   @LogMonitoringInvocation
-  public ResponseEntity<Page<ReportListResponse>> getReports(@ParameterObject @Valid ReportFilteredRequest request) {
+  public ResponseEntity<Page<ReportFilteredResponse>> getReports(@ParameterObject @Valid ReportFilteredRequest request) {
     return ResponseEntity.ok(reportAdminService.getReports(request));
   }
 
   @Override
   @GetMapping("/report/{report-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<ReportDetailResponse> getReport(@PathVariable(value = "report-id") UUID reportId) {
+  public ResponseEntity<ReportInfoResponse> getReport(@PathVariable(value = "report-id") UUID reportId) {
     return ResponseEntity.ok(reportAdminService.getReport(reportId));
   }
 
@@ -196,14 +196,6 @@ public class AdminController implements AdminControllerDocs {
   @LogMonitoringInvocation
   public ResponseEntity<Void> updateReport(@PathVariable(value = "report-id") UUID reportId, @RequestBody @Valid ReportUpdateRequest request) {
     reportAdminService.updateReport(reportId, request);
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  @DeleteMapping("/report/{report-id}")
-  @LogMonitoringInvocation
-  public ResponseEntity<Void> deleteReport(@PathVariable(value = "report-id") UUID reportId) {
-    reportAdminService.deleteReport(reportId);
     return ResponseEntity.noContent().build();
   }
 }
