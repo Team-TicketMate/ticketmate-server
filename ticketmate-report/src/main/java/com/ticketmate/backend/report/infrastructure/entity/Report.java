@@ -1,8 +1,9 @@
 package com.ticketmate.backend.report.infrastructure.entity;
 
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
-import com.ticketmate.backend.report.application.dto.request.ReportRequest;
 import com.ticketmate.backend.report.core.constant.ReportReason;
 import com.ticketmate.backend.report.core.constant.ReportStatus;
 import jakarta.persistence.*;
@@ -17,45 +18,62 @@ import java.util.UUID;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(callSuper = true)
 public class Report extends BasePostgresEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID reportId;
 
   // 신고 작성자
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false)
   private Member reporter;
 
   // 신고 대상자
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Member reportedUser;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false)
+  private Member reportedMember;
 
   // 신고 사유
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ReportReason reason;
+  private ReportReason reportReason;
 
   // 상세 내용
-  @Column(columnDefinition = "TEXT")
+  @Column(length = 200)
   private String description;
 
   // 처리 상태
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private ReportStatus status = ReportStatus.PENDING;
+  private ReportStatus reportStatus = ReportStatus.PENDING;
 
-  public static Report of(Member reporter, Member reportedUser, ReportRequest request) {
+  public static Report create(Member reporter, Member reportedMember, ReportReason reportReason, String description) {
     return Report.builder()
         .reporter(reporter)
-        .reportedUser(reportedUser)
-        .reason(request.getReason())
-        .description(request.getDescription())
+        .reportedMember(reportedMember)
+        .reportReason(reportReason)
+        .description(description)
         .build();
   }
 
-  public void updateStatus(ReportStatus status) {
-    this.status = status;
+  public void transitionReportStatus(ReportStatus reportStatus) {
+    if (!canTransitionReportStatus(reportStatus)) {
+        throw new CustomException(ErrorCode.REPORT_STATUS_TRANSITION_ERROR);
+    }
+    this.reportStatus = reportStatus;
+  }
+
+  private boolean canTransitionReportStatus(ReportStatus reportStatus) {
+      if (reportStatus == null || this.reportStatus.equals(reportStatus)) {
+          return false;
+      }
+
+      return switch (this.reportStatus) {
+          case PENDING -> reportStatus == ReportStatus.IN_PROGRESS || reportStatus == ReportStatus.RESOLVED || reportStatus == ReportStatus.REJECTED;
+          case IN_PROGRESS -> reportStatus == ReportStatus.RESOLVED || reportStatus == ReportStatus.REJECTED;
+          case RESOLVED -> false;
+          case REJECTED ->  false;
+      };
   }
 }
