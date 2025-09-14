@@ -4,7 +4,6 @@ import com.ticketmate.backend.report.core.constant.ReportStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
