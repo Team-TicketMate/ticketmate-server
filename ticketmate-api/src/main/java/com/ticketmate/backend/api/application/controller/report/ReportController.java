@@ -1,6 +1,7 @@
 package com.ticketmate.backend.api.application.controller.report;
 
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.report.application.dto.request.ReportRequest;
 import com.ticketmate.backend.report.application.service.ReportService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,9 +27,10 @@ public class ReportController implements ReportControllerDocs {
 
   @Override
   @PostMapping
+  @LogMonitoringInvocation
   public ResponseEntity<Void> createReport(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                            @RequestBody @Valid ReportRequest request) {
-    reportService.createReport(customOAuth2User.getMember().getMemberId(), request);
+    reportService.createReport(customOAuth2User.getMember(), request);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }
