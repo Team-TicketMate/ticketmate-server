@@ -4,8 +4,8 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportDetailResponse;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportListResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import com.ticketmate.backend.report.infrastructure.entity.QReport;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
@@ -25,10 +25,10 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Page<ReportListResponse> filteredReports(Pageable pageable){
+  public Page<ReportFilteredResponse> filteredReports(Pageable pageable){
     // TODO: 필터링 로직, 반환값 추가 등 수정 필요
-    JPAQuery<ReportListResponse> contentQuery = queryFactory
-        .select(Projections.constructor(ReportListResponse.class,
+    JPAQuery<ReportFilteredResponse> contentQuery = queryFactory
+        .select(Projections.constructor(ReportFilteredResponse.class,
             REPORT.reportId,
             REPORT.reporter.memberId,
             REPORT.reportedUser.memberId,
@@ -55,10 +55,10 @@ public class ReportRepositoryImpl implements ReportRepositoryCustom {
   }
 
   @Override
-  public Optional<ReportDetailResponse> findReportById(UUID reportId){
+  public Optional<ReportInfoResponse> findReportById(UUID reportId){
     // TODO: 반환값 추가 수정 필요
-    ReportDetailResponse response = queryFactory
-        .select(Projections.constructor(ReportDetailResponse.class,
+    ReportInfoResponse response = queryFactory
+        .select(Projections.constructor(ReportInfoResponse.class,
             REPORT.reportId,
             REPORT.reporter.memberId,
             REPORT.reportedUser.memberId,

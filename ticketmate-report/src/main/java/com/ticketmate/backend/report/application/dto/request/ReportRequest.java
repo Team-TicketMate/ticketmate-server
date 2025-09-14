@@ -14,10 +14,10 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ReportRequest {
   @NotNull
-  private UUID reportedUserId;
+  private UUID reportedMemberId;
 
   @NotNull
-  private ReportReason reason;
+  private ReportReason reportReason;
 
   private String description;
 }
