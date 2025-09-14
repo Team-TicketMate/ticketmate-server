@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +22,7 @@ public enum ReportReason {
 
   @JsonCreator
   public static ReportReason from(String code){
-    for (ReportReason reportReason : ReportReason.values()) {
-      if(reportReason.getCode().equals(code)){
-        return reportReason;
-      }
-    }
-    throw new CustomException(ErrorCode.INVALID_REPORT_REASON);
+    return CommonUtil.stringToEnum(ReportReason.class, code);
   }
 
   // TODO: 신고 사유 재정의 필요
