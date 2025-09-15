@@ -2,11 +2,14 @@ package com.ticketmate.backend.chat.application.mapper;
 
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatMessage;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
+import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.List;
@@ -30,9 +33,7 @@ public class ChatMapperImpl implements ChatMapper {
         .toList();
 
     return ChatMessageResponse.builder()
-        .chatRoomId(message.getChatRoomId())
         .messageId(message.getChatMessageId())
-        .senderId(message.getSenderId())
         .senderNickname(message.getSenderNickName())
         .message(message.getMessage())
         .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
@@ -63,5 +64,30 @@ public class ChatMapperImpl implements ChatMapper {
         .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
         .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
         .build();
+  }
+
+  @Override
+  public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId, TicketOpenType ticketOpenType, ConcertInfoResponse response) {
+    UUID otherMemberId = resolveOpponentMemberId(chatRoom, currentMemberId);
+
+    return ChatRoomContextResponse.builder()
+        .concertName(response.concertName())
+        .concertType(response.concertType())
+        .ticketReservationSite(response.ticketReservationSite())
+        .concertThumbnailUrl(response.concertThumbnailUrl())
+        .ticketOpenDateInfoResponseList(response.ticketOpenDateInfoResponseList())
+        .chatRoomId(chatRoom.getChatRoomId())
+        .opponentMemberId(otherMemberId)
+        .ticketOpenType(ticketOpenType)
+        .build();
+  }
+
+  /**
+   * 상대방 ID 추출 메서드
+   */
+  private UUID resolveOpponentMemberId(ChatRoom chatRoom, UUID currentMemberId) {
+    UUID clientId = chatRoom.getClientMemberId();
+    UUID agentId  = chatRoom.getAgentMemberId();
+    return currentMemberId.equals(clientId) ? agentId : clientId;
   }
 }
