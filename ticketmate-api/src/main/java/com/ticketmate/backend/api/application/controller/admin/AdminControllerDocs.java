@@ -9,8 +9,12 @@ import com.ticketmate.backend.admin.concerthall.application.dto.request.ConcertH
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioFilteredRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioStatusUpdateRequest;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
-import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
+import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
+import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
@@ -561,4 +565,132 @@ public interface AdminControllerDocs {
   )
   ResponseEntity<CoolSmsBalanceResponse> getBalance(
       CustomOAuth2User customOAuth2User);
+
+  /*
+  ======================================신고======================================
+   */
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-02",
+          author = "Yooonjeong",
+          description = "사용자 신고 CRUD 구현",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/486"
+      )
+  })
+  @Operation(
+      summary = "신고 목록 조회",
+      description = """
+        
+        이 API는 관리자 인증이 필요합니다
+        
+        
+        ### 요청 파라미터
+        - `pageNumber` (Integer, required, 기본값=1): 페이지 번호 (1부터 시작)
+        - `pageSize` (Integer, required, 기본값=PageableConstants.DEFAULT_PAGE_SIZE): 페이지 크기
+        - `sortField` (ReportSortField, required, 기본값=CREATED_DATE): 정렬 대상 필드
+        - `sortDirection` (Sort.Direction, required, 기본값=DESC): 정렬 방향 (`ASC` | `DESC`)
+
+        ### 응답 데이터 (`Page<ReportFilteredResponse>`)
+        - 콘텐츠 각 항목(`ReportFilteredResponse`) 필드:
+          - `reportId` (UUID): 신고 ID
+          - `reporterId` (UUID): 신고자 ID
+          - `reportedMemberId` (UUID): 피신고자 ID
+          - `reportReason` (ReportReason, enum): 신고 사유
+          - `reportStatus` (ReportStatus, enum): 신고 처리 상태
+          - `createdDate` (LocalDateTime): 신고 생성 일시
+        - UI가 확정되면 반환값이 변경될 예정입니다.
+
+        ### 사용 방법
+        1. `GET /admin/report`로 호출합니다.
+        2. 페이지/정렬 파라미터를 쿼리스트링으로 전달합니다. (예: `?pageNumber=1&pageSize=10&sortField=CREATED_DATE&sortDirection=DESC`)
+        3. 성공 시 **200 OK**와 함께 `Page<ReportFilteredResponse>`를 반환합니다.
+
+        ### 유의 사항
+        - 현재 필터링 조건은 없습니다. (추후 UI에 따라 확장될 수 있습니다.)
+        - `reportReason`, `reportStatus`는 각 enum에 정의된 값만 반환됩니다. (enum값 역시 기획에 따라 변경될 예정입니다.)
+        - `reportReason`은 영문 코드(code)와 한글 설명(description)을 포함하는 객체 형태로 반환됩니다.
+        - `pageNumber`는 1부터 시작합니다.
+        """
+  )
+
+  ResponseEntity<Page<ReportFilteredResponse>> getReports(ReportFilteredRequest request);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-02",
+          author = "Yooonjeong",
+          description = "사용자 신고 CRUD 구현",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/486"
+      )
+  })
+  @Operation(
+      summary = "신고 상세 조회",
+      description = """
+        
+        이 API는 관리자 인증이 필요합니다
+        
+        
+        ### 요청 파라미터
+        - `report-id` (Path, UUID, required): 조회할 신고 ID
+
+        ### 응답 데이터 (`ReportInfoResponse`)
+        - `reportId` (UUID): 신고 ID
+        - `reporterId` (UUID): 신고자 ID
+        - `reportedMemberId` (UUID): 피신고자 ID
+        - `reportReason` (ReportReason, enum): 신고 사유
+        - `description` (String): 신고 상세 내용
+        - `reportStatus` (ReportStatus, enum): 신고 처리 상태
+        - `createdDate` (LocalDateTime): 신고 생성 일시
+        - UI가 확정되면 반환값이 변경될 예정입니다.
+
+        ### 사용 방법
+        1. `GET /admin/report/{report-id}`로 호출합니다.
+        2. 경로 변수에 실제 신고 ID(UUID)를 넣어 요청합니다.
+        3. 성공 시 **200 OK**와 함께 `ReportInfoResponse`를 반환합니다.
+
+        ### 유의 사항
+        - `reportReason`, `reportStatus`는 각 enum에 정의된 값만 반환됩니다. (enum값은 기획에 따라 변경될 예정입니다.)
+        - `description` 필드는 null일 경우 ""으로 반환됩니다.
+        - `reportReason`은 영문 코드(code)와 한글 설명(description)을 포함하는 객체 형태로 반환됩니다.
+        """
+  )
+
+  ResponseEntity<ReportInfoResponse> getReport(UUID reportId);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-02",
+          author = "Yooonjeong",
+          description = "사용자 신고 CRUD 구현",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/486"
+      )
+  })
+  @Operation(
+      summary = "신고 상태 변경",
+      description = """
+        
+        이 API는 관리자 인증이 필요합니다
+        
+        
+        ### 요청 파라미터
+        - `report-id` (Path, UUID, required): 상태를 변경할 신고 ID
+        - `ReportUpdateRequest` (Query, `@RequestBody`, `@Valid`):
+          - `reportStatus` (ReportStatus, enum): 변경할 신고 처리 상태
+        
+        ### 응답 데이터
+        - 본문 없이 **204 No Content**를 반환합니다.
+
+        ### 사용 방법
+        1. `PUT /admin/report/{report-id}`로 호출합니다.
+        2. 요청 바디에 `reportStatus`를 전달합니다.
+        3. 성공 시 **204 No Content** 응답을 받습니다.
+
+        ### 유의 사항
+        - 본 API는 **신고 상태(`reportStatus`)만 변경**합니다. 기획에 따라 변경값이 추가될 수 있습니다.
+        - `reportStatus` 값은 `ReportStatus` enum 정의에 포함된 값만 허용됩니다.
+        """
+  )
+
+  ResponseEntity<Void> updateReport(UUID reportId, ReportUpdateRequest request);
 }
