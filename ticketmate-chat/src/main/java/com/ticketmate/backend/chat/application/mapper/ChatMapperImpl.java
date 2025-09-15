@@ -67,17 +67,17 @@ public class ChatMapperImpl implements ChatMapper {
   }
 
   @Override
-  public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId, TicketOpenType ticketOpenType, ConcertInfoResponse concertInfo) {
-    UUID otherMemberId = resolveOtherMemberId(chatRoom, currentMemberId);
+  public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId, TicketOpenType ticketOpenType, ConcertInfoResponse response) {
+    UUID otherMemberId = resolveOpponentMemberId(chatRoom, currentMemberId);
 
     return ChatRoomContextResponse.builder()
-        .concertName(concertInfo.concertName())
-        .concertType(concertInfo.concertType())
-        .ticketReservationSite(concertInfo.ticketReservationSite())
-        .concertThumbnailImage(concertInfo.concertThumbnailUrl())
-        .ticketOpenDateInfoResponseList(concertInfo.ticketOpenDateInfoResponseList())
+        .concertName(response.concertName())
+        .concertType(response.concertType())
+        .ticketReservationSite(response.ticketReservationSite())
+        .concertThumbnailUrl(response.concertThumbnailUrl())
+        .ticketOpenDateInfoResponseList(response.ticketOpenDateInfoResponseList())
         .chatRoomId(chatRoom.getChatRoomId())
-        .otherMemberId(otherMemberId)
+        .opponentMemberId(otherMemberId)
         .ticketOpenType(ticketOpenType)
         .build();
   }
@@ -85,7 +85,7 @@ public class ChatMapperImpl implements ChatMapper {
   /**
    * 상대방 ID 추출 메서드
    */
-  private UUID resolveOtherMemberId(ChatRoom chatRoom, UUID currentMemberId) {
+  private UUID resolveOpponentMemberId(ChatRoom chatRoom, UUID currentMemberId) {
     UUID clientId = chatRoom.getClientMemberId();
     UUID agentId  = chatRoom.getAgentMemberId();
     return currentMemberId.equals(clientId) ? agentId : clientId;
