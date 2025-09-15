@@ -6,6 +6,7 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
+import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
@@ -55,13 +56,22 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   }
 
   @Override
-  @GetMapping("/{chat-room-id}")
+  @GetMapping("/{chat-room-id}/message")
   @LogMonitoringInvocation
-  public ResponseEntity<Slice<ChatMessageResponse>> enterChatRoom(
+  public ResponseEntity<Slice<ChatMessageResponse>> getChatMessages(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId,
       @ParameterObject @Valid ChatMessageFilteredRequest request) {
     return ResponseEntity.ok(chatRoomService.getChatMessage(customOAuth2User.getMember(), chatRoomId, request));
+  }
+
+  @Override
+  @GetMapping("/{chat-room-id}/context")
+  @LogMonitoringInvocation
+  public ResponseEntity<ChatRoomContextResponse> enterChatRoom(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @PathVariable("chat-room-id") String chatRoomId) {
+    return ResponseEntity.ok(chatRoomService.enterChatRoom(customOAuth2User.getMember(), chatRoomId));
   }
 
   @Override
