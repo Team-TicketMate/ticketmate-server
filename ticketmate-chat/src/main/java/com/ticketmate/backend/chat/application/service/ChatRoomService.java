@@ -211,9 +211,9 @@ public class ChatRoomService {
 
     // 콘서트 정보 조회
     UUID concertId = chatRoom.getConcertId();
-    ConcertInfoResponse concertInfo = concertService.getConcertInfo(concertId);
+    ConcertInfoResponse response = concertService.getConcertInfo(concertId);
 
-    return chatMapper.toChatRoomContextResponse(chatRoom, member.getMemberId(), chatRoom.getTicketOpenType(), concertInfo);
+    return chatMapper.toChatRoomContextResponse(chatRoom, member.getMemberId(), chatRoom.getTicketOpenType(), response);
   }
   /**
    * @param chatRoomId 채팅방 고유 ID

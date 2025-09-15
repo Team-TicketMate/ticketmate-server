@@ -11,7 +11,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ChatRoomResponse {
-
   private String chatRoomId;  // 채팅방 PK
   private String chatRoomName;  // 상대방 닉네임 출력
   private String lastChatMessage;  // 마지막 채팅 메시지
