@@ -65,6 +65,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     return ResponseEntity.ok(chatRoomService.getChatMessage(customOAuth2User.getMember(), chatRoomId, request));
   }
 
+  @Override
   @GetMapping("/{chat-room-id}/context")
   @LogMonitoringInvocation
   public ResponseEntity<ChatRoomContextResponse> enterChatRoom(
