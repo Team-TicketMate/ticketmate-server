@@ -109,7 +109,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
             PORTFOLIO.portfolioDescription,
             AGENT_PERFORMANCE_SUMMARY.averageRating,
             AGENT_PERFORMANCE_SUMMARY.reviewCount,
-            Expressions.nullExpression()
+            Expressions.constant(0.0)
         ))
         .from(MEMBER)
         .leftJoin(PORTFOLIO).on(PORTFOLIO.member.eq(MEMBER))
