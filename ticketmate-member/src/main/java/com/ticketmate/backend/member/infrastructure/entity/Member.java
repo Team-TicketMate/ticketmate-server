@@ -1,11 +1,13 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
+import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -67,6 +69,11 @@ public class Member extends BasePostgresEntity {
   // 성별
   private String gender;
 
+  // 한줄 소개
+  @Column(length = 20)
+  @Convert(converter = NullIfBlankConverter.class)
+  private String introduction;
+
   // 권한 (유저, 관리자)
   @Enumerated(EnumType.STRING)
   @Builder.Default
@@ -88,6 +95,16 @@ public class Member extends BasePostgresEntity {
   // 마지막 로그인 시간
   @Column(columnDefinition = "TIMESTAMPTZ(0)")
   private Instant lastLoginTime;
+
+  // 본인인증 여부
+  @Builder.Default
+  @Column(nullable = false)
+  private boolean isPhoneNumberVerified = false;
+
+  // 기본 프로필 설정 여부
+  @Builder.Default
+  @Column(nullable = false)
+  private boolean isInitialProfileSet = false;
 
   // 팔로잉 수 (내가 팔로잉하는 수)
   @Builder.Default
