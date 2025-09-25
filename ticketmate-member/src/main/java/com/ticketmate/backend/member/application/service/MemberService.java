@@ -57,6 +57,7 @@ public class MemberService {
       log.debug("한줄 소개 변경 - 기존: {}, 변경: {}", member.getIntroduction(), request.getIntroduction());
       member.setIntroduction(request.getIntroduction());
     }
+    updateInitialProfileSet(member, true);
   }
 
   /**
@@ -83,6 +84,26 @@ public class MemberService {
           log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
           return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         });
+  }
+
+  /**
+   * 회원 본인인증 여부 업데이트
+   */
+  @Transactional
+  public void updatePhoneNumberVerified(Member member, boolean status) {
+    log.debug("회원: {} 본인인증 여부 업데이트. 기존: {} -> 변경: {}", member.getMemberId(), member.isPhoneNumberVerified(), status);
+    member.setPhoneNumberVerified(status);
+    memberRepository.save(member);
+  }
+
+  /**
+   * 회원 기본 프로필 설정 여부 업데이트
+   */
+  @Transactional
+  public void updateInitialProfileSet(Member member, boolean status) {
+    log.debug("회원: {} 기본 프로필 설정 여부 업데이트. 기존: {} -> 변경: {}", member.getMemberId(), member.isInitialProfileSet(), status);
+    member.setInitialProfileSet(status);
+    memberRepository.save(member);
   }
 
   /**
