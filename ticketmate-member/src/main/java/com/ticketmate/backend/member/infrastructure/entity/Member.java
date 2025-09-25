@@ -70,7 +70,7 @@ public class Member extends BasePostgresEntity {
   private String gender;
 
   // 한줄 소개
-  @Column(length = 20)
+  @Column(length = 50)
   @Convert(converter = NullIfBlankConverter.class)
   private String introduction;
 

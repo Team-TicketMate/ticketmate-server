@@ -6,7 +6,7 @@
 
 -- 컬럼 추가
 ALTER TABLE member
-  ADD COLUMN IF NOT EXISTS introduction varchar(20);
+  ADD COLUMN IF NOT EXISTS introduction varchar(50);
 
 ALTER TABLE member
   ADD COLUMN IF NOT EXISTS is_phone_number_verified BOOLEAN;

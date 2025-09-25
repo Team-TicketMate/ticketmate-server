@@ -19,6 +19,6 @@ public class MemberInfoUpdateRequest {
 
   private MultipartFile profileImg;
 
-  @Size(max = 20, message = "한줄소개는 최대 20자까지 작성 가능합니다")
+  @Size(max = 50, message = "한줄소개는 최대 50자까지 작성 가능합니다")
   private String introduction;
 }
