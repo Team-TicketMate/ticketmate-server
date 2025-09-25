@@ -26,7 +26,7 @@ WHERE is_phone_number_verified IS NULL;
 
 UPDATE member
 SET is_initial_profile_set = FALSE
-WHERE is_initial_profile_set ISNULL;
+WHERE is_initial_profile_set IS NULL;
 
 -- 제약 및 기본값 설정
 -- 신규 레코드 기본값 FALSE로 설정되도록 DEFAULT 추가
