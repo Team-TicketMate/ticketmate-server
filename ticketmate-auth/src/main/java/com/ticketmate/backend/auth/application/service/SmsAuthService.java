@@ -8,6 +8,8 @@ import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRem
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.member.application.service.MemberService;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import com.ticketmate.backend.sms.core.service.SmsService;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class SmsAuthService {
 
   private final SmsService smsService;
+  private final MemberService memberService;
   private final RedisTemplate<String, String> redisTemplate;
 
   /**
@@ -47,7 +50,7 @@ public class SmsAuthService {
    * @param request phoneNumber 인증 전화번호
    *                code 6자리 인증번호
    */
-  public void verifyVerificationCode(VerifyCodeRequest request) {
+  public void verifyVerificationCode(Member member, VerifyCodeRequest request) {
     String normalizedPhoneNumber =
         normalizeAndRemoveSpecialCharacters(request.getPhoneNumber()); // 요청 전화번호 정규화 (01012345678)
     String key = generateKey(normalizedPhoneNumber); // Redis Key 생성
@@ -58,6 +61,7 @@ public class SmsAuthService {
     }
     log.debug("본인인증 성공");
     deleteCode(key);
+    memberService.updatePhoneNumberVerified(member, true);
   }
 
   /**
