@@ -49,9 +49,10 @@ public class MemberService {
     }
     if (!FileUtil.isNullOrEmpty(request.getProfileImg())) {
       log.debug("프로필 이미지 변경");
-      storageService.deleteFile(member.getProfileImgStoredPath()); // 기존 프로필 이미지 삭제
+      String previousPath = member.getProfileImgStoredPath();
       FileMetadata metadata = storageService.uploadFile(request.getProfileImg(), UploadType.MEMBER);
       member.setProfileImgStoredPath(metadata.storedPath());
+      storageService.deleteFile(previousPath); // 기존 프로필 이미지 삭제
     }
     if (!CommonUtil.nvl(request.getIntroduction(), "").isEmpty()) {
       log.debug("한줄 소개 변경 - 기존: {}, 변경: {}", member.getIntroduction(), request.getIntroduction());
