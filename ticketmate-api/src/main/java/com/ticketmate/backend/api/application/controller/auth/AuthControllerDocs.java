@@ -4,6 +4,7 @@ import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.auth.application.dto.request.LoginRequest;
 import com.ticketmate.backend.auth.application.dto.response.LoginResponse;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import com.ticketmate.backend.totp.application.dto.request.TotpVerifyRequest;
@@ -269,7 +270,7 @@ public interface AuthControllerDocs {
   @Operation(
       summary = "본인인증 6자리 인증문자 발송",
       description = """
-          이 API는 인증이 필요하지 않습니다.
+          이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
           - **phoneNumber** (String): 인증문자를 발송할 전화번호 [필수]
@@ -282,6 +283,7 @@ public interface AuthControllerDocs {
           """
   )
   ResponseEntity<Void> sendVerificationCode(
+      CustomOAuth2User customOAuth2User,
       SendCodeRequest request
   );
 
@@ -296,7 +298,7 @@ public interface AuthControllerDocs {
   @Operation(
       summary = "본인인증 6자리 인증문자 검증",
       description = """
-          이 API는 인증이 필요하지 않습니다.
+          이 API는 인증이 필요합니다.
           
           ### 요청 파라미터
           - **phoneNumber** (String): 인증문자를 발송한 전화번호 [필수]
@@ -311,6 +313,7 @@ public interface AuthControllerDocs {
           """
   )
   ResponseEntity<Void> verifyVerificationCode(
+      CustomOAuth2User customOAuth2User,
       VerifyCodeRequest request
   );
 }

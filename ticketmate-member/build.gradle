@@ -15,6 +15,7 @@ dependencies {
     implementation project(':ticketmate-common')
     implementation project(':ticketmate-querydsl')
     implementation project(':ticketmate-notification')
+    implementation project(':ticketmate-storage')
 
     // PostgreSQL
     api libs.postgresql.driver

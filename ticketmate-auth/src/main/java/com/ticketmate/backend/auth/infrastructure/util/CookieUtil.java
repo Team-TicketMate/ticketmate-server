@@ -17,14 +17,24 @@ public class CookieUtil {
    *
    * @return 발급된 쿠키를 반환합니다
    */
-  public Cookie createCookie(String key, String token, long expirationTimeInSeconds) {
-    if (key.equals(AuthConstants.ACCESS_TOKEN_KEY)) {
-      return createAccessTokenCookie(token, expirationTimeInSeconds);
-    } else if (key.equals(AuthConstants.REFRESH_TOKEN_KEY)) {
-      return createRefreshTokenCookie(token, expirationTimeInSeconds);
-    } else {
-      log.error("잘못된 Cookie key가 요청됐습니다. 요청값: {}", key);
-      throw new CustomException(ErrorCode.INVALID_REQUEST);
+  public Cookie createCookie(String key, String value, long expirationTimeInSeconds) {
+    switch (key) {
+      case AuthConstants.ACCESS_TOKEN_KEY -> {
+        return createAccessTokenCookie(value, expirationTimeInSeconds);
+      }
+      case AuthConstants.REFRESH_TOKEN_KEY -> {
+        return createRefreshTokenCookie(value, expirationTimeInSeconds);
+      }
+      case AuthConstants.PHONE_NUMBER_VERIFIED_KEY -> {
+        return createPhoneNumberVerifiedCookie(value, expirationTimeInSeconds);
+      }
+      case AuthConstants.INITIAL_PROFILE_SET_KEY -> {
+        return createInitialProfileSetCookie(value, expirationTimeInSeconds);
+      }
+      default -> {
+        log.error("잘못된 Cookie key가 요청됐습니다. 요청값: {}", key);
+        throw new CustomException(ErrorCode.INVALID_REQUEST);
+      }
     }
   }
 
@@ -53,7 +63,7 @@ public class CookieUtil {
   }
 
   /**
-   * 엑세스 토큰이 들어있는 쿠키를 발급합니다
+   * 엑세스 토큰이 포함된 쿠키를 발급합니다
    * httpOnly = false
    */
   private Cookie createAccessTokenCookie(String accessToken, long expirationTimeInSeconds) {
@@ -68,12 +78,42 @@ public class CookieUtil {
   }
 
   /**
-   * 리프레시 토큰이 들어있는 쿠키를 발급합니다.
+   * 리프레시 토큰이 포함된 쿠키를 발급합니다
    * httpOnly = true
    */
   private Cookie createRefreshTokenCookie(String refreshToken, long expirationTimeInSeconds) {
     log.debug("refreshToken을 포함한 쿠키를 발급합니다.");
     Cookie cookie = new Cookie(AuthConstants.REFRESH_TOKEN_KEY, refreshToken);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setDomain(AuthConstants.ROOT_DOMAIN);
+    cookie.setMaxAge((int) expirationTimeInSeconds);
+    return cookie;
+  }
+
+  /**
+   * 본인인증 여부가 포함된 쿠키를 발급합니다
+   * httpOnly = true
+   */
+  private Cookie createPhoneNumberVerifiedCookie(String value, long expirationTimeInSeconds) {
+    log.debug("본인인증 여부가 포함된 쿠키를 발급합니다.");
+    Cookie cookie = new Cookie(AuthConstants.PHONE_NUMBER_VERIFIED_KEY, value);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true);
+    cookie.setPath("/");
+    cookie.setDomain(AuthConstants.ROOT_DOMAIN);
+    cookie.setMaxAge((int) expirationTimeInSeconds);
+    return cookie;
+  }
+
+  /**
+   * 기본 프로필 설정 여부가 포함된 쿠키를 발급합니다
+   * httpOnly = true
+   */
+  private Cookie createInitialProfileSetCookie(String value, long expirationTimeInSeconds) {
+    log.debug("기본 프로필 설정 여부가 포함된 쿠리를 발급합니다.");
+    Cookie cookie = new Cookie(AuthConstants.INITIAL_PROFILE_SET_KEY, value);
     cookie.setHttpOnly(true);
     cookie.setSecure(true);
     cookie.setPath("/");
