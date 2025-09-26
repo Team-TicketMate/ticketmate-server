@@ -5,6 +5,7 @@ import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,8 +74,70 @@ public interface MemberControllerDocs {
           - 인증 정보가 없거나 잘못된 경우에는 컨트롤러에 진입하지 않고 보안 필터에서 차단됩니다.
           """
   )
-  ResponseEntity<MemberInfoResponse> getMemberInfo(
-      CustomOAuth2User customOAuth2User);
+  ResponseEntity<MemberInfoResponse> getMemberInfo(CustomOAuth2User customOAuth2User);
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-25",
+          author = "Chuseok22",
+          description = "회원 정보 수정",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/538"
+      )
+  })
+  @Operation(
+      summary = "회원 정보 수정 (닉네임/프로필 이미지/한줄소개)",
+      description = """
+          이 API는 인증된 사용자만 사용 가능합니다
+          
+          **HTTP**
+          - `PATCH /api/member`
+          - `Content-Type: multipart/form-data`
+          
+          ### 요청 파라미터 (multipart/form-data)
+          - `nickname` (text, optional): 변경할 닉네임. 비어있거나 공백만 있는 경우 무시됩니다.
+          - `profileImg` (file, optional): 변경할 프로필 이미지 파일(바이너리). 파일이 전달되면 기존 이미지가 삭제된 후 새 파일로 교체됩니다.
+          - `introduction` (text, optional): 변경할 한줄 소개. 비어있거나 공백만 있는 경우 무시됩니다. **최대 20자**.
+          
+          > 서버 동작 요약
+          > - 닉네임: 값이 비어있지 않을 때만 `member.nickname` 갱신  
+          > - 프로필 이미지: 파일이 전달되면 기존 파일 삭제 → 새 파일 업로드 → 업로드 결과의 `storedPath`로 `member.profileImgStoredPath` 갱신  
+          > - 한줄 소개: 값이 비어있지 않을 때만 `member.introduction` 갱신  
+          > - **제공되지 않은 필드는 변경되지 않습니다.**
+          
+          ### 응답 데이터
+          - 본문 없음 (`ResponseEntity<Void>`)
+          
+          ### 사용 방법
+          1. **변경하려는 필드만** multipart 폼으로 전송합니다.
+          2. `nickname`, `introduction`이 빈 문자열("")이거나 공백만 있는 경우 서버가 **변경을 무시**합니다.
+          3. `profileImg`가 포함되면 **기존 프로필 이미지는 삭제**된 뒤 새 파일로 교체됩니다.
+          
+          ### 유의 사항
+          - `introduction`은 DB 스키마 기준 **최대 20자**입니다.
+          - 부분 업데이트(Partial Update) 방식으로, 누락된 필드는 기존 값이 유지됩니다.
+          
+          ### 요청 예시
+          **1) 파일 포함(닉네임+한줄소개+이미지 교체)**
+          ```bash
+          curl -X PATCH "https://{host}/api/member" \
+            -H "Content-Type: multipart/form-data" \
+            -F "nickname=ticketmate_fan" \
+            -F "introduction=안녕하세요!" \
+            -F "profileImg=@/path/to/new-profile.jpg"
+          ```
+          
+          **2) 파일 없이 텍스트만 수정(닉네임만 변경)**
+          ```bash
+          curl -X PATCH "https://{host}/api/member" \
+            -H "Content-Type: multipart/form-data" \
+            -F "nickname=ticketmate_fan"
+          ```
+          """
+  )
+  ResponseEntity<Void> updateMemberInfo(
+      CustomOAuth2User customOAuth2User,
+      MemberInfoUpdateRequest request
+  );
 
   @ApiChangeLogs({
       @ApiChangeLog(

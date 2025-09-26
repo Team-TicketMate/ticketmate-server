@@ -4,6 +4,7 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.member.application.service.MemberFollowService;
@@ -14,9 +15,12 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +45,16 @@ public class MemberController implements MemberControllerDocs {
   public ResponseEntity<MemberInfoResponse> getMemberInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok().body(memberService.getMemberInfo(customOAuth2User.getMember()));
+  }
+
+  @Override
+  @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> updateMemberInfo(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @ModelAttribute MemberInfoUpdateRequest request) {
+    memberService.updateMemberInfo(customOAuth2User.getMember(), request);
+    return ResponseEntity.ok().build();
   }
 
   @Override

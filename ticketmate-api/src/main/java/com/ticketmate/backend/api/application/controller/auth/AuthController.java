@@ -6,6 +6,7 @@ import com.ticketmate.backend.auth.application.service.AuthService;
 import com.ticketmate.backend.auth.application.service.SmsAuthService;
 import com.ticketmate.backend.auth.application.service.TotpAuthService;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
+import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
@@ -17,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -96,6 +98,7 @@ public class AuthController implements AuthControllerDocs {
   @PostMapping(value = "/sms/send-code")
   @LogMonitoringInvocation
   public ResponseEntity<Void> sendVerificationCode(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody SendCodeRequest request) {
     smsAuthService.sendVerificationCode(request);
     return ResponseEntity.ok().build();
@@ -105,8 +108,10 @@ public class AuthController implements AuthControllerDocs {
   @PostMapping(value = "/sms/verify")
   @LogMonitoringInvocation
   public ResponseEntity<Void> verifyVerificationCode(
-      @Valid @RequestBody VerifyCodeRequest request) {
-    smsAuthService.verifyVerificationCode(request);
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @RequestBody VerifyCodeRequest request
+  ) {
+    smsAuthService.verifyVerificationCode(customOAuth2User.getMember(), request);
     return ResponseEntity.ok().build();
   }
 }
