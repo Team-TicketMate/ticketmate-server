@@ -27,7 +27,8 @@ public record S3Properties(
       @NotBlank String concertHall,
       @NotBlank String concert,
       @NotBlank String portfolio,
-      @NotBlank String chat
+      @NotBlank String chat,
+      @NotBlank String review
   ) {
 
   }

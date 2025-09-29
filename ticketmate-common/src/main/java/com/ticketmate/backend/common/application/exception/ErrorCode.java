@@ -256,8 +256,21 @@ public enum ErrorCode {
 
   SELF_REPORT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다."),
 
-  REPORT_STATUS_TRANSITION_ERROR(HttpStatus.BAD_REQUEST, "신고 상태를 변경할 수 없습니다.")
+  REPORT_STATUS_TRANSITION_ERROR(HttpStatus.BAD_REQUEST, "신고 상태를 변경할 수 없습니다."),
 
+  // REVIEW
+
+  NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."),
+
+  CANNOT_REVIEW_NOT_SUCCEEDED_FORM(HttpStatus.BAD_REQUEST, "성공한 신청서에 대해서만 리뷰를 작성할 수 있습니다."),
+
+  REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 신청서에 대한 리뷰가 존재합니다."),
+
+  IMAGE_UPLOAD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "리뷰 이미지는 최대 3개까지 등록 가능합니다."),
+
+  REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."),
+
+  REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다.")
   ;
 
   private final HttpStatus status;
