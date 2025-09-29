@@ -47,7 +47,7 @@ public class S3Service implements StorageService {
    * @param file 요청된 MultipartFile
    * @return 원본 파일명
    */
-  private static String validateAndExtractFilename(MultipartFile file) {
+  public static String validateAndExtractFilename(MultipartFile file) {
     // 파일 검증
     if (FileUtil.isNullOrEmpty(file)) {
       log.error("파일이 비어있거나 존재하지 않습니다.");
@@ -181,6 +181,7 @@ public class S3Service implements StorageService {
       case CONCERT -> s3Properties.s3().path().concert();
       case PORTFOLIO -> s3Properties.s3().path().portfolio();
       case CHAT -> s3Properties.s3().path().chat();
+      case REVIEW -> s3Properties.s3().path().review();
     };
   }
 
