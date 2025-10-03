@@ -2,15 +2,20 @@ package com.ticketmate.backend.api.application.controller.member;
 
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
+import com.ticketmate.backend.member.application.dto.request.AgentSaveBankAccountRequest;
+import com.ticketmate.backend.member.application.dto.request.AgentUpdateBankAccountRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
+import com.ticketmate.backend.member.application.dto.response.AgentBankAccountResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
+import com.ticketmate.backend.member.application.service.AgentBankAccountService;
 import com.ticketmate.backend.member.application.service.MemberFollowService;
 import com.ticketmate.backend.member.application.service.MemberService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -18,11 +23,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +45,7 @@ public class MemberController implements MemberControllerDocs {
 
   private final MemberService memberService;
   private final MemberFollowService memberFollowService;
+  private final AgentBankAccountService agentBankAccountService;
 
   @Override
   @GetMapping
@@ -84,5 +92,50 @@ public class MemberController implements MemberControllerDocs {
       @PathVariable(name = "client-id") UUID clientId,
       @Valid @ParameterObject MemberFollowFilteredRequest request) {
     return ResponseEntity.ok(memberFollowService.filteredMemberFollow(clientId, request));
+  }
+
+  @Override
+  @PostMapping("/bank-account")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> saveBankAccount(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @RequestBody AgentSaveBankAccountRequest request) {
+    agentBankAccountService.saveAgentBankAccount(customOAuth2User.getMember(), request);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @GetMapping("/bank-account")
+  @LogMonitoringInvocation
+  public ResponseEntity<List<AgentBankAccountResponse>> getBankAccountList(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    return ResponseEntity.ok(agentBankAccountService.getAgentBankAccountList(customOAuth2User.getMember()));
+  }
+
+  @Override
+  @PatchMapping("/bank-account/{bank-account-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> changePrimaryBankAccount(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    agentBankAccountService.changePrimaryAccount(agentBankAccountId, customOAuth2User.getMember());
+    return ResponseEntity.ok().build();
+  }
+  @Override
+  @PutMapping("/bank-account/{bank-account-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> changeBankAccountInfo(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @RequestBody AgentUpdateBankAccountRequest request) {
+    agentBankAccountService.changeAccountInfo(agentBankAccountId, customOAuth2User.getMember(), request);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @DeleteMapping("/bank-account/{bank-account-id}")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> deleteBankAccount(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    agentBankAccountService.deleteBankAccount(agentBankAccountId, customOAuth2User.getMember());
+    return ResponseEntity.ok().build();
   }
 }
