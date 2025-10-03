@@ -294,7 +294,7 @@ public enum ErrorCode {
 
   INVALID_ACCOUNT_HOLDER(HttpStatus.BAD_REQUEST, "올바르지 않은 예금주 양식입니다."),
 
-  INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다..");
+  INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다.");
 
   private final HttpStatus status;
   private final String message;
