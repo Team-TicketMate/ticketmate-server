@@ -6,6 +6,7 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,12 @@ public class Review extends BasePostgresEntity {
   @Column(nullable = false, length = 300)
   private String comment;
 
+  @Column(length = 300)
+  private String agentComment;
+
+  @Column(columnDefinition = "TIMESTAMPTZ(0)")
+  private Instant agentCommentedDate;
+
   @Builder.Default
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<ReviewImg> reviewImgList = new ArrayList<>();
@@ -64,5 +71,10 @@ public class Review extends BasePostgresEntity {
 
   public void removeReviewImg(ReviewImg reviewImg) {
     this.reviewImgList.remove(reviewImg);
+  }
+
+  public void addAgentComment(String comment) {
+    this.agentComment = comment;
+    this.agentCommentedDate = Instant.now();
   }
 }
