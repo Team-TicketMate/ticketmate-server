@@ -262,6 +262,8 @@ public enum ErrorCode {
 
   NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."),
 
+  NO_AUTH_TO_REVIEW_COMMENT(HttpStatus.FORBIDDEN, "해당 리뷰에 댓글을 작성할 권한이 없습니다."),
+
   CANNOT_REVIEW_NOT_SUCCEEDED_FORM(HttpStatus.BAD_REQUEST, "성공한 신청서에 대해서만 리뷰를 작성할 수 있습니다."),
 
   REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 신청서에 대한 리뷰가 존재합니다."),
