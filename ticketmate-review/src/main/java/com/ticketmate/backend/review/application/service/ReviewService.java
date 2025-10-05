@@ -4,6 +4,7 @@ import com.ticketmate.backend.applicationform.application.service.ApplicationFor
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.member.application.service.AgentPerformanceService;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.review.application.dto.request.ReviewEditRequest;
 import com.ticketmate.backend.review.application.dto.request.ReviewRequest;
@@ -24,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -42,6 +42,7 @@ public class ReviewService {
   private final ReviewRepository reviewRepository;
   private final ReviewImgRepository reviewImgRepository;
   private final ReviewMapper reviewMapper;
+  private final AgentPerformanceService agentPerformanceService;
 
   private static final int MAX_IMAGE_COUNT = 3;
 
@@ -54,7 +55,6 @@ public class ReviewService {
 
   @Transactional(readOnly = true)
   public Page<ReviewResponse> findReviewsByAgent(Member agent, Pageable pageable) {
-    // TODO: agent별 조회 필요한지
     return reviewRepository.findByAgent(agent, pageable)
         .map(reviewMapper::toReviewResponse);
   }
@@ -74,6 +74,9 @@ public class ReviewService {
 
       addReviewImages(request.getReviewImgList(), review);
 
+      // 대리인 통계 업데이트
+      agentPerformanceService.addReviewStats(review.getAgent(), request.getRating());
+
       return reviewRepository.save(review).getReviewId();
     } catch (Exception e) {
       log.error("리뷰 생성 중 오류: {}", e.getMessage(), e);
@@ -85,6 +88,8 @@ public class ReviewService {
   public void updateReview(UUID reviewId, ReviewEditRequest request, Member member) {
     Review review = reviewRepository.findById(reviewId)
         .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+    double oldRating = review.getRating();
 
     // 수정 권한 검증
     validateEditor(review, member);
@@ -112,6 +117,9 @@ public class ReviewService {
 
     // 리뷰 내용 업데이트
     review.update(request.getRating(), request.getComment());
+
+    // 대리인 통계 업데이트
+    agentPerformanceService.updateReviewStats(review.getAgent(), oldRating, request.getRating());
   }
 
   @Transactional
@@ -125,6 +133,9 @@ public class ReviewService {
     // s3에서 이미지 삭제
     List<ReviewImg> imagesToDelete = review.getReviewImgList();
     deleteImages(imagesToDelete, review);
+
+    // 대리인 통계 업데이트
+    agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
 
     reviewRepository.delete(review);
   }
@@ -188,7 +199,7 @@ public class ReviewService {
   }
 
   /**
-   * S3에 업로드하고 Review 엔티티에 추가
+   * 이미지 업로드 (S3, DB)
    */
   private void addReviewImages(List<MultipartFile> imageFileList, Review review) {
     if (imageFileList == null || imageFileList.isEmpty()) {
