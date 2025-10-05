@@ -59,9 +59,13 @@ public class ReviewMapperImpl implements ReviewMapper {
   private AgentCommentResponse toAgentCommentResponse(Review review) {
     if (review.getAgentComment() == null) return null;
 
+    String profileStoredPath = review.getAgent().getProfileImgStoredPath();
+    String profileUrl = CommonUtil.nvl(profileStoredPath, "").isEmpty()
+        ? null : storageService.generatePublicUrl(profileStoredPath);
+
     return new AgentCommentResponse(
         review.getAgent().getNickname(),
-        storageService.generatePublicUrl(review.getAgent().getProfileImgStoredPath()),
+        profileUrl,
         review.getAgentComment(),
         TimeUtil.toLocalDateTime(review.getAgentCommentedDate())
     );
