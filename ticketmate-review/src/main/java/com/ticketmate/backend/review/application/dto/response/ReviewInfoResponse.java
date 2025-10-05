@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
-public class ReviewResponse {
+public class ReviewInfoResponse {
   private UUID reviewId;
 
   private String concertTitle;
@@ -21,4 +21,6 @@ public class ReviewResponse {
   private List<ReviewImgResponse> reviewImgList;
 
   private LocalDateTime createdDate;
+
+  private AgentCommentResponse agentComment;
 }
