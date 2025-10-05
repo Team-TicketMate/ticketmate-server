@@ -23,15 +23,17 @@ import java.util.UUID;
     name = "리뷰 API",
     description = "리뷰 관련 API 제공"
 )
-public class ReviewController {
+public class ReviewController implements ReviewControllerDocs {
   private final ReviewService reviewService;
 
+  @Override
   @GetMapping("/{review-id}")
   @LogMonitoringInvocation
   public ResponseEntity<ReviewResponse> getReview(@PathVariable(name = "review-id") UUID reviewId) {
     return ResponseEntity.ok(reviewService.getReview(reviewId));
   }
 
+  @Override
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @LogMonitoringInvocation
   public ResponseEntity<UUID> createReview(@Valid @ModelAttribute ReviewRequest request,
@@ -39,6 +41,7 @@ public class ReviewController {
     return ResponseEntity.ok(reviewService.createReview(request, customOAuth2User.getMember()));
   }
 
+  @Override
   @PatchMapping(value = "/{review-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @LogMonitoringInvocation
   public ResponseEntity<Void> updateReview(@PathVariable(name = "review-id") UUID reviewId,
