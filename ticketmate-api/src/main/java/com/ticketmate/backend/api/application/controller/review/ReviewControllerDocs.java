@@ -75,6 +75,7 @@ public interface ReviewControllerDocs {
 
         ### 유의 사항
         - 이미지 첨부는 최대 3개까지만 허용됩니다.
+        - 파일의 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다.
         - 필수 검증:
           - `applicationFormId`: null 불가
           - `rating`: 0.0 이상 5.0 이하
@@ -126,6 +127,7 @@ public interface ReviewControllerDocs {
 
         ### 유의 사항
         - 부분 수정이 가능하며 전달하지 않은 필드는 기존 값이 유지됩니다.
+        - 파일의 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다.
         - **Swagger에서는 파일 없이 요청하면 400 오류가 발생할 수 있습니다. 실제 요청 시 이미지가 없다면 newReviewImgList 필드는 아예 포함하지 말고 요청해 주세요.**
 
         ### 예외 처리
