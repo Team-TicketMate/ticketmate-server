@@ -47,12 +47,4 @@ public class ReviewController {
     reviewService.updateReview(reviewId, request, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
-
-  @DeleteMapping("{review-id}")
-  @LogMonitoringInvocation
-  public ResponseEntity<Void> deleteReview(@PathVariable(name = "review-id") UUID reviewId,
-                                           @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-    reviewService.deleteReview(reviewId, customOAuth2User.getMember());
-    return ResponseEntity.noContent().build();
-  }
 }

@@ -137,7 +137,7 @@ public class ReviewService {
     // 대리인 통계 업데이트
     agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
 
-    reviewRepository.delete(review);
+    // TODO: Soft Delete를 통한 삭제
   }
 
   /**
