@@ -29,3 +29,11 @@ CREATE TABLE public.review_img
     created_date                            TIMESTAMPTZ(0) NOT NULL,
     updated_date                            TIMESTAMPTZ(0) NOT NULL
 );
+
+-- agent_performance_summary 테이블에 total_rating_sum 컬럼 추가 (마이그레이션용 기본값 포함)
+ALTER TABLE public.agent_performance_summary
+    ADD COLUMN total_rating_sum DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- default 제거
+ALTER TABLE public.agent_performance_summary
+    ALTER COLUMN total_rating_sum DROP DEFAULT;
