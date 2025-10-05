@@ -48,6 +48,10 @@ public class AgentPerformanceSummary extends BasePostgresEntity implements Persi
   @Column(nullable = false)
   private int reviewCount;
 
+  // 전체 별점 총합
+  @Column(nullable = false)
+  private double totalRatingSum;
+
   // 최근 30일 성공 수
   @PositiveOrZero
   @Column(nullable = false)
@@ -61,5 +65,18 @@ public class AgentPerformanceSummary extends BasePostgresEntity implements Persi
   @Override
   public boolean isNew() {
     return getCreatedDate() == null;
+  }
+
+  // 후기 평균 업데이트
+  public void updateAverageRating(boolean plus, double rating) {
+    this.reviewCount += plus ? 1 : -1;
+    this.totalRatingSum += rating;
+    this.averageRating = totalRatingSum / reviewCount;
+  }
+
+  // 후기 수정 시 업데이트
+  public void updateAverageRating(double ratingDiff) {
+    this.totalRatingSum += ratingDiff;
+    this.averageRating = totalRatingSum / reviewCount;
   }
 }
