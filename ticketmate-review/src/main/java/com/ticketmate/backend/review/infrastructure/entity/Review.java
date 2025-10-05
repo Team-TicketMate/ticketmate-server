@@ -58,8 +58,8 @@ public class Review extends BasePostgresEntity {
   }
 
   public void update(Float rating, String comment) {
-    this.rating = rating;
-    this.comment = comment;
+    if (rating != null) this.rating = rating;
+    if (comment != null) this.comment = comment;
   }
 
   public void removeReviewImg(ReviewImg reviewImg) {
