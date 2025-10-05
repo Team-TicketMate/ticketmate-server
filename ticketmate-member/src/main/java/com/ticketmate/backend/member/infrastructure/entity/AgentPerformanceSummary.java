@@ -70,12 +70,21 @@ public class AgentPerformanceSummary extends BasePostgresEntity implements Persi
   // 후기 평균 업데이트
   public void updateAverageRating(boolean plus, double rating) {
     this.reviewCount += plus ? 1 : -1;
-    this.totalRatingSum += rating;
+    if (this.reviewCount == 0) {
+      this.totalRatingSum = 0;
+      this.averageRating = 0;
+      return;
+    }
+    this.totalRatingSum += plus ? rating : -rating;
     this.averageRating = totalRatingSum / reviewCount;
   }
 
   // 후기 수정 시 업데이트
   public void updateAverageRating(double ratingDiff) {
+    if (this.reviewCount == 0) {
+      this.averageRating = 0;
+      return;
+    }
     this.totalRatingSum += ratingDiff;
     this.averageRating = totalRatingSum / reviewCount;
   }
