@@ -5,10 +5,15 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationF
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.application.service.AgentPerformanceService;
+import com.ticketmate.backend.member.application.service.MemberService;
+import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.review.application.dto.request.AgentCommentRequest;
 import com.ticketmate.backend.review.application.dto.request.ReviewEditRequest;
+import com.ticketmate.backend.review.application.dto.request.ReviewFilteredRequest;
 import com.ticketmate.backend.review.application.dto.request.ReviewRequest;
-import com.ticketmate.backend.review.application.dto.response.ReviewResponse;
+import com.ticketmate.backend.review.application.dto.response.ReviewFilteredResponse;
+import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse;
 import com.ticketmate.backend.review.application.mapper.ReviewMapper;
 import com.ticketmate.backend.review.infrastructure.entity.Review;
 import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
@@ -20,7 +25,6 @@ import com.ticketmate.backend.storage.core.model.FileMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,20 +47,24 @@ public class ReviewService {
   private final ReviewImgRepository reviewImgRepository;
   private final ReviewMapper reviewMapper;
   private final AgentPerformanceService agentPerformanceService;
+  private final MemberService memberService;
 
   private static final int MAX_IMAGE_COUNT = 3;
 
   @Transactional(readOnly = true)
-  public ReviewResponse getReview(UUID reviewId) {
-    Review review = reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
-    return reviewMapper.toReviewResponse(review);
+  public ReviewInfoResponse getReview(UUID reviewId) {
+    Review review = findReviewById(reviewId);
+    return reviewMapper.toReviewInfoResponse(review);
   }
 
   @Transactional(readOnly = true)
-  public Page<ReviewResponse> findReviewsByAgent(Member agent, Pageable pageable) {
-    return reviewRepository.findByAgent(agent, pageable)
-        .map(reviewMapper::toReviewResponse);
+  public Page<ReviewFilteredResponse> getReviewsByAgent(ReviewFilteredRequest request) {
+    // 대리인 조회 및 검증
+    Member agent = memberService.findMemberById(request.getAgentId());
+    memberService.validateMemberType(agent, MemberType.AGENT);
+
+    return reviewRepository.findByAgent(agent, request.toPageable())
+        .map(reviewMapper::toReviewFilteredResponse);
   }
 
   @Transactional
@@ -86,8 +94,7 @@ public class ReviewService {
 
   @Transactional
   public void updateReview(UUID reviewId, ReviewEditRequest request, Member member) {
-    Review review = reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+    Review review = findReviewById(reviewId);
 
     double oldRating = review.getRating();
 
@@ -124,8 +131,7 @@ public class ReviewService {
 
   @Transactional
   public void deleteReview(UUID reviewId, Member member) {
-    Review review = reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+    Review review = findReviewById(reviewId);
 
     // 삭제 권한 검증
     validateEditor(review, member);
@@ -138,6 +144,31 @@ public class ReviewService {
     agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
 
     // TODO: Soft Delete를 통한 삭제
+  }
+
+  @Transactional
+  public void addAgentComment(UUID reviewId, AgentCommentRequest request, Member agent) {
+    Review review = findReviewById(reviewId);
+
+    // 리뷰 작성 권한 검증
+    validateReviewCommenter(review, agent);
+
+    // 대리인 댓글 업데이트
+    review.addAgentComment(request.getComment());
+  }
+
+  private Review findReviewById(UUID reviewId) {
+    return reviewRepository.findById(reviewId)
+        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+  }
+
+  /**
+   * 리뷰 댓글 작성자가 실제 리뷰의 대리인인지 검증
+   */
+  private void validateReviewCommenter(Review review, Member agent) {
+    if (!review.getAgent().getMemberId().equals(agent.getMemberId())) {
+      throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW_COMMENT);
+    }
   }
 
   /**
