@@ -2,8 +2,10 @@ package com.ticketmate.backend.review.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.review.application.dto.response.AgentCommentResponse;
+import com.ticketmate.backend.review.application.dto.response.ReviewFilteredResponse;
 import com.ticketmate.backend.review.application.dto.response.ReviewImgResponse;
-import com.ticketmate.backend.review.application.dto.response.ReviewResponse;
+import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse;
 import com.ticketmate.backend.review.infrastructure.entity.Review;
 import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import com.ticketmate.backend.storage.core.service.StorageService;
@@ -18,8 +20,21 @@ public class ReviewMapperImpl implements ReviewMapper {
   private final StorageService storageService;
 
   @Override
-  public ReviewResponse toReviewResponse(Review review) {
-    return new ReviewResponse(
+  public ReviewInfoResponse toReviewInfoResponse(Review review) {
+    return new ReviewInfoResponse(
+        review.getReviewId(),
+        review.getApplicationForm().getConcert().getConcertName(),
+        review.getRating(),
+        review.getComment(),
+        toImageUrls(review.getReviewImgList()),
+        TimeUtil.toLocalDateTime(review.getCreatedDate()),
+        toAgentCommentResponse(review)
+    );
+  }
+
+  @Override
+  public ReviewFilteredResponse toReviewFilteredResponse(Review review) {
+    return new ReviewFilteredResponse(
         review.getReviewId(),
         review.getApplicationForm().getConcert().getConcertName(),
         review.getRating(),
@@ -41,4 +56,14 @@ public class ReviewMapperImpl implements ReviewMapper {
         .toList();
   }
 
+  private AgentCommentResponse toAgentCommentResponse(Review review) {
+    if (review.getComment() == null) return null;
+
+    return new AgentCommentResponse(
+        review.getAgent().getNickname(),
+        storageService.generatePublicUrl(review.getAgent().getProfileImgStoredPath()),
+        review.getAgentComment(),
+        TimeUtil.toLocalDateTime(review.getAgentCommentedDate())
+    );
+  }
 }
