@@ -57,7 +57,7 @@ public class ReviewMapperImpl implements ReviewMapper {
   }
 
   private AgentCommentResponse toAgentCommentResponse(Review review) {
-    if (review.getComment() == null) return null;
+    if (review.getAgentComment() == null) return null;
 
     return new AgentCommentResponse(
         review.getAgent().getNickname(),
