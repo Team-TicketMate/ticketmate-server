@@ -9,6 +9,8 @@ CREATE TABLE public.review
         CONSTRAINT fk_review_on_agent_member REFERENCES member,
     rating                                  REAL           NOT NULL,
     comment                                 VARCHAR(300)   NOT NULL,
+    agent_comment                           VARCHAR(300)   NULL,
+    agent_commented_date                    TIMESTAMPTZ(0) NULL,
     created_date                            TIMESTAMPTZ(0) NOT NULL,
     updated_date                            TIMESTAMPTZ(0) NOT NULL
 );
