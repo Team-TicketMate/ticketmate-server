@@ -21,8 +21,6 @@ public class SecurityUrls {
       "/api/auth/2fa/setup/verify", // 2FA setup verify
       "/api/auth/2fa/login/verify", // 2FA Login verify
       "/api/auth/2fa/reset", // 2FA Reset
-      "/api/auth/send-code", // 인증문자 발송
-      "/api/auth/verify", // 인증문자 검증
       "/api/oauth2/**", // 소셜 로그인
 
       // API

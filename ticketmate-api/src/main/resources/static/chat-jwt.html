@@ -289,6 +289,8 @@
   // ✅ dev 전용: 한 번만 토큰/roomId 받아서 세션에 캐싱
   const DEV_INIT_KEY = "dev.mock.init";  // {roomId, tokens:{client,agent}}
 
+  const picsOf = (p) => p.pictureMessageUrlList || p.pictureMessageList || [];
+
   function clearClientState() {
     sessionStorage.removeItem(DEV_INIT_KEY); // 'dev.mock.init'
     Token.clear();                           // 'at'
@@ -619,6 +621,34 @@
     document.getElementById('roomListSection').style.display = 'block';
   }
 
+  async function loadContext(roomId) {
+    const res = await apiFetch(`${API}/api/chat-room/${roomId}/context`);
+    if (!res.ok) throw new Error(res.status);
+    const ctx = await res.json();
+    renderContext(ctx);
+  }
+
+  function renderContext(ctx) {
+    // 기존 우측 패널(formInfoSection)을 재사용해서 표기
+    const panel = document.getElementById("formInfoSection");
+    const box = document.getElementById("formInfo");
+    box.innerHTML = `
+    <div class="form-field"><b>콘서트:</b> ${ctx.concertName ?? "-"}</div>
+    <div class="form-field"><b>구분:</b> ${ctx.ticketOpenType ?? "-"}</div>
+    <div class="form-field"><b>예매처:</b> ${ctx.ticketReservationSite ?? "-"}</div>
+    ${ctx.concertThumbnailImage ? `<div class="form-field"><img src="${ctx.concertThumbnailImage}" style="max-width:100%;border-radius:8px"/></div>` : ""}
+    ${Array.isArray(ctx.ticketOpenDateInfoResponseList) ? ctx.ticketOpenDateInfoResponseList.map((d,i)=>`
+      <div class="detail-box">
+        <h5>오픈 일정 #${i+1}</h5>
+        ${d.ticketOpenDate ? `<div><b>오픈일:</b> ${fmtDateTime(parseDate(d.ticketOpenDate))}</div>` : ""}
+        ${d.ticketOpenType ? `<div><b>구분:</b> ${d.ticketOpenType}</div>` : ""}
+      </div>`).join("") : ""}
+  `;
+    // 필요할 때만 열도록 유지
+  }
+
+
+
   /* ===============================================
    * 방 입장
    =============================================== */
@@ -643,6 +673,9 @@
 
     // 방 구독 준비 (STOMP 연결이 없다면 connectStomp가 내부에서 처리)
     await connectRoomWS(id);
+
+    // 컨텍스트 1회 로드 (콘서트/요약정보)
+    await loadContext(id);
 
     // Drag & Drop (중복 등록 방지 위해 먼저 제거 후 등록)
     const box = document.getElementById("chatBox");
@@ -701,7 +734,7 @@
     // const res = await fetch(url, {
     //   headers: {Authorization: BEARER ? "Bearer " + Token.get() : Token.get()},
     // });
-    const res = await apiFetch(`${API}/api/chat-room/${roomId}?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`);
+    const res = await apiFetch(`${API}/api/chat-room/${roomId}/message?pageNumber=${page + 1}&pageSize=${PAGE_SIZE}`);
 
     if (!res.ok) {
       loadingOlder = false;
@@ -805,7 +838,7 @@
 
     // 콘텐츠
     if (p.chatMessageType === "PICTURE") {
-      const pics = p.pictureMessageList || [];
+      const pics = picsOf(p);
       const count = pics.length || p._tmpCount || 0;
 
       if (count <= 1) {
@@ -1072,7 +1105,7 @@
    =============================================== */
   function previewText(dto) {
     if (dto.chatMessageType === "PICTURE") {
-      const cnt = dto.pictureMessageList?.length ?? dto._tmpCount ?? 0;
+      const cnt = picsOf(dto)?.length ?? dto._tmpCount ?? 0;
       return cnt <= 1 ? "사진" : `사진 ${cnt}장`;
     }
     return dto.message ?? mLastMsg(dto);
@@ -1167,14 +1200,14 @@
       const btn = document.getElementById("toggleFormButton");
       if (panel.style.display === "none" || panel.style.display === "") {
         if (!formLoaded) {
-          await loadApplicationForm(currentRoomId);
+          await loadContext(currentRoomId);
           formLoaded = true;
         }
         panel.style.display = "block";
-        btn.textContent = "신청서 숨기기";
+        btn.textContent = "컨텍스트 숨기기";
       } else {
         panel.style.display = "none";
-        btn.textContent = "신청서 보기";
+        btn.textContent = "컨텍스트 보기";
       }
     };
 
