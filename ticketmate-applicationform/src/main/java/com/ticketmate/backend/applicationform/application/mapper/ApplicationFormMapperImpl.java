@@ -10,8 +10,10 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationF
 import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -38,8 +40,23 @@ public class ApplicationFormMapperImpl implements ApplicationFormMapper {
   }
 
   @Override
+  public ApplicationFormDetailResponse toApplicationFormDetailResponse(ApplicationFormDetail applicationFormDetail) {
+    ConcertDate concertDate = applicationFormDetail.getConcertDate();
+
+    return new ApplicationFormDetailResponse(
+        TimeUtil.toLocalDateTime(concertDate.getPerformanceDate()),
+        concertDate.getSession(),
+        applicationFormDetail.getRequestCount(),
+        toHopeAreaResponseList(applicationFormDetail.getHopeAreaList()),
+        applicationFormDetail.getRequirement()
+    );
+  }
+
+  @Override
   public List<ApplicationFormDetailResponse> toApplicationFormDetailResponseList(List<ApplicationFormDetail> applicationFormDetailList) {
-    return mapStruct.toApplicationFormDetailResponseList(applicationFormDetailList);
+    return applicationFormDetailList.stream()
+        .map(this::toApplicationFormDetailResponse)
+        .collect(Collectors.toList());
   }
 
   @Override
