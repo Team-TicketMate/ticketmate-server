@@ -102,10 +102,6 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
     Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
-      Instant openDate = t.get(TICKET_OPEN_DATE.openDate);
-      if (openDate != null && openDate.isBefore(now)) {
-        continue;
-      }
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
       openMap.putIfAbsent(type, new TicketOpenDateInfo(
           t.get(TICKET_OPEN_DATE.openDate),
