@@ -4,6 +4,8 @@ import com.ticketmate.backend.applicationform.application.service.ApplicationFor
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.application.service.AgentPerformanceService;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
@@ -29,9 +31,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -88,7 +92,7 @@ public class ReviewService {
       return reviewRepository.save(review).getReviewId();
     } catch (Exception e) {
       log.error("리뷰 생성 중 오류: {}", e.getMessage(), e);
-      throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
+      throw new CustomException(ErrorCode.REVIEW_SAVE_ERROR);
     }
   }
 
@@ -102,15 +106,16 @@ public class ReviewService {
     validateEditor(review, member);
 
     // 리뷰 수정 기간 검증
-    ZonedDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1).atZone(ZoneId.of("Asia/Seoul"));
-    if (review.getCreatedDate().isBefore(oneMonthAgo.toInstant())) {
+    Instant oneMonthAgo = TimeUtil.now().minus(1, ChronoUnit.MONTHS);
+    if (review.getCreatedDate().isBefore(oneMonthAgo)) {
+      log.error("리뷰 수정 기간이 만료되어 수정하지 못했습니다. reviewId: {}, memberId: {}", reviewId, member.getMemberId());
       throw new CustomException(ErrorCode.REVIEW_EDIT_PERIOD_EXPIRED);
     }
 
     // 이미지 파일 개수 검증
     List<UUID> deleteIdList = request.getDeleteImgIdList();
     List<ReviewImg> imagesToDelete = new ArrayList<>();
-    if (deleteIdList != null && !deleteIdList.isEmpty()) {
+    if (CommonUtil.nullOrEmpty(deleteIdList)) {
       imagesToDelete = reviewImgRepository.findAllById(deleteIdList);
     }
     validateImageCount(request.getNewReviewImgList(), review.getReviewImgList().size(), imagesToDelete.size());
@@ -174,8 +179,8 @@ public class ReviewService {
   /**
    * 리뷰 작성자가 실제 신청서의 의뢰인인지 검증
    */
-  private void validateReviewer(ApplicationForm applicationForm, Member member) {
-    if (!applicationForm.getClient().getMemberId().equals(member.getMemberId())) {
+  private void validateReviewer(ApplicationForm applicationForm, Member client) {
+    if (!applicationForm.getClient().getMemberId().equals(client.getMemberId())) {
       throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW);
     }
   }
@@ -183,8 +188,8 @@ public class ReviewService {
   /**
    * 리뷰 수정/삭제 권한이 있는지 검증
    */
-  private void validateEditor(Review review, Member member) {
-    if (!review.getClient().getMemberId().equals(member.getMemberId())) {
+  private void validateEditor(Review review, Member client) {
+    if (!review.getClient().getMemberId().equals(client.getMemberId())) {
       throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW);
     }
   }
@@ -233,7 +238,7 @@ public class ReviewService {
    * 이미지 업로드 (S3, DB)
    */
   private void addReviewImages(List<MultipartFile> imageFileList, Review review) {
-    if (imageFileList == null || imageFileList.isEmpty()) {
+    if (CommonUtil.nullOrEmpty(imageFileList)) {
       return;
     }
     // S3에 이미지 업로드
