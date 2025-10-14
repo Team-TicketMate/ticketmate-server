@@ -47,7 +47,7 @@ public class S3Service implements StorageService {
    * @param file 요청된 MultipartFile
    * @return 원본 파일명
    */
-  public static String validateAndExtractFilename(MultipartFile file) {
+  private static String validateAndExtractFilename(MultipartFile file) {
     // 파일 검증
     if (FileUtil.isNullOrEmpty(file)) {
       log.error("파일이 비어있거나 존재하지 않습니다.");
