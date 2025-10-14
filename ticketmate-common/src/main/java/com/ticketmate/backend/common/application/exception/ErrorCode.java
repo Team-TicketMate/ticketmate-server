@@ -272,7 +272,9 @@ public enum ErrorCode {
 
   REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."),
 
-  REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다.")
+  REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다."),
+
+  REVIEW_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "리뷰 등록 중 오류가 발생했습니다.");
   ;
 
   private final HttpStatus status;
