@@ -6,15 +6,16 @@ import com.ticketmate.backend.storage.core.model.FileMetadata;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReviewImg extends BasePostgresEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

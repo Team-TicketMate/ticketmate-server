@@ -1,10 +1,13 @@
 package com.ticketmate.backend.review.infrastructure.entity;
 
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -12,11 +15,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Review extends BasePostgresEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,16 +29,16 @@ public class Review extends BasePostgresEntity {
   @JoinColumn(nullable = false, unique = true)
   private ApplicationForm applicationForm;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private Member client;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
   private Member agent;
 
   @Column(nullable = false)
-  private Float rating;
+  private float rating;
 
   @Column(nullable = false, length = 300)
   private String comment;
@@ -61,6 +64,12 @@ public class Review extends BasePostgresEntity {
   }
 
   public void addReviewImgs(List<ReviewImg> reviewImgs) {
+    if (CommonUtil.nullOrEmpty(reviewImgs)) return;
+    for (ReviewImg img : reviewImgs) {
+      if (img.getReview() != this) {
+        img.setReview(this);
+      }
+    }
     this.reviewImgList.addAll(reviewImgs);
   }
 
@@ -75,6 +84,6 @@ public class Review extends BasePostgresEntity {
 
   public void addAgentComment(String comment) {
     this.agentComment = comment;
-    this.agentCommentedDate = Instant.now();
+    this.agentCommentedDate = TimeUtil.now();
   }
 }
