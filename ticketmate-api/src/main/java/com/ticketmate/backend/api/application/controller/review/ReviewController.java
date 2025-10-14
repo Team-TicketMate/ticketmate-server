@@ -12,6 +12,7 @@ import com.ticketmate.backend.review.application.service.ReviewService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class ReviewController implements ReviewControllerDocs {
   @Override
   @GetMapping("/agent")
   @LogMonitoringInvocation
-  public ResponseEntity<Page<ReviewFilteredResponse>> getReviewsByAgent(@ModelAttribute ReviewFilteredRequest request) {
+  public ResponseEntity<Page<ReviewFilteredResponse>> getReviewsByAgent(@ParameterObject @Valid ReviewFilteredRequest request) {
     return ResponseEntity.ok(reviewService.getReviewsByAgent(request));
   }
 
@@ -65,7 +66,7 @@ public class ReviewController implements ReviewControllerDocs {
   @PostMapping("/{review-id}/comment")
   @LogMonitoringInvocation
   public ResponseEntity<Void> addAgentComment(@PathVariable(name = "review-id") UUID reviewId,
-                                              @ModelAttribute AgentCommentRequest request,
+                                              @RequestBody @Valid AgentCommentRequest request,
                                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     reviewService.addAgentComment(reviewId, request, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
