@@ -26,7 +26,7 @@ public class ReviewMapperImpl implements ReviewMapper {
         review.getApplicationForm().getConcert().getConcertName(),
         review.getRating(),
         review.getComment(),
-        toImageUrls(review.getReviewImgList()),
+        toReviewImgResponseList(review.getReviewImgList()),
         TimeUtil.toLocalDateTime(review.getCreatedDate()),
         toAgentCommentResponse(review)
     );
@@ -39,13 +39,13 @@ public class ReviewMapperImpl implements ReviewMapper {
         review.getApplicationForm().getConcert().getConcertName(),
         review.getRating(),
         review.getComment(),
-        toImageUrls(review.getReviewImgList()),
+        toReviewImgResponseList(review.getReviewImgList()),
         TimeUtil.toLocalDateTime(review.getCreatedDate())
     );
   }
 
-  private List<ReviewImgResponse> toImageUrls(List<ReviewImg> reviewImgList) {
-    if (reviewImgList == null || reviewImgList.isEmpty()) {
+  private List<ReviewImgResponse> toReviewImgResponseList(List<ReviewImg> reviewImgList) {
+    if (CommonUtil.nullOrEmpty(reviewImgList)) {
       return List.of();
     }
     return reviewImgList.stream()
