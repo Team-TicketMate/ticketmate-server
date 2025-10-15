@@ -53,7 +53,7 @@ public class Review extends BasePostgresEntity {
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<ReviewImg> reviewImgList = new ArrayList<>();
 
-  public static Review create(ApplicationForm applicationForm, Member client, Member agent, Float rating, String comment) {
+  public static Review create(ApplicationForm applicationForm, Member client, Member agent, float rating, String comment) {
     return Review.builder()
         .applicationForm(applicationForm)
         .client(client)
