@@ -17,6 +17,7 @@ import com.ticketmate.backend.review.application.dto.request.ReviewRequest;
 import com.ticketmate.backend.review.application.dto.response.ReviewFilteredResponse;
 import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse;
 import com.ticketmate.backend.review.application.mapper.ReviewMapper;
+import com.ticketmate.backend.review.infrastructure.constant.ReviewConstants;
 import com.ticketmate.backend.review.infrastructure.entity.Review;
 import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import com.ticketmate.backend.review.infrastructure.repository.ReviewImgRepository;
@@ -52,8 +53,6 @@ public class ReviewService {
   private final ReviewMapper reviewMapper;
   private final AgentPerformanceService agentPerformanceService;
   private final MemberService memberService;
-
-  private static final int MAX_IMAGE_COUNT = 3;
 
   @Transactional(readOnly = true)
   public ReviewInfoResponse getReview(UUID reviewId) {
@@ -212,7 +211,7 @@ public class ReviewService {
    * 이미지 파일 개수 검증
    */
   private void validateImageCount(List<MultipartFile> imageFileList, int currentFileCount, int deleteFileCount) {
-    if (imageFileList != null && currentFileCount - deleteFileCount + imageFileList.size() > MAX_IMAGE_COUNT) {
+    if (imageFileList != null && currentFileCount - deleteFileCount + imageFileList.size() > ReviewConstants.MAX_IMAGE_COUNT) {
       throw new CustomException(ErrorCode.IMAGE_UPLOAD_LIMIT_EXCEEDED);
     }
   }
