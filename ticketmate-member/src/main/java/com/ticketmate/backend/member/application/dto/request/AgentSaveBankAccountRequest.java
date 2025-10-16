@@ -6,12 +6,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class AgentSaveBankAccountRequest {
   @NotNull(message = "은행을 선택해주세요.")
   private BankCode bankCode;  // 은행 코드
@@ -26,5 +30,5 @@ public class AgentSaveBankAccountRequest {
   private String accountNumber;  // "-" 제거된 계좌번호
 
   @NotNull(message = "대표계좌 유무 체크를 확인하세요.")
-  private Boolean primaryAccount;  // 대표계좌 유/무 (등록하면서 바로 설정)
+  private boolean primaryAccount;  // 대표계좌 유/무 (등록하면서 바로 설정)
 }

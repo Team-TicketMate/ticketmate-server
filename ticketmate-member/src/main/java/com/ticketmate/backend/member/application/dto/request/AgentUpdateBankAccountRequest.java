@@ -4,14 +4,18 @@ import com.ticketmate.backend.member.core.constant.BankCode;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentUpdateBankAccountRequest {
-  private BankCode bankCode;  // 은행 코드
+  private BankCode bankCode;  // 은행 정보
 
   @Size(max = 20, message = "예금주명은 최대 20자 입니다.")
   @Pattern(regexp = ".*\\S.*", message = "예금주명은 공백만으로 구성될 수 없습니다.")
