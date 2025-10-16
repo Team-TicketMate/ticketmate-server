@@ -282,9 +282,9 @@ public enum ErrorCode {
 
   INVALID_ACCOUNT_NUMBER(HttpStatus.BAD_REQUEST, "올바르지 않은 계좌번호 양식입니다."),
 
-  ACCOUNT_EXCEED(HttpStatus.BAD_REQUEST, "대표계좌는 총 5개만 생성 가능합니다."),
+  ACCOUNT_EXCEED(HttpStatus.BAD_REQUEST, "계좌는 총 5개만 생성 가능합니다."),
 
-  ACCOUNT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "대표계좌 연동중 오류가 발생했습니다."),
+  ACCOUNT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "대표계좌 변경중 오류가 발생했습니다."),
 
   BANK_ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "계좌를 찾을 수 없습니다."),
 
