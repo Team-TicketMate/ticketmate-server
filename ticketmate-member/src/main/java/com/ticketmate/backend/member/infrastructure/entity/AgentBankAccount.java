@@ -38,10 +38,7 @@ public class AgentBankAccount extends BasePostgresEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private BankCode bankCode;  // 은행 코드
-
-  @Column(nullable = false)
-  private String bankName;  // 은행 이름
+  private BankCode bankCode;  // 은행 정보
 
   @Column(nullable = false, length = 64)
   private String accountHolder;  // 예금주
@@ -52,4 +49,14 @@ public class AgentBankAccount extends BasePostgresEntity {
 
   @Column(nullable = false)
   private boolean primaryAccount; // 대표계좌 여부
+
+  public static AgentBankAccount create(Member agent, BankCode bankCode, String accountHolder, String accountNumberEnc, boolean primaryAccount) {
+    return AgentBankAccount.builder()
+        .agent(agent)
+        .bankCode(bankCode)
+        .accountHolder(accountHolder)
+        .accountNumberEnc(accountNumberEnc)
+        .primaryAccount(primaryAccount)
+        .build();
+  }
 }
