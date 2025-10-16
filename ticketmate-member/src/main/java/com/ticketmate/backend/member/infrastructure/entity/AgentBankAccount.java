@@ -40,7 +40,7 @@ public class AgentBankAccount extends BasePostgresEntity {
   @Column(nullable = false)
   private BankCode bankCode;  // 은행 정보
 
-  @Column(nullable = false, length = 64)
+  @Column(nullable = false, length = 20)
   private String accountHolder;  // 예금주
 
   @Column(nullable = false, length = 256)
