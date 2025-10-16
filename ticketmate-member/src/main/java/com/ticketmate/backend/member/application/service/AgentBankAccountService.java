@@ -1,7 +1,10 @@
 package com.ticketmate.backend.member.application.service;
 
+import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRemoveSpecialCharacters;
+import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.ACCOUNT_NUMBER_PATTERN;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.MAX_ACCOUNT_NUMBER;
+import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.MAX_ACCOUNT_COUNT;
+import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.MAX_ACCOUNT_HOLDER_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -18,6 +21,7 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,17 +33,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class AgentBankAccountService {
+
   private final AgentBankAccountRepository agentBankAccountRepository;
   private final AgentBankAccountMapper mapper;
+  private final MemberService memberService;
 
   @Transactional
   public void saveAgentBankAccount(Member member, AgentSaveBankAccountRequest request) {
-    agentMemberTypeValidate(member);
+    memberService.validateMemberType(member, MemberType.AGENT);
 
-    long existBankAccountNumber = agentBankAccountRepository.countByAgent(member);
+    long existBankAccountCount = agentBankAccountRepository.countByAgent(member);
 
-    if (existBankAccountNumber >= MAX_ACCOUNT_NUMBER) {
-      log.error("대표계좌는 최대 5개까지만 등록 가능합니다. 현재 존재하는 계좌 수 : {}", existBankAccountNumber);
+    if (existBankAccountCount >= MAX_ACCOUNT_COUNT) {
+      log.error("대표계좌는 최대 5개까지만 등록 가능합니다. 현재 존재하는 계좌 수 : {}", existBankAccountCount);
       throw new CustomException(ErrorCode.ACCOUNT_EXCEED);
     }
 
@@ -51,7 +57,7 @@ public class AgentBankAccountService {
       throw new CustomException(ErrorCode.INVALID_ACCOUNT_NUMBER);
     }
 
-    boolean primaryAccount = Boolean.TRUE.equals(request.getPrimaryAccount());
+    boolean primaryAccount = Boolean.TRUE.equals(request.isPrimaryAccount());
 
     // 첫번째로 등록하는 계좌는 무조건 대표계좌로 설정
     if (!primaryAccount && !agentBankAccountRepository.existsByAgentAndPrimaryAccountTrue(member)) {
@@ -63,21 +69,17 @@ public class AgentBankAccountService {
       agentBankAccountRepository.demoteAllPrimaryAccount(member.getMemberId());
     }
 
-    AgentBankAccount agentBankAccount = AgentBankAccount.builder()
-        .bankCode(request.getBankCode())
-        .agent(member)
-        .bankName(request.getBankCode().getDisplayName())
-        .accountHolder(request.getAccountHolder().trim())
-        .accountNumberEnc(accountNumber)
-        .primaryAccount(primaryAccount)
-        .build();
+    String accountHolder = normalizeAndRemoveSpecialCharacters(request.getAccountHolder());
+
+    AgentBankAccount agentBankAccount = AgentBankAccount
+        .create(member, request.getBankCode(), accountHolder, accountNumber, primaryAccount);
 
     agentBankAccountRepository.save(agentBankAccount);
   }
 
   @Transactional(readOnly = true)
   public List<AgentBankAccountResponse> getAgentBankAccountList(Member member) {
-    agentMemberTypeValidate(member);
+    memberService.validateMemberType(member, MemberType.AGENT);
 
     List<AgentBankAccount> agentBankAccountList = agentBankAccountRepository.findAllByAgent(member);
 
@@ -92,19 +94,12 @@ public class AgentBankAccountService {
 
   @Transactional
   public void changePrimaryAccount(UUID agentBankAccountId, Member member) {
-    agentMemberTypeValidate(member);
+    memberService.validateMemberType(member, MemberType.AGENT);
 
-    AgentBankAccount agentBankAccount = agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
-        () -> {
-          log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
-          throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
-        }
-    );
+    AgentBankAccount agentBankAccount = findAgentAccountById(agentBankAccountId);
 
     // 소유권 검증
-    if (!agentBankAccount.getAgent().getMemberId().equals(member.getMemberId())) {
-      throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_OWNED);
-    }
+    validateAgentAccountOwner(agentBankAccount, member);
 
     // 원하는 계좌를 대표계좌로 변경 전 모든 계좌의 대표계좌 여부 필드상태 false로 세팅(유니크 인덱스)
     agentBankAccountRepository.demoteAllPrimaryAccount(member.getMemberId());
@@ -121,69 +116,59 @@ public class AgentBankAccountService {
 
   @Transactional
   public void changeAccountInfo(UUID agentBankAccountId, Member member, AgentUpdateBankAccountRequest request) {
-    agentMemberTypeValidate(member);
+    memberService.validateMemberType(member, MemberType.AGENT);
 
-    AgentBankAccount agentBankAccount = agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
-        () -> {
-          log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
-          throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
-        }
-    );
+    AgentBankAccount agentBankAccount = findAgentAccountById(agentBankAccountId);
 
     // 소유권 검증
-    if (!agentBankAccount.getAgent().getMemberId().equals(member.getMemberId())) {
-      throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_OWNED);
-    }
+    validateAgentAccountOwner(agentBankAccount, member);
 
     BankCode bankCode = (request.getBankCode() != null) ? request.getBankCode() : agentBankAccount.getBankCode();
 
-    String accountHolder = (request.getAccountHolder() != null) ?
-        request.getAccountHolder().trim() : agentBankAccount.getAccountHolder();
+    String accountHolderOfNvl = nvl(request.getAccountHolder(), "");
+
+    String accountHolder = (!Objects.equals(accountHolderOfNvl, "")) ?
+        normalizeAndRemoveSpecialCharacters(accountHolderOfNvl) : agentBankAccount.getAccountHolder();
 
     String accountNumber = (request.getAccountNumber() != null) ?
         normalizeAccountNumber(request.getAccountNumber()) : agentBankAccount.getAccountNumberEnc();
 
-    if (accountHolder == null || accountHolder.isEmpty() || accountHolder.length() > 20) {
+    if (accountHolder == null || accountHolder.isEmpty() || accountHolder.length() > MAX_ACCOUNT_HOLDER_LENGTH) {
+      log.error("예금주 형식이 맞지 않습니다. 요청한 예금주 문자열 : {}", accountHolder);
       throw new CustomException(ErrorCode.INVALID_ACCOUNT_HOLDER);
     }
 
     if (bankCode == null) {
+      log.error("은행정보의 값이 Null 입니다");
       throw new CustomException(ErrorCode.INVALID_BANK_CODE);
     }
 
     if (!ACCOUNT_NUMBER_PATTERN.matcher(accountNumber).matches()) {
+      log.error("계좌번호의 형식이 잘못되었습니다. 요청한 계좌번호 : {}", accountNumber);
       throw new CustomException(ErrorCode.INVALID_ACCOUNT_NUMBER);
     }
 
     agentBankAccount.setBankCode(bankCode);
-    agentBankAccount.setBankName(bankCode.getDisplayName());
     agentBankAccount.setAccountHolder(accountHolder);
     agentBankAccount.setAccountNumberEnc(accountNumber);
   }
 
   @Transactional
   public void deleteBankAccount(UUID agentBankAccountId, Member member) {
-    agentMemberTypeValidate(member);
+    memberService.validateMemberType(member, MemberType.AGENT);
 
-    AgentBankAccount agentBankAccount = agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
-        () -> {
-          log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
-          throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
-        }
-    );
+    AgentBankAccount agentBankAccount = findAgentAccountById(agentBankAccountId);
 
     // 소유권 검증
-    if (!agentBankAccount.getAgent().getMemberId().equals(member.getMemberId())) {
-      throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_OWNED);
-    }
+    validateAgentAccountOwner(agentBankAccount, member);
 
     agentBankAccountRepository.deleteById(agentBankAccountId);
 
     // 현재 남아있는 계좌 수
-    long existBankAccountNumber = agentBankAccountRepository.countByAgent(member);
+    long existBankAccountCount = agentBankAccountRepository.countByAgent(member);
 
     // 나머지 계좌의 수가 1개만 남았을 시 남아있는 계좌는 대표계좌로 설정
-    if (existBankAccountNumber == 1L) {
+    if (existBankAccountCount == 1L) {
       Optional<AgentBankAccount> optionalBankAccount = agentBankAccountRepository.findFirstByAgentOrderByCreatedDateAsc(member);
 
       if (optionalBankAccount.isEmpty()) {
@@ -210,10 +195,25 @@ public class AgentBankAccountService {
     return nfkc.replaceAll("\\D", "");
   }
 
-  private static void agentMemberTypeValidate(Member member) {
-    if (member.getMemberType() != MemberType.AGENT) {
-      log.error("대표계좌 등록 기능은 대리인만 사용 가능합니다.");
-      throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
+
+  /**
+   * 계좌 추출
+   */
+  private AgentBankAccount findAgentAccountById(UUID agentBankAccountId) {
+    return agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
+        () -> {
+          log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
+          throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
+        }
+    );
+  }
+
+  /**
+   * 해당 계좌가 현재 로그인된 사용자의 계좌인지 검증하는 메서드
+   */
+  private void validateAgentAccountOwner(AgentBankAccount agentBankAccount, Member member) {
+    if (!agentBankAccount.getAgent().getMemberId().equals(member.getMemberId())) {
+      throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_OWNED);
     }
   }
 }
