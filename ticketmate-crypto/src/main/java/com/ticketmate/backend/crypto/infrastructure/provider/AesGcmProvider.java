@@ -7,6 +7,7 @@ import static com.ticketmate.backend.crypto.infrastructure.constant.AesGcmConsta
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -16,15 +17,20 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor
+@Slf4j
 public class AesGcmProvider {
   private static volatile SecretKey KEY;
 
   public static void initFromBase64(String base64Key) {
-    if (base64Key == null || base64Key.isBlank()) {
+    String key = CommonUtil.nvl(base64Key, "");
+
+    if (key.isEmpty()) {
       throw new CustomException(ErrorCode.AES_KEY_NOT_CONFIGURED);
     }
+
     try {
       byte[] raw = Base64.getDecoder().decode(base64Key);
       if (raw.length != 32) throw new CustomException(ErrorCode.AES_KEY_LENGTH_INVALID);
@@ -38,6 +44,7 @@ public class AesGcmProvider {
 
   public static void initFromSecretKey(SecretKey secretKey) {
     if (secretKey == null) throw new CustomException(ErrorCode.AES_KEY_NOT_CONFIGURED);
+    log.debug("암호화를 위한 KEY 등록 완료");
     KEY = secretKey;
   }
 
@@ -59,6 +66,8 @@ public class AesGcmProvider {
 
       System.arraycopy(ivLen, 0, out, 0, ivLen.length);
       System.arraycopy(ct, 0, out, ivLen.length, ct.length);
+
+      log.debug("암호화가 성공적으로 이루어졌습니다.");
 
       return Base64.getEncoder().encodeToString(out);
 
@@ -89,6 +98,9 @@ public class AesGcmProvider {
 
       Cipher cipher = Cipher.getInstance(TRANS);
       cipher.init(Cipher.DECRYPT_MODE, KEY, new GCMParameterSpec(TAG_LEN, ivLen));
+
+      log.debug("복호화가 성공적으로 이루어졌습니다.");
+
       return new String(cipher.doFinal(ct), StandardCharsets.UTF_8);
 
     } catch (IllegalArgumentException e) { // Base64 디코드 실패
