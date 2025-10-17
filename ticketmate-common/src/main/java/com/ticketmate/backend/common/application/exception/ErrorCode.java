@@ -258,6 +258,24 @@ public enum ErrorCode {
 
   REPORT_STATUS_TRANSITION_ERROR(HttpStatus.BAD_REQUEST, "신고 상태를 변경할 수 없습니다."),
 
+  // REVIEW
+
+  NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."),
+
+  NO_AUTH_TO_REVIEW_COMMENT(HttpStatus.FORBIDDEN, "해당 리뷰에 댓글을 작성할 권한이 없습니다."),
+
+  CANNOT_REVIEW_NOT_SUCCEEDED_FORM(HttpStatus.BAD_REQUEST, "성공한 신청서에 대해서만 리뷰를 작성할 수 있습니다."),
+
+  REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 신청서에 대한 리뷰가 존재합니다."),
+
+  IMAGE_UPLOAD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "리뷰 이미지는 최대 3개까지 등록 가능합니다."),
+
+  REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."),
+
+  REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다."),
+
+  REVIEW_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "리뷰 등록 중 오류가 발생했습니다."),
+  
   // AES-GCM
 
   AES_KEY_LENGTH_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키 길이가 올바르지 않습니다. AES-256 키는 32바이트여야 합니다."),

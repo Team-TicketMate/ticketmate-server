@@ -181,6 +181,7 @@ public class S3Service implements StorageService {
       case CONCERT -> s3Properties.s3().path().concert();
       case PORTFOLIO -> s3Properties.s3().path().portfolio();
       case CHAT -> s3Properties.s3().path().chat();
+      case REVIEW -> s3Properties.s3().path().review();
     };
   }
 
