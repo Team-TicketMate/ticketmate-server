@@ -233,6 +233,12 @@ public interface ChatRoomControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-10-17",
+          author = "Chuseok22",
+          description = "신청서 상세 조회 반환값에 '신청서 상태', '선예매/일반예매' 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/550"
+      ),
+      @ApiChangeLog(
           date = "2025-06-23",
           author = "mr6208",
           description = "채팅방 신청서 조회 API 설계",
@@ -274,6 +280,9 @@ public interface ChatRoomControllerDocs {
               - location: 위치
               - price: 가격
             - requirement: 요청 사항
+          
+          - applicationFormStatus: 신청서 상태
+          - ticketOpenType: 선예매/일반예매
           
           ### 유의사항
           - 선예매/일반예매 및 공연 기준 모두 각각의 채팅방에 존재합니다.
