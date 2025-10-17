@@ -150,7 +150,12 @@ public class ApplicationFormService {
     // 신청서 세부사항 조회
     List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
 
-    return new ApplicationFormInfoResponse(concertInfoResponse, applicationFormDetailResponseList);
+    return new ApplicationFormInfoResponse(
+        concertInfoResponse,
+        applicationFormDetailResponseList,
+        applicationForm.getApplicationFormStatus(),
+        applicationForm.getTicketOpenType()
+    );
   }
 
   /**
