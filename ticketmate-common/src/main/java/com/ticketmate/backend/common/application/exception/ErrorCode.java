@@ -274,8 +274,45 @@ public enum ErrorCode {
 
   REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다."),
 
-  REVIEW_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "리뷰 등록 중 오류가 발생했습니다.");
-  ;
+  REVIEW_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "리뷰 등록 중 오류가 발생했습니다."),
+  
+  // AES-GCM
+
+  AES_KEY_LENGTH_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키 길이가 올바르지 않습니다. AES-256 키는 32바이트여야 합니다."),
+
+  AES_KEY_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키가 설정되지 않았습니다."),
+
+  AES_KEY_BASE64_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키(Base64) 형식이 올바르지 않습니다."),
+
+  AES_INIT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "암호 모듈 초기화에 실패했습니다."),
+
+  AES_ALGO_NOT_AVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 AES-GCM 알고리즘을 사용할 수 없습니다."),
+
+  AES_ENCRYPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 암호화에 실패했습니다."),
+
+  AES_DECRYPT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "데이터 복호화에 실패했습니다."),
+
+  AES_CIPHERTEXT_INVALID_FORMAT(HttpStatus.BAD_REQUEST, "암호문 형식이 올바르지 않습니다."),
+
+  AES_CIPHERTEXT_TAMPERED(HttpStatus.BAD_REQUEST, "암호문 무결성 검증에 실패했습니다."),
+
+  // ACCOUNT
+
+  INVALID_ACCOUNT_NUMBER(HttpStatus.BAD_REQUEST, "올바르지 않은 계좌번호 양식입니다."),
+
+  ACCOUNT_EXCEED(HttpStatus.BAD_REQUEST, "계좌는 총 5개만 생성 가능합니다."),
+
+  ACCOUNT_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "대표계좌 변경중 오류가 발생했습니다."),
+
+  BANK_ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "계좌를 찾을 수 없습니다."),
+
+  BANK_ACCOUNT_NOT_OWNED(HttpStatus.BAD_REQUEST, "변경할 계좌의 주인이 아닙니다."),
+
+  PRIMARY_CHANGE_REQUIRES_MULTIPLE_ACCOUNTS(HttpStatus.BAD_REQUEST, "대표계좌는 최소 계좌가 2개 이상 있을 시 변경이 가능합니다."),
+
+  INVALID_ACCOUNT_HOLDER(HttpStatus.BAD_REQUEST, "올바르지 않은 예금주 양식입니다."),
+
+  INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다.");
 
   private final HttpStatus status;
   private final String message;

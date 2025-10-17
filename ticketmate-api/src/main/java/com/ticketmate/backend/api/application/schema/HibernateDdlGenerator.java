@@ -10,6 +10,7 @@ import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailabi
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.entity.MemberFollow;
@@ -105,6 +106,7 @@ public final class HibernateDdlGenerator {
     sources.addAnnotatedClass(Report.class);
     sources.addAnnotatedClass(Review.class);
     sources.addAnnotatedClass(ReviewImg.class);
+    sources.addAnnotatedClass(AgentBankAccount.class);
     // ===============================
   }
 
