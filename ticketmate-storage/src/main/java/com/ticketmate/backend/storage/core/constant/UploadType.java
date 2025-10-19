@@ -13,5 +13,7 @@ public enum UploadType {
 
   PORTFOLIO,
 
-  CHAT;
+  CHAT,
+
+  REVIEW;
 }

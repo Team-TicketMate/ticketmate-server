@@ -121,14 +121,16 @@ public class MockMemberFactory {
 
   // AgentPerformanceSummary 객체 생성 및 랜덤 정수 부여
   public AgentPerformanceSummary generatePerformanceSummary(Member agent) {
-    int reviewCount = koFaker.number().numberBetween(0, 100);
+    int reviewCount = koFaker.number().numberBetween(1, 101);
+    double averageRating = koFaker.random().nextDouble(1.0, 5.0);
+    double totalRatingSum = reviewCount * averageRating;
     int recentSuccessCount = koFaker.number().numberBetween(0, 50);
-    double averageRating = koFaker.number().randomDouble(1, 0, 5);
     long totalScore = koFaker.number().numberBetween(0, 100);
 
     return AgentPerformanceSummary.builder()
         .agent(agent)
         .reviewCount(reviewCount)
+        .totalRatingSum(totalRatingSum)
         .averageRating(averageRating)
         .recentSuccessCount(recentSuccessCount)
         .totalScore(totalScore)
