@@ -17,7 +17,7 @@ CREATE TABLE public.review_img
     review_img_id                           UUID           NOT NULL PRIMARY KEY,
     review_review_id                        UUID           NOT NULL REFERENCES review,
     original_filename                       VARCHAR(255)   NOT NULL,
-    stored_path                             VARCHAR(255)   NOT NULL UNIQUE,
+    stored_path                             VARCHAR(512)   NOT NULL UNIQUE,
     file_extension                          VARCHAR(255)   NOT NULL
         constraint review_img_file_extension_check
             check ((file_extension)::text = ANY ((ARRAY ['JPG'::character varying, 'JPEG'::character varying, 'PNG'::character varying, 'GIF'::character varying, 'BMP'::character varying, 'WEBP'::character varying])::text[])),
