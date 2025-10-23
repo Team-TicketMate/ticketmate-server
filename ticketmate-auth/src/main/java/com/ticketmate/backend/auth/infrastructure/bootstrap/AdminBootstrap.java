@@ -7,7 +7,6 @@ import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@DependsOn("flywayInitializer")
 public class AdminBootstrap {
 
   private final AuthProperties authProperties;
