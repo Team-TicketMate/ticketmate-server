@@ -3,12 +3,16 @@ package com.ticketmate.backend.api.application.controller.member;
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.member.application.dto.request.AgentSaveBankAccountRequest;
+import com.ticketmate.backend.member.application.dto.request.AgentUpdateBankAccountRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
+import com.ticketmate.backend.member.application.dto.response.AgentBankAccountResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
@@ -266,5 +270,164 @@ public interface MemberControllerDocs {
   ResponseEntity<Slice<MemberFollowResponse>> filteredMemberFollow(
       UUID clientId,
       MemberFollowFilteredRequest request
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-29",
+          author = "mr6208",
+          description = "대리인 계좌등록 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/537"
+      )
+  })
+  @Operation(
+      summary = "대리인 계좌등록",
+      description = """
+          대리인이 자신의 계좌를 티켓메이트 서비스에 등록합니다.
+                    
+          ### 요청 파라미터
+          - bankCode(String) : 계좌의 은행 정보(필수)
+          - accountHolder(String) : 예금주 명(필수, 최대 20자)
+          - accountNumber(String) : 계좌번호(필수, 11~16자)
+          - primaryAccount(boolean) : 대표계좌 유/무(필수)
+                   
+          ### 사용 방법
+          `BankCode`
+                    
+          - KYONGNAM_BANK("039", "경남"),
+          - GWANGJU_BANK("034", "광주"),
+          - LOCALNONGHYEOP("012", "지역축농협"),
+          - BUSAN_BANK("032", "부산"),
+          - SAEMAUL("045", "새마을"),
+          - SANLIM("064", "산림"),
+          - SHINHAN("088", "신한"),
+          - SHINHYEOP("048", "신협"),
+          - CITI("027", "씨티"),
+          - WOORI("020", "우리"),
+          - POST("071", "우체국"),
+          - SAVING_BANK("050", "저축"),
+          - JEONBUK_BANK("037", "전북"),
+          - JEJU_BANK("035", "제주"),
+          - KAKAO_BANK("090", "카카오"),
+          - K_BANK("089", "케이"),
+          - TOSS_BANK("092", "토스"),
+          - HANA("081", "하나"),
+          - HSBC("054", "홍콩상하이"),
+          - IBK("003", "기업"),
+          - KOOKMIN("004", "국민"),
+          - DAEGU_BANK("031", "대구"),
+          - KDB_BANK("002", "산업"),
+          - NONGHYEOP("011", "농협"),
+          - SC("023", "SC제일"),
+          - SUHYEOP("007", "수협");
+                             
+          ### 유의 사항
+          - BankCode의 파라미터는 각각 금융결제원 공식 코드, 보여주기용 문자입니다.
+          - 계좌번호 입력 시 **'-' 문자는 제외하고 호출해야 합니다.**
+          - 만약 기존에 대표계좌로 설정된 계좌가 있고 해당 API를 호출하며 등록하는 계좌를 대표계좌로 설정할 시 기존 대표계좌는 대표계좌에서 강등됩니다.
+          """
+  )
+  ResponseEntity<Void> saveBankAccount(CustomOAuth2User customOAuth2User, AgentSaveBankAccountRequest request
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-30",
+          author = "mr6208",
+          description = "대리인 계좌조회 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/537"
+      )
+  })
+  @Operation(
+      summary = "대리인 계좌조회",
+      description = """
+          대리인이 자신의 계좌를 조회합니다.
+                    
+          ### 요청 파라미터 X (인증 필수)
+                   
+          ### 유의 사항
+          - 자신의 계좌중 대표계좌가 최상단에 배치되며 나머지는 생성일자 기준으로 정렬됩니다. 
+          - 암호화된 계좌번호를 평문으로 클라이언트에게 전송합니다.
+          """
+  )
+  ResponseEntity<List<AgentBankAccountResponse>> getBankAccountList(CustomOAuth2User customOAuth2User
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-30",
+          author = "mr6208",
+          description = "대리인 대표계좌 변경 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/537"
+      )
+  })
+  @Operation(
+      summary = "대리인 대표계좌 변경",
+      description = """
+          대리인이 자신의 대표계좌를 변경합니다.
+                    
+          ### 요청 파라미터
+          - bank-account-id : 변경할 계좌 ID
+                   
+          ### 유의 사항
+          - 대표계좌 변경시 순차적으로 모든 계좌들의 대표계좌 필드가 false로 변경된 이후에 변경할 계좌의 필드가 ture로 변경됩니다.  
+          - 대표계좌 변경은 총 2개 이상일때만 가능하도록 설계해놨습니다. (방어로직은 X)
+          - 처음으로 계좌 생성 시 반드시 대표계좌로 설정되도록 설계 + 계좌 삭제 시에 남은 계좌의 수가 1개일 시 반드시 남은 계좌가 대표계좌로 변경되도록 설계. 
+          """
+  )
+  ResponseEntity<Void> changePrimaryBankAccount(UUID agentBankAccountId, CustomOAuth2User customOAuth2User
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-09-30",
+          author = "mr6208",
+          description = "대리인 대표계좌 수정 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/537"
+      )
+  })
+  @Operation(
+      summary = "대리인 대표계좌 수정",
+      description = """
+          대리인이 자신의 대표계좌를 수정합니다.
+                    
+          ### 요청 파라미터 (AgentUpdateBankAccountRequest)
+          - bankCode(String) : 계좌의 은행 정보(필수X)
+          - accountHolder(String) : 예금주 명(필수X, 최대 20자)
+          - accountNumber(String) : 계좌번호(필수X, 11~16자)
+
+                   
+          ### 유의 사항
+          - 모든 필드가 필수가 아니라 아닌 변경하고싶은 필드만 채워넣습니다. (Null 허용)   
+          - 만약 Null이 아닌 필드는 변경하고싶은 필드라고 판단, DTO단에서 검증이 들어갑니다.
+          - 대표계좌 변경은 API를 분기하였습니다. 
+          """
+  )
+  ResponseEntity<Void> changeBankAccountInfo(UUID agentBankAccountId, CustomOAuth2User customOAuth2User, AgentUpdateBankAccountRequest request
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-10-02",
+          author = "mr6208",
+          description = "대리인 대표계좌 삭제 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/537"
+      )
+  })
+  @Operation(
+      summary = "대리인 대표계좌 삭제",
+      description = """
+          대리인이 자신의 대표계좌를 삭제합니다.
+                    
+          ### 요청 파라미터
+          - bank-account-id : 삭제할 계좌 ID
+
+                   
+          ### 유의 사항
+          - 논리삭제가 아닌 물리삭제를 진행합니다. (데이터는 어차피 인당 최대 5개)   
+          - 만약 삭제 후 남은 계좌의 개수가 1개라면 그 계좌는 자동으로 대표계좌로 설정됩니다.
+          """
+  )
+  ResponseEntity<Void> deleteBankAccount(UUID agentBankAccountId, CustomOAuth2User customOAuth2User
   );
 }

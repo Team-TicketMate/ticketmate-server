@@ -42,6 +42,9 @@ public class MemberInfoResponse {
   // 성별
   private String gender;
 
+  // 한줄 소개
+  private String introduction;
+
   // 회원 종류 (대리인, 구매자)
   private MemberType memberType;
 

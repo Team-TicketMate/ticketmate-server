@@ -150,7 +150,12 @@ public class ApplicationFormService {
     // 신청서 세부사항 조회
     List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
 
-    return new ApplicationFormInfoResponse(concertInfoResponse, applicationFormDetailResponseList);
+    return new ApplicationFormInfoResponse(
+        concertInfoResponse,
+        applicationFormDetailResponseList,
+        applicationForm.getApplicationFormStatus(),
+        applicationForm.getTicketOpenType()
+    );
   }
 
   /**
@@ -290,7 +295,7 @@ public class ApplicationFormService {
    * @param applicationFormId 신청서 PK
    * @return ApplicationForm
    */
-  private ApplicationForm findApplicationFormById(UUID applicationFormId) {
+  public ApplicationForm findApplicationFormById(UUID applicationFormId) {
     return applicationFormRepository.findById(applicationFormId)
         .orElseThrow(() -> {
               log.error("신청서를 찾을 수 없습니다. 요청PK: {}", applicationFormId);
