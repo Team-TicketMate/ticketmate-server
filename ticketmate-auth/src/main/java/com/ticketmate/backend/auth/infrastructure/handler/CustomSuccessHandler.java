@@ -46,9 +46,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else if (!member.isInitialProfileSet()) {
           log.debug("프로필 설정 페이지 리다이렉트");
           response.sendRedirect(properties.setProfile());
+        } else {
+          log.debug("본인인증 & 프로필 설정 완료: 홈 화면 리다이렉트");
+          response.sendRedirect(properties.home());
         }
-        log.debug("본인인증 & 프로필 설정 완료: 홈 화면 리다이렉트");
-        response.sendRedirect(properties.home()); // FIXME: 추후 리다이렉트 동적으로 받는 로직 작성
       }
     } catch (IOException e) {
       log.error("로그인 성공 후 리다이렉트 과정에서 문제가 발생했습니다. {}", e.getMessage());
