@@ -2,8 +2,8 @@ package com.ticketmate.backend.auth.infrastructure.handler;
 
 import com.ticketmate.backend.auth.application.service.JwtManager;
 import com.ticketmate.backend.auth.core.dto.TokenPair;
-import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
+import com.ticketmate.backend.auth.infrastructure.properties.OAuth2Properties;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -22,12 +21,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-  private final TokenProvider tokenProvider;
   private final JwtManager jwtManager;
-  @Value("${spring.security.app.redirect-uri.dev}")
-  private String devRedirectUri;
-  @Value("${spring.security.app.redirect-uri.prod}")
-  private String prodRedirectUri;
+  private final OAuth2Properties properties;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
@@ -42,11 +37,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     jwtManager.saveAndAttachTokenPair(member, tokenPair, response);
 
-    // 로그인 성공 후 메인 페이지로 리다이렉트
+    // 로그인 성공 후 메인 페이지 or 프로필 설정 페이지 리다이렉트
     try {
-      log.debug("로그인 성공, 메인페이지로 리다이렉트 됩니다");
       if (!response.isCommitted()) {
-        response.sendRedirect(prodRedirectUri); // FIXME: 추후 리다이렉트 동적으로 받는 로직 작성
+        if (!member.isPhoneNumberVerified()) {
+          log.debug("본인인증 페이지 리다이렉트");
+          response.sendRedirect(properties.phoneVerify());
+        } else if (!member.isInitialProfileSet()) {
+          log.debug("프로필 설정 페이지 리다이렉트");
+          response.sendRedirect(properties.setProfile());
+        }
+        log.debug("본인인증 & 프로필 설정 완료: 홈 화면 리다이렉트");
+        response.sendRedirect(properties.home()); // FIXME: 추후 리다이렉트 동적으로 받는 로직 작성
       }
     } catch (IOException e) {
       log.error("로그인 성공 후 리다이렉트 과정에서 문제가 발생했습니다. {}", e.getMessage());
