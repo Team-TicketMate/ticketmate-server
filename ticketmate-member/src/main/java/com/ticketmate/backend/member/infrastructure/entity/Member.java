@@ -2,7 +2,6 @@ package com.ticketmate.backend.member.infrastructure.entity;
 
 import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
@@ -82,11 +81,6 @@ public class Member extends BasePostgresEntity {
   // 회원 종류 (대리인, 구매자)
   @Enumerated(EnumType.STRING)
   private MemberType memberType;
-
-  // 계정 상태 (활성, 삭제)
-  @Enumerated(EnumType.STRING)
-  @Builder.Default
-  private AccountStatus accountStatus = AccountStatus.ACTIVE_ACCOUNT;
 
   // 첫 로그인 여부
   @Builder.Default

@@ -6,7 +6,6 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.response.NaverResponse;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
@@ -67,7 +66,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .introduction(null)
           .role(Role.ROLE_USER)
           .memberType(MemberType.CLIENT)
-          .accountStatus(AccountStatus.ACTIVE_ACCOUNT)
           .isFirstLogin(true)
           .lastLoginTime(TimeUtil.now())
           .isPhoneNumberVerified(false)

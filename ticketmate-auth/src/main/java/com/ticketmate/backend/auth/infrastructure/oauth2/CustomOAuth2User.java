@@ -1,7 +1,6 @@
 package com.ticketmate.backend.auth.infrastructure.oauth2;
 
 import com.ticketmate.backend.auth.core.principal.UserPrincipal;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.security.Principal;
@@ -58,13 +57,13 @@ public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
   }
 
   public boolean isAccountNonExpired() {
-    // AccountStatus가 DELETE_ACCOUNT 인 경우, 계정이 만료된 것으로 간주
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
+    // member.isDeleted() 가 true인 경우 계정이 만료된 것으로 간주
+    return !member.isDeleted();
   }
 
   public boolean isAccountNonLocked() {
-    // AccountStatus가 DELETE_ACCOUNT 인 경우, 계정이 잠긴 것으로 간주
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
+    // member.isDeleted 가 true 인 경우, 계정이 잠긴 것으로 간주 TODO: 추후 계정 Ban 기능 개발 후 수정 필요
+    return !member.isDeleted();
   }
 
   public boolean isCredentialsNonExpired() {
@@ -72,8 +71,8 @@ public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
   }
 
   public boolean isEnabled() {
-    // AccountStatus가 ACTIVE_ACCOUNT 인 경우, 계정이 활성화
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
+    // member.isDeleted 가 false 인 경우, 계정이 활성화
+    return !member.isDeleted();
   }
 
   public String getMemberId() {

@@ -109,7 +109,6 @@ public class MockService {
    * @param request role 권한 (ROLE_TEST / ROLE_TEST_ADMIN)
    *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
    *                memberType 의로인/대리인
-   *                accountStatus 활성화/삭제
    *                isFirstLogin 첫 로그인 여부
    */
   @Transactional

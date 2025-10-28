@@ -7,7 +7,6 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
@@ -50,7 +49,6 @@ public class MockMemberFactory {
    *                role 권한
    *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
    *                memberType 의로인/대리인
-   *                accountStatus 활성화/삭제
    *                isFirstLogin 첫 로그인 여부
    */
   public Member generate(MockLoginRequest request) {
@@ -87,9 +85,6 @@ public class MockMemberFactory {
     MemberType memberType = requestOptional
         .map(MockLoginRequest::getMemberType)
         .orElseGet(() -> koFaker.options().option(MemberType.class));
-    AccountStatus status = requestOptional
-        .map(MockLoginRequest::getAccountStatus)
-        .orElse(AccountStatus.ACTIVE_ACCOUNT);
     boolean firstLogin = requestOptional
         .map(MockLoginRequest::getIsFirstLogin)
         .orElseGet(() -> koFaker.random().nextBoolean());
@@ -106,7 +101,6 @@ public class MockMemberFactory {
         .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
         .gender(koFaker.options().option("male", "female"))
         .memberType(memberType)
-        .accountStatus(status)
         .isFirstLogin(firstLogin)
         .lastLoginTime(TimeUtil.now());
   }
