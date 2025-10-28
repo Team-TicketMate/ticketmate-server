@@ -1,5 +1,7 @@
 package com.ticketmate.backend.mock.application.service;
 
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
@@ -129,10 +131,10 @@ public class MockApplicationFormFactory {
   }
 
   /**
-   * 희망구역 리스트를 생성합니다 (0개 ~ 10개 랜덤)
+   * 희망구역 리스트를 생성합니다 (0개 ~ 5개 랜덤)
    */
   private List<HopeArea> createHopeAreaList() {
-    int size = koFaker.random().nextInt(11);
+    int size = koFaker.random().nextInt(HOPE_AREA_MAX_SIZE + 1);
     List<HopeArea> hopeAreaList = new ArrayList<>();
 
     for (int i = 0; i < size; i++) {

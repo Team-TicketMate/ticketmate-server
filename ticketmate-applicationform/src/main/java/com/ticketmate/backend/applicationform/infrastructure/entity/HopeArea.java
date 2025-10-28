@@ -40,7 +40,7 @@ public class HopeArea extends BasePostgresEntity {
   @Min(1)
   @Max(HOPE_AREA_MAX_SIZE)
   @Column(nullable = false)
-  private int priority; // 순위 (1~10)
+  private int priority; // 순위 (1~5)
 
   @Column(nullable = false)
   private String location; // 위치 (예: A구역, B구역)

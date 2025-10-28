@@ -1,5 +1,7 @@
 package com.ticketmate.backend.applicationform.application.dto.request;
 
+import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,8 +19,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class HopeAreaRequest {
 
-  @Min(value = 1, message = "순위는 1부터 10 사이의 정수만 입력 가능합니다.")
-  @Max(value = 10, message = "순위는 1부터 10 사이의 정수만 입력 가능합니다.")
+  @Min(value = 1, message = "순위는 1부터 5 사이의 정수만 입력 가능합니다.")
+  @Max(value = HOPE_AREA_MAX_SIZE, message = "순위는 1부터 5 사이의 정수만 입력 가능합니다.")
   private int priority; // 순위
 
   @NotBlank(message = "희망 구역을 입력하세요.")
