@@ -15,7 +15,7 @@ import lombok.ToString;
 @Builder
 public class HopeAreaResponse {
 
-  private Integer priority; // 우선 순위 (1~10)
+  private Integer priority; // 우선 순위 (1~5)
 
   private String location; // 위치 (예: A구역, B구역)
 
