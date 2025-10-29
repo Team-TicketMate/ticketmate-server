@@ -2,6 +2,7 @@ package com.ticketmate.backend.member.infrastructure.entity;
 
 import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
@@ -37,12 +38,10 @@ public class Member extends BasePostgresEntity {
   // 소셜 로그인 시 발급되는 ID
   private String socialLoginId;
 
-  // 이메일
-  @Column(unique = true)
+  // 이메일 (DB 활성화 unique 제약조건 추가)
   private String username;
 
-  // 닉네임
-  @Column(unique = true)
+  // 닉네임 (DB 활성화 unique 제약조건 추가)
   private String nickname;
 
   // 이름
@@ -59,7 +58,7 @@ public class Member extends BasePostgresEntity {
   // 출생연도
   private String birthYear;
 
-  // 전화번호
+  // 전화번호 (DB 활성화 unique 제약조건 추가)
   private String phone;
 
   // 프로필 이미지
@@ -81,6 +80,11 @@ public class Member extends BasePostgresEntity {
   // 회원 종류 (대리인, 구매자)
   @Enumerated(EnumType.STRING)
   private MemberType memberType;
+
+  // 계정 상태 (활성, 삭제)
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
   // 첫 로그인 여부
   @Builder.Default
@@ -112,7 +116,7 @@ public class Member extends BasePostgresEntity {
 
   /**
    * 관리자
-   **/
+   */
   private String password;
 
   @Builder.Default
