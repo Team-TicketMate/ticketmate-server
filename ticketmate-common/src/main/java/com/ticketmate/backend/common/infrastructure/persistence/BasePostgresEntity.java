@@ -1,5 +1,6 @@
 package com.ticketmate.backend.common.infrastructure.persistence;
 
+import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -31,4 +32,17 @@ public abstract class BasePostgresEntity {
   @LastModifiedDate
   @Column(nullable = false, columnDefinition = "TIMESTAMPTZ(0)")
   private Instant updatedDate;
+
+  // 삭제 여부
+  @Column(nullable = false)
+  private boolean deleted = false;
+
+  // 삭제 일시
+  @Column(columnDefinition = "TIMESTAMPTZ(0)")
+  private Instant deletedDate;
+
+  public void delete() {
+    this.deleted = true;
+    this.deletedDate = TimeUtil.now();
+  }
 }
