@@ -22,6 +22,14 @@ public enum ErrorCode {
 
   MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다."),
 
+  LOGIN_NOT_ALLOWED(HttpStatus.FORBIDDEN, "로그인이 제한된 계정입니다."),
+
+  ACCOUNT_WITHDRAWN(HttpStatus.FORBIDDEN, "탈퇴한 계정입니다."),
+
+  ACCOUNT_TEMP_BANNED(HttpStatus.FORBIDDEN, "일시정지된 계정입니다."),
+
+  ACCOUNT_PERMANENT_BANNED(HttpStatus.FORBIDDEN, "영구정지된 계정입니다."),
+
   INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
 
   EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
@@ -77,6 +85,18 @@ public enum ErrorCode {
   DUPLICATE_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "이미 팔로우한 회원입니다."),
 
   UNFOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "팔로우하지 않은 회원에 대해 언팔로우할 수 없습니다."),
+
+  // MEMBER_WITHDRAW
+
+  OTHER_REASON_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "회원탈퇴 기타사유는 최대 {}자 까지만 작성 가능합니다."),
+
+  // PHONE_BLOCK
+
+  PHONE_BLOCKED(HttpStatus.FORBIDDEN, "차단된 전화번호입니다."),
+
+  INVALID_BLOCK_TYPE(HttpStatus.BAD_REQUEST, "회원 차단 유형이 올바르지 않습니다."),
+
+  PHONE_REQUIRED(HttpStatus.BAD_REQUEST, "전화번호는 필수로 요청되어야합니다."),
 
   // CONCERT
 
