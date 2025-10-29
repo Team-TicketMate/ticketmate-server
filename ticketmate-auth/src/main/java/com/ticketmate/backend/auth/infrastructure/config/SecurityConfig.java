@@ -1,5 +1,6 @@
 package com.ticketmate.backend.auth.infrastructure.config;
 
+import com.ticketmate.backend.auth.application.validator.AuthValidator;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.admin.CustomAdminUserService;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
@@ -38,6 +39,7 @@ public class SecurityConfig {
   private final CustomAdminUserService customAdminUserService;
   private final CustomClientRegistrationRepository customClientRegistrationRepository;
   private final CustomLogoutHandler customLogoutHandler;
+  private final AuthValidator authValidator;
   private final PasswordEncoder passwordEncoder;
 
   /**
@@ -79,9 +81,10 @@ public class SecurityConfig {
             .successHandler(customSuccessHandler))
         // JWT Filter
         .addFilterAfter(
-            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService),
+            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),
             OAuth2LoginAuthenticationFilter.class
         )
+        // TODO: Security Filter 커스텀 예외처리 추가
         // 관리자 로그인용 DaoAuthenticationProvider
         .authenticationProvider(daoAuthenticationProvider())
         .build();
