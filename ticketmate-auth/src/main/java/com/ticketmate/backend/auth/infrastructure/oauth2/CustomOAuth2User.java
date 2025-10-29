@@ -56,25 +56,6 @@ public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
     return member.getSocialPlatform(); // 소셜 플랫폼
   }
 
-  public boolean isAccountNonExpired() {
-    // member.isDeleted() 가 true인 경우 계정이 만료된 것으로 간주
-    return !member.isDeleted();
-  }
-
-  public boolean isAccountNonLocked() {
-    // member.isDeleted 가 true 인 경우, 계정이 잠긴 것으로 간주 TODO: 추후 계정 Ban 기능 개발 후 수정 필요
-    return !member.isDeleted();
-  }
-
-  public boolean isCredentialsNonExpired() {
-    return true; // 인증 정보 항상 유효
-  }
-
-  public boolean isEnabled() {
-    // member.isDeleted 가 false 인 경우, 계정이 활성화
-    return !member.isDeleted();
-  }
-
   public String getMemberId() {
     return member.getMemberId().toString(); // 회원의 memberId (UUID)를 string 으로 반환
   }

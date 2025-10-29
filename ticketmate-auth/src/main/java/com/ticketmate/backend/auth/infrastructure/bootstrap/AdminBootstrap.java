@@ -29,7 +29,7 @@ public class AdminBootstrap {
       String username = admin.username();
       String rawPassword = admin.password();
       String name = admin.name();
-      memberRepository.findByUsername(username)
+      memberRepository.findByUsernameAndDeletedFalse(username)
           .ifPresentOrElse(
               member -> {
                 // 패스워드 업데이트

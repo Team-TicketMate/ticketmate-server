@@ -116,7 +116,7 @@ public class MockService {
 
     log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
-    Member member = memberRepository.findByUsername(request.getUsername())
+    Member member = memberRepository.findByUsernameAndDeletedFalse(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT)) {
       Portfolio testPortfolio = mockPortfolioFactory.generate(member);
