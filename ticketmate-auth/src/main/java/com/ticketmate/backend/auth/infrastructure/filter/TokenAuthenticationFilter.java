@@ -1,6 +1,7 @@
 package com.ticketmate.backend.auth.infrastructure.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketmate.backend.auth.application.validator.AuthValidator;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
@@ -10,6 +11,8 @@ import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
 import com.ticketmate.backend.common.core.util.CommonUtil;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
+import com.ticketmate.backend.member.infrastructure.entity.Member;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,6 +37,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   private final AntPathMatcher pathMatcher = new AntPathMatcher();
   private final TokenProvider tokenProvider;
   private final CustomOAuth2UserService customOAuth2UserService;
+  private final AuthValidator authValidator;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -156,6 +160,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     SecurityContextHolder.getContext().setAuthentication(
         new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities())
     );
+
+    // 회원 차단 여부 검증
+    Member member = customOAuth2User.getMember();
+    if (!authValidator.isLoginAllowed(member)) {
+      AccountStatus accountStatus = member.getAccountStatus();
+      log.warn("로그인 불가 상태의 계정입니다. accountStatus: {}, memberId: {}", accountStatus, member.getMemberId());
+      ErrorCode errorCode = authValidator.resolveLoginRestrictionErrorCode(accountStatus);
+      sendErrorResponse(response, errorCode);
+      return;
+    }
 
     // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
     if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
