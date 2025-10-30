@@ -69,7 +69,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
       member = Member.builder()
           .socialLoginId(oAuth2Response.getId())
           .username(oAuth2Response.getEmail())
-          .nickname(UUID.randomUUID().toString().substring(0, 13)) // 첫 로그인 시 랜덤 닉네임 부여 (12자리)
+          .nickname(UUID.randomUUID().toString().substring(0, 12)) // 첫 로그인 시 랜덤 닉네임 부여 (12자리)
           .name(oAuth2Response.getName())
           .socialPlatform(socialPlatform)
           .birthDay(oAuth2Response.getBirthDay())
