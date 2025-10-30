@@ -84,7 +84,6 @@ public class SecurityConfig {
             new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),
             OAuth2LoginAuthenticationFilter.class
         )
-        // TODO: Security Filter 커스텀 예외처리 추가
         // 관리자 로그인용 DaoAuthenticationProvider
         .authenticationProvider(daoAuthenticationProvider())
         .build();
