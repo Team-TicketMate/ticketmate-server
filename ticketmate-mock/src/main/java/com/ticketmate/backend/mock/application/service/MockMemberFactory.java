@@ -77,9 +77,9 @@ public class MockMemberFactory {
             .replaceAll("[^a-zA-Z0-9@.]", ""));
 
     // 공통 랜덤 필드
-    String nickname = suhRandomKit.nicknameWithUuid().substring(0, 13);
+    String nickname = suhRandomKit.nicknameWithUuid();
     String name = koFaker.name().name().replaceAll(" ", "");
-    String phone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(1000, 9999), koFaker.random().nextInt(1000, 9999));
+    String phone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(10_000), koFaker.random().nextInt(10_000));
     SocialPlatform social = requestOptional
         .map(MockLoginRequest::getSocialPlatform)
         .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
