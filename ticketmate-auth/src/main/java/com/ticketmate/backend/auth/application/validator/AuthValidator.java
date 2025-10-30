@@ -6,13 +6,13 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.convert.ReadingConverter;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-@ReadingConverter
+@RequiredArgsConstructor
 public class AuthValidator {
 
   /**
