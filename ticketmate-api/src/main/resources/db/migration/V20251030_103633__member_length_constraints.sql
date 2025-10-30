@@ -25,7 +25,7 @@ $$
       WHERE birth_day IS NOT NULL
         AND CHAR_LENGTH(birth_day) <> 4
     ) THEN
-      RAISE EXCEPTION 'Flyway 마이그레이션 에러: brith_day는 정확히 4자 또는 NULL만 허용됩니다. 기존 데이터 중 해당 제약조건을 위반하는 데이터가 있습니다';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: birth_day는 정확히 4자 또는 NULL만 허용됩니다. 기존 데이터 중 해당 제약조건을 위반하는 데이터가 있습니다';
     END IF;
 
     -- 출생연도: NULL 허용 + 값이 있으면 정확히 4자 (YYYY)
@@ -35,7 +35,7 @@ $$
       WHERE birth_year IS NOT NULL
         AND CHAR_LENGTH(birth_year) <> 4
     ) THEN
-      RAISE EXCEPTION 'Flyway 마이그레이션 에러: brith_year는 정확히 4자 또는 NULL만 허용됩니다. 기존 데이터 중 해당 제약조건을 위반하는 데이터가 있습니다';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: birth_year는 정확히 4자 또는 NULL만 허용됩니다. 기존 데이터 중 해당 제약조건을 위반하는 데이터가 있습니다';
     END IF;
 
     -- 전화번호: NULL 허용 + 값이 있으면 정확히 13자 (010-1234-5678)
