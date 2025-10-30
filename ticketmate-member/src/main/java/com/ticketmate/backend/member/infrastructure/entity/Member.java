@@ -50,7 +50,7 @@ public class Member extends BasePostgresEntity {
 
   // 닉네임 (DB 활성화 unique 제약조건 추가)
   @Size(min = NICKNAME_MIN_LENGTH, max = NICKNAME_MAX_LENGTH)
-  @Column(length = NICKNAME_MAX_LENGTH)
+  @Column(nullable = false, length = NICKNAME_MAX_LENGTH)
   private String nickname;
 
   // 이름
