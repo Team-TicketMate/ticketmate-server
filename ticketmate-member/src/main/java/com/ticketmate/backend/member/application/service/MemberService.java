@@ -163,7 +163,7 @@ public class MemberService {
       log.warn("변경전후 AccountStatus 가 동일합니다: {}", newStatus);
       return;
     }
-    log.debug("회원: {}의 AcountStatus를 변경합니다. {} -> {}",
+    log.debug("회원: {}의 AccountStatus를 변경합니다. {} -> {}",
         member.getMemberId(), member.getAccountStatus(), newStatus);
     member.setAccountStatus(newStatus);
     memberRepository.save(member);
