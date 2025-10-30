@@ -12,4 +12,9 @@ public class MemberInfoConstants {
   // 전화번호 제약조건
   public static final int PHONE_MAX_LENGTH = 13; // 010-1234-5678
 
+  // 생일 및 출생연도 제약조건
+  public static final int BIRTHDAY_LENGTH = 4; // MMDD
+
+  public static final int BIRTHYEAR_LENGTH = 4; // YYYY
+
 }
