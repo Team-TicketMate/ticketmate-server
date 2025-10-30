@@ -13,7 +13,6 @@ import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +30,6 @@ public class MockMemberFactory {
   private final Faker koFaker;
   private final Faker enFaker;
   private final SuhRandomKit suhRandomKit;
-  private final Clock clock;
 
   /**
    * 개발자용 회원 Mock 데이터 생성
