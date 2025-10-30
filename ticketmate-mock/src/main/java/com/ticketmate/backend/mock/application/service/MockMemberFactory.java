@@ -79,6 +79,7 @@ public class MockMemberFactory {
     // 공통 랜덤 필드
     String nickname = suhRandomKit.nicknameWithUuid().substring(0, 13);
     String name = koFaker.name().name().replaceAll(" ", "");
+    String phone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(1000, 9999), koFaker.random().nextInt(1000, 9999));
     SocialPlatform social = requestOptional
         .map(MockLoginRequest::getSocialPlatform)
         .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
@@ -97,7 +98,7 @@ public class MockMemberFactory {
         .socialPlatform(social)
         .birthYear(birthYear)
         .birthDay(birthDay)
-        .phone(koFaker.phoneNumber().cellPhone())
+        .phone(phone)
         .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
         .gender(koFaker.options().option("male", "female"))
         .memberType(memberType)
