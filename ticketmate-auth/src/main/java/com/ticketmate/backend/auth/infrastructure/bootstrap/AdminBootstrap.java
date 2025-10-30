@@ -29,12 +29,14 @@ public class AdminBootstrap {
       String username = admin.username();
       String rawPassword = admin.password();
       String name = admin.name();
+      String nickname = admin.nickname();
       memberRepository.findByUsernameAndDeletedFalse(username)
           .ifPresentOrElse(
               member -> {
                 // 패스워드 업데이트
                 member.setRole(Role.ROLE_ADMIN);
                 member.setPassword(passwordEncoder.encode(rawPassword));
+                member.setNickname(nickname);
                 memberRepository.save(member);
                 log.debug("관리자: {} 업데이트 완료", member.getName());
               },
@@ -45,6 +47,7 @@ public class AdminBootstrap {
                     .role(Role.ROLE_ADMIN)
                     .name(name)
                     .password(passwordEncoder.encode(rawPassword))
+                    .nickname(nickname)
                     .totpEnabled(false)
                     .build();
                 memberRepository.save(newAdmin);
