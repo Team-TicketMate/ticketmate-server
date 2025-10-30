@@ -37,7 +37,11 @@ public class MemberWithdrawalHistoryService {
   }
 
   private String handleOtherReason(WithdrawalReasonType withdrawalReasonType, String otherReason) {
-    if (withdrawalReasonType.equals(WithdrawalReasonType.OTHER)) {
+    if (withdrawalReasonType == null) {
+      log.error("회원 탈퇴 사유 타입이 누락되었습니다.");
+      throw new CustomException(ErrorCode.WITHDRAWAL_REASON_TYPE_REQUIRED);
+    }
+    if (withdrawalReasonType == WithdrawalReasonType.OTHER) {
       String normalize = CommonUtil.normalizeAndRemoveSpecialCharacters(otherReason);
       if (normalize.length() > WITHDRAW_REASON_MAX_SIZE) {
         log.error("회원 탈퇴 기타 사유 글자 수 오류. 최대: {}, 요청: {}", WITHDRAW_REASON_MAX_SIZE, normalize.length());
