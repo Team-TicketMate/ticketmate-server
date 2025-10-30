@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface MemberRepository extends JpaRepository<Member, UUID> {
 
-  Optional<Member> findByUsername(String username);
+  Optional<Member> findByUsernameAndDeletedFalse(String username);
 
   Optional<List<Member>> findAllByMemberType(MemberType memberType);
 

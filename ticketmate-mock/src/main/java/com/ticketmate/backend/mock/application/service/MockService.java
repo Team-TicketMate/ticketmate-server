@@ -109,7 +109,6 @@ public class MockService {
    * @param request role 권한 (ROLE_TEST / ROLE_TEST_ADMIN)
    *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
    *                memberType 의로인/대리인
-   *                accountStatus 활성화/삭제
    *                isFirstLogin 첫 로그인 여부
    */
   @Transactional
@@ -117,7 +116,7 @@ public class MockService {
 
     log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
-    Member member = memberRepository.findByUsername(request.getUsername())
+    Member member = memberRepository.findByUsernameAndDeletedFalse(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT)) {
       Portfolio testPortfolio = mockPortfolioFactory.generate(member);

@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Configuration;
     info = @Info(
         title = "🎫 티켓메이트 : TICKET-MATE 🎫",
         description = """
-            ### 🌐 티켓메이트 웹사이트 🌐 : ticketmate.site
-            [**웹사이트 바로가기**](https://ticketmate.site)
+            ### 🌐 티켓메이트 웹사이트 🌐 : https://www.ticketmate.site
+            [**웹사이트 바로가기**](https://www.ticketmate.site)
             
             ### 💻 **GitHub 저장소**
             - **[백엔드 소스코드](https://github.com/Team-TicketMate/ticketmate-server)**

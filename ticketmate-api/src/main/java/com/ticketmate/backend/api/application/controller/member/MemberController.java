@@ -7,6 +7,7 @@ import com.ticketmate.backend.member.application.dto.request.AgentUpdateBankAcco
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberWithdrawRequest;
 import com.ticketmate.backend.member.application.dto.response.AgentBankAccountResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
@@ -115,15 +116,18 @@ public class MemberController implements MemberControllerDocs {
   @Override
   @PatchMapping("/bank-account/{bank-account-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> changePrimaryBankAccount(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+  public ResponseEntity<Void> changePrimaryBankAccount(
+      @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     agentBankAccountService.changePrimaryAccount(agentBankAccountId, customOAuth2User.getMember());
     return ResponseEntity.ok().build();
   }
+
   @Override
   @PutMapping("/bank-account/{bank-account-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> changeBankAccountInfo(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+  public ResponseEntity<Void> changeBankAccountInfo(
+      @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody AgentUpdateBankAccountRequest request) {
     agentBankAccountService.changeAccountInfo(agentBankAccountId, customOAuth2User.getMember(), request);
@@ -133,9 +137,20 @@ public class MemberController implements MemberControllerDocs {
   @Override
   @DeleteMapping("/bank-account/{bank-account-id}")
   @LogMonitoringInvocation
-  public ResponseEntity<Void> deleteBankAccount(@PathVariable(name = "bank-account-id") UUID agentBankAccountId,
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+  public ResponseEntity<Void> deleteBankAccount(
+      @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     agentBankAccountService.deleteBankAccount(agentBankAccountId, customOAuth2User.getMember());
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @PostMapping("/withdraw")
+  @LogMonitoringInvocation
+  public ResponseEntity<Void> withdraw(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @RequestBody MemberWithdrawRequest request) {
+    memberService.withdraw(customOAuth2User.getMember(), request);
     return ResponseEntity.ok().build();
   }
 }

@@ -1,7 +1,6 @@
 package com.ticketmate.backend.auth.infrastructure.oauth2;
 
 import com.ticketmate.backend.auth.core.principal.UserPrincipal;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.security.Principal;
@@ -55,25 +54,6 @@ public class CustomOAuth2User implements OAuth2User, UserPrincipal, Principal {
 
   public SocialPlatform getSocialPlatform() {
     return member.getSocialPlatform(); // 소셜 플랫폼
-  }
-
-  public boolean isAccountNonExpired() {
-    // AccountStatus가 DELETE_ACCOUNT 인 경우, 계정이 만료된 것으로 간주
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
-  }
-
-  public boolean isAccountNonLocked() {
-    // AccountStatus가 DELETE_ACCOUNT 인 경우, 계정이 잠긴 것으로 간주
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
-  }
-
-  public boolean isCredentialsNonExpired() {
-    return true; // 인증 정보 항상 유효
-  }
-
-  public boolean isEnabled() {
-    // AccountStatus가 ACTIVE_ACCOUNT 인 경우, 계정이 활성화
-    return member.getAccountStatus() != AccountStatus.DELETE_ACCOUNT;
   }
 
   public String getMemberId() {

@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
-public class AgentBankAccountConstant {
+public class AgentBankAccountConstants {
   public static final int MAX_ACCOUNT_COUNT = 5;
 
   public static final int MAX_ACCOUNT_HOLDER_LENGTH = 20;

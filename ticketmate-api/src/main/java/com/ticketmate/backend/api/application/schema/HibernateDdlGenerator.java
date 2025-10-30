@@ -14,6 +14,8 @@ import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.entity.MemberFollow;
+import com.ticketmate.backend.member.infrastructure.entity.MemberWithdrawalHistory;
+import com.ticketmate.backend.member.infrastructure.entity.PhoneBlock;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 import java.nio.file.Files;
@@ -107,6 +109,8 @@ public final class HibernateDdlGenerator {
     sources.addAnnotatedClass(Review.class);
     sources.addAnnotatedClass(ReviewImg.class);
     sources.addAnnotatedClass(AgentBankAccount.class);
+    sources.addAnnotatedClass(MemberWithdrawalHistory.class);
+    sources.addAnnotatedClass(PhoneBlock.class);
     // ===============================
   }
 
