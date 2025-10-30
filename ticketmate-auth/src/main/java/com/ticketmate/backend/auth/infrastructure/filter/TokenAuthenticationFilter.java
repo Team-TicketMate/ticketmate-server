@@ -8,10 +8,10 @@ import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.auth.infrastructure.util.AuthUtil;
+import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
 import com.ticketmate.backend.common.core.util.CommonUtil;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -44,7 +44,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String uri = request.getRequestURI();
-    log.debug("요청된 URI: {}", uri);
     ApiRequestType apiRequestType = determineApiRequestType(uri);
 
     // 화이트리스트 체크 : 화이트리스트 경로면 필터링 건너뜀
@@ -69,6 +68,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
       }
 
       handleInvalidToken(response, token);
+    } catch (CustomException e) {
+      log.error("[TokenAuthenticationFilter] CustomException 발생: {}", e.getMessage());
+      sendErrorResponse(response, e.getErrorCode());
     } catch (ExpiredJwtException e) {
       log.error("토큰 만료: {}", e.getMessage());
       sendErrorResponse(response, ErrorCode.EXPIRED_ACCESS_TOKEN);
@@ -76,26 +78,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   }
 
   /**
-   * 에러 응답을 JSON 형태로 클라이언트에 전송
-   *
-   * @param response  HttpServletResponse 객체
-   * @param errorCode 발생한 에러코드
-   */
-  private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setStatus(errorCode.getStatus().value());
-    response.setCharacterEncoding("UTF-8");
-
-    ErrorResponse errorResponse = new ErrorResponse(errorCode, errorCode.getMessage());
-
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.writeValue(response.getWriter(), errorResponse);
-  }
-
-  /**
    * URI에 따른 요청 타입을 결정합니다
    */
   private ApiRequestType determineApiRequestType(String uri) {
+    log.debug("요청된 URI: {}", uri);
     if (uri.startsWith(AuthConstants.API_RESPONSE_PREFIX)) {
       return ApiRequestType.API;
     } else if (uri.startsWith(AuthConstants.ADMIN_RESPONSE_PREFIX)) {
@@ -163,20 +149,10 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 회원 차단 여부 검증
     Member member = customOAuth2User.getMember();
-    if (!authValidator.isLoginAllowed(member)) {
-      AccountStatus accountStatus = member.getAccountStatus();
-      log.warn("로그인 불가 상태의 계정입니다. accountStatus: {}, memberId: {}", accountStatus, member.getMemberId());
-      ErrorCode errorCode = authValidator.resolveLoginRestrictionErrorCode(accountStatus);
-      sendErrorResponse(response, errorCode);
-      return;
-    }
+    authValidator.assertLoginAllowed(member);
 
-    // 관리자 페이지 접근 권한 체크: 관리자 권한 없으면 로그인 페이지로 리다이렉트 TODO: 추후 테스트계정 권한 삭제
-    if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
-      log.error("관리자 권한이 없습니다.");
-      sendErrorResponse(response, ErrorCode.ACCESS_DENIED);
-      return;
-    }
+    // 관리자 검증
+    assertAdminAuthenticated(token, apiRequestType);
 
     // 인증 성공
     filterChain.doFilter(request, response);
@@ -188,11 +164,36 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   private void handleInvalidToken(HttpServletResponse response, String token) throws IOException {
     if (CommonUtil.nvl(token, "").isEmpty()) { // 토큰 없음
       log.error("토큰이 존재하지 않습니다.");
-      sendErrorResponse(response, ErrorCode.MISSING_AUTH_TOKEN);
+      throw new CustomException(ErrorCode.MISSING_AUTH_TOKEN);
     } else { // 유효하지 않은 토큰
       log.error("토큰이 유효하지 않습니다.");
-      sendErrorResponse(response, ErrorCode.INVALID_JWT_TOKEN);
+      throw new CustomException(ErrorCode.INVALID_JWT_TOKEN);
     }
+  }
+
+  // 관리자 접근 권한 체크 TODO: 추후 테스트 계정 권한 삭제
+  private void assertAdminAuthenticated(String token, ApiRequestType apiRequestType) {
+    if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
+      log.error("관리자 권한이 없습니다.");
+      throw new CustomException(ErrorCode.ACCESS_DENIED);
+    }
+  }
+
+  /**
+   * 에러 응답을 JSON 형태로 클라이언트에 전송
+   *
+   * @param response  HttpServletResponse 객체
+   * @param errorCode 발생한 에러코드
+   */
+  private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setStatus(errorCode.getStatus().value());
+    response.setCharacterEncoding("UTF-8");
+
+    ErrorResponse errorResponse = new ErrorResponse(errorCode, errorCode.getMessage());
+
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.writeValue(response.getWriter(), errorResponse);
   }
 
   /**
