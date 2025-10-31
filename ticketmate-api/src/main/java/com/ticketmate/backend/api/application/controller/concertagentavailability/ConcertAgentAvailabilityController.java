@@ -1,11 +1,13 @@
-package com.ticketmate.backend.api.application.controller.concert;
+package com.ticketmate.backend.api.application.controller.concertagentavailability;
 
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concert.application.service.ConcertAgentAvailabilityService;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -50,4 +52,5 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
       @ParameterObject @Valid ConcertAcceptingAgentFilteredRequest request) {
     return ResponseEntity.ok().body(concertAgentAvailabilityService.findAcceptingAgentByConcert(concertId, request));
   }
+
 }

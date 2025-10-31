@@ -1,14 +1,18 @@
-package com.ticketmate.backend.concert.application.service;
+package com.ticketmate.backend.concertagentavailability.application.service;
 
-import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgentInfo;
-import com.ticketmate.backend.concert.application.mapper.ConcertMapper;
+import com.ticketmate.backend.concert.application.service.ConcertService;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepository;
-import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepositoryCustom;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAgentStatusInfo;
+import com.ticketmate.backend.concertagentavailability.application.mapper.ConcertAgentAvailabilityMapper;
+import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concertagentavailability.infrastructure.repository.ConcertAgentAvailabilityRepository;
+import com.ticketmate.backend.concertagentavailability.infrastructure.repository.ConcertAgentAvailabilityRepositoryCustom;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
@@ -26,7 +30,7 @@ public class ConcertAgentAvailabilityService {
   private final ConcertAgentAvailabilityRepositoryCustom concertAgentAvailabilityRepositoryCustom;
   private final ConcertService concertService;
   private final MemberService memberService;
-  private final ConcertMapper concertMapper;
+  private final ConcertAgentAvailabilityMapper availabilityMapper;
 
   /**
    * 공연별 대리인 수락 설정
@@ -67,6 +71,7 @@ public class ConcertAgentAvailabilityService {
   public Slice<ConcertAcceptingAgentResponse> findAcceptingAgentByConcert(UUID concertId, ConcertAcceptingAgentFilteredRequest request) {
     Slice<ConcertAcceptingAgentInfo> infoSlice = concertAgentAvailabilityRepositoryCustom
         .findAcceptingAgentByConcert(concertId, request.toPageable());
-    return infoSlice.map(concertMapper::toConcertAcceptingAgentResponse);
+    return infoSlice.map(availabilityMapper::toConcertAcceptingAgentResponse);
   }
+
 }

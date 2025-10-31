@@ -1,8 +1,8 @@
-package com.ticketmate.backend.concert.application.dto.request;
+package com.ticketmate.backend.concertagentavailability.application.dto.request;
 
 import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
 import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
-import com.ticketmate.backend.concert.core.constant.ConcertAgentAvailabilitySortField;
+import com.ticketmate.backend.concertagentavailability.core.constant.ConcertAgentAvailabilitySortField;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;

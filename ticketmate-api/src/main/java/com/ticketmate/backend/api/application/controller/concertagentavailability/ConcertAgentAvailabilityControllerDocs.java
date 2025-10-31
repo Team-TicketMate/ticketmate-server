@@ -1,11 +1,13 @@
-package com.ticketmate.backend.api.application.controller.concert;
+package com.ticketmate.backend.api.application.controller.concertagentavailability;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 import org.springframework.data.domain.Slice;
@@ -51,7 +53,7 @@ public interface ConcertAgentAvailabilityControllerDocs {
             - 인증 정보가 없거나 잘못된 경우 보안 필터에서 차단됩니다.
           """
   )
-  public ResponseEntity<Void> setAcceptingOption(
+  ResponseEntity<Void> setAcceptingOption(
       CustomOAuth2User customOAuth2User,
       ConcertAgentAvailabilityRequest request);
 
@@ -124,7 +126,8 @@ public interface ConcertAgentAvailabilityControllerDocs {
             - **INVALID_SORT_FIELD**: 정렬 필드 요청 잘못됨
           """
   )
-  public ResponseEntity<Slice<ConcertAcceptingAgentResponse>> filteredAcceptingAgents(
+  ResponseEntity<Slice<ConcertAcceptingAgentResponse>> filteredAcceptingAgents(
       UUID concertId,
       ConcertAcceptingAgentFilteredRequest request);
+
 }
