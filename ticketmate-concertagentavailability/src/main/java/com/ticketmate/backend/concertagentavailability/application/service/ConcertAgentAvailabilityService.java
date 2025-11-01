@@ -97,6 +97,7 @@ public class ConcertAgentAvailabilityService {
    *                pageSize
    * @return Slice<AgentAcceptingConcertResponse>
    */
+  @Transactional(readOnly = true)
   public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, AgentConcertSettingFilteredRequest request) {
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
     return infoSlice.map(availabilityMapper::toAcceptingConcertInfoResponse);
