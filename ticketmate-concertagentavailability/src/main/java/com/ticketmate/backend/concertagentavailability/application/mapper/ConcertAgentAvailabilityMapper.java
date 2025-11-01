@@ -11,4 +11,10 @@ public interface ConcertAgentAvailabilityMapper {
    * 이미지 storedPath -> publicUrl 변환
    */
   ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info);
+
+  /**
+   * ConcertAgentStatusInfo -> ConcertAgentStatusResponse (DTO -> DTO)
+   * 이미지 storedPath -> publicUrl 변환
+   */
+  ConcertAgentStatusResponse toConcertAgentStatusResponse(ConcertAgentStatusInfo info);
 }

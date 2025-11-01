@@ -26,4 +26,15 @@ public class ConcertAgentAvailabilityMapperImpl implements ConcertAgentAvailabil
     );
   }
 
+  @Override
+  public ConcertAgentStatusResponse toConcertAgentStatusResponse(ConcertAgentStatusInfo info) {
+    return new ConcertAgentStatusResponse(
+        info.concertId(),
+        info.concertName(),
+        storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
+        info.status() == 1 ? RecruitmentStatus.OPEN : RecruitmentStatus.CLOSED,
+        info.matchedClientCount(),
+        info.accepting()
+    );
+  }
 }
