@@ -1,5 +1,6 @@
 package com.ticketmate.backend.concertagentavailability.application.mapper;
 
+import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.concert.core.constant.ConcertRecruitStatus;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
@@ -17,10 +18,15 @@ public class ConcertAgentAvailabilityMapperImpl implements ConcertAgentAvailabil
 
   @Override
   public ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info) {
+    String profileImgStoredPath = null;
+    if (!CommonUtil.nvl(info.profileImgStoredPath(), "").isEmpty()) {
+      profileImgStoredPath = storageService.generatePublicUrl(info.profileImgStoredPath());
+    }
+
     return new ConcertAcceptingAgentResponse(
         info.agentId(),
         info.nickname(),
-        storageService.generatePublicUrl(info.profileImgStoredPath()),
+        profileImgStoredPath,
         info.introduction(),
         info.averageRating(),
         info.reviewCount()
