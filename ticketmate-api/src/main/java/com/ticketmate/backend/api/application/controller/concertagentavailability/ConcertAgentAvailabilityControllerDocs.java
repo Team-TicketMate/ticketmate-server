@@ -132,10 +132,96 @@ public interface ConcertAgentAvailabilityControllerDocs {
       UUID concertId,
       ConcertAcceptingAgentFilteredRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-11-01",
+          author = "Yooonjeong",
+          description = "대리인 수락 on/off 포함한 공연 리스트 API 구현",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/566"
+      )
+  })
+  @Operation(
+      summary = "대리인 on/off 설정을 위한 공연 목록 조회",
+      description = """
+        ### 요청 파라미터
+        - **pageNumber (int)** : 요청할 페이지 번호 [선택, 기본값 1]
+        - **pageSize (int)** : 요청할 페이지 사이즈 [선택, 기본값 10]
+
+        ### 응답 데이터
+        - Slice<AgentConcertSettingResponse>
+        - **content** : 공연 리스트 (대리인 on/off 설정 여부, 공연 모집 상태, 매칭된 의뢰인 수 포함)
+          - **concertId** (UUID): 공연 PK
+          - **concertName** (String): 공연 제목
+          - **concertThumbnailUrl** (String): 공연 썸네일 공개 URL
+          - **status** (ConcertRecruitStatus): 모집 상태 (**OPEN** 또는 **CLOSED**)
+          - **matchedClientCount** (int): 해당 대리인과 매칭된 의뢰인 수 (신청서 **APPROVED** 상태)
+          - **accepting** (boolean): 대리인의 on/off 설정 값
+
+        ### 사용 방법
+        1) 인증 후 호출 예: GET /concerts?pageNumber=1&pageSize=10
+        2) status 기준으로 OPEN 우선, CLOSED 후순위로 정렬해 반환하므로, 클라이언트는 status 값으로 접수중/마감을 구분해 표시할 수 있습니다.
+        3) Slice 타입을 사용하므로 클라이언트는 **first**, **last** 플래그를 보고 무한 스크롤을 구현할 수 있습니다.
+
+        ### 정렬/필터 동작
+        - 정렬 우선순위:
+          1. 공연 모집 상태(status) 오름차순 → **OPEN 먼저**, **CLOSED** 나중
+          2. 대리인 설정(accepting) 내림차순 → **ON(true)** 먼저, **OFF(false)** 나중
+          3. 공연 생성일(createdDate) 내림차순 → 최신순
+        - **status**: 현재 시각 기준 미래의 티켓 오픈 일자가 존재하면 **OPEN**, 아니면 **CLOSED**
+        - **matchedClientCount**: 현재 대리인의 해당 공연에서 **APPROVED** 상태 신청서 개수
+        - **accepting**: 대리인이 해당 공연에 대한 신청을 받을지에 대한 on/off 설정
+
+        ### 예외처리
+        - 400 Bad Request (검증 오류)
+          - **pageNumber** < 1: "페이지 번호는 1이상 값을 입력해야합니다."
+          - **pageSize** < 1: "페이지 당 데이터 최솟값은 1개 입니다."
+        """
+  )
   ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       CustomOAuth2User customOAuth2User,
       ConcertStatusFilteredRequest request);
 
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-11-01",
+          author = "Yooonjeong",
+          description = "대리인 수락 on/off 포함한 공연 리스트 API 구현",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/566"
+      )
+  })
+  @Operation(
+      summary = "대리인 ON 설정된 모집 중 공연 목록 조회",
+      description = """
+        ### 요청 파라미터
+        - **pageNumber (int)** : 요청할 페이지 번호 [선택, 기본값 1]
+        - **pageSize (int)** : 요청할 페이지 사이즈 [선택, 기본값 10]
+        
+        ### 응답 데이터
+        - Slice<AgentAcceptingConcertResponse>
+        - **content** : 대리인이 on 설정한 모집 중인 공연 리스트 (매칭된 의뢰인 수 포함)
+          - **concertId** (UUID): 공연 PK
+          - **concertName** (String): 공연 제목
+          - **concertThumbnailUrl** (String): 공연 썸네일 공개 URL
+          - **matchedClientCount** (int): 해당 대리인과 매칭된 의뢰인 수 (신청서 **APPROVED** 상태)
+
+        ### 사용 방법
+        1) 인증 후 호출 예: GET /accepting-concerts?pageNumber=1&pageSize=10
+        2) 이 목록에는 **대리인이 ON으로 설정**했고 **현재 모집 중(OPEN)**인 공연만 포함됩니다.
+        3) Slice 타입을 사용하므로 클라이언트는 **first**, **last** 플래그를 보고 무한 스크롤을 구현할 수 있습니다.
+
+        ### 필터/정렬 동작
+        - 필터: 모집 중(**OPEN**)이면서, 현재 로그인한 대리인이 ON 설정한 공연만 필터링
+        - 정렬:
+          - **createdDate** 내림차순 (최신순)
+        - **status**: 현재 시각 기준 미래의 티켓 오픈 일자가 존재하면 **OPEN**, 아니면 **CLOSED**
+        - **matchedClientCount**: 해당 대리인 + 해당 공연에서 **APPROVED** 신청서 개수
+
+        ### 예외처리
+        - 400 Bad Request (검증 오류)
+          - **pageNumber** < 1: "페이지 번호는 1이상 값을 입력해야합니다."
+          - **pageSize** < 1: "페이지 당 데이터 최솟값은 1개 입니다."
+        """
+  )
   ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       CustomOAuth2User customOAuth2User,
       ConcertStatusFilteredRequest request);
