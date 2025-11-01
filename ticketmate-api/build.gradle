@@ -28,6 +28,7 @@ dependencies {
     implementation project(':ticketmate-report')
     implementation project(':ticketmate-review')
     implementation project(':ticketmate-crypto')
+    implementation project(':ticketmate-concertagentavailability')
 
     // Swagger UI
     implementation libs.springdoc.openapi.ui

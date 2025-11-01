@@ -6,9 +6,9 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationF
 import com.ticketmate.backend.applicationform.infrastructure.entity.HopeArea;
 import com.ticketmate.backend.applicationform.infrastructure.entity.RejectionReason;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
+import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
