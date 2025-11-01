@@ -2,7 +2,7 @@ package com.ticketmate.backend.concertagentavailability.application.dto.view;
 
 import java.util.UUID;
 
-public record ConcertAgentStatusInfo (
+public record AgentConcertSettingInfo(
   UUID concertId, // 공연 PK
   String concertName, // 공연 제목
   String concertThumbnailStoredPath, // 공연 썸네일 URL
