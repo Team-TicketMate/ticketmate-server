@@ -12,4 +12,6 @@ public interface ConcertAgentAvailabilityRepositoryCustom {
 
   // 특정 공연에 요청 수락 중인 정렬된 대리인 조회
   Slice<ConcertAcceptingAgentInfo> findAcceptingAgentByConcert(UUID concertId, Pageable pageable);
+
+  Slice<ConcertAgentStatusInfo> findMyConcertList(UUID agentId, Pageable pageable);
 }
