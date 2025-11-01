@@ -53,4 +53,14 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
     return ResponseEntity.ok().body(concertAgentAvailabilityService.findAcceptingAgentByConcert(concertId, request));
   }
 
+  @Override
+  @GetMapping("/my-list")
+  public ResponseEntity<Slice<ConcertAgentStatusResponse>> getMyConcertList(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @ParameterObject ConcertStatusFilteredRequest request) {
+    return ResponseEntity.ok()
+        .body(concertAgentAvailabilityService.getMyConcertList(customOAuth2User.getMember().getMemberId(), request));
+  }
+
+  // on인 공연 조회
 }

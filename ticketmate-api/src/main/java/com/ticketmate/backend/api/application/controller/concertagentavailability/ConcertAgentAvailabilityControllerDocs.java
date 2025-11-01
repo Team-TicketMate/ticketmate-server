@@ -130,4 +130,7 @@ public interface ConcertAgentAvailabilityControllerDocs {
       UUID concertId,
       ConcertAcceptingAgentFilteredRequest request);
 
+  ResponseEntity<Slice<ConcertAgentStatusResponse>> getMyConcertList(
+      CustomOAuth2User customOAuth2User,
+      ConcertStatusFilteredRequest request);
 }

@@ -74,4 +74,16 @@ public class ConcertAgentAvailabilityService {
     return infoSlice.map(availabilityMapper::toConcertAcceptingAgentResponse);
   }
 
+  /**
+   * 내 공연 관리 목록 조회
+   *
+   * @param agentId 현재 로그인한 대리인의 memberId
+   * @param request       오프셋 페이징 요청 DTO
+   * @return Slice<MyConcertResponse>
+   */
+  @Transactional(readOnly = true)
+  public Slice<ConcertAgentStatusResponse> getMyConcertList(UUID agentId, ConcertStatusFilteredRequest request) {
+    Slice<ConcertAgentStatusInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
+    return infoSlice.map(availabilityMapper::toConcertAgentStatusResponse);
+  }
 }
