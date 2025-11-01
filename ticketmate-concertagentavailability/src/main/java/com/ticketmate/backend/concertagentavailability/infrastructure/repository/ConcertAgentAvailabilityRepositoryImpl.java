@@ -92,6 +92,12 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
 
+  /**
+   * 대리인 마이페이지용 on/off 설정을 위한 전체 공연 조회
+   * @param agentId 로그인한 대리인
+   * @param pageable 페이지 번호, 크기를 담은 Pageable
+   * @return DTO {@link ConcertAgentStatusInfo} Slice
+   */
   @Override
   public Slice<ConcertAgentStatusInfo> findMyConcertList(UUID agentId, Pageable pageable) {
 
@@ -113,6 +119,12 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
 
+  /**
+   * 대리인 마이페이지용 on 설정한 모집 중 공연 조회
+   * @param agentId 로그인한 대리인
+   * @param pageable 페이지 번호, 크기를 담은 Pageable
+   * @return DTO {@link ConcertAgentStatusInfo} Slice
+   */
   @Override
   public Slice<ConcertAgentStatusInfo> findMyAcceptingConcert(UUID agentId, Pageable pageable) {
 
