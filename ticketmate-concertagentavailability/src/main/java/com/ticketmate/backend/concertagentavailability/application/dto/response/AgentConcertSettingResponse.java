@@ -4,7 +4,7 @@ import com.ticketmate.backend.concert.core.constant.RecruitmentStatus;
 
 import java.util.UUID;
 
-public record ConcertAgentStatusResponse (
+public record AgentConcertSettingResponse(
     UUID concertId, // 공연 PK
     String concertName, // 공연 제목
     String concertThumbnailUrl, // 공연 썸네일 URL
