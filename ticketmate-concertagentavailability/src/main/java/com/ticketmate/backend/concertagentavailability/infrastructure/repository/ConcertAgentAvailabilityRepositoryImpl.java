@@ -92,10 +92,9 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
 
-  // TODO: dto명, 메서드명 수정
+  // TODO: dto명, 메서드명 수정, 성능 개선 (서브쿼리 대체 방안)
   @Override
   public Slice<ConcertAgentStatusInfo> findMyConcertList(UUID agentId, Pageable pageable) {
-    Instant now = Instant.now();
 
     // status (모집 중/마감)
     NumberExpression<Integer> statusExpression = new CaseBuilder()
@@ -103,7 +102,7 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
             .from(TICKET_OPEN_DATE)
             .where(
                 TICKET_OPEN_DATE.concert.eq(CONCERT),
-                TICKET_OPEN_DATE.openDate.gt(now)
+                TICKET_OPEN_DATE.openDate.gt(Instant.now())
             ).exists())
         .then(1)
         .otherwise(2);
@@ -144,6 +143,58 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
         acceptingExpression.desc(), // accepting 여부
         CONCERT.createdDate.desc()  // 최신순
     );
+
+    return QueryDslUtil.fetchSlice(contentQuery, pageable);
+  }
+
+  @Override
+  public Slice<ConcertAgentStatusInfo> findMyAcceptingConcert(UUID agentId, Pageable pageable) {
+
+    // status (모집 중/마감)
+    NumberExpression<Integer> statusExpression = new CaseBuilder()
+        .when(JPAExpressions.selectOne()
+            .from(TICKET_OPEN_DATE)
+            .where(
+                TICKET_OPEN_DATE.concert.eq(CONCERT),
+                TICKET_OPEN_DATE.openDate.gt(Instant.now())
+            ).exists())
+        .then(1)
+        .otherwise(2);
+
+    // matchedClientCount (매칭된 의뢰인 수)
+    Expression<Integer> matchedClientCountExpression = JPAExpressions
+        .select(APPLICATION_FORM.count().intValue())
+        .from(APPLICATION_FORM)
+        .where(
+            APPLICATION_FORM.concert.eq(CONCERT),
+            APPLICATION_FORM.agent.memberId.eq(agentId),
+            APPLICATION_FORM.applicationFormStatus.eq(ApplicationFormStatus.APPROVED)
+        );
+
+    // accepting 여부
+    BooleanExpression acceptingExpression = CONCERT_AGENT_AVAILABILITY.accepting.isTrue().coalesce(false);
+
+    JPAQuery<ConcertAgentStatusInfo> contentQuery = queryFactory
+        .select(Projections.constructor(
+            ConcertAgentStatusInfo.class,
+            CONCERT.concertId,
+            CONCERT.concertName,
+            CONCERT.concertThumbnailStoredPath,
+            statusExpression,
+            matchedClientCountExpression,
+            acceptingExpression
+        ))
+        .from(CONCERT)
+        .leftJoin(CONCERT_AGENT_AVAILABILITY)
+        .on(
+            CONCERT_AGENT_AVAILABILITY.concert.eq(CONCERT),
+            CONCERT_AGENT_AVAILABILITY.agent.memberId.eq(agentId)
+        )
+        .where(
+            statusExpression.eq(1),
+            acceptingExpression.isTrue()
+        )
+        .orderBy(CONCERT.createdDate.desc());
 
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
