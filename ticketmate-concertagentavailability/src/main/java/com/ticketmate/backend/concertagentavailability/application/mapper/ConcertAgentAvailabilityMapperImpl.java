@@ -1,11 +1,11 @@
 package com.ticketmate.backend.concertagentavailability.application.mapper;
 
 import com.ticketmate.backend.concert.core.constant.RecruitmentStatus;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAgentStatusInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,8 +28,8 @@ public class ConcertAgentAvailabilityMapperImpl implements ConcertAgentAvailabil
   }
 
   @Override
-  public ConcertAgentStatusResponse toConcertAgentStatusResponse(ConcertAgentStatusInfo info) {
-    return new ConcertAgentStatusResponse(
+  public AgentConcertSettingResponse toConcertAgentStatusResponse(AgentConcertSettingInfo info) {
+    return new AgentConcertSettingResponse(
         info.concertId(),
         info.concertName(),
         storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
@@ -40,8 +40,8 @@ public class ConcertAgentAvailabilityMapperImpl implements ConcertAgentAvailabil
   }
 
   @Override
-  public AcceptingConcertInfoResponse toAcceptingConcertInfoResponse(ConcertAgentStatusInfo info) {
-    return new AcceptingConcertInfoResponse(
+  public AgentAcceptingConcertResponse toAcceptingConcertInfoResponse(AgentConcertSettingInfo info) {
+    return new AgentAcceptingConcertResponse(
         info.concertId(),
         info.concertName(),
         storageService.generatePublicUrl(info.concertThumbnailStoredPath()),

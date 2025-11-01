@@ -1,10 +1,10 @@
 package com.ticketmate.backend.concertagentavailability.application.mapper;
 
-import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAgentStatusInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
 
 public interface ConcertAgentAvailabilityMapper {
   /**
@@ -14,15 +14,15 @@ public interface ConcertAgentAvailabilityMapper {
   ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info);
 
   /**
-   * ConcertAgentStatusInfo -> ConcertAgentStatusResponse (DTO -> DTO)
+   * ConcertAgentStatusInfo -> AgentConcertSettingResponse (DTO -> DTO)
    * 이미지 storedPath -> publicUrl 변환
    * Integer (모집 중: 1, 모집 마감: 2) -> RecruitmentStatus Enum 변환
    */
-  ConcertAgentStatusResponse toConcertAgentStatusResponse(ConcertAgentStatusInfo info);
+  AgentConcertSettingResponse toConcertAgentStatusResponse(AgentConcertSettingInfo info);
 
   /**
-   * ConcertAgentStatusInfo -> AcceptingConcertInfoResponse (DTO -> DTO)
+   * ConcertAgentStatusInfo -> AgentAcceptingConcertResponse (DTO -> DTO)
    * 이미지 storedPath -> publicUrl 변환
    */
-  AcceptingConcertInfoResponse toAcceptingConcertInfoResponse(ConcertAgentStatusInfo info);
+  AgentAcceptingConcertResponse toAcceptingConcertInfoResponse(AgentConcertSettingInfo info);
 }
