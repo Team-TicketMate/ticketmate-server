@@ -5,6 +5,7 @@ import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
@@ -75,15 +76,29 @@ public class ConcertAgentAvailabilityService {
   }
 
   /**
-   * 내 공연 관리 목록 조회
+   * 대리인 on/off 설정을 위한 공연 목록 조회
    *
    * @param agentId 현재 로그인한 대리인의 memberId
-   * @param request       오프셋 페이징 요청 DTO
+   * @param request pageNumber
+   *                pageSize
    * @return Slice<MyConcertResponse>
    */
   @Transactional(readOnly = true)
   public Slice<ConcertAgentStatusResponse> getMyConcertList(UUID agentId, ConcertStatusFilteredRequest request) {
     Slice<ConcertAgentStatusInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
     return infoSlice.map(availabilityMapper::toConcertAgentStatusResponse);
+  }
+
+  /**
+   * 대리인 on 설정된 모집 중 공연 목록 조회
+   *
+   * @param agentId 현재 로그인한 대리인의 memberId
+   * @param request pageNumber
+   *                pageSize
+   * @return Slice<MyConcertResponse>
+   */
+  public Slice<AcceptingConcertInfoResponse> findAcceptingConcertByAgent(UUID agentId, ConcertStatusFilteredRequest request) {
+    Slice<ConcertAgentStatusInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
+    return infoSlice.map(availabilityMapper::toAcceptingConcertInfoResponse);
   }
 }

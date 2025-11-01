@@ -5,6 +5,7 @@ import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocat
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
 import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
@@ -54,7 +55,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
   }
 
   @Override
-  @GetMapping("/my-list")
+  @GetMapping("/concerts")
   public ResponseEntity<Slice<ConcertAgentStatusResponse>> getMyConcertList(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject ConcertStatusFilteredRequest request) {
@@ -62,5 +63,12 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
         .body(concertAgentAvailabilityService.getMyConcertList(customOAuth2User.getMember().getMemberId(), request));
   }
 
-  // on인 공연 조회
+  @Override
+  @GetMapping("/accepting-concerts")
+  public ResponseEntity<Slice<AcceptingConcertInfoResponse>> findAcceptingConcertByAgent(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @ParameterObject ConcertStatusFilteredRequest request) {
+    return ResponseEntity.ok()
+        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember().getMemberId(), request));
+  }
 }
