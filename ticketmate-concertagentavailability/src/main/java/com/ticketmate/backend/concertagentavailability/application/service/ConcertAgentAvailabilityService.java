@@ -4,7 +4,7 @@ import com.ticketmate.backend.concert.application.service.ConcertService;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.AgentConcertSettingFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
@@ -84,7 +84,7 @@ public class ConcertAgentAvailabilityService {
    * @return Slice<AgentConcertSettingResponse>
    */
   @Transactional(readOnly = true)
-  public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(UUID agentId, ConcertStatusFilteredRequest request) {
+  public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(UUID agentId, AgentConcertSettingFilteredRequest request) {
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
     return infoSlice.map(availabilityMapper::toConcertAgentStatusResponse);
   }
@@ -97,7 +97,7 @@ public class ConcertAgentAvailabilityService {
    *                pageSize
    * @return Slice<AgentAcceptingConcertResponse>
    */
-  public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, ConcertStatusFilteredRequest request) {
+  public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, AgentConcertSettingFilteredRequest request) {
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
     return infoSlice.map(availabilityMapper::toAcceptingConcertInfoResponse);
   }

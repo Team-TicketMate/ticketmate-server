@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 @Setter
 @Builder
 @AllArgsConstructor
-public class ConcertStatusFilteredRequest {
+public class AgentConcertSettingFilteredRequest {
 
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
   @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
@@ -24,7 +24,7 @@ public class ConcertStatusFilteredRequest {
   @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "페이지 당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
   private Integer pageSize; // 페이지 사이즈
 
-  public ConcertStatusFilteredRequest() {
+  public AgentConcertSettingFilteredRequest() {
     this.pageNumber = 1;
     this.pageSize = PageableConstants.DEFAULT_PAGE_SIZE;
   }

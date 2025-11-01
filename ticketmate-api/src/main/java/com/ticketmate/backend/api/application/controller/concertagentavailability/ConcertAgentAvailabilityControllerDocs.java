@@ -5,7 +5,7 @@ import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.AgentConcertSettingFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
@@ -179,7 +179,7 @@ public interface ConcertAgentAvailabilityControllerDocs {
   )
   ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       CustomOAuth2User customOAuth2User,
-      ConcertStatusFilteredRequest request);
+      AgentConcertSettingFilteredRequest request);
 
   @ApiChangeLogs({
       @ApiChangeLog(
@@ -224,5 +224,5 @@ public interface ConcertAgentAvailabilityControllerDocs {
   )
   ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       CustomOAuth2User customOAuth2User,
-      ConcertStatusFilteredRequest request);
+      AgentConcertSettingFilteredRequest request);
 }
