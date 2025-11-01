@@ -1,7 +1,6 @@
 package com.ticketmate.backend.concertagentavailability.infrastructure.repository;
 
 import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.JPAExpressions;
@@ -9,10 +8,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
 import com.ticketmate.backend.applicationform.infrastructure.entity.QApplicationForm;
-import com.ticketmate.backend.concert.core.constant.RecruitmentStatus;
 import com.ticketmate.backend.concert.infrastructure.entity.QConcert;
 import com.ticketmate.backend.concert.infrastructure.entity.QTicketOpenDate;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAgentStatusInfo;
 import com.ticketmate.backend.concertagentavailability.core.constant.ConcertAgentAvailabilitySortField;

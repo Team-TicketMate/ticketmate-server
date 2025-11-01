@@ -1,7 +1,5 @@
 package com.ticketmate.backend.concertagentavailability.application.dto.view;
 
-import com.ticketmate.backend.concert.core.constant.RecruitmentStatus;
-
 import java.util.UUID;
 
 public record ConcertAgentStatusInfo (
