@@ -122,10 +122,7 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
         );
 
     // accepting 여부
-    NumberExpression<Integer> accepting = new CaseBuilder()
-        .when(CONCERT_AGENT_AVAILABILITY.accepting.isTrue())
-        .then(1)
-        .otherwise(0);
+    BooleanExpression acceptingExpression = CONCERT_AGENT_AVAILABILITY.accepting.isTrue().coalesce(false);
 
     JPAQuery<ConcertAgentStatusInfo> contentQuery = queryFactory
         .select(Projections.constructor(
@@ -135,7 +132,7 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
             CONCERT.concertThumbnailStoredPath,
             statusExpression,
             matchedClientCountExpression,
-            CONCERT_AGENT_AVAILABILITY.accepting.isTrue().coalesce(false)
+            acceptingExpression
         ))
         .from(CONCERT)
         .leftJoin(CONCERT_AGENT_AVAILABILITY)
@@ -144,19 +141,11 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
             CONCERT_AGENT_AVAILABILITY.agent.memberId.eq(agentId)
         );
 
-    // 커스텀 정렬 Map
-    Map<String, ComparableExpressionBase<?>> customSortMap = Map.of(
-        "status", statusExpression,
-        "accepting", accepting,
-        "createdDate", CONCERT.createdDate
-    );
-
-    QueryDslUtil.applySorting(
-        contentQuery,
-        pageable,
-        QConcert.class,
-        CONCERT.getMetadata().getName(),
-        customSortMap
+    // 정렬
+    contentQuery.orderBy(
+        statusExpression.asc(),     // 모집 여부
+        acceptingExpression.desc(), // accepting 여부
+        CONCERT.createdDate.desc()  // 최신순
     );
 
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
