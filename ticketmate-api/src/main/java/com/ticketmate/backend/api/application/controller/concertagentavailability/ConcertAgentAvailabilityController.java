@@ -5,9 +5,9 @@ import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocat
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
 import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -56,16 +56,16 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @GetMapping("/concerts")
-  public ResponseEntity<Slice<ConcertAgentStatusResponse>> getMyConcertList(
+  public ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject ConcertStatusFilteredRequest request) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.getMyConcertList(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember().getMemberId(), request));
   }
 
   @Override
   @GetMapping("/accepting-concerts")
-  public ResponseEntity<Slice<AcceptingConcertInfoResponse>> findAcceptingConcertByAgent(
+  public ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject ConcertStatusFilteredRequest request) {
     return ResponseEntity.ok()

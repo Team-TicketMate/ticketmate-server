@@ -6,9 +6,9 @@ import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertStatusFilteredRequest;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.AcceptingConcertInfoResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAgentStatusResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
 
@@ -132,11 +132,11 @@ public interface ConcertAgentAvailabilityControllerDocs {
       UUID concertId,
       ConcertAcceptingAgentFilteredRequest request);
 
-  ResponseEntity<Slice<ConcertAgentStatusResponse>> getMyConcertList(
+  ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       CustomOAuth2User customOAuth2User,
       ConcertStatusFilteredRequest request);
 
-  ResponseEntity<Slice<AcceptingConcertInfoResponse>> findAcceptingConcertByAgent(
+  ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       CustomOAuth2User customOAuth2User,
       ConcertStatusFilteredRequest request);
 }
