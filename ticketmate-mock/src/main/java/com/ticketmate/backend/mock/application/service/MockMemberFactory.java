@@ -106,7 +106,7 @@ public class MockMemberFactory {
 
   // 테스트 회원 Role 검증
   private void isValidMemberRoleRequest(Role role) {
-    if (!role.equals(Role.ROLE_TEST) && !role.equals(Role.ROLE_TEST_ADMIN)) {
+    if (role != Role.ROLE_TEST && role != Role.ROLE_TEST_ADMIN) {
       log.error("Mock 회원은 TEST, TEST_ADMIN 권한만 부여할 수 있습니다. 요청된 ROLE: {}", role);
       throw new CustomException(ErrorCode.INVALID_MEMBER_ROLE_REQUEST);
     }

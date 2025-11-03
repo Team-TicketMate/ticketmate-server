@@ -82,12 +82,12 @@ public class PhoneBlockService {
       return;
     }
     // 이미 영구밴인 경우
-    if (phoneBlock.getBlockType().equals(BlockType.PERMANENT_BAN)) {
+    if (phoneBlock.getBlockType() == BlockType.PERMANENT_BAN) {
       log.debug("이미 영구 차단된 전화번호입니다: {}", phoneBlock.getPhone());
       return;
     }
     // 영구밴 요청 시
-    if (blockType.equals(BlockType.PERMANENT_BAN)) {
+    if (blockType == BlockType.PERMANENT_BAN) {
       updateBlockTypeAndBlockedUntil(phoneBlock, blockType, blockedUntil);
       log.debug("전화번호: {} 영구 차단 활성화. BlockType: {}, 차단기한: {}", phoneBlock.getPhone(), blockType, blockedUntil);
       return;

@@ -73,7 +73,7 @@ public class MemberService {
    * @param memberType 예상 MemberType
    */
   public void validateMemberType(Member member, MemberType memberType) {
-    if (!member.getMemberType().equals(memberType)) {
+    if (member.getMemberType() != memberType) {
       log.error("잘못된 MemberType 입니다.. 사용자 MemberType: {}", member.getMemberType());
       throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
     }
