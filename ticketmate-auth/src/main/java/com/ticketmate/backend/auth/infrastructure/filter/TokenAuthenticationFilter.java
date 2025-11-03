@@ -173,7 +173,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   // 관리자 접근 권한 체크 TODO: 추후 테스트 계정 권한 삭제
   private void assertAdminAuthenticated(String token, ApiRequestType apiRequestType) {
-    if (apiRequestType.equals(ApiRequestType.ADMIN) && !hasAdminRole(token) && !hasTestAdminRole(token)) {
+    if (apiRequestType == ApiRequestType.ADMIN && !hasAdminRole(token) && !hasTestAdminRole(token)) {
       log.error("관리자 권한이 없습니다.");
       throw new CustomException(ErrorCode.ACCESS_DENIED);
     }
