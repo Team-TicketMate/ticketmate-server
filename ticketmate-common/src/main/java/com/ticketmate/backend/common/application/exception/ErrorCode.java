@@ -92,7 +92,7 @@ public enum ErrorCode {
 
   WITHDRAWAL_REASON_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "회원 탈퇴 사유는 필수입니다."),
 
-  OTHER_REASON_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "회원탈퇴 기타사유는 최대 {}자 까지만 작성 가능합니다."),
+  OTHER_REASON_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "회원탈퇴 기타사유는 최대 {0}자 까지만 작성 가능합니다."),
 
   // PHONE_BLOCK
 
