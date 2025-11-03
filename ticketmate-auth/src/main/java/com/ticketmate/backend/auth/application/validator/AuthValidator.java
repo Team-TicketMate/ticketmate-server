@@ -38,10 +38,10 @@ public class AuthValidator {
    */
   private ErrorCode resolveLoginRestrictionErrorCode(AccountStatus accountStatus) {
     return switch (accountStatus) {
-      case ACTIVE -> ErrorCode.INVALID_REQUEST;
       case WITHDRAWN -> ErrorCode.ACCOUNT_WITHDRAWN;
       case TEMP_BAN -> ErrorCode.ACCOUNT_TEMP_BANNED;
       case PERMANENT_BAN -> ErrorCode.ACCOUNT_PERMANENT_BANNED;
+      default -> throw new CustomException(ErrorCode.INVALID_ACCOUNT_STATUS);
     };
   }
 }

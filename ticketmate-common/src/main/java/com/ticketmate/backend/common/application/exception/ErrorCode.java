@@ -30,6 +30,8 @@ public enum ErrorCode {
 
   ACCOUNT_PERMANENT_BANNED(HttpStatus.FORBIDDEN, "영구정지된 계정입니다."),
 
+  INVALID_ACCOUNT_STATUS(HttpStatus.INTERNAL_SERVER_ERROR, "잘못된 AccountStatus 요청입니다."),
+
   INVALID_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
 
   EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "엑세스 토큰이 만료되었습니다."),
