@@ -41,7 +41,7 @@ $$
       GROUP BY username
       HAVING COUNT(*) > 1
     ) THEN
-      RAISE EXCEPTION '중복 username 존재: deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: 중복 username 존재 - deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
     END IF;
 
     IF EXISTS(
@@ -52,7 +52,7 @@ $$
       GROUP BY nickname
       HAVING COUNT(*) > 1
     ) THEN
-      RAISE EXCEPTION '중복 nickname 존재: deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: 중복 nickname 존재 - deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
     END IF;
 
     IF EXISTS(
@@ -63,7 +63,7 @@ $$
       GROUP BY phone
       HAVING COUNT(*) > 1
     ) THEN
-      RAISE EXCEPTION '중복 phone 존재: deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: 중복 phone 존재 - deleted = FALSE 범위에서 유니크 인덱스 생성 불가';
     END IF;
   END;
 $$;
