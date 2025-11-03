@@ -38,7 +38,7 @@ public class MemberFollowValidator {
    * Client 만 Agent 팔로우 가능
    */
   public MemberFollowValidator validateClientToAgentOnly() {
-    if (!(follower.getMemberType().equals(MemberType.CLIENT) && followee.getMemberType().equals(MemberType.AGENT))) {
+    if (!(follower.getMemberType() == MemberType.CLIENT && followee.getMemberType() == MemberType.AGENT)) {
       log.error("의뢰인만 대리인을 팔로우 할 수 있습니다. followerType={}, followeeType={}",
           follower.getMemberType(), followee.getMemberType());
       throw new CustomException(ErrorCode.CLIENT_FOLLOW_AGENT_ONLY);

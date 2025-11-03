@@ -28,6 +28,35 @@ KNOWN_FALSE_POSITIVES = """
 - Treat equivalent type spellings as the same (e.g., varchar vs character varying; timestamptz vs timestamp with time zone).
 - Ignore extensions and comments (CREATE EXTENSION, COMMENT ON).
 - Ignore cosmetic reformatting of CHECK constraints (extra parentheses/spacing).
+- Treat database-level DEFAULTs as non-differences when the ORM typically supplies values on INSERT
+  (e.g., boolean DEFAULT false, now(), gen_random_uuid()) unless @DynamicInsert is explicitly in use.
+- Treat ID generation strategy variants (IDENTITY/SERIAL/SEQUENCE/UUID) as equivalent if PK is NOT NULL and unique.
+- Treat absence/presence of enum CHECK constraints as equivalent when JPA maps enums to VARCHAR (EnumType.STRING).
+- Treat expression/functional/partial indexes, index methods, CONCURRENTLY, storage and tablespace options as cosmetic.
+- Treat DEFERRABLE/INITIALLY DEFERRED on constraints as non-differences unless explicitly required by app semantics.
+- Treat partitioning (PARTITION BY ...), inheritance, storage parameters (FILLFACTOR, autovacuum settings) as non-differences.
+- Treat triggers/functions/views/materialized views unrelated to PK/FK/UNIQUE/NOT NULL semantics as non-differences.
+- Treat schema qualification differences (public.foo vs foo), collation settings, domain vs base type, as non-differences.
+""".strip()
+
+# 한국어 출력
+LANGUAGE_POLICY = """
+Language requirements:
+- All human-readable strings in JSON (values of "reasons" and "suggestions") MUST be written in Korean.
+- Keep JSON keys EXACTLY as: "match", "reasons", "suggestions".
+- The "match" value MUST be only "yes" or "no" (lowercase).
+- Do not include code fences or backticks. The response must be pure JSON.
+""".strip()
+
+# Hibernate 기본 가정(ORM 문맥 힌트): 모델이 오판하지 않도록 제공
+ORM_ASSUMPTIONS = """
+Framework context and assumptions:
+- The application uses Hibernate ORM with default behavior: INSERT statements typically include all mapped columns
+  (DB-level DEFAULT rarely fires) unless @DynamicInsert is enabled.
+- @ColumnDefault or columnDefinition may declare defaults, but their absence on Hibernate side must NOT be considered a mismatch.
+- Enums are commonly mapped as VARCHAR (EnumType.STRING). Lack of DB-side CHECK for enum values is acceptable.
+- Primary key generation strategy may differ across environments (IDENTITY/SERIAL/SEQUENCE/UUID) without semantic change
+  if uniqueness and NOT NULL are enforced.
 """.strip()
 
 SYSTEM_RULES = f"""
@@ -46,6 +75,16 @@ Rules for logical equivalence:
 - Consider the following **non-differences** (treat as equal, do not fail on them):
 {KNOWN_FALSE_POSITIVES}
 
+Additional ORM context (assumptions):
+{ORM_ASSUMPTIONS}
+
+Decision policy:
+- When a difference falls into the non-difference list or the ORM-non-expressible area above,
+  DO NOT report it as a mismatch. Instead, keep "match": "yes" and move any advice into "suggestions".
+- Only report "match": "no" for clear semantic differences that affect data validity or query behavior:
+  e.g., missing NOT NULL/UNIQUE/PK/FK, different data types with incompatible ranges,
+  materially different CHECK logic, or missing critical indexes for FKs/unique keys.
+
 Improvement guidance (for "suggestions"):
 - Always write suggestions targeted at **the Flyway DDL** (Schema B), even when match == "yes".
 - Focus on production-ready migration best practices: idempotency, transactional safety, explicit data types/precision,
@@ -53,11 +92,10 @@ Improvement guidance (for "suggestions"):
   index strategy for FKs & unique lookups, enum/check design, timestamp/timezone choices, extension usage hygiene,
   and safe roll-forward/rollback considerations.
 - Keep each suggestion short (<= 160 chars) and actionable.
+- If a difference was ignored due to ORM constraints (e.g., DB DEFAULT present only in Flyway),
+  prefer to suggest documentation or explicit DDL in Flyway rather than flagging mismatch.
 
-Important:
-- If schemas are logically equivalent, return: {{ "match": "yes", "reasons": [], "suggestions": [...] }}
-- If there is any semantic difference, return: {{ "match": "no", "reasons": [ ... ], "suggestions": [...] }}
-- Do **not** include backticks or code fences. Output **pure JSON only**.
+{LANGUAGE_POLICY}
 """.strip()
 
 PROMPT_TMPL = """# Schema A (Hibernate-generated DDL)

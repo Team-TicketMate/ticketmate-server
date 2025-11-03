@@ -1,5 +1,11 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
+import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.BIRTHDAY_LENGTH;
+import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.BIRTHYEAR_LENGTH;
+import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.NICKNAME_MAX_LENGTH;
+import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.NICKNAME_MIN_LENGTH;
+import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.PHONE_MAX_LENGTH;
+
 import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
@@ -14,6 +20,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -38,12 +45,12 @@ public class Member extends BasePostgresEntity {
   // 소셜 로그인 시 발급되는 ID
   private String socialLoginId;
 
-  // 이메일
-  @Column(unique = true)
+  // 이메일 (DB 활성화 unique 제약조건 추가)
   private String username;
 
-  // 닉네임
-  @Column(unique = true)
+  // 닉네임 (DB 활성화 unique 제약조건 추가)
+  @Size(min = NICKNAME_MIN_LENGTH, max = NICKNAME_MAX_LENGTH)
+  @Column(nullable = false, length = NICKNAME_MAX_LENGTH)
   private String nickname;
 
   // 이름
@@ -55,12 +62,15 @@ public class Member extends BasePostgresEntity {
   private SocialPlatform socialPlatform;
 
   // 생일
+  @Column(length = BIRTHDAY_LENGTH)
   private String birthDay;
 
   // 출생연도
+  @Column(length = BIRTHYEAR_LENGTH)
   private String birthYear;
 
-  // 전화번호
+  // 전화번호 (DB 활성화 unique 제약조건 추가)
+  @Column(length = PHONE_MAX_LENGTH)
   private String phone;
 
   // 프로필 이미지
@@ -86,7 +96,7 @@ public class Member extends BasePostgresEntity {
   // 계정 상태 (활성, 삭제)
   @Enumerated(EnumType.STRING)
   @Builder.Default
-  private AccountStatus accountStatus = AccountStatus.ACTIVE_ACCOUNT;
+  private AccountStatus accountStatus = AccountStatus.ACTIVE;
 
   // 첫 로그인 여부
   @Builder.Default
@@ -118,7 +128,7 @@ public class Member extends BasePostgresEntity {
 
   /**
    * 관리자
-   **/
+   */
   private String password;
 
   @Builder.Default
