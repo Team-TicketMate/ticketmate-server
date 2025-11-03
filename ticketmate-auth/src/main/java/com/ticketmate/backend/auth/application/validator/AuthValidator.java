@@ -36,7 +36,7 @@ public class AuthValidator {
   /**
    * 비활성 계정 ErrorCode 반환
    */
-  public ErrorCode resolveLoginRestrictionErrorCode(AccountStatus accountStatus) {
+  private ErrorCode resolveLoginRestrictionErrorCode(AccountStatus accountStatus) {
     return switch (accountStatus) {
       case ACTIVE -> ErrorCode.INVALID_REQUEST;
       case WITHDRAWN -> ErrorCode.ACCOUNT_WITHDRAWN;
