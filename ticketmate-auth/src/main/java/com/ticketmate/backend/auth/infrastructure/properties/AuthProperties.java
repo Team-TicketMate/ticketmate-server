@@ -19,7 +19,8 @@ public record AuthProperties(
   public record Admin(
       @NotBlank String username,
       @NotBlank String password,
-      @NotBlank String name
+      @NotBlank String name,
+      @NotBlank String nickname
   ) {
 
   }
