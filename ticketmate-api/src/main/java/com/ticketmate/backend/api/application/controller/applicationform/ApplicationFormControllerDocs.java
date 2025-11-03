@@ -20,6 +20,12 @@ public interface ApplicationFormControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-10-28",
+          author = "Chuseok22",
+          description = "희망구역 최대 개수 5개 제한",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/579"
+      ),
+      @ApiChangeLog(
           date = "2025-06-24",
           author = "Chuseok22",
           description = "신청서 작성 API 리팩토링",
@@ -40,8 +46,8 @@ public interface ApplicationFormControllerDocs {
           - **applicationFormDetailRequestList** (배열): 신청 공연 회차 목록 [최소 1개 이상 필수]
             - **performanceDate** (String): 공연 일시 (yyyy-MM-dd'T'HH:mm:ss 형식) [필수]
             - **requestCount** (Integer): 요청 매수 [필수, 최소 1장]
-            - **hopeAreaList** (배열): 희망 구역 목록
-              - **priority** (Integer): 희망 구역 우선순위 [필수, 1~10 사이 값]
+            - **hopeAreaList** (배열): 희망 구역 목록 [선택, 최대 5개]
+              - **priority** (Integer): 희망 구역 우선순위 [필수, 1~5 사이 값]
               - **location** (String): 희망 구역 위치명 [필수, 예: "A구역"]
               - **price** (Long): 희망 구역 가격 [필수, 0원 이상]
             - **requestDetails** (String): 요청 사항
@@ -185,6 +191,12 @@ public interface ApplicationFormControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-10-28",
+          author = "Chuseok22",
+          description = "희망구역 최대 개수 5개 제한",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/579"
+      ),
+      @ApiChangeLog(
           date = "2025-06-24",
           author = "Chuseok22",
           description = "신청서 수정 API 작성",
@@ -245,7 +257,7 @@ public interface ApplicationFormControllerDocs {
           - `ApplicationFormEditRequest applicationFormEditRequest`를 json 형태로 작성
           - `performanceDate` (LocalDateTime, 필수): 공연 일자 (중복 불가)
           - `requestCount` (Integer, 필수): 요청 매수 (최소 1장, 최대 공연별 최대 매수)
-          - `hopeAreaList` (List<HopeAreaRequest>, 선택): 희망 구역 리스트 (최대 10개)
+          - `hopeAreaList` (List<HopeAreaRequest>, 선택): 희망 구역 리스트 (최대 5개)
           - `requestDetails` (String, 선택): 요청사항
           
           **응답**

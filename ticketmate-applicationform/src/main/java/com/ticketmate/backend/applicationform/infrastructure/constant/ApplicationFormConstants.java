@@ -15,7 +15,7 @@ public class ApplicationFormConstants {
   public static final int REQUIREMENT_MAX_LENGTH = 100;
 
   // 희망구역 최대 개수
-  public static final int HOPE_AREA_MAX_SIZE = 10;
+  public static final int HOPE_AREA_MAX_SIZE = 5;
 
   // 수정 가능한 신청서 상태
   public static final List<ApplicationFormStatus> EDITABLE_APPLICATION_FORM_STATUS = List.of(
