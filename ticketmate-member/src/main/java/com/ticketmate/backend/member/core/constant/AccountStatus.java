@@ -3,11 +3,18 @@ package com.ticketmate.backend.member.core.constant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum AccountStatus {
-  ACTIVE_ACCOUNT("활성화된 계정"),
-  DELETE_ACCOUNT("삭제된 계정");
+
+  ACTIVE("활성"),
+
+  WITHDRAWN("탈퇴"),
+
+  TEMP_BAN("일시정지"),
+
+  PERMANENT_BAN("영구정지"),
+  ;
 
   private final String description;
 }

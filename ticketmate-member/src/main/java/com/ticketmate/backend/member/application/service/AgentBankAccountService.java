@@ -2,9 +2,9 @@ package com.ticketmate.backend.member.application.service;
 
 import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRemoveSpecialCharacters;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.ACCOUNT_NUMBER_PATTERN;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.MAX_ACCOUNT_COUNT;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstant.MAX_ACCOUNT_HOLDER_LENGTH;
+import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.ACCOUNT_NUMBER_PATTERN;
+import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.MAX_ACCOUNT_COUNT;
+import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.MAX_ACCOUNT_HOLDER_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;

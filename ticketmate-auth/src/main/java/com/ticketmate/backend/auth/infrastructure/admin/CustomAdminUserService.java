@@ -21,7 +21,7 @@ public class CustomAdminUserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Member member = memberRepository.findByUsername(username)
+    Member member = memberRepository.findByUsernameAndDeletedFalse(username)
         .filter(m -> m.getRole().equals(Role.ROLE_ADMIN) && m.getPassword() != null)
         .orElseThrow(() -> new CustomException(ErrorCode.ADMIN_MEMBER_NOT_FOUND));
     return new CustomAdminUser(member);

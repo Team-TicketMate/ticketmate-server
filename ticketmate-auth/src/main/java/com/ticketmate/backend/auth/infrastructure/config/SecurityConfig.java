@@ -1,5 +1,6 @@
 package com.ticketmate.backend.auth.infrastructure.config;
 
+import com.ticketmate.backend.auth.application.validator.AuthValidator;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.admin.CustomAdminUserService;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
@@ -10,6 +11,7 @@ import com.ticketmate.backend.auth.infrastructure.handler.CustomSuccessHandler;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomClientRegistrationRepository;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.auth.infrastructure.properties.AuthProperties;
+import com.ticketmate.backend.auth.infrastructure.properties.OAuth2Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableConfigurationProperties(AuthProperties.class)
+@EnableConfigurationProperties({AuthProperties.class, OAuth2Properties.class})
 public class SecurityConfig {
 
   private final TokenProvider tokenProvider;
@@ -37,6 +39,7 @@ public class SecurityConfig {
   private final CustomAdminUserService customAdminUserService;
   private final CustomClientRegistrationRepository customClientRegistrationRepository;
   private final CustomLogoutHandler customLogoutHandler;
+  private final AuthValidator authValidator;
   private final PasswordEncoder passwordEncoder;
 
   /**
@@ -78,7 +81,7 @@ public class SecurityConfig {
             .successHandler(customSuccessHandler))
         // JWT Filter
         .addFilterAfter(
-            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService),
+            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),
             OAuth2LoginAuthenticationFilter.class
         )
         // 관리자 로그인용 DaoAuthenticationProvider

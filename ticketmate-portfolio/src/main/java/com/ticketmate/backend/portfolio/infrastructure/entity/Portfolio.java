@@ -1,6 +1,6 @@
 package com.ticketmate.backend.portfolio.infrastructure.entity;
 
-import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstant.MAX_IMG_COUNT;
+import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstants.MAX_IMG_COUNT;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -83,7 +83,7 @@ public class Portfolio extends BasePostgresEntity {
 
   // 현재 PortfolioStatus 에서 요청된 상태로 변경 가능 여부
   private boolean canTransitionPortfolioStatus(PortfolioStatus portfolioStatus) {
-    if (portfolioStatus == null || this.portfolioStatus.equals(portfolioStatus)) {
+    if (portfolioStatus == null || this.portfolioStatus == portfolioStatus) {
       return false;
     }
     return switch (this.portfolioStatus) {
