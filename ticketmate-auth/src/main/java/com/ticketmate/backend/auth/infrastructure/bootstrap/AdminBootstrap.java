@@ -37,6 +37,8 @@ public class AdminBootstrap {
                 member.setRole(Role.ROLE_ADMIN);
                 member.setPassword(passwordEncoder.encode(rawPassword));
                 member.setNickname(nickname);
+                member.setPhoneNumberVerified(true);
+                member.setInitialProfileSet(true);
                 memberRepository.save(member);
                 log.debug("관리자: {} 업데이트 완료", member.getName());
               },
@@ -49,6 +51,8 @@ public class AdminBootstrap {
                     .password(passwordEncoder.encode(rawPassword))
                     .nickname(nickname)
                     .totpEnabled(false)
+                    .isPhoneNumberVerified(true)
+                    .isInitialProfileSet(true)
                     .build();
                 memberRepository.save(newAdmin);
                 log.debug("새로운 관리자: {} 저장 완료", newAdmin.getName());
