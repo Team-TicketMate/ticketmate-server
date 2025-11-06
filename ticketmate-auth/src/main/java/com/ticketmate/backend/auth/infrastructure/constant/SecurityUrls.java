@@ -82,6 +82,8 @@ public class SecurityUrls {
    * 로그인 및 전화번호 인증이 끝난 사용자의 초기 프로필 설정을 위한 API
    */
   public static final List<String> INITIAL_PROFILE_SET_BYPASS_PATHS = List.of(
+    "/api/auth/sms/send-code", // sms 문자 발송
+    "/api/auth/sms/verify", // sms 문자 인증
     "/api/member" // 기본 프로필 설정
   );
 }
