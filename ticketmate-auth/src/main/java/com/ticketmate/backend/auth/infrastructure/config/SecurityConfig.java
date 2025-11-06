@@ -1,5 +1,7 @@
 package com.ticketmate.backend.auth.infrastructure.config;
 
+import static com.ticketmate.backend.auth.infrastructure.constant.AuthConstants.OAUTH2_LOGIN_URL;
+
 import com.ticketmate.backend.auth.application.validator.AuthValidator;
 import com.ticketmate.backend.auth.core.service.TokenProvider;
 import com.ticketmate.backend.auth.infrastructure.admin.CustomAdminUserService;
@@ -49,44 +51,46 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     return http
-        .cors(Customizer.withDefaults())
-        .csrf(AbstractHttpConfigurer::disable)
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .formLogin(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(authorize -> authorize
-            // AUTH_WHITELIST에 등록된 URL은 인증 허용
-            .requestMatchers(SecurityUrls.AUTH_WHITELIST.toArray(new String[0])).permitAll()
-            // OPTIONAL_AUTH_PATHS에 등록된 URL도 인증 허용
-            .requestMatchers(HttpMethod.GET, SecurityUrls.OPTIONAL_AUTH_PATHS.toArray(new String[0])).permitAll()
-            // ADMIN_PATHS에 등록된 URL은 관리자만 접근가능 TODO: 추후 테스트 계정 권한 삭제
-            .requestMatchers(SecurityUrls.ADMIN_PATHS.toArray(new String[0])).hasAnyRole("ADMIN", "TEST_ADMIN")
-            .anyRequest().authenticated()
-        )
-        // 로그아웃
-        .logout(logout -> logout
-            .logoutUrl(AuthConstants.LOGOUT_API_PATH) // LOGOUT_URL 경로로 접근 시 로그아웃
-            .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제)
-            .logoutSuccessUrl(AuthConstants.LOGOUT_SUCCESS_URL) // 로그아웃 성공 후 페이지 이동
-        )
-        // 세션 설정: STATELESS
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        )
-        // OAuth2
-        .oauth2Login(oauth2 -> oauth2
-            .clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository())
-            .userInfoEndpoint(userInfoEndpointConfig ->
-                userInfoEndpointConfig
-                    .userService(customOAuth2UserService))
-            .successHandler(customSuccessHandler))
-        // JWT Filter
-        .addFilterAfter(
-            new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),
-            OAuth2LoginAuthenticationFilter.class
-        )
-        // 관리자 로그인용 DaoAuthenticationProvider
-        .authenticationProvider(daoAuthenticationProvider())
-        .build();
+      .cors(Customizer.withDefaults())
+      .csrf(AbstractHttpConfigurer::disable)
+      .httpBasic(AbstractHttpConfigurer::disable)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .authorizeHttpRequests(authorize -> authorize
+        // AUTH_WHITELIST에 등록된 URL은 인증 허용
+        .requestMatchers(SecurityUrls.AUTH_WHITELIST.toArray(new String[0])).permitAll()
+        // OPTIONAL_AUTH_PATHS에 등록된 URL도 인증 허용
+        .requestMatchers(HttpMethod.GET, SecurityUrls.OPTIONAL_AUTH_PATHS.toArray(new String[0])).permitAll()
+        // ADMIN_PATHS에 등록된 URL은 관리자만 접근가능 TODO: 추후 테스트 계정 권한 삭제
+        .requestMatchers(SecurityUrls.ADMIN_PATHS.toArray(new String[0])).hasAnyRole("ADMIN", "TEST_ADMIN")
+        .anyRequest().authenticated()
+      )
+      // 로그아웃
+      .logout(logout -> logout
+        .logoutUrl(AuthConstants.LOGOUT_API_PATH) // LOGOUT_URL 경로로 접근 시 로그아웃
+        .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제)
+        .logoutSuccessUrl(AuthConstants.LOGOUT_SUCCESS_URL) // 로그아웃 성공 후 페이지 이동
+      )
+      // 세션 설정: STATELESS
+      .sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      )
+      // OAuth2
+      .oauth2Login(oauth2 -> oauth2
+        .authorizationEndpoint(authorization ->
+          authorization.baseUri(OAUTH2_LOGIN_URL)) // oauth2 로그인 엔드포인트
+        .clientRegistrationRepository(customClientRegistrationRepository.clientRegistrationRepository())
+        .userInfoEndpoint(userInfoEndpointConfig ->
+          userInfoEndpointConfig
+            .userService(customOAuth2UserService))
+        .successHandler(customSuccessHandler))
+      // JWT Filter
+      .addFilterAfter(
+        new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),
+        OAuth2LoginAuthenticationFilter.class
+      )
+      // 관리자 로그인용 DaoAuthenticationProvider
+      .authenticationProvider(daoAuthenticationProvider())
+      .build();
   }
 
   /**
