@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +42,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
+    throws ServletException, IOException {
 
     String uri = request.getRequestURI();
     ApiRequestType apiRequestType = determineApiRequestType(uri);
@@ -98,7 +99,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    */
   private boolean isWhitelistedPath(String uri) {
     return SecurityUrls.AUTH_WHITELIST.stream()
-        .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+      .anyMatch(pattern -> pathMatcher.match(pattern, uri));
   }
 
   /**
@@ -109,7 +110,25 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    */
   private boolean isOptionalAuthPath(String uri) {
     return SecurityUrls.OPTIONAL_AUTH_PATHS.stream()
-        .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+      .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+  }
+
+  /**
+   * SMS 본인인증 경로 확인
+   */
+  private boolean isPhoneVerificationPath(String uri) {
+    return SecurityUrls.PHONE_VERIFICATION_BYPASS_PATHS.stream()
+      .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+  }
+
+  /**
+   * 기본 프로필 설정 경로 확인 (POST 메서드)
+   */
+  private boolean isInitialProfileSetPath(String uri, String httpMethod) {
+    boolean pathMatched = SecurityUrls.INITIAL_PROFILE_SET_BYPASS_PATHS.stream()
+      .anyMatch(pattern -> pathMatcher.match(pattern, uri));
+    boolean methodMatched = HttpMethod.POST.matches(httpMethod);
+    return pathMatched && methodMatched;
   }
 
   /**
@@ -134,18 +153,20 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
    * 유효한 토큰 처리
    */
   private void handleValidToken(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain,
-      String token,
-      ApiRequestType apiRequestType
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain filterChain,
+    String token,
+    ApiRequestType apiRequestType
   ) throws IOException, ServletException {
     String username = tokenProvider.getUsername(token);
 
     CustomOAuth2User customOAuth2User = customOAuth2UserService.loadUserByUsername(username);
     SecurityContextHolder.getContext().setAuthentication(
-        new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities())
+      new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities())
     );
+    String uri = request.getRequestURI();
+    String httpMethod = request.getMethod();
 
     // 회원 차단 여부 검증
     Member member = customOAuth2User.getMember();
@@ -153,6 +174,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     // 관리자 검증
     assertAdminAuthenticated(token, apiRequestType);
+
+    // sms 본인인증 검증
+    assertPhoneVerification(member, uri);
+
+    // 기본 프로필 설정 검증
+    assertInitialProfileSet(member, uri, httpMethod);
 
     // 인증 성공
     filterChain.doFilter(request, response);
@@ -176,6 +203,22 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     if (apiRequestType == ApiRequestType.ADMIN && !hasAdminRole(token) && !hasTestAdminRole(token)) {
       log.error("관리자 권한이 없습니다.");
       throw new CustomException(ErrorCode.ACCESS_DENIED);
+    }
+  }
+
+  // SMS 본인인증 여부 검증
+  private void assertPhoneVerification(Member member, String uri) {
+    if (!member.isPhoneNumberVerified() && !isPhoneVerificationPath(uri)) {
+      log.warn("전화번호 미인증 회원의 보호 리소스 접근 차단: memberId: {}, uri: {}", member.getMemberId(), uri);
+      throw new CustomException(ErrorCode.PHONE_VERIFICATION_REQUIRED);
+    }
+  }
+
+  // 기본 프로필 설정 여부 검증
+  private void assertInitialProfileSet(Member member, String uri, String httpMethod) {
+    if (!member.isInitialProfileSet() && !isInitialProfileSetPath(uri, httpMethod)) {
+      log.warn("기본 프로필 미설정 회원의 보호 리소스 접근 차단: memberId: {}, uri: {}", member.getMemberId(), uri);
+      throw new CustomException(ErrorCode.INITIAL_PROFILE_SETUP_REQUIRED);
     }
   }
 
