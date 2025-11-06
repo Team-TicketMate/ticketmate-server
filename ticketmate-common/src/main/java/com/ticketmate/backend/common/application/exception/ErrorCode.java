@@ -46,6 +46,10 @@ public enum ErrorCode {
 
   VERIFY_CODE_NOT_SAME(HttpStatus.BAD_REQUEST, "인증번호가 일치하지 않습니다."),
 
+  PHONE_VERIFICATION_REQUIRED(HttpStatus.FORBIDDEN, "SMS 본인인증이 완료되지 않았습니다."),
+
+  INITIAL_PROFILE_SETUP_REQUIRED(HttpStatus.FORBIDDEN, "기본 프로필 설정이 완료되지 않았습니다."),
+
   // TOTP
 
   INVALID_TOTP_SECRET(HttpStatus.BAD_REQUEST, "TOTP 시크릿이 유효하지 않습니다."),
