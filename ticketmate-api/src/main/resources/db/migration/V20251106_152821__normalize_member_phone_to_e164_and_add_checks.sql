@@ -47,7 +47,7 @@ $$
            HAVING COUNT(*) > 1
            UNION ALL
 
-           -- 이미 new_164가 member.phone에 존재하는지 검증 (활성 행 기준)
+           -- 이미 new_e164가 member.phone에 존재하는지 검증 (활성 행 기준)
            SELECT c.new_e164
            FROM candidates c
                   JOIN member m
