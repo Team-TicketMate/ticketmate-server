@@ -1,0 +1,21 @@
+-- 검증: 기존 데이터 중 숫자만 추출했을 때 010으로 시작하는 11자리가 아니면 예외 발생
+
+DO
+$$
+  BEGIN
+    IF EXISTS (
+      SELECT 1
+      FROM phone_block
+      WHERE phone NOT LIKE '+82%' -- 이미 E.164 로 저장된 값은 검증 대상에서 제외
+        AND REGEXP_REPLACE(phone, '[^0-9]', '', 'g') !~ '^010[0-9]{8}$'
+    ) THEN
+      RAISE EXCEPTION 'Migration aborted: phone_block.phone contains non-010 format rows.';
+    END IF;
+  END;
+$$;
+
+-- 변환: 010-1234-5678 -> +821012345678
+UPDATE phone_block
+SET phone = '+82' || SUBSTRING(REGEXP_REPLACE(phone, '[^0-9]', '', 'g') FROM 2)
+WHERE phone NOT LIKE '+82%'
+  AND REGEXP_REPLACE(phone, '[^0-9]', '', 'g') ~ '^010[0-9]{8}$';
