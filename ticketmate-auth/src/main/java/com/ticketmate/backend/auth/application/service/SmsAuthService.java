@@ -10,6 +10,7 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.application.service.PhoneBlockService;
+import com.ticketmate.backend.member.core.vo.Phone;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
@@ -40,7 +41,7 @@ public class SmsAuthService {
     String code = generateCode(); // 6자리 인증코드 생성
     String normalizedPhoneNumber =
         normalizeAndRemoveSpecialCharacters(request.getPhoneNumber()); // 요청 전화번호 정규화 (01012345678)
-    phoneBlockService.ensurePhoneNotBlocked(normalizedPhoneNumber); // 차단된 전화번호 검증
+    phoneBlockService.ensurePhoneNotBlocked(Phone.of(normalizedPhoneNumber)); // 차단된 전화번호 검증
     String key = generateKey(normalizedPhoneNumber); // Redis Key 생성
     saveCode(key, code); // Redis TTL 저장
     String message = generateMessage(code); // 인증문자 메시지 생성
