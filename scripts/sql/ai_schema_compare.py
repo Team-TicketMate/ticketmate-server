@@ -86,19 +86,15 @@ Hard JSON rules:
 
 Language requirements:
 - All human-readable strings in "reasons" and "suggestions" MUST be written in Korean.
-- JSON keys and structural tokens remain in English as specified above.
+- JSON keys and structural tokens MUST remain in English exactly as specified above.
 
 Authoritative evidence rules (VERY IMPORTANT):
-- You MUST base ALL conclusions ONLY on the actual DDL content provided for Schema A and Schema B.
-- DO NOT assume or hallucinate missing/present constraints, indexes, or FKs.
-- Before claiming that something is "missing in Schema B":
-  - You MUST scan Schema B for:
-    - PRIMARY KEYs
-    - UNIQUE constraints
-    - UNIQUE indexes
-    - FOREIGN KEY constraints
-    - CHECK constraints
-    on the SAME column set, regardless of their names.
+- Base ALL conclusions ONLY on the actual DDL content provided for Schema A and Schema B.
+- DO NOT assume, guess, or hallucinate missing/present constraints, indexes, or FKs.
+- Before stating that something is "missing in Schema B", you MUST:
+  - Scan Schema B for PRIMARY KEYs, UNIQUE constraints, UNIQUE indexes,
+    FOREIGN KEY constraints, and CHECK constraints on the SAME column set,
+    regardless of their names.
   - If an equivalent constraint or index exists in Schema B (even with a different name),
     you MUST NOT report it as missing.
 - Constraint/index NAMES are irrelevant. Only their columns and semantics matter.
@@ -115,7 +111,7 @@ Scope to consider:
 - Tables and columns
 - Data types and length/precision
 - Nullability
-- Defaults (only when they change semantics)
+- Defaults (ONLY when they materially change semantics)
 - Primary keys
 - Unique constraints
 - Foreign keys
@@ -126,47 +122,58 @@ Treat the following as NON-differences (must NOT cause match = "no"):
 
 {KNOWN_FALSE_POSITIVES}
 
-Additional ORM context (from Hibernate, also NOT mismatches by themselves):
-
+Additional ORM context (from Hibernate, NOT mismatches by themselves):
 {ORM_ASSUMPTIONS}
+
+Explicit NON-differences for this task (CRITICAL):
+
+- Do NOT set "match": "no" just because:
+  - Schema B has STRICTER CHECK constraints (e.g. E.164 phone format, priority range 1–10),
+    as long as all values valid under Schema A's model are still allowed.
+  - Schema B adds EXTRA UNIQUE constraints or indexes that narrow the domain
+    (e.g. unique names, URLs, paths) when Schema A does not forbid them.
+  - Schema B adds DEFAULT values for columns that are NOT NULL in Schema A,
+    and those defaults are reasonable domain choices (e.g. DEFAULT false for flags).
+  - Schema B enforces domain rules (phone format, enums, etc.) that Hibernate's
+    auto DDL simply cannot fully express.
+
+These differences may be mentioned in "suggestions" ONLY as best-practice or documentation notes,
+NOT as reasons to set "match": "no".
 
 Decision policy (when to set match = "no"):
 
-Set "match": "no" ONLY if there is at least ONE CLEAR semantic incompatibility where Schema B
-is weaker or conflicts with Schema A. Examples:
+Set "match": "no" ONLY if there is at least ONE CLEAR semantic incompatibility where
+Schema B is weaker than required by Schema A, or directly conflicts with it. Examples:
 
 1) Missing or weaker constraints in Schema B:
    - A field that is an @Id / PK in Schema A is NOT PRIMARY KEY / NOT UNIQUE / nullable in Schema B.
-   - A field marked nullable = false in Schema A is nullable in Schema B.
-   - A field marked unique = true in Schema A has NO corresponding UNIQUE constraint/index
-     on that column set in Schema B.
+   - A field with nullable = false in Schema A is nullable in Schema B.
+   - A field with unique = true in Schema A has NO corresponding UNIQUE/PK on that column set in Schema B.
    - A clear @ManyToOne/@OneToOne/@JoinColumn mapping in Schema A has NO reasonable FK in Schema B,
-     causing real referential integrity risk.
+     so referential integrity is not enforced at all.
 
 2) Schema B actively conflicts with Schema A:
-   - Incompatible data types/lengths that would truncate or reject valid values from Schema A
-     (e.g., 36-char UUID vs varchar(10)).
-   - CHECK constraints in Schema B that reject values valid under Schema A's model.
-   - For critical relationships, a complete lack of supporting indexes such that
-     severe and foreseeable issues are likely.
+   - Incompatible data types/lengths that would truncate or reject valid values
+     allowed by Schema A (e.g. A allows 255 chars, B only 10).
+   - CHECK constraints in Schema B that reject values clearly valid under Schema A
+     (based on A's column definitions or enums).
+   - Critically wrong FK targets (wrong table/column) that break the logical model.
 
-In ALL OTHER cases:
+If NONE of the above holds:
 - KEEP "match": "yes".
-- Do NOT manufacture mismatches.
-- If Schema B is stricter (e.g., E.164 phone CHECK, extra UNIQUEs, partial/functional indexes)
-  and still accepts all valid Schema A values, treat this as OK and possibly desirable.
-- Mention such points ONLY in "suggestions" as best-practice notes, NOT as reasons for "no".
+- Do NOT invent or overstate differences.
+- Stricter or more domain-rich Schema B is acceptable and should NOT flip match to "no".
 
 Suggestions (ALWAYS required, for Schema B / Flyway DDL):
 
 - Always include 3-10 short, actionable suggestions in Korean.
-- Even when "match" == "yes", provide concrete improvements for Flyway DDL:
-  - clarify and document important constraints,
-  - ensure consistent PK/FK/UNIQUE/NOT NULL usage,
-  - add indexes for important FKs or unique lookups when missing,
-  - improve migration idempotency (IF NOT EXISTS, defensive checks),
-  - align schema with domain rules in a safe way.
-- Do NOT repeat issues that are not actually supported by the given DDLs.
+- Even when "match" == "yes", provide concrete improvements for Flyway DDL, such as:
+  - 중요한 FK 컬럼에 인덱스 추가,
+  - PK/FK/UNIQUE/NOT NULL 규칙 명시 및 일관성 강화,
+  - CHECK 제약을 도메인 규칙에 맞게 명확화,
+  - 마이그레이션 시 IF NOT EXISTS / 기존 데이터 검증 등 방어적 DDL 적용,
+  - Flyway 스키마와 애플리케이션 도메인 규칙을 주석이나 문서로 명확히 연결.
+- Do NOT list as "reasons" any item that is not strictly supported by the given DDLs.
 """
 
 PROMPT_TMPL = """# Schema A (Hibernate-generated DDL)
