@@ -128,7 +128,7 @@ Additional ORM context (from Hibernate, NOT mismatches by themselves):
 Explicit NON-differences for this task (CRITICAL):
 
 - Do NOT set "match": "no" just because:
-  - Schema B has STRICTER CHECK constraints (e.g. E.164 phone format, priority range 1–10),
+  - Schema B has STRICTER CHECK constraints (e.g. E.164 phone format, priority range 1-10),
     as long as all values valid under Schema A's model are still allowed.
   - Schema B adds EXTRA UNIQUE constraints or indexes that narrow the domain
     (e.g. unique names, URLs, paths) when Schema A does not forbid them.
