@@ -9,7 +9,7 @@ $$
       WHERE phone NOT LIKE '+82%' -- 이미 E.164 로 저장된 값은 검증 대상에서 제외
         AND REGEXP_REPLACE(phone, '[^0-9]', '', 'g') !~ '^010[0-9]{8}$'
     ) THEN
-      RAISE EXCEPTION 'Migration aborted: phone_block.phone contains non-010 format rows.';
+      RAISE EXCEPTION 'Flyway 마이그레이션 에러: 010으로 시작하지 않는 데이터가 있습니다.';
     END IF;
   END;
 $$;
