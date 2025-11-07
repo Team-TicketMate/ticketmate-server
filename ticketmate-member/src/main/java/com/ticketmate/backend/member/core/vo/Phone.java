@@ -36,7 +36,7 @@ public class Phone {
   @JsonCreator(mode = Mode.DELEGATING)
   public static Phone of(String raw) {
     if (CommonUtil.nvl(raw, "").isEmpty()) {
-      throw new CustomException(ErrorCode.INVALID_PHONE);
+      return null;
     }
     String trimmed = raw.trim();
     if (trimmed.startsWith("+")) {
