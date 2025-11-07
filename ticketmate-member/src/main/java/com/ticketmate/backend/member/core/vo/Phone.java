@@ -75,7 +75,7 @@ public class Phone {
   }
 
   private void validate(String value) {
-    Optional.of(value)
+    Optional.ofNullable(value)
       .filter(v -> !v.isBlank())
       .filter(this::isValidFormat)
       .orElseThrow(() -> new CustomException(ErrorCode.INVALID_PHONE));
