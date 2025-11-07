@@ -19,3 +19,8 @@ UPDATE phone_block
 SET phone = '+82' || SUBSTRING(REGEXP_REPLACE(phone, '[^0-9]', '', 'g') FROM 2)
 WHERE phone NOT LIKE '+82%'
   AND REGEXP_REPLACE(phone, '[^0-9]', '', 'g') ~ '^010[0-9]{8}$';
+
+-- E.164 제약조건 추가
+ALTER TABLE phone_block
+  ADD CONSTRAINT phone_block_phone_e164_kr_check
+    CHECK (phone ~ '^\+8210[0-9]{8}$');

@@ -20,3 +20,8 @@ UPDATE member_withdrawal_history
 SET phone = '+82' || SUBSTRING(REGEXP_REPLACE(phone, '[^0-9]', '', 'g') FROM 2)
 WHERE phone NOT LIKE '+82%'
   AND REGEXP_REPLACE(phone, '[^0-9]', '', 'g') ~ '^010[0-9]{8}$';
+
+-- E.164 제약조건 추가
+ALTER TABLE member_withdrawal_history
+  ADD CONSTRAINT mwh_phone_e164_kr_check
+    CHECK (phone ~ '^\+8210[0-9]{8}$');
