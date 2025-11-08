@@ -5,6 +5,6 @@ import java.util.UUID;
 public record AgentAcceptingConcertResponse(
     UUID concertId,
     String concertName,
-    String concertThumbnailStoredPath,
+    String concertThumbnailUrl,
     int matchedClientCount
 ) {}
