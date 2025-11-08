@@ -421,7 +421,7 @@ public class ApplicationFormService {
         }
       }
       case CANCEL, REJECT, APPROVE -> {
-        if (!currentStatus.equals(ApplicationFormStatus.PENDING)) {
+        if (currentStatus != ApplicationFormStatus.PENDING) {
           log.error("{} 불가 상태의 신청서입니다. 신청서 상태: {}", action.getDescription(), currentStatus);
           throw new CustomException(ErrorCode.INVALID_APPLICATION_FORM_STATUS);
         }

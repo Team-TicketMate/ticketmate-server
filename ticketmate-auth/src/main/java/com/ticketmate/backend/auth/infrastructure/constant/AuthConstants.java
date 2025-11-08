@@ -13,9 +13,6 @@ public final class AuthConstants {
   public static final String ROOT_DOMAIN = "ticketmate.site";
   public static final String ACCESS_TOKEN_KEY = "accessToken";
   public static final String REFRESH_TOKEN_KEY = "refreshToken";
-  public static final String PHONE_NUMBER_VERIFIED_KEY = "phoneNumberVerified";
-  public static final String INITIAL_PROFILE_SET_KEY = "initialProfileSetKey";
-  public static final long DEFAULT_COOKIE_EXPIRATION_TIME_IN_SECONDS = 300L;
 
   // JwtUtil
   public static final String ACCESS_CATEGORY = "access";
@@ -27,6 +24,7 @@ public final class AuthConstants {
   public static final String ADMIN_RESPONSE_PREFIX = "/admin/";
   public static final String LOGOUT_API_PATH = "/api/auth/logout";
   public static final String LOGOUT_SUCCESS_URL = "/";
+  public static final String OAUTH2_LOGIN_URL = "/api/oauth2/authorization";
 
   // SMS
   public static final long SMS_CODE_TTL_MIN = 5;

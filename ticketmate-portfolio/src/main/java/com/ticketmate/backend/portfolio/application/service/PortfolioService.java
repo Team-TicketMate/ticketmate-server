@@ -1,6 +1,6 @@
 package com.ticketmate.backend.portfolio.application.service;
 
-import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstant.MAX_IMG_COUNT;
+import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstants.MAX_IMG_COUNT;
 
 import com.ticketmate.backend.ai.application.service.VertexAiEmbeddingService;
 import com.ticketmate.backend.ai.core.constant.EmbeddingType;

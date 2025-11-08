@@ -4,8 +4,11 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberWithdrawRequest;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
 import com.ticketmate.backend.member.application.mapper.MemberMapper;
+import com.ticketmate.backend.member.core.constant.AccountStatus;
+import com.ticketmate.backend.member.core.constant.BlockType;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
@@ -27,6 +30,8 @@ public class MemberService {
   private final MemberRepository memberRepository;
   private final MemberMapper memberMapper;
   private final StorageService storageService;
+  private final MemberWithdrawalHistoryService memberWithdrawalHistoryService;
+  private final PhoneBlockService phoneBlockService;
 
   /**
    * JWT 기반 회원정보 조회
@@ -68,7 +73,7 @@ public class MemberService {
    * @param memberType 예상 MemberType
    */
   public void validateMemberType(Member member, MemberType memberType) {
-    if (!member.getMemberType().equals(memberType)) {
+    if (member.getMemberType() != memberType) {
       log.error("잘못된 MemberType 입니다.. 사용자 MemberType: {}", member.getMemberType());
       throw new CustomException(ErrorCode.INVALID_MEMBER_TYPE);
     }
@@ -91,7 +96,9 @@ public class MemberService {
    * 회원 본인인증 여부 업데이트
    */
   @Transactional
-  public void updatePhoneNumberVerified(Member member, boolean status) {
+  public void updatePhoneNumberVerified(Member member, String phone, boolean status) {
+    log.debug("회원: {} 전화번호 업데이트: {}", member.getMemberId(), phone);
+    member.setPhone(phone);
     log.debug("회원: {} 본인인증 여부 업데이트. 기존: {} -> 변경: {}", member.getMemberId(), member.isPhoneNumberVerified(), status);
     member.setPhoneNumberVerified(status);
     memberRepository.save(member);
@@ -127,5 +134,38 @@ public class MemberService {
   @Transactional
   public void updateFollowerCount(Member member, long count) {
     memberRepository.updateFollowerCount(member.getMemberId(), count);
+  }
+
+  /**
+   * 회원 탈퇴
+   */
+  @Transactional
+  public void withdraw(Member member, MemberWithdrawRequest request) {
+    // 회원 탈퇴 사유 저장
+    memberWithdrawalHistoryService.saveWithdrawalHistory(member, request);
+
+    // 전화번호 차단
+    phoneBlockService.executePhoneBlock(member.getPhone(), BlockType.WITHDRAWAL);
+
+    // AccountStatus 탈퇴 상태 변경
+    updateAccountStatus(member, AccountStatus.WITHDRAWN);
+
+    // member 논리 삭제
+    // TODO: 구현 필요
+  }
+
+  /**
+   * AccountStatus 상태 변경
+   */
+  @Transactional
+  public void updateAccountStatus(Member member, AccountStatus newStatus) {
+    if (member.getAccountStatus() == newStatus) {
+      log.warn("변경전후 AccountStatus 가 동일합니다: {}", newStatus);
+      return;
+    }
+    log.debug("회원: {}의 AccountStatus를 변경합니다. {} -> {}",
+        member.getMemberId(), member.getAccountStatus(), newStatus);
+    member.setAccountStatus(newStatus);
+    memberRepository.save(member);
   }
 }

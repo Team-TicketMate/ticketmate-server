@@ -7,14 +7,12 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
-import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +30,6 @@ public class MockMemberFactory {
   private final Faker koFaker;
   private final Faker enFaker;
   private final SuhRandomKit suhRandomKit;
-  private final Clock clock;
 
   /**
    * 개발자용 회원 Mock 데이터 생성
@@ -50,7 +47,6 @@ public class MockMemberFactory {
    *                role 권한
    *                socialPlatform 네이버/카카오 소셜 로그인 플랫폼
    *                memberType 의로인/대리인
-   *                accountStatus 활성화/삭제
    *                isFirstLogin 첫 로그인 여부
    */
   public Member generate(MockLoginRequest request) {
@@ -81,15 +77,13 @@ public class MockMemberFactory {
     // 공통 랜덤 필드
     String nickname = suhRandomKit.nicknameWithUuid();
     String name = koFaker.name().name().replaceAll(" ", "");
+    String phone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(10_000), koFaker.random().nextInt(10_000));
     SocialPlatform social = requestOptional
         .map(MockLoginRequest::getSocialPlatform)
         .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
     MemberType memberType = requestOptional
         .map(MockLoginRequest::getMemberType)
         .orElseGet(() -> koFaker.options().option(MemberType.class));
-    AccountStatus status = requestOptional
-        .map(MockLoginRequest::getAccountStatus)
-        .orElse(AccountStatus.ACTIVE_ACCOUNT);
     boolean firstLogin = requestOptional
         .map(MockLoginRequest::getIsFirstLogin)
         .orElseGet(() -> koFaker.random().nextBoolean());
@@ -102,18 +96,17 @@ public class MockMemberFactory {
         .socialPlatform(social)
         .birthYear(birthYear)
         .birthDay(birthDay)
-        .phone(koFaker.phoneNumber().cellPhone())
+        .phone(phone)
         .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
         .gender(koFaker.options().option("male", "female"))
         .memberType(memberType)
-        .accountStatus(status)
         .isFirstLogin(firstLogin)
         .lastLoginTime(TimeUtil.now());
   }
 
   // 테스트 회원 Role 검증
   private void isValidMemberRoleRequest(Role role) {
-    if (!role.equals(Role.ROLE_TEST) && !role.equals(Role.ROLE_TEST_ADMIN)) {
+    if (role != Role.ROLE_TEST && role != Role.ROLE_TEST_ADMIN) {
       log.error("Mock 회원은 TEST, TEST_ADMIN 권한만 부여할 수 있습니다. 요청된 ROLE: {}", role);
       throw new CustomException(ErrorCode.INVALID_MEMBER_ROLE_REQUEST);
     }

@@ -8,6 +8,7 @@ import com.ticketmate.backend.member.application.dto.request.AgentUpdateBankAcco
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberInfoUpdateRequest;
+import com.ticketmate.backend.member.application.dto.request.MemberWithdrawRequest;
 import com.ticketmate.backend.member.application.dto.response.AgentBankAccountResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberFollowResponse;
 import com.ticketmate.backend.member.application.dto.response.MemberInfoResponse;
@@ -291,16 +292,16 @@ public interface MemberControllerDocs {
       summary = "대리인 계좌등록",
       description = """
           대리인이 자신의 계좌를 티켓메이트 서비스에 등록합니다.
-                    
+          
           ### 요청 파라미터
           - bankCode(String) : 계좌의 은행 정보(필수)
           - accountHolder(String) : 예금주 명(필수, 최대 20자)
           - accountNumber(String) : 계좌번호(필수, 11~16자)
           - primaryAccount(boolean) : 대표계좌 유/무(필수)
-                   
+          
           ### 사용 방법
           `BankCode`
-                    
+          
           - KYONGNAM_BANK("039", "경남"),
           - GWANGJU_BANK("034", "광주"),
           - LOCALNONGHYEOP("012", "지역축농협"),
@@ -327,7 +328,7 @@ public interface MemberControllerDocs {
           - NONGHYEOP("011", "농협"),
           - SC("023", "SC제일"),
           - SUHYEOP("007", "수협");
-                             
+          
           ### 유의 사항
           - BankCode의 파라미터는 각각 금융결제원 공식 코드, 보여주기용 문자입니다.
           - 계좌번호 입력 시 **'-' 문자는 제외하고 호출해야 합니다.**
@@ -349,9 +350,9 @@ public interface MemberControllerDocs {
       summary = "대리인 계좌조회",
       description = """
           대리인이 자신의 계좌를 조회합니다.
-                    
+          
           ### 요청 파라미터 X (인증 필수)
-                   
+          
           ### 유의 사항
           - 자신의 계좌중 대표계좌가 최상단에 배치되며 나머지는 생성일자 기준으로 정렬됩니다. 
           - 암호화된 계좌번호를 평문으로 클라이언트에게 전송합니다.
@@ -372,10 +373,10 @@ public interface MemberControllerDocs {
       summary = "대리인 대표계좌 변경",
       description = """
           대리인이 자신의 대표계좌를 변경합니다.
-                    
+          
           ### 요청 파라미터
           - bank-account-id : 변경할 계좌 ID
-                   
+          
           ### 유의 사항
           - 대표계좌 변경시 순차적으로 모든 계좌들의 대표계좌 필드가 false로 변경된 이후에 변경할 계좌의 필드가 ture로 변경됩니다.  
           - 대표계좌 변경은 총 2개 이상일때만 가능하도록 설계해놨습니다. (방어로직은 X)
@@ -397,13 +398,13 @@ public interface MemberControllerDocs {
       summary = "대리인 대표계좌 수정",
       description = """
           대리인이 자신의 대표계좌를 수정합니다.
-                    
+          
           ### 요청 파라미터 (AgentUpdateBankAccountRequest)
           - bankCode(String) : 계좌의 은행 정보(필수X)
           - accountHolder(String) : 예금주 명(필수X, 최대 20자)
           - accountNumber(String) : 계좌번호(필수X, 11~16자)
-
-                   
+          
+          
           ### 유의 사항
           - 모든 필드가 필수가 아니라 아닌 변경하고싶은 필드만 채워넣습니다. (Null 허용)   
           - 만약 Null이 아닌 필드는 변경하고싶은 필드라고 판단, DTO단에서 검증이 들어갑니다.
@@ -425,16 +426,83 @@ public interface MemberControllerDocs {
       summary = "대리인 대표계좌 삭제",
       description = """
           대리인이 자신의 대표계좌를 삭제합니다.
-                    
+          
           ### 요청 파라미터
           - bank-account-id : 삭제할 계좌 ID
-
-                   
+          
+          
           ### 유의 사항
-          - 논리삭제가 아닌 물리삭제를 진행합니다. (데이터는 어차피 인당 최대 5개)   
+          - 논리삭제가 아닌 물리삭제를 진행합니다. (데이터는 어차피 인당 최대 5개)
           - 만약 삭제 후 남은 계좌의 개수가 1개라면 그 계좌는 자동으로 대표계좌로 설정됩니다.
           """
   )
-  ResponseEntity<Void> deleteBankAccount(UUID agentBankAccountId, CustomOAuth2User customOAuth2User
+  ResponseEntity<Void> deleteBankAccount(
+      UUID agentBankAccountId,
+      CustomOAuth2User customOAuth2User
+  );
+
+  @ApiChangeLogs({
+      @ApiChangeLog(
+          date = "2025-10-29",
+          author = "chuseok22",
+          description = "회원 탈퇴 기능 개발",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/581"
+      )
+  })
+  @Operation(
+      summary = "회원 탈퇴",
+      description = """
+          ### 요청 파라미터 (Request Body)
+          - `withdrawalReasonType` (WithdrawalReasonType, required): 탈퇴 사유 타입
+            - 가능한 값:
+              - `NO_CONCERTS` ("찾는 공연이 없어요")
+              - `RUDE_USER` ("비매너 사용자를 만났어요")
+              - `UNFAIR_RESTRICTION` ("억울하게 이용이 제한됐어요")
+              - `WANT_NEW_ACCOUNT` ("새 계정을 만들고 싶어요")
+              - `DELETE_PERSONAL_DATA` ("개인정보를 삭제하고 싶어요")
+              - `OTHER` ("기타")
+          - `otherReason` (String, optional, 최대 20자): 기타 사유 입력란
+            - `withdrawalReasonType`이 `OTHER`인 경우에만 처리 대상입니다.
+            - 저장 전 **특수문자 제거 및 정규화**가 적용되며, 정규화된 문자열 기준으로 최대 20자까지만 저장됩니다.
+            - `OTHER`가 아닌 경우 이 값은 **무시**되며 저장 시 `null`로 처리됩니다.
+          
+          #### 요청 예시
+          - 사유 선택형:
+            ```json
+            {
+              "withdrawalReasonType": "NO_CONCERTS"
+            }
+            ```
+          - 기타 사유 입력:
+            ```json
+            {
+              "withdrawalReasonType": "OTHER",
+              "otherReason": "티켓팅이 불편해서"
+            }
+            ```
+          
+          ### 응답 데이터
+          `없음`
+          
+          ### 사용 방법
+          1. 화면에서 탈퇴 사유를 선택합니다.
+             - 사유가 `OTHER`인 경우에만 `otherReason` 입력란을 노출하여 함께 전달합니다.
+          2. 위의 Request Body 형식으로 JSON을 전송합니다.
+          3. 서버는 다음을 수행합니다.
+             - 탈퇴 이력 저장 (회원ID, 전화번호, 닉네임, 사유 타입, 기타 사유)
+             - 해당 **전화번호를 탈퇴 사유(WITHDRAWAL)로 차단**
+          4. 응답은 컨트롤러 구현에 따릅니다.
+          
+          ### 유의 사항
+          - `withdrawalReasonType`은 **필수**입니다.
+          - `otherReason`은 `withdrawalReasonType`이 `OTHER`일 때만 의미가 있으며,
+            저장 전 **특수문자 제거/정규화** 후 **최대 20자**까지만 저장됩니다.
+          - 탈퇴 처리 시, 해당 **전화번호는 30일간 차단**됩니다. (BlockType: `WITHDRAWAL`)
+          - 코드 상 주석 기준으로, **회원 논리 삭제 로직은 아직 미구현** 상태입니다. (TODO)
+          """
+  )
+  ResponseEntity<Void> withdraw(
+      CustomOAuth2User customOAuth2User,
+      MemberWithdrawRequest request
   );
 }
