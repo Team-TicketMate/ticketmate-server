@@ -1,7 +1,6 @@
 package com.ticketmate.backend.concertagentavailability.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
-import com.ticketmate.backend.concert.core.constant.ConcertRecruitStatus;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
@@ -34,19 +33,18 @@ public class ConcertAgentAvailabilityMapperImpl implements ConcertAgentAvailabil
   }
 
   @Override
-  public AgentConcertSettingResponse toConcertAgentStatusResponse(AgentConcertSettingInfo info) {
+  public AgentConcertSettingResponse toAgentConcertSettingResponse(AgentConcertSettingInfo info) {
     return new AgentConcertSettingResponse(
         info.concertId(),
         info.concertName(),
         storageService.generatePublicUrl(info.concertThumbnailStoredPath()),
-        info.status() == 1 ? ConcertRecruitStatus.OPEN : ConcertRecruitStatus.CLOSED,
         info.matchedClientCount(),
         info.accepting()
     );
   }
 
   @Override
-  public AgentAcceptingConcertResponse toAcceptingConcertInfoResponse(AgentConcertSettingInfo info) {
+  public AgentAcceptingConcertResponse toAgentAcceptingConcertResponse(AgentConcertSettingInfo info) {
     return new AgentAcceptingConcertResponse(
         info.concertId(),
         info.concertName(),

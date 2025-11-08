@@ -14,15 +14,14 @@ public interface ConcertAgentAvailabilityMapper {
   ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info);
 
   /**
-   * ConcertAgentStatusInfo -> AgentConcertSettingResponse (DTO -> DTO)
+   * AgentConcertSettingInfo -> AgentConcertSettingResponse (DTO -> DTO)
    * 이미지 storedPath -> publicUrl 변환
-   * Integer (모집 중: 1, 모집 마감: 2) -> RecruitmentStatus Enum 변환
    */
-  AgentConcertSettingResponse toConcertAgentStatusResponse(AgentConcertSettingInfo info);
+  AgentConcertSettingResponse toAgentConcertSettingResponse(AgentConcertSettingInfo info);
 
   /**
-   * ConcertAgentStatusInfo -> AgentAcceptingConcertResponse (DTO -> DTO)
+   * AgentConcertSettingInfo -> AgentAcceptingConcertResponse (DTO -> DTO)
    * 이미지 storedPath -> publicUrl 변환
    */
-  AgentAcceptingConcertResponse toAcceptingConcertInfoResponse(AgentConcertSettingInfo info);
+  AgentAcceptingConcertResponse toAgentAcceptingConcertResponse(AgentConcertSettingInfo info);
 }
