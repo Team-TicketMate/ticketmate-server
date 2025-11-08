@@ -6,7 +6,7 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;

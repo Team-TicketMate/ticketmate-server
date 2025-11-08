@@ -2,12 +2,10 @@ package com.ticketmate.backend.concert.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertDateInfoResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.concert.application.dto.response.TicketOpenDateInfoResponse;
-import com.ticketmate.backend.concert.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertDateInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertFilteredInfo;
 import com.ticketmate.backend.concert.application.dto.view.ConcertInfo;
@@ -74,18 +72,6 @@ public class ConcertMapperImpl implements ConcertMapper {
         TimeUtil.toLocalDateTime(info.endDate()),
         concertThumbnailUrl,
         seatingChartUrl
-    );
-  }
-
-  @Override
-  public ConcertAcceptingAgentResponse toConcertAcceptingAgentResponse(ConcertAcceptingAgentInfo info) {
-    return new ConcertAcceptingAgentResponse(
-        info.agentId(),
-        info.nickname(),
-        storageService.generatePublicUrl(info.profileImgStoredPath()),
-        info.introduction(),
-        info.averageRating(),
-        info.reviewCount()
     );
   }
 
