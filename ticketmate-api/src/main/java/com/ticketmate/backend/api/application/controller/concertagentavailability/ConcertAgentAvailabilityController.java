@@ -56,6 +56,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @GetMapping("/concerts")
+  @LogMonitoringInvocation
   public ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
@@ -65,6 +66,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @GetMapping("/accepting-concerts")
+  @LogMonitoringInvocation
   public ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
