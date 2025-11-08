@@ -19,13 +19,13 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.concert.infrastructure.entity.ConcertDate;
 import com.ticketmate.backend.concert.infrastructure.entity.TicketOpenDate;
-import com.ticketmate.backend.concert.infrastructure.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertDateRepository;
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepository;
 import com.ticketmate.backend.concert.infrastructure.repository.TicketOpenDateRepository;
+import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concertagentavailability.infrastructure.repository.ConcertAgentAvailabilityRepository;
 import com.ticketmate.backend.concerthall.core.constant.City;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepository;
@@ -118,7 +118,7 @@ public class MockService {
 
     Member member = memberRepository.findByUsernameAndDeletedFalse(request.getUsername())
         .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
-    if (request.getMemberType().equals(AGENT)) {
+    if (request.getMemberType().equals(AGENT) && !portfolioRepository.existsByMember(member)) {
       Portfolio testPortfolio = mockPortfolioFactory.generate(member);
       portfolioRepository.save(testPortfolio);
       portfolioService.promoteToAgent(testPortfolio);

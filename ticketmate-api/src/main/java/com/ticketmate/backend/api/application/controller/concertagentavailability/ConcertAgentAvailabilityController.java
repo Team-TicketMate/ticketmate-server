@@ -1,11 +1,14 @@
-package com.ticketmate.backend.api.application.controller.concert;
+package com.ticketmate.backend.api.application.controller.concertagentavailability;
 
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAcceptingAgentFilteredRequest;
-import com.ticketmate.backend.concert.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concert.application.dto.response.ConcertAcceptingAgentResponse;
-import com.ticketmate.backend.concert.application.service.ConcertAgentAvailabilityService;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.AgentConcertSettingFilteredRequest;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
+import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -49,5 +52,25 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
       @PathVariable(value = "concert-id") UUID concertId,
       @ParameterObject @Valid ConcertAcceptingAgentFilteredRequest request) {
     return ResponseEntity.ok().body(concertAgentAvailabilityService.findAcceptingAgentByConcert(concertId, request));
+  }
+
+  @Override
+  @GetMapping("/concerts")
+  @LogMonitoringInvocation
+  public ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
+    return ResponseEntity.ok()
+        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember().getMemberId(), request));
+  }
+
+  @Override
+  @GetMapping("/accepting-concerts")
+  @LogMonitoringInvocation
+  public ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+      @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
+    return ResponseEntity.ok()
+        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember().getMemberId(), request));
   }
 }

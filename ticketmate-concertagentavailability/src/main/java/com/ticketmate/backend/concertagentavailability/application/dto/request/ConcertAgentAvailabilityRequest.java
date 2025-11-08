@@ -1,4 +1,4 @@
-package com.ticketmate.backend.concert.application.dto.request;
+package com.ticketmate.backend.concertagentavailability.application.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
