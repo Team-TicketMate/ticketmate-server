@@ -54,7 +54,7 @@ public class ConcertAgentAvailabilityService {
             .build()
         );
 
-    availability.updateAcceptingStatus(request.getAccepting(), request.getAccepting() ? request.getIntroduction() : null);
+    availability.updateAcceptingStatus(request.getAccepting(), request.getIntroduction());
 
     concertAgentAvailabilityRepository.save(availability);
   }
@@ -86,7 +86,7 @@ public class ConcertAgentAvailabilityService {
   @Transactional(readOnly = true)
   public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(UUID agentId, AgentConcertSettingFilteredRequest request) {
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
-    return infoSlice.map(availabilityMapper::toConcertAgentStatusResponse);
+    return infoSlice.map(availabilityMapper::toAgentConcertSettingResponse);
   }
 
   /**
@@ -100,6 +100,6 @@ public class ConcertAgentAvailabilityService {
   @Transactional(readOnly = true)
   public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, AgentConcertSettingFilteredRequest request) {
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
-    return infoSlice.map(availabilityMapper::toAcceptingConcertInfoResponse);
+    return infoSlice.map(availabilityMapper::toAgentAcceptingConcertResponse);
   }
 }
