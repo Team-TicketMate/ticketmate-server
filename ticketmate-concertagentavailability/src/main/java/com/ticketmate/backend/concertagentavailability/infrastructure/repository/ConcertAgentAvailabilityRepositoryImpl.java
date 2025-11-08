@@ -100,18 +100,17 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
    */
   @Override
   public Slice<AgentConcertSettingInfo> findMyConcertList(UUID agentId, Pageable pageable) {
+    Instant now = Instant.now();
 
-    NumberExpression<Integer> statusExpression = getStatusExpression(Instant.now());
     Expression<Integer> matchedClientCountExpression = getMatchedClientCountExpression(agentId);
     BooleanExpression acceptingExpression = getAcceptingExpression();
 
     JPAQuery<AgentConcertSettingInfo> contentQuery = createBaseConcertStatusQuery(
-        agentId, statusExpression, matchedClientCountExpression, acceptingExpression
+        agentId, now, matchedClientCountExpression, acceptingExpression
     );
 
     // 정렬
     contentQuery.orderBy(
-        statusExpression.asc(),     // 모집 여부
         acceptingExpression.desc(), // accepting 여부
         CONCERT.createdDate.desc()  // 최신순
     );
@@ -127,23 +126,20 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
    */
   @Override
   public Slice<AgentConcertSettingInfo> findMyAcceptingConcert(UUID agentId, Pageable pageable) {
+    Instant now = Instant.now();
 
-    NumberExpression<Integer> statusExpression = getStatusExpression(Instant.now());
     Expression<Integer> matchedClientCountExpression = getMatchedClientCountExpression(agentId);
     BooleanExpression acceptingExpression = getAcceptingExpression();
 
     JPAQuery<AgentConcertSettingInfo> contentQuery = createBaseConcertStatusQuery(
-        agentId, statusExpression, matchedClientCountExpression, acceptingExpression
+        agentId, now, matchedClientCountExpression, acceptingExpression
     );
 
     contentQuery
         // 필터링
-        .where(
-            statusExpression.eq(1), // 모집 중
-            acceptingExpression.isTrue() // ON
-        )
+        .where(acceptingExpression.isTrue()) // ON
         // 정렬
-        .orderBy(CONCERT.createdDate.desc());
+        .orderBy(CONCERT.createdDate.desc()); // 최신순
 
     return QueryDslUtil.fetchSlice(contentQuery, pageable);
   }
@@ -153,17 +149,23 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
    */
   private JPAQuery<AgentConcertSettingInfo> createBaseConcertStatusQuery(
       UUID agentId,
-      NumberExpression<Integer> statusExpression,
+      Instant now,
       Expression<Integer> matchedClientCountExpression,
       BooleanExpression acceptingExpression
   ) {
+    BooleanExpression isRecruiting = JPAExpressions.selectOne()
+        .from(TICKET_OPEN_DATE)
+        .where(
+            TICKET_OPEN_DATE.concert.eq(CONCERT),
+            TICKET_OPEN_DATE.openDate.gt(now)
+        ).exists();
+
     return queryFactory
         .select(Projections.constructor(
             AgentConcertSettingInfo.class,
             CONCERT.concertId,
             CONCERT.concertName,
             CONCERT.concertThumbnailStoredPath,
-            statusExpression,
             matchedClientCountExpression,
             acceptingExpression
         ))
@@ -172,22 +174,8 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
         .on(
             CONCERT_AGENT_AVAILABILITY.concert.eq(CONCERT),
             CONCERT_AGENT_AVAILABILITY.agent.memberId.eq(agentId)
-        );
-  }
-
-  /**
-   * status (모집 중/마감) 표현식
-   */
-  private NumberExpression<Integer> getStatusExpression(Instant now) {
-    return new CaseBuilder()
-        .when(JPAExpressions.selectOne()
-            .from(TICKET_OPEN_DATE)
-            .where(
-                TICKET_OPEN_DATE.concert.eq(CONCERT),
-                TICKET_OPEN_DATE.openDate.gt(now)
-            ).exists())
-        .then(1) // 모집 중
-        .otherwise(2); // 마감
+        )
+        .where(isRecruiting);
   }
 
   /**
