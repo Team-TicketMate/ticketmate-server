@@ -87,6 +87,7 @@ public class ConcertAgentAvailabilityService {
    */
   @Transactional(readOnly = true)
   public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(UUID agentId, AgentConcertSettingFilteredRequest request) {
+    memberService.validateMemberType(memberService.findMemberById(agentId), MemberType.AGENT);
     Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
     return infoSlice.map(availabilityMapper::toAgentConcertSettingResponse);
   }
@@ -99,6 +100,7 @@ public class ConcertAgentAvailabilityService {
    */
   @Transactional(readOnly = true)
   public List<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId) {
+    memberService.validateMemberType(memberService.findMemberById(agentId), MemberType.AGENT);
     return concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId)
         .stream().map(availabilityMapper::toAgentAcceptingConcertResponse).toList();
   }
