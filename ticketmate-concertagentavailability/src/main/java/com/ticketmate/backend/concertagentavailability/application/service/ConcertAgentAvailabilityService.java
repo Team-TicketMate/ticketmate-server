@@ -17,6 +17,8 @@ import com.ticketmate.backend.concertagentavailability.infrastructure.repository
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -93,13 +95,11 @@ public class ConcertAgentAvailabilityService {
    * 대리인 on 설정된 모집 중 공연 목록 조회
    *
    * @param agentId 현재 로그인한 대리인의 memberId
-   * @param request pageNumber
-   *                pageSize
-   * @return Slice<AgentAcceptingConcertResponse>
+   * @return List<AgentAcceptingConcertResponse>
    */
   @Transactional(readOnly = true)
-  public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, AgentConcertSettingFilteredRequest request) {
-    Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
-    return infoSlice.map(availabilityMapper::toAgentAcceptingConcertResponse);
+  public List<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId) {
+    return concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId)
+        .stream().map(availabilityMapper::toAgentAcceptingConcertResponse).toList();
   }
 }
