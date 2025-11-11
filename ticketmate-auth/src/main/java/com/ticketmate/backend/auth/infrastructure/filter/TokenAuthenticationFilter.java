@@ -122,12 +122,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
   }
 
   /**
-   * 기본 프로필 설정 경로 확인 (POST 메서드)
+   * 기본 프로필 설정 경로 확인 (PATCH 메서드)
    */
   private boolean isInitialProfileSetPath(String uri, String httpMethod) {
     boolean pathMatched = SecurityUrls.INITIAL_PROFILE_SET_BYPASS_PATHS.stream()
       .anyMatch(pattern -> pathMatcher.match(pattern, uri));
-    boolean methodMatched = HttpMethod.POST.matches(httpMethod);
+    boolean methodMatched = HttpMethod.PATCH.matches(httpMethod);
     return pathMatched && methodMatched;
   }
 
