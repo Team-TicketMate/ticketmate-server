@@ -11,6 +11,8 @@ import com.ticketmate.backend.concertagentavailability.application.dto.response.
 import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -61,16 +63,15 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember(), request));
   }
 
   @Override
   @GetMapping("/accepting-concerts")
   @LogMonitoringInvocation
-  public ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
+  public ResponseEntity<List<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember()));
   }
 }
