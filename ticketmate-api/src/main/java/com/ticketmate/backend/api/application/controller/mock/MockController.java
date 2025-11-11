@@ -118,6 +118,8 @@ public class MockController implements MockControllerDocs {
   }
 
   @Override
+  @PostMapping("/notification")
+  @LogMonitoringInvocation
   public void sendTestNotification(
     @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
     @RequestBody MockNotificationRequest request
