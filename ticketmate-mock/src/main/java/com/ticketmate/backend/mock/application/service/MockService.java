@@ -37,6 +37,7 @@ import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
+import com.ticketmate.backend.mock.application.dto.request.MockNotificationRequest;
 import com.ticketmate.backend.mock.application.dto.response.MockChatRoomResponse;
 import com.ticketmate.backend.mock.application.dto.response.MockLoginResponse;
 import com.ticketmate.backend.mock.infrastructure.config.CachedConfig;
@@ -95,6 +96,7 @@ public class MockService {
   private final RejectionReasonRepository rejectionReasonRepository;
   private final ChatRoomRepository chatRoomRepository;
   private final MockChatRoomFactory mockChatRoomFactory;
+  private final MockNotificationFactory mockNotificationFactory;
   private final AtomicReference<CachedConfig> cachedConfigAtomicReference = new AtomicReference<>();
   private final Clock clock;
 
@@ -117,7 +119,7 @@ public class MockService {
     log.debug("테스트 계정 로그인을 집행합니다. 요청 소셜 플랫폼: {}", request.getSocialPlatform());
 
     Member member = memberRepository.findByUsernameAndDeletedFalse(request.getUsername())
-        .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
+      .orElseGet(() -> memberRepository.saveAndFlush(mockMemberFactory.generate(request)));
     if (request.getMemberType().equals(AGENT) && !portfolioRepository.existsByMember(member)) {
       Portfolio testPortfolio = mockPortfolioFactory.generate(member);
       portfolioRepository.save(testPortfolio);
@@ -131,10 +133,10 @@ public class MockService {
     log.debug("테스트 accessToken = {}", accessToken);
 
     return MockLoginResponse.builder()
-        .memberId(member.getMemberId())
-        .memberType(member.getMemberType())
-        .accessToken(accessToken)
-        .build();
+      .memberId(member.getMemberId())
+      .memberType(member.getMemberType())
+      .accessToken(accessToken)
+      .build();
   }
 
   /**
@@ -172,34 +174,34 @@ public class MockService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .thenApply(v -> transactionTemplate.execute(status -> {
-          try {
-            // 트랜잭션 내에서 일괄 저장
-            List<Member> savedMemberList = memberRepository.saveAll(memberList);
+      .thenApply(v -> transactionTemplate.execute(status -> {
+        try {
+          // 트랜잭션 내에서 일괄 저장
+          List<Member> savedMemberList = memberRepository.saveAll(memberList);
 
-            for (Member savedMember : savedMemberList) {
-              if (savedMember.getMemberType() == AGENT) {
-                // AgentPerformanceSummary 생성 및 추가
-                summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
+          for (Member savedMember : savedMemberList) {
+            if (savedMember.getMemberType() == AGENT) {
+              // AgentPerformanceSummary 생성 및 추가
+              summaryList.add(mockMemberFactory.generatePerformanceSummary(savedMember));
 
-                // ConcertAgentAvailability 생성 및 추가
-                Concert randomConcert = concertList.get(koFaker.random().nextInt(concertList.size()));
-                availabilityList.add(mockMemberFactory.generateAvailability(randomConcert, savedMember));
-              }
+              // ConcertAgentAvailability 생성 및 추가
+              Concert randomConcert = concertList.get(koFaker.random().nextInt(concertList.size()));
+              availabilityList.add(mockMemberFactory.generateAvailability(randomConcert, savedMember));
             }
-            agentPerformanceSummaryRepository.saveAll(summaryList);
-            concertAgentAvailabilityRepository.saveAll(availabilityList);
-
-            long endMs = System.currentTimeMillis();
-            log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
-                savedMemberList.size(), endMs - startMs);
-            return null;
-          } catch (Exception e) {
-            log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
           }
-        })).thenAccept(v -> {
-        });
+          agentPerformanceSummaryRepository.saveAll(summaryList);
+          concertAgentAvailabilityRepository.saveAll(availabilityList);
+
+          long endMs = System.currentTimeMillis();
+          log.debug("회원 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+            savedMemberList.size(), endMs - startMs);
+          return null;
+        } catch (Exception e) {
+          log.error("회원 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+          throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+        }
+      })).thenAccept(v -> {
+      });
   }
 
   /**
@@ -252,19 +254,19 @@ public class MockService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .thenApply(v -> {
-          try {
-            // 공연장 Mock데이터 저장
-            concertHallRepository.saveAll(concertHalls);
-            long endMs = System.currentTimeMillis();
-            log.debug("공연장 Mock 데이터 저장 완료, 저장된 개수: {}", concertHalls.size());
-            log.debug("공연장 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
-            return null;
-          } catch (Exception e) {
-            log.error("공연장 데이터 저장 중 오류: {}", e.getMessage());
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
-          }
-        });
+      .thenApply(v -> {
+        try {
+          // 공연장 Mock데이터 저장
+          concertHallRepository.saveAll(concertHalls);
+          long endMs = System.currentTimeMillis();
+          log.debug("공연장 Mock 데이터 저장 완료, 저장된 개수: {}", concertHalls.size());
+          log.debug("공연장 Mock 데이터 멀티스레드 저장 소요 시간: {}ms", endMs - startMs);
+          return null;
+        } catch (Exception e) {
+          log.error("공연장 데이터 저장 중 오류: {}", e.getMessage());
+          throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+        }
+      });
   }
 
   /**
@@ -279,11 +281,11 @@ public class MockService {
     String url = "https://www." + koFaker.internet().domainName();
 
     return ConcertHall.builder()
-        .concertHallName(concertHallName)
-        .address(address)
-        .city(city)
-        .webSiteUrl(url)
-        .build();
+      .concertHallName(concertHallName)
+      .address(address)
+      .city(city)
+      .webSiteUrl(url)
+      .build();
   }
 
     /*
@@ -359,15 +361,15 @@ public class MockService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .handle((res, ex) -> {
-          if (ex != null) {
-            log.error("공연 Mock 데이터 전체 저장 중 오류: {}", ex.getMessage(), ex);
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
-          }
-          stopWatch.stop();
-          log.debug("공연 Mock 데이터 저장 완료: 총 {}건, 소요시간 {}ms", total, stopWatch.getTotalTimeMillis());
-          return null;
-        });
+      .handle((res, ex) -> {
+        if (ex != null) {
+          log.error("공연 Mock 데이터 전체 저장 중 오류: {}", ex.getMessage(), ex);
+          throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+        }
+        stopWatch.stop();
+        log.debug("공연 Mock 데이터 저장 완료: 총 {}건, 소요시간 {}ms", total, stopWatch.getTotalTimeMillis());
+        return null;
+      });
   }
 
     /*
@@ -389,17 +391,17 @@ public class MockService {
 
     // 데이터베이스에서 대리인 목록 조회
     List<Member> agentList = memberRepository.findAllByMemberType(AGENT)
-        .orElseThrow(() -> {
-          log.error("데이터베이스에 저장 된 대리인이 없습니다.");
-          return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        });
+      .orElseThrow(() -> {
+        log.error("데이터베이스에 저장 된 대리인이 없습니다.");
+        return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+      });
 
     // 데이터베이스에서 의뢰인 목록 조회
     List<Member> clientList = memberRepository.findAllByMemberType(CLIENT)
-        .orElseThrow(() -> {
-          log.error("데이터베이스에 저장 된 의뢰인이 없습니다.");
-          return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        });
+      .orElseThrow(() -> {
+        log.error("데이터베이스에 저장 된 의뢰인이 없습니다.");
+        return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+      });
 
     // 데이터베이스에서 콘서트 목록 조회
     List<Concert> concertList = concertRepository.findAll();
@@ -434,9 +436,9 @@ public class MockService {
 
             // '거절'상태의 신청서에 대해서 거절사유 엔티티 저장
             List<RejectionReason> rejectionReasonList = applicationFormList.stream()
-                .filter(form -> form.getApplicationFormStatus().equals(ApplicationFormStatus.REJECTED))
-                .map(mockApplicationFormFactory::createRejectionReason)
-                .collect(Collectors.toList());
+              .filter(form -> form.getApplicationFormStatus().equals(ApplicationFormStatus.REJECTED))
+              .map(mockApplicationFormFactory::createRejectionReason)
+              .collect(Collectors.toList());
             if (!CommonUtil.nullOrEmpty(rejectionReasonList)) {
               rejectionReasonRepository.saveAll(rejectionReasonList);
             }
@@ -452,15 +454,15 @@ public class MockService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .handle((result, ex) -> {
-          if (ex != null) {
-            log.error("신청서 Mock 데이터 전체 저장 중 오류 발생: {}", ex.getMessage());
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
-          }
-          stopwatch.stop();
-          log.debug("신청서 Mock 데이터 {}개 저장 완료, 소요시간: {}ms", total, stopwatch.getTotalTimeMillis());
-          return null;
-        });
+      .handle((result, ex) -> {
+        if (ex != null) {
+          log.error("신청서 Mock 데이터 전체 저장 중 오류 발생: {}", ex.getMessage());
+          throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+        }
+        stopwatch.stop();
+        log.debug("신청서 Mock 데이터 {}개 저장 완료, 소요시간: {}ms", total, stopwatch.getTotalTimeMillis());
+        return null;
+      });
   }
 
 
@@ -496,19 +498,19 @@ public class MockService {
 
     // 모든 비동기 작업이 완료될 때까지 대기
     return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-        .thenApply(v -> {
-          try {
-            // 트랜잭션 내에서 일괄 저장
-            List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
-            long endMs = System.currentTimeMillis();
-            log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
-                savedPortfolioList.size(), endMs - startMs);
-            return null;
-          } catch (Exception e) {
-            log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
-            throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
-          }
-        });
+      .thenApply(v -> {
+        try {
+          // 트랜잭션 내에서 일괄 저장
+          List<Portfolio> savedPortfolioList = portfolioRepository.saveAll(portfolioList);
+          long endMs = System.currentTimeMillis();
+          log.debug("포트폴리오 Mock 데이터 {}개 생성 및 저장 완료: 소요시간: {}ms",
+            savedPortfolioList.size(), endMs - startMs);
+          return null;
+        } catch (Exception e) {
+          log.error("포트폴리오 Mock 데이터 저장 중 오류 발생: {}", e.getMessage());
+          throw new CustomException(ErrorCode.SAVE_MOCK_DATA_ERROR);
+        }
+      });
   }
 
 
@@ -541,30 +543,30 @@ public class MockService {
     }
 
     MockLoginResponse agentLogin = testSocialLogin(
-        MockLoginRequest.builder()
-            .username(DEV_AGENT_USERNAME)
-            .role(Role.ROLE_TEST)
-            .memberType(MemberType.AGENT)
-            .socialPlatform(SocialPlatform.KAKAO)
-            .build()
+      MockLoginRequest.builder()
+        .username(DEV_AGENT_USERNAME)
+        .role(Role.ROLE_TEST)
+        .memberType(MemberType.AGENT)
+        .socialPlatform(SocialPlatform.KAKAO)
+        .build()
     );
     log.debug("대리인 회원 생성 완료");
 
     MockLoginResponse clientLogin = testSocialLogin(
-        MockLoginRequest.builder()
-            .username(DEV_CLIENT_USERNAME)
-            .role(Role.ROLE_TEST)
-            .memberType(MemberType.CLIENT)
-            .socialPlatform(SocialPlatform.NAVER)
-            .build()
+      MockLoginRequest.builder()
+        .username(DEV_CLIENT_USERNAME)
+        .role(Role.ROLE_TEST)
+        .memberType(MemberType.CLIENT)
+        .socialPlatform(SocialPlatform.NAVER)
+        .build()
     );
     log.debug("의뢰인 회원 생성 완료");
 
     Member agent = memberRepository.findById(agentLogin.getMemberId())
-        .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
     Member client = memberRepository.findById(clientLogin.getMemberId())
-        .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
     List<Concert> concerts = concertRepository.findAll();
     if (concerts.isEmpty()) {
@@ -585,10 +587,10 @@ public class MockService {
     Date expAgentToken = tokenProvider.getExpiredAt(agentLogin.getAccessToken());
     Date expClientToken = tokenProvider.getExpiredAt(clientLogin.getAccessToken());
     Instant minExp = expAgentToken.toInstant()
-        .isBefore(expClientToken.toInstant()) ? expAgentToken.toInstant() : expClientToken.toInstant();
+      .isBefore(expClientToken.toInstant()) ? expAgentToken.toInstant() : expClientToken.toInstant();
 
     CachedConfig fresh = new CachedConfig(agentLogin.getAccessToken(), clientLogin.getAccessToken(),
-        chatRoom.getChatRoomId(), minExp);
+      chatRoom.getChatRoomId(), minExp);
     cachedConfigAtomicReference.set(fresh);
     return fresh.toResponse();
   }
@@ -626,17 +628,24 @@ public class MockService {
     TicketOpenType ticketOpenType = applicationForm.getTicketOpenType();
 
     return chatRoomRepository
-        .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
-            agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
-        .orElseGet(() -> {
-          try {
-            return chatRoomRepository.save(mockChatRoomFactory.generateFrom(applicationForm));
-          } catch (org.springframework.dao.DuplicateKeyException e) {
-            return chatRoomRepository
-                .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
-                    agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
-                .orElseThrow();
-          }
-        });
+      .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
+        agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
+      .orElseGet(() -> {
+        try {
+          return chatRoomRepository.save(mockChatRoomFactory.generateFrom(applicationForm));
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+          return chatRoomRepository
+            .findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
+              agent.getMemberId(), client.getMemberId(), concert.getConcertId(), ticketOpenType)
+            .orElseThrow();
+        }
+      });
+  }
+
+  /*
+  ======================================알림======================================
+  */
+  public void generateNotificationMockData(Member member, MockNotificationRequest request) {
+    mockNotificationFactory.sendTestNotification(member, request);
   }
 }
