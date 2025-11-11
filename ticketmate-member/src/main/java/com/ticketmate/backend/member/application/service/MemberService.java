@@ -58,7 +58,9 @@ public class MemberService {
       String previousPath = member.getProfileImgStoredPath();
       FileMetadata metadata = storageService.uploadFile(request.getProfileImg(), UploadType.MEMBER);
       member.setProfileImgStoredPath(metadata.storedPath());
-      storageService.deleteFile(previousPath); // 기존 프로필 이미지 삭제
+      if (!CommonUtil.nvl(previousPath, "").isEmpty()) {
+        storageService.deleteFile(previousPath); // 기존 프로필 이미지 삭제
+      }
     }
     if (!CommonUtil.nvl(request.getIntroduction(), "").isEmpty()) {
       log.debug("한줄 소개 변경 - 기존: {}, 변경: {}", member.getIntroduction(), request.getIntroduction());
@@ -87,10 +89,10 @@ public class MemberService {
    */
   public Member findMemberById(UUID memberId) {
     return memberRepository.findById(memberId)
-        .orElseThrow(() -> {
-          log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
-          return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        });
+      .orElseThrow(() -> {
+        log.error("요청한 PK값에 해당하는 회원을 찾을 수 없습니다. 요청 PK: {}", memberId);
+        return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+      });
   }
 
   /**
@@ -165,7 +167,7 @@ public class MemberService {
       return;
     }
     log.debug("회원: {}의 AccountStatus를 변경합니다. {} -> {}",
-        member.getMemberId(), member.getAccountStatus(), newStatus);
+      member.getMemberId(), member.getAccountStatus(), newStatus);
     member.setAccountStatus(newStatus);
     memberRepository.save(member);
   }
