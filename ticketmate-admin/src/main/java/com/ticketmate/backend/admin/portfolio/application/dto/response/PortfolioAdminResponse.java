@@ -2,6 +2,7 @@ package com.ticketmate.backend.admin.portfolio.application.dto.response;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.vo.Phone;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +11,7 @@ public record PortfolioAdminResponse(
     UUID portfolioId,
     UUID memberId,
     String nickname,
-    String phone,
+    Phone phone,
     String profileUrl,
     MemberType memberType,
     String portfolioDescription,

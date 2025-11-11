@@ -22,6 +22,8 @@ public interface MockControllerDocs {
           - **socialPlatform** (String): 소셜 플랫폼 [필수]
           - **memberType** (String): 의뢰인/대리자 (기본: 의뢰인)
           - **isFirstLogin** (Boolean): 첫 로그인 여부
+          - **phoneNumberVerified** (Boolean): 본인인증 여부
+          - **initialProfileSet** (Boolean): 기본 프로필 설정 여부
           
           ### 유의사항
           - 개발자의 편의를 위한 소셜 로그인 회원가입/로그인 메서드입니다

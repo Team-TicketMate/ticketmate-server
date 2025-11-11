@@ -1,8 +1,11 @@
-package com.ticketmate.backend.auth.core.response;
+package com.ticketmate.backend.auth.core.profile;
 
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
 
-public interface OAuth2Response {
+/**
+ * 소셜 로그인 사용자 공통 인터페이스
+ */
+public interface OAuth2Profile {
 
   SocialPlatform getSocialPlatform(); // 소셜 플랫폼
 

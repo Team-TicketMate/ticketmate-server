@@ -1,6 +1,7 @@
 package com.ticketmate.backend.admin.portfolio.application.dto.view;
 
 import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.vo.Phone;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +10,7 @@ public record PortfolioAdminInfo(
     UUID portfolioId,
     UUID memberId,
     String nickname,
-    String phone,
+    Phone phone,
     String profileImgStoredPath, // 프로필 이미지 저장 경로
     MemberType memberType,
     String portfolioDescription,

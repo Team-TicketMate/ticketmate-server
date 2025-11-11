@@ -10,6 +10,7 @@ import com.ticketmate.backend.member.application.mapper.MemberMapper;
 import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.BlockType;
 import com.ticketmate.backend.member.core.constant.MemberType;
+import com.ticketmate.backend.member.core.vo.Phone;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import com.ticketmate.backend.storage.core.constant.UploadType;
@@ -96,9 +97,9 @@ public class MemberService {
    * 회원 본인인증 여부 업데이트
    */
   @Transactional
-  public void updatePhoneNumberVerified(Member member, String phone, boolean status) {
-    log.debug("회원: {} 전화번호 업데이트: {}", member.getMemberId(), phone);
-    member.setPhone(phone);
+  public void updatePhoneNumberVerified(Member member, String rawPhone, boolean status) {
+    log.debug("회원: {} 전화번호 업데이트: {}", member.getMemberId(), rawPhone);
+    member.setPhone(Phone.of(rawPhone));
     log.debug("회원: {} 본인인증 여부 업데이트. 기존: {} -> 변경: {}", member.getMemberId(), member.isPhoneNumberVerified(), status);
     member.setPhoneNumberVerified(status);
     memberRepository.save(member);
