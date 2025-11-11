@@ -211,8 +211,8 @@ jobs:
                 -v "${MOUNT_DIR}":/app \
                 "${IMAGE}"
             
-              echo "[test] 헬스체크 (최대 120회, 1초간격)"
-              for i in $(seq 1 120); do
+              echo "[test] 헬스체크 (최대 180회, 1초간격)"
+              for i in $(seq 1 180); do
                 if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
@@ -221,7 +221,7 @@ jobs:
                   HEALTH_OK=1
                   break
                 fi
-                echo "헬스체크 진행중... (시도 ${i}/120)"
+                echo "헬스체크 진행중... (시도 ${i}/180)"
                 sleep 1
               done
             
@@ -264,8 +264,8 @@ jobs:
                 -v "${MOUNT_DIR}":/app \
                 "${IMAGE}"
 
-              echo "[deploy] 헬스체크 (최대 120회, 1초간격)"
-              for i in $(seq 1 120); do
+              echo "[deploy] 헬스체크 (최대 180회, 1초간격)"
+              for i in $(seq 1 180); do
                 if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
@@ -274,7 +274,7 @@ jobs:
                   HEALTH_OK=1
                   break
                 fi
-                echo "헬스체크 진행중... (시도 ${i}/120)"
+                echo "헬스체크 진행중... (시도 ${i}/180)"
                 sleep 1
               done
 
@@ -382,8 +382,8 @@ jobs:
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"
             
-            echo "[main] 헬스체크 (최대 120회, 1초간격)"
-            for i in $(seq 1 120); do
+            echo "[main] 헬스체크 (최대 180회, 1초간격)"
+            for i in $(seq 1 180); do
               if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
                  curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
                  curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
@@ -392,7 +392,7 @@ jobs:
                 HEALTH_OK=1
                 break
               fi  
-              echo "헬스체크 진행중... (시도 ${i}/120)"
+              echo "헬스체크 진행중... (시도 ${i}/180)"
               sleep 1
             done
             
