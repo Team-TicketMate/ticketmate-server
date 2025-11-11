@@ -12,6 +12,8 @@ import com.ticketmate.backend.member.core.constant.AccountStatus;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
+import com.ticketmate.backend.member.core.vo.Phone;
+import com.ticketmate.backend.member.infrastructure.converter.PhoneJpaConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -71,7 +73,8 @@ public class Member extends BasePostgresEntity {
 
   // 전화번호 (DB 활성화 unique 제약조건 추가)
   @Column(length = PHONE_MAX_LENGTH)
-  private String phone;
+  @Convert(converter = PhoneJpaConverter.class)
+  private Phone phone;
 
   // 프로필 이미지
   private String profileImgStoredPath;

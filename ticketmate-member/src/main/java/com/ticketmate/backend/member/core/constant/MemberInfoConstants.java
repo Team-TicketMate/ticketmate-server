@@ -10,7 +10,7 @@ public class MemberInfoConstants {
   public static final int NICKNAME_MAX_LENGTH = 12;
 
   // 전화번호 제약조건
-  public static final int PHONE_MAX_LENGTH = 13; // 010-1234-5678
+  public static final int PHONE_MAX_LENGTH = 13; // +8212345678 (E.164 형식)
 
   // 생일 및 출생연도 제약조건
   public static final int BIRTHDAY_LENGTH = 4; // MMDD

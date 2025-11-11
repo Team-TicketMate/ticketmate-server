@@ -27,4 +27,8 @@ public class MockLoginRequest {
   private MemberType memberType;
 
   private Boolean isFirstLogin;
+
+  private boolean isPhoneNumberVerified;
+
+  private boolean isInitialProfileSet;
 }

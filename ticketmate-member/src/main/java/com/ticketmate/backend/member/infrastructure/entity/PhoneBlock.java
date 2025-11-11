@@ -5,7 +5,10 @@ import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.PH
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.core.constant.BlockType;
+import com.ticketmate.backend.member.core.vo.Phone;
+import com.ticketmate.backend.member.infrastructure.converter.PhoneJpaConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,7 +36,8 @@ public class PhoneBlock extends BasePostgresEntity {
   private UUID phoneBlockId;
 
   @Column(nullable = false, unique = true, length = PHONE_MAX_LENGTH)
-  private String phone;
+  @Convert(converter = PhoneJpaConverter.class)
+  private Phone phone;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -44,7 +48,7 @@ public class PhoneBlock extends BasePostgresEntity {
   @Column(columnDefinition = "TIMESTAMPTZ(0)")
   private Instant blockedUntil;
 
-  public static PhoneBlock create(String phone, BlockType blockType, Instant blockedUntil) {
+  public static PhoneBlock create(Phone phone, BlockType blockType, Instant blockedUntil) {
     return PhoneBlock.builder()
         .phone(phone)
         .blockType(blockType)
