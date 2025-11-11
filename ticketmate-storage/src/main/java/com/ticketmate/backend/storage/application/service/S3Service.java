@@ -131,14 +131,14 @@ public class S3Service implements StorageService {
   @Override
   @Transactional
   public void deleteFile(String storedPath) {
-    if (storedPath.startsWith("https://picsum.photos/")) {
-      return;
-    } // TODO: Mock 데이터 사진은 "https://picsum.photos/..." 고정이므로 Mock 데이터는 storedPath를 저장하는 것이 아닌 publicUrl 전체 저장 (개발 후 삭제 필요)
-
     if (CommonUtil.nvl(storedPath, "").isEmpty()) {
       log.warn("요청된 파일 경로가 없습니다.");
       return;
     }
+
+    if (storedPath.startsWith("https://picsum.photos/")) {
+      return;
+    } // TODO: Mock 데이터 사진은 "https://picsum.photos/..." 고정이므로 Mock 데이터는 storedPath를 저장하는 것이 아닌 publicUrl 전체 저장 (개발 후 삭제 필요)
 
     // S3 파일 삭제
     try {
