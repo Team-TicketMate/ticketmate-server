@@ -10,6 +10,8 @@ import com.ticketmate.backend.concertagentavailability.application.dto.response.
 import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
 import io.swagger.v3.oas.annotations.Operation;
+
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Slice;
@@ -185,17 +187,22 @@ public interface ConcertAgentAvailabilityControllerDocs {
           author = "Yooonjeong",
           description = "대리인 수락 on/off 포함한 공연 리스트 API 구현",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/566"
+      ),
+      @ApiChangeLog(
+          date = "2025-11-10",
+          author = "Yooonjeong",
+          description = "반환 타입 Slice→List 변경 및 중복 방지 유니크 제약 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/611"
       )
   })
   @Operation(
       summary = "대리인 ON 설정된 모집 중 공연 목록 조회",
       description = """
         ### 요청 파라미터
-        - **pageNumber (int)** : 요청할 페이지 번호 [선택, 기본값 1]
-        - **pageSize (int)** : 요청할 페이지 사이즈 [선택, 기본값 10]
+        - 없음
         
         ### 응답 데이터
-        - Slice<AgentAcceptingConcertResponse>
+        - List<AgentAcceptingConcertResponse>
         - **content** : 대리인이 on 설정한 모집 중인 공연 리스트 (매칭된 의뢰인 수 포함)
           - **concertId** (UUID): 공연 PK
           - **concertName** (String): 공연 제목
@@ -203,9 +210,9 @@ public interface ConcertAgentAvailabilityControllerDocs {
           - **matchedClientCount** (int): 해당 대리인과 매칭된 의뢰인 수 (신청서 **APPROVED** 상태)
 
         ### 사용 방법
-        1) 인증 후 호출 예: GET /accepting-concerts?pageNumber=1&pageSize=10
+        1) 인증 후 호출 예: GET /accepting-concerts
         2) 이 목록에는 **대리인이 ON으로 설정**했고 **현재 모집 중**인 공연만 포함됩니다.
-        3) Slice 타입을 사용하므로 클라이언트는 **first**, **last** 플래그를 보고 무한 스크롤을 구현할 수 있습니다.
+        3) 최대 사이즈가 10인 정렬된 List가 반환됩니다.
 
         ### 필터/정렬 동작
         - 필터: 모집 중(**OPEN**)이면서, 현재 로그인한 대리인이 ON 설정한 공연만 필터링
@@ -219,7 +226,5 @@ public interface ConcertAgentAvailabilityControllerDocs {
           - **pageSize** < 1: "페이지 당 데이터 최솟값은 1개 입니다."
         """
   )
-  ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
-      CustomOAuth2User customOAuth2User,
-      AgentConcertSettingFilteredRequest request);
+  ResponseEntity<List<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(CustomOAuth2User customOAuth2User);
 }

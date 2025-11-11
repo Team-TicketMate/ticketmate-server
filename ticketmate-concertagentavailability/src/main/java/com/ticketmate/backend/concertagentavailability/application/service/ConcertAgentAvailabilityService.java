@@ -17,6 +17,8 @@ import com.ticketmate.backend.concertagentavailability.infrastructure.repository
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -78,28 +80,28 @@ public class ConcertAgentAvailabilityService {
   /**
    * 대리인 on/off 설정을 위한 공연 목록 조회
    *
-   * @param agentId 현재 로그인한 대리인의 memberId
+   * @param agent 현재 로그인한 대리인
    * @param request pageNumber
    *                pageSize
    * @return Slice<AgentConcertSettingResponse>
    */
   @Transactional(readOnly = true)
-  public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(UUID agentId, AgentConcertSettingFilteredRequest request) {
-    Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agentId, request.toPageable());
+  public Slice<AgentConcertSettingResponse> findConcertsForAgentAcceptingSetting(Member agent, AgentConcertSettingFilteredRequest request) {
+    memberService.validateMemberType(agent, MemberType.AGENT);
+    Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyConcertList(agent.getMemberId(), request.toPageable());
     return infoSlice.map(availabilityMapper::toAgentConcertSettingResponse);
   }
 
   /**
    * 대리인 on 설정된 모집 중 공연 목록 조회
    *
-   * @param agentId 현재 로그인한 대리인의 memberId
-   * @param request pageNumber
-   *                pageSize
-   * @return Slice<AgentAcceptingConcertResponse>
+   * @param agent 현재 로그인한 대리인
+   * @return List<AgentAcceptingConcertResponse>
    */
   @Transactional(readOnly = true)
-  public Slice<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(UUID agentId, AgentConcertSettingFilteredRequest request) {
-    Slice<AgentConcertSettingInfo> infoSlice = concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agentId, request.toPageable());
-    return infoSlice.map(availabilityMapper::toAgentAcceptingConcertResponse);
+  public List<AgentAcceptingConcertResponse> findAcceptingConcertByAgent(Member agent) {
+    memberService.validateMemberType(agent, MemberType.AGENT);
+    return concertAgentAvailabilityRepositoryCustom.findMyAcceptingConcert(agent.getMemberId())
+        .stream().map(availabilityMapper::toAgentAcceptingConcertResponse).toList();
   }
 }
