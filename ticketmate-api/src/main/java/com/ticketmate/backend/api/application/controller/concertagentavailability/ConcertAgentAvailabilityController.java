@@ -63,7 +63,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember(), request));
   }
 
   @Override
@@ -72,6 +72,6 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
   public ResponseEntity<List<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember().getMemberId()));
+        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember()));
   }
 }
