@@ -6,10 +6,11 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.concert.infrastructure.entity.ConcertAgentAvailability;
+import com.ticketmate.backend.concertagentavailability.infrastructure.entity.ConcertAgentAvailability;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.constant.Role;
 import com.ticketmate.backend.member.core.constant.SocialPlatform;
+import com.ticketmate.backend.member.core.vo.Phone;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
@@ -36,8 +37,8 @@ public class MockMemberFactory {
    */
   public Member generate() {
     return baseBuilder(Optional.empty())
-        .role(Role.ROLE_TEST)
-        .build();
+      .role(Role.ROLE_TEST)
+      .build();
   }
 
   /**
@@ -54,8 +55,10 @@ public class MockMemberFactory {
     isValidMemberRoleRequest(request.getRole());
 
     return baseBuilder(Optional.of(request))
-        .role(request.getRole())
-        .build();
+      .role(request.getRole())
+      .isPhoneNumberVerified(request.isPhoneNumberVerified())
+      .isInitialProfileSet(request.isInitialProfileSet())
+      .build();
   }
 
   /**
@@ -68,40 +71,44 @@ public class MockMemberFactory {
 
     // username 생성
     String username = requestOptional
-        .map(MockLoginRequest::getUsername)
-        .filter(s -> !nvl(s, "").isEmpty())
-        .orElseGet(() -> enFaker.internet()
-            .emailAddress()
-            .replaceAll("[^a-zA-Z0-9@.]", ""));
+      .map(MockLoginRequest::getUsername)
+      .filter(s -> !nvl(s, "").isEmpty())
+      .orElseGet(() -> enFaker.internet()
+        .emailAddress()
+        .replaceAll("[^a-zA-Z0-9@.]", ""));
 
     // 공통 랜덤 필드
     String nickname = suhRandomKit.nicknameWithUuid();
+    if (nickname.length() > 12) {
+      nickname = nickname.substring(0, 12);
+    }
     String name = koFaker.name().name().replaceAll(" ", "");
-    String phone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(10_000), koFaker.random().nextInt(10_000));
+    String rawPhone = String.format("%s-%04d-%04d", "010", koFaker.random().nextInt(10_000), koFaker.random().nextInt(10_000));
+    Phone phone = Phone.of(rawPhone);
     SocialPlatform social = requestOptional
-        .map(MockLoginRequest::getSocialPlatform)
-        .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
+      .map(MockLoginRequest::getSocialPlatform)
+      .orElseGet(() -> koFaker.options().option(SocialPlatform.class));
     MemberType memberType = requestOptional
-        .map(MockLoginRequest::getMemberType)
-        .orElseGet(() -> koFaker.options().option(MemberType.class));
+      .map(MockLoginRequest::getMemberType)
+      .orElseGet(() -> koFaker.options().option(MemberType.class));
     boolean firstLogin = requestOptional
-        .map(MockLoginRequest::getIsFirstLogin)
-        .orElseGet(() -> koFaker.random().nextBoolean());
+      .map(MockLoginRequest::getIsFirstLogin)
+      .orElseGet(() -> koFaker.random().nextBoolean());
 
     return Member.builder()
-        .socialLoginId(UUID.randomUUID().toString())
-        .username(username + koFaker.random().nextInt(1000))
-        .nickname(nickname)
-        .name(name)
-        .socialPlatform(social)
-        .birthYear(birthYear)
-        .birthDay(birthDay)
-        .phone(phone)
-        .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
-        .gender(koFaker.options().option("male", "female"))
-        .memberType(memberType)
-        .isFirstLogin(firstLogin)
-        .lastLoginTime(TimeUtil.now());
+      .socialLoginId(UUID.randomUUID().toString())
+      .username(username + koFaker.random().nextInt(1000))
+      .nickname(nickname)
+      .name(name)
+      .socialPlatform(social)
+      .birthYear(birthYear)
+      .birthDay(birthDay)
+      .phone(phone)
+      .profileImgStoredPath(koFaker.internet().image() + UUID.randomUUID())
+      .gender(koFaker.options().option("male", "female"))
+      .memberType(memberType)
+      .isFirstLogin(firstLogin)
+      .lastLoginTime(TimeUtil.now());
   }
 
   // 테스트 회원 Role 검증
@@ -121,22 +128,22 @@ public class MockMemberFactory {
     long totalScore = koFaker.number().numberBetween(0, 100);
 
     return AgentPerformanceSummary.builder()
-        .agent(agent)
-        .reviewCount(reviewCount)
-        .totalRatingSum(totalRatingSum)
-        .averageRating(averageRating)
-        .recentSuccessCount(recentSuccessCount)
-        .totalScore(totalScore)
-        .build();
+      .agent(agent)
+      .reviewCount(reviewCount)
+      .totalRatingSum(totalRatingSum)
+      .averageRating(averageRating)
+      .recentSuccessCount(recentSuccessCount)
+      .totalScore(totalScore)
+      .build();
   }
 
   // 공연에 대해 대리인의 수락 ON 설정하는 ConcertAgentAvailability 객체 생성
   public ConcertAgentAvailability generateAvailability(Concert concert, Member agent) {
     return ConcertAgentAvailability.builder()
-        .concert(concert)
-        .agent(agent)
-        .accepting(true)
-        .introduction(koFaker.lorem().sentence(5, 0))
-        .build();
+      .concert(concert)
+      .agent(agent)
+      .accepting(true)
+      .introduction(koFaker.lorem().sentence(5, 0))
+      .build();
   }
 }

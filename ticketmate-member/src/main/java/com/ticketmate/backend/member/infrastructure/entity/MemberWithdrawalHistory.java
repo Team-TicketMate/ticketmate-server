@@ -6,7 +6,10 @@ import static com.ticketmate.backend.member.infrastructure.constant.BlockConstan
 
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.WithdrawalReasonType;
+import com.ticketmate.backend.member.core.vo.Phone;
+import com.ticketmate.backend.member.infrastructure.converter.PhoneJpaConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -36,7 +39,8 @@ public class MemberWithdrawalHistory extends BasePostgresEntity {
   private UUID memberId;
 
   @Column(nullable = false, length = PHONE_MAX_LENGTH)
-  private String phone;
+  @Convert(converter = PhoneJpaConverter.class)
+  private Phone phone;
 
   @Column(nullable = false, length = NICKNAME_MAX_LENGTH)
   private String nickname;
@@ -48,7 +52,7 @@ public class MemberWithdrawalHistory extends BasePostgresEntity {
   @Column(length = WITHDRAW_REASON_MAX_SIZE)
   private String otherReason;
 
-  public static MemberWithdrawalHistory create(UUID memberId, String phone, String nickname, WithdrawalReasonType withdrawalReasonType, String otherReason) {
+  public static MemberWithdrawalHistory create(UUID memberId, Phone phone, String nickname, WithdrawalReasonType withdrawalReasonType, String otherReason) {
     return MemberWithdrawalHistory.builder()
         .memberId(memberId)
         .phone(phone)

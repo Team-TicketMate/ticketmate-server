@@ -1,4 +1,4 @@
-package com.ticketmate.backend.concert.application.dto.response;
+package com.ticketmate.backend.concertagentavailability.application.dto.response;
 
 import java.util.UUID;
 

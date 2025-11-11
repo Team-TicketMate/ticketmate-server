@@ -22,6 +22,12 @@ public interface MemberControllerDocs {
 
   @ApiChangeLogs({
       @ApiChangeLog(
+          date = "2025-10-20",
+          author = "Yooonjeong",
+          description = "사용자 조회 응답에 한줄소개 introduction 포함",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/556"
+      ),
+      @ApiChangeLog(
           date = "2025-07-18",
           author = "Chuseok22",
           description = "회원 정보 조회 팔로우/팔로잉 수 추가",
@@ -58,6 +64,7 @@ public interface MemberControllerDocs {
               "phone": "010-1234-5678",
               "profileUrl": null,
               "gender": "female",
+              "introduction": "한줄소개",
               "memberType": "CLIENT",
               "followingCount": "130",
               "followerCount": "70"

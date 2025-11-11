@@ -82,6 +82,11 @@ public enum ErrorCode {
 
   INVALID_MEMBER_ROLE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 권한 요청입니다."),
 
+
+  // PHONE
+
+  INVALID_PHONE(HttpStatus.BAD_REQUEST, "전화번호 형식이 잘못되었습니다."),
+
   // MEMBER FOLLOW
 
   SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신은 팔로우 할 수 없습니다."),

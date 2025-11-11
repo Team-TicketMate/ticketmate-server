@@ -4,9 +4,9 @@ import static com.ticketmate.backend.member.infrastructure.constant.BlockConstan
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
 import com.ticketmate.backend.member.core.constant.BlockType;
+import com.ticketmate.backend.member.core.vo.Phone;
 import com.ticketmate.backend.member.infrastructure.entity.PhoneBlock;
 import com.ticketmate.backend.member.infrastructure.repository.PhoneBlockRepository;
 import java.time.Instant;
@@ -27,7 +27,7 @@ public class PhoneBlockService {
    * 이미 활성화된 차단의 경우 더 긴 기한으로 업데이트
    */
   @Transactional
-  public void executePhoneBlock(String phone, BlockType blockType) {
+  public void executePhoneBlock(Phone phone, BlockType blockType) {
     Instant newBlockedUntil = calculateBlockedUntil(blockType);
 
     phoneBlockRepository.findByPhone(phone)
@@ -41,8 +41,8 @@ public class PhoneBlockService {
    * 전화번호 차단 여부
    */
   @Transactional(readOnly = true)
-  public void ensurePhoneNotBlocked(String phone) {
-    if (CommonUtil.nvl(phone, "").isEmpty()) {
+  public void ensurePhoneNotBlocked(Phone phone) {
+    if (phone == null) {
       log.error("차단 여부 조회 오류 발생: 요청 전화번호가 비어있습니다.");
       throw new CustomException(ErrorCode.PHONE_REQUIRED);
     }
@@ -68,7 +68,7 @@ public class PhoneBlockService {
   }
 
   // 새로운 PhoneBlock 엔티티 생성 및 저장
-  private void createPhoneBlock(String phone, BlockType blockType, Instant blockedUntil) {
+  private void createPhoneBlock(Phone phone, BlockType blockType, Instant blockedUntil) {
     phoneBlockRepository.save(PhoneBlock.create(phone, blockType, blockedUntil));
     log.debug("새로운 전화번호: {} 차단 활성화. BlockType: {}, 차단기한: {}", phone, blockType, blockedUntil);
   }

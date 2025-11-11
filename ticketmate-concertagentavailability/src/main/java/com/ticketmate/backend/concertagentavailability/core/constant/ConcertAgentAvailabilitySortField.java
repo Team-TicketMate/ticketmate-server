@@ -1,4 +1,4 @@
-package com.ticketmate.backend.concert.core.constant;
+package com.ticketmate.backend.concertagentavailability.core.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.ticketmate.backend.common.core.constant.SortField;
