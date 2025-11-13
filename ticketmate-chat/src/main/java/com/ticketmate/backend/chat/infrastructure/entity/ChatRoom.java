@@ -88,9 +88,4 @@ public class ChatRoom extends BaseMongoDocument {
   public UUID getOpponentId(UUID currentMemberId) {
     return currentMemberId.equals(agentMemberId) ? clientMemberId : agentMemberId;
   }
-
-  // 상대방 닉네임 추출
-  public String getOpponentNickname(UUID currentMemberId) {
-    return currentMemberId.equals(agentMemberId) ? clientMemberNickname : agentMemberNickname;
-  }
 }
