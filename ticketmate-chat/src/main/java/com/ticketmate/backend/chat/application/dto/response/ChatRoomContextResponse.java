@@ -13,8 +13,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ChatRoomContextResponse {
+
   private String chatRoomId;  // 채팅방 ID
   private UUID opponentMemberId;  // 상대방 ID
+  private String opponentMemberNickName;  // 상대방 닉네임
   private String concertName;  // 콘서트명
   private String concertThumbnailUrl;  // 콘서트 썸네일 이미지
   private TicketOpenType ticketOpenType;  // 선예/일예 구분
@@ -23,10 +25,11 @@ public class ChatRoomContextResponse {
   private ConcertType concertType;  // 공연 카테고리
 
   @Builder
-  public ChatRoomContextResponse(String chatRoomId, UUID opponentMemberId, String concertName, String concertThumbnailUrl, TicketOpenType ticketOpenType,
-      List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList, TicketReservationSite ticketReservationSite, ConcertType concertType) {
+  public ChatRoomContextResponse(String chatRoomId, UUID opponentMemberId, String opponentMemberNickName, String concertName, String concertThumbnailUrl, TicketOpenType ticketOpenType,
+    List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList, TicketReservationSite ticketReservationSite, ConcertType concertType) {
     this.chatRoomId = chatRoomId;
     this.opponentMemberId = opponentMemberId;
+    this.opponentMemberNickName = opponentMemberNickName;
     this.concertName = concertName;
     this.concertThumbnailUrl = concertThumbnailUrl;
     this.ticketOpenType = ticketOpenType;

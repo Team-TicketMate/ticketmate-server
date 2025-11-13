@@ -24,12 +24,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 // 대리인, 의뢰인, 콘서트, 선예매/일반예매 4가지 필드의 복합 인덱스 (4가지 조건이 갖춰진 데이터는 1개여야함)
 @CompoundIndex(
-    name = "uk_agent_client_concert_ticketOpenType",
-    def = "{'agentMemberId': 1, "
-          + "'clientMemberId': 1, "
-          + "'concertId': 1, "
-          + "'ticketOpenType': 1}",
-    unique = true
+  name = "uk_agent_client_concert_ticketOpenType",
+  def = "{'agentMemberId': 1, "
+        + "'clientMemberId': 1, "
+        + "'concertId': 1, "
+        + "'ticketOpenType': 1}",
+  unique = true
 )
 public class ChatRoom extends BaseMongoDocument {
 
@@ -82,5 +82,15 @@ public class ChatRoom extends BaseMongoDocument {
 
   public void updateLastMessageType(ChatMessageType chatMessageType) {
     this.lastMessageType = chatMessageType;
+  }
+
+  // 상대방 아이디 추출
+  public UUID getOpponentId(UUID currentMemberId) {
+    return currentMemberId.equals(agentMemberId) ? clientMemberId : agentMemberId;
+  }
+
+  // 상대방 닉네임 추출
+  public String getOpponentNickname(UUID currentMemberId) {
+    return currentMemberId.equals(agentMemberId) ? clientMemberNickname : agentMemberNickname;
   }
 }
