@@ -1,7 +1,6 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

@@ -2,7 +2,11 @@ package com.ticketmate.backend.admin.report.application.dto.request;
 
 import com.ticketmate.backend.report.core.constant.ReportStatus;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor

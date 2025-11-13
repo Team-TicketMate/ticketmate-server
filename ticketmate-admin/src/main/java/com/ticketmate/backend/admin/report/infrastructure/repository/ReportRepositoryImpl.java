@@ -4,19 +4,16 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
 import com.ticketmate.backend.admin.report.application.dto.view.ReportInfo;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
 import com.ticketmate.backend.report.infrastructure.entity.QReport;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
