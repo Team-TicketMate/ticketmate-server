@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.concert;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
@@ -32,7 +32,7 @@ public class ConcertController implements ConcertControllerDocs {
 
   @Override
   @GetMapping(value = "")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertFilteredRequest request) {
@@ -41,7 +41,7 @@ public class ConcertController implements ConcertControllerDocs {
 
   @Override
   @GetMapping(value = "{concert-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ConcertInfoResponse> getConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "concert-id") UUID concertId) {

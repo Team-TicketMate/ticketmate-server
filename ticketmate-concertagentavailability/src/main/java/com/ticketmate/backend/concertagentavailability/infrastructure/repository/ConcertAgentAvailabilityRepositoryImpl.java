@@ -2,7 +2,9 @@ package com.ticketmate.backend.concertagentavailability.infrastructure.repositor
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.ComparableExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -10,24 +12,26 @@ import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatu
 import com.ticketmate.backend.applicationform.infrastructure.entity.QApplicationForm;
 import com.ticketmate.backend.concert.infrastructure.entity.QConcert;
 import com.ticketmate.backend.concert.infrastructure.entity.QTicketOpenDate;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concertagentavailability.core.constant.ConcertAgentAvailabilitySortField;
 import com.ticketmate.backend.concertagentavailability.infrastructure.entity.QConcertAgentAvailability;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.QAgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.QMember;
 import com.ticketmate.backend.querydsl.infrastructure.util.QueryDslUtil;
-
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvailabilityRepositoryCustom {
@@ -121,11 +125,10 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
   /**
    * 대리인 마이페이지용 on 설정한 모집 중 공연 조회
    * @param agentId 로그인한 대리인
-   * @param pageable 페이지 번호, 크기를 담은 Pageable
-   * @return DTO {@link AgentConcertSettingInfo} Slice
+   * @return DTO {@link AgentConcertSettingInfo} List
    */
   @Override
-  public Slice<AgentConcertSettingInfo> findMyAcceptingConcert(UUID agentId, Pageable pageable) {
+  public List<AgentConcertSettingInfo> findMyAcceptingConcert(UUID agentId) {
     Instant now = Instant.now();
 
     Expression<Integer> matchedClientCountExpression = getMatchedClientCountExpression(agentId);
@@ -139,9 +142,10 @@ public class ConcertAgentAvailabilityRepositoryImpl implements ConcertAgentAvail
         // 필터링
         .where(acceptingExpression.isTrue()) // ON
         // 정렬
-        .orderBy(CONCERT.createdDate.desc()); // 최신순
+        .orderBy(CONCERT.createdDate.desc()) // 최신순
+        .limit(10); // 최대 10개
 
-    return QueryDslUtil.fetchSlice(contentQuery, pageable);
+    return contentQuery.fetch();
   }
 
   /**

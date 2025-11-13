@@ -1,5 +1,6 @@
 package com.ticketmate.backend.api.application.controller.applicationform;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.applicationform.application.dto.request.ApplicationFormDuplicateRequest;
 import com.ticketmate.backend.applicationform.application.dto.request.ApplicationFormEditRequest;
 import com.ticketmate.backend.applicationform.application.dto.request.ApplicationFormFilteredRequest;
@@ -11,7 +12,6 @@ import com.ticketmate.backend.applicationform.application.dto.response.Rejection
 import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
 import com.ticketmate.backend.applicationform.application.service.RejectionReasonService;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,7 +43,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PostMapping("")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> saveApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @RequestBody @Valid ApplicationFormRequest request) {
@@ -53,7 +53,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @GetMapping("")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ApplicationFormFilteredResponse>> filteredApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ApplicationFormFilteredRequest request) {
@@ -62,7 +62,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @GetMapping("/{application-form-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ApplicationFormInfoResponse> getApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
@@ -71,7 +71,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PatchMapping("/{application-form-id}/edit")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> editApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
@@ -82,7 +82,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PatchMapping("/{application-form-id}/cancel")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> cancelApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
@@ -92,7 +92,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PatchMapping("/{application-form-id}/reject")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> rejectApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId,
@@ -103,7 +103,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PatchMapping("/{application-form-id}/accept")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> approve(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {
@@ -113,7 +113,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @PostMapping("/duplicate")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Boolean> isDuplicateApplicationForm(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @RequestBody @Valid ApplicationFormDuplicateRequest request) {
@@ -123,7 +123,7 @@ public class ApplicationFormController implements ApplicationFormControllerDocs 
 
   @Override
   @GetMapping("/{application-form-id}/rejection-reason")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<RejectionReasonResponse> getRejectionReason(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "application-form-id") UUID applicationFormId) {

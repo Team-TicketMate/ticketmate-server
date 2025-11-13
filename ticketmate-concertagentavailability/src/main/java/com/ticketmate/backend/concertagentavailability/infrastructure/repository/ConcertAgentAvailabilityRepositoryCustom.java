@@ -1,9 +1,9 @@
 package com.ticketmate.backend.concertagentavailability.infrastructure.repository;
 
-import java.util.UUID;
-
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -16,5 +16,5 @@ public interface ConcertAgentAvailabilityRepositoryCustom {
   Slice<AgentConcertSettingInfo> findMyConcertList(UUID agentId, Pageable pageable);
 
   // 대리인 마이페이지용 on 설정한 모집 중 공연 조회
-  Slice<AgentConcertSettingInfo> findMyAcceptingConcert(UUID agentId, Pageable pageable);
+  List<AgentConcertSettingInfo> findMyAcceptingConcert(UUID agentId);
 }

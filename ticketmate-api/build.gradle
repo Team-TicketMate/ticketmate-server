@@ -36,6 +36,9 @@ dependencies {
     // Chuseok22 API Change Log
     implementation libs.api.changelog
 
+    // Chuseok22 Method Logging
+    implementation libs.method.logging
+
     // Flyway
     implementation libs.flyway.core
     implementation libs.flyway.postgres

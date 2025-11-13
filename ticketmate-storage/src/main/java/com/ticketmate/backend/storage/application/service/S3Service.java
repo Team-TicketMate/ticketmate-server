@@ -16,7 +16,6 @@ import com.ticketmate.backend.storage.infrastructure.properties.S3Properties;
 import com.ticketmate.backend.storage.infrastructure.util.FileUtil;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,7 +37,6 @@ public class S3Service implements StorageService {
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
   private final AmazonS3 amazonS3;
   private final S3Properties s3Properties;
-  private final Clock clock;
   private final ZoneId zoneId;
 
   /**
@@ -105,12 +103,13 @@ public class S3Service implements StorageService {
 
   @Override
   public String generatePublicUrl(String storedPath) {
+    if (CommonUtil.nvl(storedPath, "").isEmpty()) {
+      log.warn("요청된 파일 경로가 없습니다.");
+      return null;
+    }
     if (storedPath.startsWith("https://picsum.photos/")) {
       return storedPath;
     } // TODO: Mock 데이터 사진은 "https://picsum.photos/..." 고정이므로 Mock 데이터는 storedPath를 저장하는 것이 아닌 publicUrl 전체 저장 (개발 후 삭제 필요)
-    if (CommonUtil.nvl(storedPath, "").isEmpty()) {
-      return null;
-    }
     return FileUtil.combineBaseAndPath(s3Properties.s3().domain(), storedPath); // 예: "https://domain.com/prefix/yyyyMMdd-UUID-파일명.jpg"
   }
 
@@ -135,7 +134,6 @@ public class S3Service implements StorageService {
       log.warn("요청된 파일 경로가 없습니다.");
       return;
     }
-
     if (storedPath.startsWith("https://picsum.photos/")) {
       return;
     } // TODO: Mock 데이터 사진은 "https://picsum.photos/..." 고정이므로 Mock 데이터는 storedPath를 저장하는 것이 아닌 publicUrl 전체 저장 (개발 후 삭제 필요)

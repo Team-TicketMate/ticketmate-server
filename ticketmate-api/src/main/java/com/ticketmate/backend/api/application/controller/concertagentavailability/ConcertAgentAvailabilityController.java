@@ -1,16 +1,17 @@
 package com.ticketmate.backend.api.application.controller.concertagentavailability;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
+import com.ticketmate.backend.concertagentavailability.application.dto.request.AgentConcertSettingFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAcceptingAgentFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.request.ConcertAgentAvailabilityRequest;
-import com.ticketmate.backend.concertagentavailability.application.dto.request.AgentConcertSettingFilteredRequest;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.service.ConcertAgentAvailabilityService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -37,7 +38,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @PostMapping
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> setAcceptingOption(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody ConcertAgentAvailabilityRequest request) {
@@ -47,7 +48,7 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @GetMapping("/{concert-id}/agents")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Slice<ConcertAcceptingAgentResponse>> filteredAcceptingAgents(
       @PathVariable(value = "concert-id") UUID concertId,
       @ParameterObject @Valid ConcertAcceptingAgentFilteredRequest request) {
@@ -56,21 +57,20 @@ public class ConcertAgentAvailabilityController implements ConcertAgentAvailabil
 
   @Override
   @GetMapping("/concerts")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Slice<AgentConcertSettingResponse>> findConcertsForAgentAcceptingSetting(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findConcertsForAgentAcceptingSetting(customOAuth2User.getMember(), request));
   }
 
   @Override
   @GetMapping("/accepting-concerts")
-  @LogMonitoringInvocation
-  public ResponseEntity<Slice<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @ParameterObject AgentConcertSettingFilteredRequest request) {
+  @LogMonitoring
+  public ResponseEntity<List<AgentAcceptingConcertResponse>> findAcceptingConcertByAgent(
+      @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok()
-        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember().getMemberId(), request));
+        .body(concertAgentAvailabilityService.findAcceptingConcertByAgent(customOAuth2User.getMember()));
   }
 }

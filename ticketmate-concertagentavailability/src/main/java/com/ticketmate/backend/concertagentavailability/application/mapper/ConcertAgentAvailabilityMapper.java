@@ -1,10 +1,10 @@
 package com.ticketmate.backend.concertagentavailability.application.mapper;
 
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 
 public interface ConcertAgentAvailabilityMapper {
   /**

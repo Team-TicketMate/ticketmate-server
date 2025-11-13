@@ -28,7 +28,13 @@ public class SecurityUrls {
     "/api/concert-hall/**", // 공연장 조회
 
     // MOCK
-    "/mock/**", // 개발자용 테스트 api
+    "/mock/portfolio", // Mock 포트폴리오 생성
+    "/mock/member", // Mock 회원 생성
+    "/mock/login", // Mock 로그인
+    "/mock/concert", // Mock 공연 생성
+    "/mock/concert-hall", // Mock 공연장 생성
+    "/mock/chat-room", // Mock 채팅방 생성
+    "/mock/application-form", // Mock 신청서 생성
 
     // Swagger
     "/docs/swagger-ui/**", // Swagger UI
