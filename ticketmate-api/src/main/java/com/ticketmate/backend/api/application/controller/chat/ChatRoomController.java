@@ -1,5 +1,6 @@
 package com.ticketmate.backend.api.application.controller.chat;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
@@ -9,7 +10,6 @@ import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.service.ChatRoomService;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @PostMapping("")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<String> generateChatRoom(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody ChatRoomRequest request) {
@@ -48,7 +48,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @GetMapping("")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ChatRoomResponse>> getChatRoomList(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ChatRoomFilteredRequest request) {
@@ -57,7 +57,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @GetMapping("/{chat-room-id}/message")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Slice<ChatMessageResponse>> getChatMessages(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId,
@@ -67,7 +67,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @GetMapping("/{chat-room-id}/context")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ChatRoomContextResponse> enterChatRoom(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId) {
@@ -76,7 +76,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @GetMapping("/{chat-room-id}/application-form")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ApplicationFormInfoResponse> chatRoomApplicationFormInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId) {
@@ -85,7 +85,7 @@ public class ChatRoomController implements ChatRoomControllerDocs {
 
   @Override
   @PatchMapping("/{chat-room-id}/cancel-progress")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> cancelProgress(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable("chat-room-id") String chatRoomId) {

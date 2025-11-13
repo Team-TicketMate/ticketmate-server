@@ -1,11 +1,9 @@
 package com.ticketmate.backend.member.infrastructure.repository;
 
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
-
-import java.util.UUID;
-
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.QueryHints;

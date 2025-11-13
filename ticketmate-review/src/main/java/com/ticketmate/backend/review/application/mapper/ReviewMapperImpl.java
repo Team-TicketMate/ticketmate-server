@@ -9,10 +9,9 @@ import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse
 import com.ticketmate.backend.review.infrastructure.entity.Review;
 import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import com.ticketmate.backend.storage.core.service.StorageService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

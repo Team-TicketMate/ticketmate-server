@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.portfolio;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.portfolio.application.dto.request.PortfolioRequest;
 import com.ticketmate.backend.portfolio.application.service.PortfolioService;
@@ -30,7 +30,7 @@ public class PortfolioController implements PortfolioControllerDocs {
 
   @Override
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<UUID> uploadPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ModelAttribute PortfolioRequest request) {

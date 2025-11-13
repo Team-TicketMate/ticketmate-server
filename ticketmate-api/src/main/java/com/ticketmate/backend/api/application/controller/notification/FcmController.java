@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.notification;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.notification.application.dto.request.FcmTokenSaveRequest;
 import com.ticketmate.backend.notification.application.dto.response.FcmTokenSaveResponse;
@@ -29,7 +29,7 @@ public class FcmController implements FcmControllerDocs {
 
   @Override
   @PostMapping(value = "")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<FcmTokenSaveResponse> saveFcmToken(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @RequestBody @Valid FcmTokenSaveRequest request) {

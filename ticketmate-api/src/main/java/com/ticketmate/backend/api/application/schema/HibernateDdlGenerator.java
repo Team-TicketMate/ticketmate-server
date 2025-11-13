@@ -18,6 +18,9 @@ import com.ticketmate.backend.member.infrastructure.entity.MemberWithdrawalHisto
 import com.ticketmate.backend.member.infrastructure.entity.PhoneBlock;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
+import com.ticketmate.backend.report.infrastructure.entity.Report;
+import com.ticketmate.backend.review.infrastructure.entity.Review;
+import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,10 +29,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.Optional;
-
-import com.ticketmate.backend.report.infrastructure.entity.Report;
-import com.ticketmate.backend.review.infrastructure.entity.Review;
-import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
