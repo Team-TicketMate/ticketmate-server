@@ -70,8 +70,8 @@ public class ChatRoomService {
   public static UUID opponentIdOf(ChatRoom room, Member member) {
     // 여기서 member는 자기 자신입니다.
     return room.getAgentMemberId().equals(member.getMemberId())
-        ? room.getClientMemberId()
-        : room.getAgentMemberId();
+      ? room.getClientMemberId()
+      : room.getAgentMemberId();
   }
 
   /**
@@ -84,10 +84,10 @@ public class ChatRoomService {
   @Transactional
   public String generateChatRoom(ChatRoomRequest request) {
     boolean exists = chatRoomRepository.existsByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
-        request.getAgentId(),
-        request.getClientId(),
-        request.getConcertId(),
-        request.getTicketOpenType()
+      request.getAgentId(),
+      request.getClientId(),
+      request.getConcertId(),
+      request.getTicketOpenType()
     );
     if (exists) {
       log.error("채팅방에 이미 존재합니다.");
@@ -96,24 +96,24 @@ public class ChatRoomService {
     Member agent = memberService.findMemberById(request.getAgentId());
     Member client = memberService.findMemberById(request.getClientId());
     ApplicationForm applicationForm = applicationFormRepository
-        .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-            request.getClientId(),
-            request.getAgentId(),
-            request.getConcertId(),
-            request.getTicketOpenType()
-        ).orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+      .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
+        request.getClientId(),
+        request.getAgentId(),
+        request.getConcertId(),
+        request.getTicketOpenType()
+      ).orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
 
     ChatRoom chatRoom = ChatRoom.builder()
-        .agentMemberId(agent.getMemberId())
-        .agentMemberNickname(agent.getNickname())
-        .clientMemberId(client.getMemberId())
-        .clientMemberNickname(client.getNickname())
-        .lastMessage("")
-        .lastMessageId("")
-        .applicationFormId(applicationForm.getApplicationFormId())
-        .concertId(request.getConcertId())
-        .ticketOpenType(request.getTicketOpenType())
-        .build();
+      .agentMemberId(agent.getMemberId())
+      .agentMemberNickname(agent.getNickname())
+      .clientMemberId(client.getMemberId())
+      .clientMemberNickname(client.getNickname())
+      .lastMessage("")
+      .lastMessageId("")
+      .applicationFormId(applicationForm.getApplicationFormId())
+      .concertId(request.getConcertId())
+      .ticketOpenType(request.getTicketOpenType())
+      .build();
     ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
     return savedChatRoom.getChatRoomId();
   }
@@ -134,24 +134,24 @@ public class ChatRoomService {
 
     // 채팅방마다 존재하는 신청폼 Id 리스트에 저장
     List<UUID> applicationFormIdList = chatRoomPage.stream()
-        .map(ChatRoom::getApplicationFormId).collect(Collectors.toList());
+      .map(ChatRoom::getApplicationFormId).collect(Collectors.toList());
 
     // 채팅방마다 존재하는 사용자 ID중 상대방 ID만 빼와서 리스트에 저장
     Set<UUID> opponentIdList = chatRoomPage.stream()
-        .map(room -> opponentIdOf(room, member))
-        .collect(Collectors.toSet());
+      .map(room -> opponentIdOf(room, member))
+      .collect(Collectors.toSet());
 
     // 채팅방에 존재하는 신청폼 한번에 조회 (N+1 방지)
     Map<UUID, ApplicationForm> applicationFormMap = applicationFormRepository
-        .findAllById(applicationFormIdList)
-        .stream()
-        .collect(Collectors.toMap(ApplicationForm::getApplicationFormId, Function.identity()));
+      .findAllById(applicationFormIdList)
+      .stream()
+      .collect(Collectors.toMap(ApplicationForm::getApplicationFormId, Function.identity()));
 
     // 채팅방에 존재하는 회원 한번에 조회 (N+1 방지)
     Map<UUID, Member> memberMap = memberRepository
-        .findAllById(opponentIdList)
-        .stream()
-        .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
+      .findAllById(opponentIdList)
+      .stream()
+      .collect(Collectors.toMap(Member::getMemberId, Function.identity()));
 
     List<Object> countList = redisTemplate.executePipelined((RedisCallback<Object>) con -> {
       chatRoomPage.forEach(r -> {
@@ -163,12 +163,12 @@ public class ChatRoomService {
 
     AtomicInteger i = new AtomicInteger();
     List<ChatRoomResponse> response = chatRoomPage.stream()
-        .map(r -> {
-          int unReadMessageCount = parseInt(countList.get(i.getAndIncrement()));
-          return chatMapper.toChatRoomResponse(
-              r, member, applicationFormMap, memberMap, unReadMessageCount);
-        })
-        .toList();
+      .map(r -> {
+        int unReadMessageCount = parseInt(countList.get(i.getAndIncrement()));
+        return chatMapper.toChatRoomResponse(
+          r, member, applicationFormMap, memberMap, unReadMessageCount);
+      })
+      .toList();
 
     return new PageImpl<>(response, chatRoomPage.getPageable(), chatRoomPage.getTotalElements());
   }
@@ -180,7 +180,7 @@ public class ChatRoomService {
   public Slice<ChatMessageResponse> getChatMessage(Member member, String chatRoomId, ChatMessageFilteredRequest request) {
     // 메시지를 조회할 채팅방 조회
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
     // 채팅방 내부 참가자 유효성 검증
     validateRoomMember(chatRoom, member);
@@ -189,8 +189,8 @@ public class ChatRoomService {
     Pageable pageable = request.toPageable();
 
     return chatMessageRepository
-        .findByChatRoomId(chatRoomId, pageable)
-        .map(chatMessage -> chatMapper.toChatMessageResponse(chatMessage, member.getMemberId()));
+      .findByChatRoomId(chatRoomId, pageable)
+      .map(chatMessage -> chatMapper.toChatMessageResponse(chatMessage, member.getMemberId()));
   }
 
   /**
@@ -200,11 +200,11 @@ public class ChatRoomService {
   public ChatRoomContextResponse enterChatRoom(Member member, String chatRoomId) {
     // 입장할 채팅방 조회
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> {
-              log.error("채팅방 조회에 실패했습니다.");
-              return new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
-            }
-        );
+      .orElseThrow(() -> {
+          log.error("채팅방 조회에 실패했습니다.");
+          return new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+      );
 
     // 채팅방 내부 참가자 유효성 검증
     validateRoomMember(chatRoom, member);
@@ -213,8 +213,14 @@ public class ChatRoomService {
     UUID concertId = chatRoom.getConcertId();
     ConcertInfoResponse response = concertService.getConcertInfo(concertId);
 
-    return chatMapper.toChatRoomContextResponse(chatRoom, member.getMemberId(), chatRoom.getTicketOpenType(), response);
+    // 상대방 닉네임 추출
+    UUID opponentId = chatRoom.getOpponentId(member.getMemberId());
+    Member opponentMember = memberService.findMemberById(opponentId);
+
+    return chatMapper.toChatRoomContextResponse(chatRoom, member.getMemberId(), chatRoom.getTicketOpenType(),
+      opponentMember.getNickname(), response);
   }
+
   /**
    * @param chatRoomId 채팅방 고유 ID
    * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
@@ -224,16 +230,16 @@ public class ChatRoomService {
 
     // 요청된 채팅방 추출
     ChatRoom chatRoom = chatRoomRepository
-        .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+      .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
     // 현재 사용자 검증
     validateRoomMember(chatRoom, member);
 
     // 메서드 체이닝
     return Optional.of(chatRoom)
-        .map(ChatRoom::getApplicationFormId)
-        .map(applicationFormService::getApplicationFormInfo)
-        .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+      .map(ChatRoom::getApplicationFormId)
+      .map(applicationFormService::getApplicationFormInfo)
+      .orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
   }
 
   /**
