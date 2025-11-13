@@ -1,5 +1,6 @@
 package com.ticketmate.backend.api.application.controller.auth;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.application.dto.request.LoginRequest;
 import com.ticketmate.backend.auth.application.dto.response.LoginResponse;
 import com.ticketmate.backend.auth.application.service.AuthService;
@@ -7,7 +8,6 @@ import com.ticketmate.backend.auth.application.service.SmsAuthService;
 import com.ticketmate.backend.auth.application.service.TotpAuthService;
 import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.sms.application.dto.SendCodeRequest;
 import com.ticketmate.backend.sms.application.dto.VerifyCodeRequest;
 import com.ticketmate.backend.totp.application.dto.request.TotpVerifyRequest;
@@ -41,7 +41,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/login")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<LoginResponse> login(
       @Valid @RequestBody LoginRequest request) {
     return ResponseEntity.ok(authService.login(request));
@@ -49,7 +49,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/reissue")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> reissue(
       HttpServletRequest request,
       HttpServletResponse response) {
@@ -59,7 +59,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @GetMapping(value = "/2fa/setup")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<TotpSetupResponse> totpSetup(
       @RequestHeader(AuthConstants.HEADER_PRE_AUTH) String preAuthToken) {
     return ResponseEntity.ok(totpAuthService.setupTotp(preAuthToken));
@@ -67,7 +67,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/2fa/setup/verify")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> verifySetupTotp(
       @RequestHeader(AuthConstants.HEADER_PRE_AUTH) String preAuthToken,
       @Valid @RequestBody TotpVerifyRequest request) {
@@ -77,7 +77,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/2fa/login/verify")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Boolean> verifyLoginTotp(
       @RequestHeader(AuthConstants.HEADER_PRE_AUTH) String preAuthToken,
       @Valid @RequestBody TotpVerifyRequest request,
@@ -87,7 +87,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/2fa/reset")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> resetTotp(
       @RequestHeader(AuthConstants.HEADER_PRE_AUTH) String preAuthToken) {
     totpAuthService.resetTotp(preAuthToken);
@@ -96,7 +96,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/sms/send-code")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> sendVerificationCode(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody SendCodeRequest request) {
@@ -106,7 +106,7 @@ public class AuthController implements AuthControllerDocs {
 
   @Override
   @PostMapping(value = "/sms/verify")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> verifyVerificationCode(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody VerifyCodeRequest request
