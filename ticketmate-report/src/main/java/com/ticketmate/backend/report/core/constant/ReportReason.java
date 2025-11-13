@@ -2,8 +2,6 @@ package com.ticketmate.backend.report.core.constant;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.ticketmate.backend.common.application.exception.CustomException;
-import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

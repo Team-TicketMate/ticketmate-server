@@ -1,5 +1,6 @@
 package com.ticketmate.backend.api.application.controller.admin;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoEditRequest;
 import com.ticketmate.backend.admin.concert.application.dto.request.ConcertInfoRequest;
 import com.ticketmate.backend.admin.concert.application.service.ConcertAdminService;
@@ -13,13 +14,12 @@ import com.ticketmate.backend.admin.portfolio.application.dto.response.Portfolio
 import com.ticketmate.backend.admin.portfolio.application.service.PortfolioAdminService;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.service.ReportAdminService;
 import com.ticketmate.backend.admin.sms.application.dto.response.CoolSmsBalanceResponse;
 import com.ticketmate.backend.admin.sms.application.service.SmsAdminService;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.concert.application.dto.request.ConcertFilteredRequest;
 import com.ticketmate.backend.concert.application.dto.response.ConcertFilteredResponse;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
@@ -27,7 +27,6 @@ import com.ticketmate.backend.concerthall.application.dto.request.ConcertHallFil
 import com.ticketmate.backend.concerthall.application.dto.response.ConcertHallFilteredResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -36,7 +35,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,7 +66,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @PostMapping(value = "/concert-hall")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> saveHallInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody ConcertHallInfoRequest request) {
@@ -69,7 +76,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping(value = "/concert-hall")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ConcertHallFilteredResponse>> filteredConcertHall(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertHallFilteredRequest request) {
@@ -78,7 +85,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @PatchMapping(value = "/concert-hall/{concert-hall-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> editConcertHallInfo(
       @PathVariable("concert-hall-id") UUID concertHallId,
       @Valid @RequestBody ConcertHallInfoEditRequest request) {
@@ -92,7 +99,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @PostMapping(value = "/concert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> saveConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ModelAttribute ConcertInfoRequest request) {
@@ -102,7 +109,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping(value = "/concert")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ConcertFilteredResponse>> filteredConcert(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid ConcertFilteredRequest request) {
@@ -111,7 +118,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping(value = "/concert/{concert-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ConcertInfoResponse> getConcertInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "concert-id") UUID concertId
@@ -121,7 +128,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @PatchMapping(value = "/concert/{concert-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> editConcertInfo(
       @PathVariable("concert-id") UUID concertId,
       @Valid @ModelAttribute ConcertInfoEditRequest request) {
@@ -135,7 +142,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping(value = "/portfolio")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<PortfolioFilteredAdminResponse>> filteredPortfolio(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @ParameterObject @Valid PortfolioFilteredRequest request) {
@@ -144,7 +151,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping(value = "/portfolio/{portfolio-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<PortfolioAdminResponse> getPortfolioInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @PathVariable(value = "portfolio-id") UUID portfolioId) {
@@ -153,7 +160,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @PatchMapping(value = "/portfolio/{portfolio-id}/status")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> changePortfolioStatus(
       @PathVariable(value = "portfolio-id") UUID portfolioId,
       @RequestBody @Valid PortfolioStatusUpdateRequest request) {
@@ -167,7 +174,7 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping("/cool-sms/balance")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<CoolSmsBalanceResponse> getBalance(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok(smsAdminService.getBalance());
@@ -179,21 +186,21 @@ public class AdminController implements AdminControllerDocs {
 
   @Override
   @GetMapping("/report")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Page<ReportFilteredResponse>> getReports(@ParameterObject @Valid ReportFilteredRequest request) {
     return ResponseEntity.ok(reportAdminService.getReports(request));
   }
 
   @Override
   @GetMapping("/report/{report-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<ReportInfoResponse> getReport(@PathVariable(value = "report-id") UUID reportId) {
     return ResponseEntity.ok(reportAdminService.getReport(reportId));
   }
 
   @Override
   @PutMapping("/report/{report-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> updateReport(@PathVariable(value = "report-id") UUID reportId, @RequestBody @Valid ReportUpdateRequest request) {
     reportAdminService.updateReport(reportId, request);
     return ResponseEntity.noContent().build();

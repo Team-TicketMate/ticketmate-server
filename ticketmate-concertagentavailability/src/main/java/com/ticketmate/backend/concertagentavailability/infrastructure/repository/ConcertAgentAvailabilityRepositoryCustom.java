@@ -1,10 +1,9 @@
 package com.ticketmate.backend.concertagentavailability.infrastructure.repository;
 
+import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import java.util.List;
 import java.util.UUID;
-
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

@@ -11,7 +11,7 @@ validation = "3.5.4"
 mapstruct = "1.6.3"
 spring_cloud_aws = "2.2.6.RELEASE"
 datafaker = "2.4.4"
-firebase_admin = "9.5.0"
+firebase_admin = "9.7.0"
 redisson = "3.50.0"
 rabbit_test = "3.2.6"
 reactor_netty = "3.5.4"
@@ -19,6 +19,7 @@ querydsl = "5.1.0"
 jakarta-persistence = "3.2.0"
 jakarta-annotation = "3.0.0"
 api_changelog = "1.0.1"
+method_logging = "0.0.9"
 google_genai = "1.10.0"
 google_auth = "1.37.1"
 hibernate_vector = "6.4.0.Final"
@@ -117,6 +118,9 @@ jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api",
 
 # Chuseok22 API Change Log
 api_changelog = { module = "com.chuseok22:ApiChangeLog", version.ref = "api_changelog" }
+
+# Chuseok22 Method Logging
+method_logging = { module = "com.chuseok22:logging", version.ref = "method_logging" }
 
 # Google Gen-AI (Vertex AI) 클라이언트
 google_genai = { module = "com.google.genai:google-genai", version.ref = "google_genai" }

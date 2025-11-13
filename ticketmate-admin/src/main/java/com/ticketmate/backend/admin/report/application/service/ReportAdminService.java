@@ -2,8 +2,8 @@ package com.ticketmate.backend.admin.report.application.service;
 
 import com.ticketmate.backend.admin.report.application.dto.request.ReportFilteredRequest;
 import com.ticketmate.backend.admin.report.application.dto.request.ReportUpdateRequest;
-import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.dto.response.ReportFilteredResponse;
+import com.ticketmate.backend.admin.report.application.dto.response.ReportInfoResponse;
 import com.ticketmate.backend.admin.report.application.dto.view.ReportInfo;
 import com.ticketmate.backend.admin.report.application.mapper.ReportMapper;
 import com.ticketmate.backend.admin.report.infrastructure.repository.ReportRepositoryCustom;
@@ -11,13 +11,12 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
 import com.ticketmate.backend.report.infrastructure.repository.ReportRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @Slf4j

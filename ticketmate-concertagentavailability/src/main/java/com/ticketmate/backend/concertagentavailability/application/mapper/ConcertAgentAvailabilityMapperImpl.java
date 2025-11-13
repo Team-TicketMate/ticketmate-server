@@ -2,10 +2,10 @@ package com.ticketmate.backend.concertagentavailability.application.mapper;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentAcceptingConcertResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.response.AgentConcertSettingResponse;
-import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.response.ConcertAcceptingAgentResponse;
 import com.ticketmate.backend.concertagentavailability.application.dto.view.AgentConcertSettingInfo;
+import com.ticketmate.backend.concertagentavailability.application.dto.view.ConcertAcceptingAgentInfo;
 import com.ticketmate.backend.storage.core.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

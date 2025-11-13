@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.search;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.search.application.dto.request.SearchRequest;
 import com.ticketmate.backend.search.application.dto.response.SearchResponse;
 import com.ticketmate.backend.search.application.service.SearchService;
@@ -33,7 +33,7 @@ public class SearchController implements SearchControllerDocs {
 
   @Override
   @GetMapping
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<SearchResponse<?>> search(
       @ParameterObject @Valid SearchRequest request,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -45,14 +45,14 @@ public class SearchController implements SearchControllerDocs {
 
   @Override
   @GetMapping("/recent")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<List<String>> getRecentSearch(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok(recentSearchService.getRecentSearches(customOAuth2User.getMember().getMemberId()));
   }
 
   @Override
   @DeleteMapping("/recent")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> deleteAllRecentSearch(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     recentSearchService.deleteAllRecentSearches(customOAuth2User.getMember().getMemberId());
     return ResponseEntity.noContent().build();

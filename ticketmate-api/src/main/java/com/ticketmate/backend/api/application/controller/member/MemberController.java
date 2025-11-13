@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.member;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.member.application.dto.request.AgentSaveBankAccountRequest;
 import com.ticketmate.backend.member.application.dto.request.AgentUpdateBankAccountRequest;
 import com.ticketmate.backend.member.application.dto.request.MemberFollowFilteredRequest;
@@ -50,7 +50,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @GetMapping
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<MemberInfoResponse> getMemberInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok().body(memberService.getMemberInfo(customOAuth2User.getMember()));
@@ -58,7 +58,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> updateMemberInfo(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @ModelAttribute MemberInfoUpdateRequest request) {
@@ -68,7 +68,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PostMapping("/follow")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> follow(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody MemberFollowRequest request) {
@@ -78,7 +78,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PostMapping("/unfollow")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> unfollow(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody MemberFollowRequest request) {
@@ -88,7 +88,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @GetMapping("/follow/{client-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Slice<MemberFollowResponse>> filteredMemberFollow(
       @PathVariable(name = "client-id") UUID clientId,
       @Valid @ParameterObject MemberFollowFilteredRequest request) {
@@ -97,7 +97,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PostMapping("/bank-account")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> saveBankAccount(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody AgentSaveBankAccountRequest request) {
@@ -107,7 +107,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @GetMapping("/bank-account")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<List<AgentBankAccountResponse>> getBankAccountList(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
     return ResponseEntity.ok(agentBankAccountService.getAgentBankAccountList(customOAuth2User.getMember()));
@@ -115,7 +115,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PatchMapping("/bank-account/{bank-account-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> changePrimaryBankAccount(
       @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -125,7 +125,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PutMapping("/bank-account/{bank-account-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> changeBankAccountInfo(
       @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
@@ -136,7 +136,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @DeleteMapping("/bank-account/{bank-account-id}")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> deleteBankAccount(
       @PathVariable(name = "bank-account-id") UUID agentBankAccountId,
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -146,7 +146,7 @@ public class MemberController implements MemberControllerDocs {
 
   @Override
   @PostMapping("/withdraw")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> withdraw(
       @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
       @Valid @RequestBody MemberWithdrawRequest request) {

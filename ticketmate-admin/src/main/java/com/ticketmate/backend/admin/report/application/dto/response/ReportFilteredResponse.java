@@ -2,10 +2,14 @@ package com.ticketmate.backend.admin.report.application.dto.response;
 
 import com.ticketmate.backend.report.core.constant.ReportReason;
 import com.ticketmate.backend.report.core.constant.ReportStatus;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @ToString
 @Getter

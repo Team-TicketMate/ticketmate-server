@@ -10,10 +10,9 @@ import com.ticketmate.backend.review.application.dto.request.ReviewRequest;
 import com.ticketmate.backend.review.application.dto.response.ReviewFilteredResponse;
 import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-
-import java.util.UUID;
 
 public interface ReviewControllerDocs {
   @ApiChangeLogs({

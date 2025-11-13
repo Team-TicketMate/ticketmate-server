@@ -1,7 +1,7 @@
 package com.ticketmate.backend.api.application.controller.mock;
 
+import com.chuseok22.logging.annotation.LogMonitoring;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
-import com.ticketmate.backend.common.application.annotation.LogMonitoringInvocation;
 import com.ticketmate.backend.mock.application.dto.request.MockLoginRequest;
 import com.ticketmate.backend.mock.application.dto.request.MockNotificationRequest;
 import com.ticketmate.backend.mock.application.dto.response.MockChatRoomResponse;
@@ -36,7 +36,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping(value = "/login", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<MockLoginResponse> socialLogin(
     @Valid @ModelAttribute MockLoginRequest request) {
     return ResponseEntity.ok(mockService.testSocialLogin(request));
@@ -44,7 +44,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping(value = "/member")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public CompletableFuture<ResponseEntity<String>> generateMockMembers(
     @RequestParam @Schema(defaultValue = "30") int count) {
     return mockService.generateMemberMockDataAsync(count)
@@ -56,7 +56,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @DeleteMapping("/member")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public ResponseEntity<Void> deleteTestMember() {
     mockService.deleteTestMember();
     return ResponseEntity.ok().build();
@@ -64,7 +64,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping("/concert-hall")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public CompletableFuture<ResponseEntity<String>> createConcertHallMockData(
     @Schema(defaultValue = "30") Integer count) {
     return mockService.createConcertHallMockData(count)
@@ -76,7 +76,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping("/concert")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public CompletableFuture<ResponseEntity<String>> createConcertMockData(
     @Schema(defaultValue = "30") Integer count) {
     return mockService.generateConcertMockDataAsync(count)
@@ -88,7 +88,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping("/application-form")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public CompletableFuture<ResponseEntity<String>> createApplicationFormMockData(
     @Schema(defaultValue = "30") Integer count) {
     return mockService.generateApplicationFormMockDataAsync(count)
@@ -100,7 +100,7 @@ public class MockController implements MockControllerDocs {
 
   @Override
   @PostMapping("/portfolio")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public CompletableFuture<ResponseEntity<String>> createPortfolioMockData(
     @Schema(defaultValue = "30") Integer count) {
     return mockService.generateMockPortfoliosAsync(count)
@@ -112,14 +112,14 @@ public class MockController implements MockControllerDocs {
 
   @PostMapping("/chat-room")
   @Override
-  @LogMonitoringInvocation
+  @LogMonitoring
   public MockChatRoomResponse createChatRoomMockData() {
     return mockService.createChatRoomMockData();
   }
 
   @Override
   @PostMapping("/notification")
-  @LogMonitoringInvocation
+  @LogMonitoring
   public void sendTestNotification(
     @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
     @RequestBody MockNotificationRequest request
