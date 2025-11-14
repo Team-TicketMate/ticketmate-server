@@ -227,7 +227,6 @@ public class ChatRoomService {
    */
   @Transactional(readOnly = true)
   public ApplicationFormInfoResponse getChatRoomApplicationFormInfo(Member member, String chatRoomId) {
-
     // 요청된 채팅방 추출
     ChatRoom chatRoom = chatRoomRepository
       .findById(chatRoomId).orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -269,12 +268,24 @@ public class ChatRoomService {
   /**
    * 방 참가자 검증
    */
-  private void validateRoomMember(ChatRoom room, Member member) {
+  public void validateRoomMember(ChatRoom room, Member member) {
     UUID id = member.getMemberId();
     if (!id.equals(room.getAgentMemberId()) && !id.equals(room.getClientMemberId())) {
       log.error("현재 사용자는 해당 채팅방에 대한 권한이 없습니다.");
       throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
     }
+  }
+
+  /**
+   * 채팅방 조회 공용 메서드
+   */
+  public ChatRoom findChatRoomById(String chatRoomId) {
+    return chatRoomRepository.findById(chatRoomId).orElseThrow(
+        () -> {
+          log.error("채팅방을 찾지 못했습니다. 요청받은 채팅방 ID : {}", chatRoomId);
+          throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+    );
   }
 
   /**
