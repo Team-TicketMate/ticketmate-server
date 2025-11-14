@@ -180,6 +180,7 @@ public class S3Service implements StorageService {
       case PORTFOLIO -> s3Properties.s3().path().portfolio();
       case CHAT -> s3Properties.s3().path().chat();
       case REVIEW -> s3Properties.s3().path().review();
+      case FULFILLMENT_FORM -> s3Properties.s3().path().fulfillmentForm();
     };
   }
 

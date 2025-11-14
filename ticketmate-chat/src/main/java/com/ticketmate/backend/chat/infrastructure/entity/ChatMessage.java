@@ -50,4 +50,6 @@ public class ChatMessage extends BaseMongoDocument {
 
   @Builder.Default
   private List<String> pictureMessageStoredPathList = new ArrayList<>(); // 사진 전용 메시지 리스트
+
+  private String referenceId;   // 성공양식같은 특별한 메시지를 위한 필드(클릭 시 성공양식 상세로 이동하기 간편하게 하기위해 추가)
 }

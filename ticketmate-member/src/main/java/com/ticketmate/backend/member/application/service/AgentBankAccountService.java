@@ -199,7 +199,7 @@ public class AgentBankAccountService {
   /**
    * 계좌 추출
    */
-  private AgentBankAccount findAgentAccountById(UUID agentBankAccountId) {
+  public AgentBankAccount findAgentAccountById(UUID agentBankAccountId) {
     return agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
         () -> {
           log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
@@ -211,7 +211,7 @@ public class AgentBankAccountService {
   /**
    * 해당 계좌가 현재 로그인된 사용자의 계좌인지 검증하는 메서드
    */
-  private void validateAgentAccountOwner(AgentBankAccount agentBankAccount, Member member) {
+  public void validateAgentAccountOwner(AgentBankAccount agentBankAccount, Member member) {
     if (!agentBankAccount.getAgent().getMemberId().equals(member.getMemberId())) {
       throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_OWNED);
     }

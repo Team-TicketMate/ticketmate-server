@@ -28,21 +28,23 @@ public class ChatMapperImpl implements ChatMapper {
   @Override
   public ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId) {
     String profileImgStoredPath = message.getSenderProfileImgStoredPath();
+
     List<String> pictureMessageUrlList = message.getPictureMessageStoredPathList().stream()
       .map(storageService::generatePublicUrl)
       .toList();
 
     return ChatMessageResponse.builder()
-      .messageId(message.getChatMessageId())
-      .senderNickname(message.getSenderNickName())
-      .message(message.getMessage())
-      .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
-      .read(message.isRead())
-      .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
-      .mine(message.getSenderId().equals(currentMemberId))
-      .chatMessageType(message.getChatMessageType())
-      .pictureMessageUrlList(pictureMessageUrlList)
-      .build();
+        .messageId(message.getChatMessageId())
+        .senderNickname(message.getSenderNickName())
+        .message(message.getMessage())
+        .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
+        .read(message.isRead())
+        .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
+        .mine(message.getSenderId().equals(currentMemberId))
+        .chatMessageType(message.getChatMessageType())
+        .pictureMessageUrlList(pictureMessageUrlList)
+        .referenceId(message.getReferenceId())
+        .build();
   }
 
   @Override

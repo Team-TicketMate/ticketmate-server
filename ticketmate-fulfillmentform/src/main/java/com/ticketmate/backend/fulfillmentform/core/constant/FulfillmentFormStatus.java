@@ -1,0 +1,15 @@
+package com.ticketmate.backend.fulfillmentform.core.constant;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum FulfillmentFormStatus {
+  PENDING_FULFILLMENT_FORM("대기중인 성공양식"),
+  ACCEPTED_FULFILLMENT_FORM("수락된 성공양식"),
+  REJECTED_FULFILLMENT_FORM("거절된 성공양식 V20251114_165025_add");
+
+  private final String description;
+
+}

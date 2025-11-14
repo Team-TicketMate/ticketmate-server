@@ -31,4 +31,5 @@ public class ChatMessageResponse {
   public boolean isRead() {
     return read;
   }
+  private String referenceId;   // ex) fulfillmentFormId
 }

@@ -1,6 +1,14 @@
 package com.ticketmate.backend.chat.application.service;
 
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.CHAT_PICTURE_MAX_SIZE;
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.ISO_SEC;
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.LAST_READ_MESSAGE_POINTER_KEY;
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.TTL;
+import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.UN_READ_MESSAGE_COUNTER_KEY;
+import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
+
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageRequest;
+import com.ticketmate.backend.chat.application.dto.request.FulfillmentFormMessageRequest;
 import com.ticketmate.backend.chat.application.dto.request.PictureMessageRequest;
 import com.ticketmate.backend.chat.application.dto.request.ReadAckRequest;
 import com.ticketmate.backend.chat.application.dto.request.TextMessageRequest;
@@ -8,7 +16,6 @@ import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.chat.application.dto.response.ReadAckResponse;
 import com.ticketmate.backend.chat.application.mapper.ChatMapper;
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
-import com.ticketmate.backend.chat.infrastructure.constant.ChatConstants;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatMessage;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.chat.infrastructure.entity.LastReadMessage;
@@ -36,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -68,13 +76,13 @@ public class ChatMessageService {
 
     // 채팅방 두 참가자(자신 및 상대)에게 각각 1회씩 전송
     Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId())
-        .forEach(currentMemberId -> {
-          ChatMessageResponse chatMessageResponse = chatMapper.toChatMessageResponse(chatMessage, currentMemberId);
+      .forEach(currentMemberId -> {
+        ChatMessageResponse chatMessageResponse = chatMapper.toChatMessageResponse(chatMessage, currentMemberId);
 
-          rabbitTemplate.convertAndSend(
-              chatRabbitMqProperties.exchangeName(),
-              "chat.room." + chatRoomId + ".user." + currentMemberId, chatMessageResponse);
-        });
+        rabbitTemplate.convertAndSend(
+          chatRabbitMqProperties.exchangeName(),
+          "chat.room." + chatRoomId + ".user." + currentMemberId, chatMessageResponse);
+      });
   }
 
   /**
@@ -90,71 +98,157 @@ public class ChatMessageService {
     lastReadMessageRepository.save(lastReadMessagePointer); // TTL(30일)
 
     // Redis 카운터 제거
-    String unReadRedisKey = ChatConstants.UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, reader.getMemberId());
+    String unReadRedisKey = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, reader.getMemberId());
     redisTemplate.delete(unReadRedisKey);
 
     // 채팅방 리스트에 즉시 갱신하기 위한 코드
     rabbitTemplate.convertAndSend(
-        "",
-        chatRabbitMqProperties.unreadRoutingKey() + reader.getMemberId(),
-        Map.of("chatRoomId", chatRoomId,
-            "unReadMessageCount", 0,
-            "lastMessageId", ack.getLastReadMessageId())
+      "",
+      chatRabbitMqProperties.unreadRoutingKey() + reader.getMemberId(),
+      Map.of("chatRoomId", chatRoomId,
+        "unReadMessageCount", 0,
+        "lastMessageId", ack.getLastReadMessageId())
     );
 
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
     long updatedMessage = chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
     log.debug("'읽음' 처리된 메시지 개수  = {}", updatedMessage);
 
     // 읽음 이벤트 브로드캐스트 (트랜젝션 커밋 직후)
     TransactionSynchronizationManager.registerSynchronization(
-        new TransactionSynchronization() {
-          @Override
-          public void afterCommit() {
+      new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
 
-            ChatMessage lastMessage = chatMessageRepository.findById(ack.getLastReadMessageId())
-                .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
+          ChatMessage lastMessage = chatMessageRepository.findById(ack.getLastReadMessageId())
+            .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
 
-            ReadAckResponse readAckResponse = ReadAckResponse.builder()
-                .chatRoomId(chatRoomId)
-                .readerId(reader.getMemberId())
-                .senderId(lastMessage.getSenderId())
-                .lastReadMessageId(ack.getLastReadMessageId())
-                .readDate(TimeUtil.toLocalDateTime(lastMessage.getSendDate()))
-                .build();
+          ReadAckResponse readAckResponse = ReadAckResponse.builder()
+            .chatRoomId(chatRoomId)
+            .readerId(reader.getMemberId())
+            .senderId(lastMessage.getSenderId())
+            .lastReadMessageId(ack.getLastReadMessageId())
+            .readDate(TimeUtil.toLocalDateTime(lastMessage.getSendDate()))
+            .build();
 
-            Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId()).
-                filter(currentMemberId -> !currentMemberId.equals(reader.getMemberId()))
-                .forEach(currentMemberId -> rabbitTemplate.convertAndSend(
-                    chatRabbitMqProperties.exchangeName(),
-                    "chat.room." + chatRoomId + ".user." + currentMemberId, readAckResponse));
-          }
-        });
+          Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId()).
+            filter(currentMemberId -> !currentMemberId.equals(reader.getMemberId()))
+            .forEach(currentMemberId -> rabbitTemplate.convertAndSend(
+              chatRabbitMqProperties.exchangeName(),
+              "chat.room." + chatRoomId + ".user." + currentMemberId, readAckResponse));
+        }
+      });
+  }
+
+  /**
+   * 성공양식 제출 후(커밋 이후) 호출
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void sendFulfillmentFormMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
+
+    // 대상 채팅방
+    ChatRoom chatRoom = findChatRoom(chatRoomId);
+
+    handleFulfillmentDecision(chatRoom,
+      FulfillmentFormMessageRequest.builder()
+        .fulfillmentFormId(fulfillmentFormId)
+        .chatMessageType(ChatMessageType.FULFILLMENT_FORM)
+        .preview(ChatMessageType.FULFILLMENT_FORM.getDescription())
+        .build(),
+      sender
+    );
+  }
+
+  /**
+   * 의뢰인이 수락했을때 발송하는 채팅
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void sendFulfillmentFormAcceptMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
+
+    // 대상 채팅방
+    ChatRoom chatRoom = findChatRoom(chatRoomId);
+
+    handleFulfillmentDecision(chatRoom,
+      FulfillmentFormMessageRequest.builder()
+        .fulfillmentFormId(fulfillmentFormId)
+        .chatMessageType(ChatMessageType.ACCEPTED_FULFILLMENT_FORM)
+        .preview(ChatMessageType.ACCEPTED_FULFILLMENT_FORM.getDescription())
+        .build(),
+      sender
+    );
+  }
+
+  /**
+   * 의뢰인이 거절했을때 발송하는 채팅
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void sendFulfillmentFormRejectMessage(String chatRoomId, UUID fulfillmentFormId, Member sender, String rejectMemo) {
+    // 대상 채팅방
+    ChatRoom chatRoom = findChatRoom(chatRoomId);
+
+    handleFulfillmentDecision(chatRoom,
+      FulfillmentFormMessageRequest.builder()
+        .fulfillmentFormId(fulfillmentFormId)
+        .chatMessageType(ChatMessageType.REJECTED_FULFILLMENT_FORM)
+        .preview(ChatMessageType.REJECTED_FULFILLMENT_FORM.getDescription())
+        .rejectMemo(rejectMemo) // ← 거절 사유만 세팅
+        .build(),
+      sender
+    );
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void sendFulfillmentFormUpdatedMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
+    // 대상 채팅방
+    ChatRoom chatRoom = findChatRoom(chatRoomId);
+
+    handleFulfillmentDecision(chatRoom,
+      FulfillmentFormMessageRequest.builder()
+        .fulfillmentFormId(fulfillmentFormId)
+        .chatMessageType(ChatMessageType.UPDATE_FULFILLMENT_FORM)
+        .preview(ChatMessageType.UPDATE_FULFILLMENT_FORM.getDescription())
+        .build(),
+      sender
+    );
+  }
+
+  private void handleFulfillmentDecision(ChatRoom chatRoom, FulfillmentFormMessageRequest request, Member sender) {
+    ChatMessage chatMessage = handleNewChatMessage(sender, request, chatRoom);
+
+    // 참여자 라우팅
+    Stream.of(chatRoom.getAgentMemberId(), chatRoom.getClientMemberId()).forEach(currentMemberId -> {
+      ChatMessageResponse resp = chatMapper.toChatMessageResponse(chatMessage, currentMemberId);
+      rabbitTemplate.convertAndSend(
+        chatRabbitMqProperties.exchangeName(),
+        "chat.room." + chatRoom.getChatRoomId() + ".user." + currentMemberId,
+        resp
+      );
+    });
   }
 
   private LastReadMessage findLastReadMessage(ReadAckRequest request, String chatRoomId, Member reader) {
 
     // Redis포인터 기본 키값 추출
-    String redisKey = ChatConstants.LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId());
+    String redisKey = LAST_READ_MESSAGE_POINTER_KEY.formatted(chatRoomId, reader.getMemberId());
 
     // 추출한 키값 조회 후 없으면 새로 생성 후 포인터 갱신 진행
     return lastReadMessageRepository.findById(redisKey)
-        .orElseGet(() ->
-            LastReadMessage.builder()
-                .lastReadMessage(redisKey)
-                .chatRoomId(chatRoomId)
-                .memberId(reader.getMemberId())
-                .lastMessageId(request.getLastReadMessageId())
-                .readDate(TimeUtil.toInstant(request.getReadDate()))
-                .build()
-        );
+      .orElseGet(() ->
+        LastReadMessage.builder()
+          .lastReadMessage(redisKey)
+          .chatRoomId(chatRoomId)
+          .memberId(reader.getMemberId())
+          .lastMessageId(request.getLastReadMessageId())
+          .readDate(TimeUtil.toInstant(request.getReadDate()))
+          .build()
+      );
   }
 
   private String formattingSendDate(LocalDateTime dateTime) {
     return dateTime.truncatedTo(ChronoUnit.SECONDS)
-        .format(ChatConstants.ISO_SEC);
+      .format(ISO_SEC);
   }
 
   /**
@@ -172,23 +266,23 @@ public class ChatMessageService {
         continue;   // 발송자 제외
       }
 
-      String key = ChatConstants.UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoom.getChatRoomId(), chatRoomMemberId);
+      String key = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoom.getChatRoomId(), chatRoomMemberId);
       Long count = redisTemplate.opsForValue().increment(key);
-      redisTemplate.expire(key, ChatConstants.TTL);
+      redisTemplate.expire(key, TTL);
 
       String formattedSendDate = formattingSendDate(TimeUtil.toLocalDateTime(message.getSendDate()));
 
       rabbitTemplate.convertAndSend(
-          "",
-          chatRabbitMqProperties.unreadRoutingKey() + chatRoomMemberId,
-          Map.of(
-              "chatRoomId", chatRoom.getChatRoomId(),
-              "unReadMessageCount", count,
-              "lastMessage", request.toPreview(),
-              "lastMessageType", request.getType(),
-              "sendDate", formattedSendDate,
-              "lastMessageId", message.getChatMessageId()
-          ));
+        "",
+        chatRabbitMqProperties.unreadRoutingKey() + chatRoomMemberId,
+        Map.of(
+          "chatRoomId", chatRoom.getChatRoomId(),
+          "unReadMessageCount", count,
+          "lastMessage", request.toPreview(),
+          "lastMessageType", request.getType(),
+          "sendDate", formattedSendDate,
+          "lastMessageId", message.getChatMessageId()
+        ));
     }
     return message;
   }
@@ -198,12 +292,15 @@ public class ChatMessageService {
    */
   private ChatMessage saveChatMessage(Member sender, ChatMessageRequest request, ChatRoom chatRoom) {
     /**
-     * 현재 보낸 메시지가 'TEXT' 인지 'PICTURE' 인지에 대한 분기처리
+     * 현재 보낸 메시지가 무슨 메시지 타입인지에 대한 분기처리
      */
     ChatMessage chatMessage = switch (request.getType()) {
       case TEXT -> saveTextMessage(((TextMessageRequest) request).getMessage(), sender, chatRoom, ChatMessageType.TEXT);
 
       case PICTURE -> savePictureMessage((PictureMessageRequest) request, sender, chatRoom);
+
+      case FULFILLMENT_FORM, ACCEPTED_FULFILLMENT_FORM, REJECTED_FULFILLMENT_FORM, UPDATE_FULFILLMENT_FORM ->
+        saveFulfillmentFormMessage((FulfillmentFormMessageRequest) request, sender, chatRoom, request.getType());
     };
 
     updateLastMessageInfo(chatRoom, chatMessage, request.toPreview());
@@ -220,7 +317,7 @@ public class ChatMessageService {
    */
   private ChatRoom findChatRoom(String chatRoomId) {
     return chatRoomRepository.findById(chatRoomId)
-        .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
   }
 
   /**
@@ -228,17 +325,17 @@ public class ChatMessageService {
    */
   private ChatMessage saveTextMessage(String message, Member sender, ChatRoom chatRoom, ChatMessageType chatMessageType) {
     ChatMessage chatMessage = ChatMessage.builder()
-        .chatRoomId(chatRoom.getChatRoomId())
-        .senderId(sender.getMemberId())
-        .senderNickName(sender.getNickname())
-        .senderEmail(sender.getUsername())
-        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
-        .message(message)
-        .chatMessageType(chatMessageType)
-        .isRead(false)
-        .sendDate(TimeUtil.now())
-        .pictureMessageStoredPathList(Collections.emptyList())
-        .build();
+      .chatRoomId(chatRoom.getChatRoomId())
+      .senderId(sender.getMemberId())
+      .senderNickName(sender.getNickname())
+      .senderEmail(sender.getUsername())
+      .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
+      .message(message)
+      .chatMessageType(chatMessageType)
+      .isRead(false)
+      .sendDate(TimeUtil.now())
+      .pictureMessageStoredPathList(Collections.emptyList())
+      .build();
 
     chatMessageRepository.save(chatMessage);
     return chatMessage;
@@ -256,7 +353,7 @@ public class ChatMessageService {
     if (CommonUtil.nullOrEmpty(pictureList)) {
       throw new CustomException(ErrorCode.CHAT_PICTURE_EMPTY);
     }
-    if (pictureList.size() > ChatConstants.CHAT_PICTURE_MAX_SIZE) {
+    if (pictureList.size() > CHAT_PICTURE_MAX_SIZE) {
       throw new CustomException(ErrorCode.CHAT_PICTURE_SIZE_EXCEED);
     }
 
@@ -279,19 +376,51 @@ public class ChatMessageService {
     }
 
     ChatMessage chatMessage = ChatMessage.builder()
-        .chatRoomId(chatRoom.getChatRoomId())
-        .senderId(sender.getMemberId())
-        .senderNickName(sender.getNickname())
-        .senderEmail(sender.getUsername())
-        .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
-        .message(null)
-        .chatMessageType(ChatMessageType.PICTURE)
-        .isRead(false)
-        .sendDate(TimeUtil.now())
-        .pictureMessageStoredPathList(pictureStoredPathList)
-        .build();
+      .chatRoomId(chatRoom.getChatRoomId())
+      .senderId(sender.getMemberId())
+      .senderNickName(sender.getNickname())
+      .senderEmail(sender.getUsername())
+      .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
+      .message(null)
+      .chatMessageType(ChatMessageType.PICTURE)
+      .isRead(false)
+      .sendDate(TimeUtil.now())
+      .pictureMessageStoredPathList(pictureStoredPathList)
+      .build();
 
     return chatMessageRepository.save(chatMessage);
+  }
+
+  // 성공양식 저장 로직 (수락/거절/성공양식 제출 공통)
+  private ChatMessage saveFulfillmentFormMessage(FulfillmentFormMessageRequest request, Member sender, ChatRoom chatRoom, ChatMessageType type) {
+
+    // 타입 가드
+    if (type != ChatMessageType.FULFILLMENT_FORM
+        && type != ChatMessageType.ACCEPTED_FULFILLMENT_FORM
+        && type != ChatMessageType.REJECTED_FULFILLMENT_FORM
+        && type != ChatMessageType.UPDATE_FULFILLMENT_FORM) {
+      throw new CustomException(ErrorCode.INVALID_FULFILLMENT_MESSAGE_TYPE);
+    }
+
+    // 본문 메시지(거절일 때만 메모 노출, 나머지는 UI를 위한 카드 전용이므로 null)
+    final String message = (type == ChatMessageType.REJECTED_FULFILLMENT_FORM)
+      ? nvl(request.getRejectMemo(), "") : null;
+
+    ChatMessage entity = ChatMessage.builder()
+      .chatRoomId(chatRoom.getChatRoomId())
+      .senderId(sender.getMemberId())
+      .senderNickName(sender.getNickname())
+      .senderEmail(sender.getUsername())
+      .senderProfileImgStoredPath(sender.getProfileImgStoredPath())
+      .message(message) // 거절 사유만 세팅
+      .chatMessageType(type)
+      .isRead(false)
+      .sendDate(TimeUtil.now())
+      .pictureMessageStoredPathList(Collections.emptyList())
+      .referenceId(request.getFulfillmentFormId().toString())
+      .build();
+
+    return chatMessageRepository.save(entity);
   }
 
   /**
