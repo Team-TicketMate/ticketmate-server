@@ -2,6 +2,7 @@ package com.ticketmate.backend.messaging.infrastructure.config;
 
 import static org.springframework.amqp.rabbit.support.micrometer.RabbitTemplateObservation.TemplateLowCardinalityTags.ROUTING_KEY;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ticketmate.backend.messaging.infrastructure.properties.ChatRabbitMqProperties;
 import com.ticketmate.backend.messaging.infrastructure.properties.RabbitMqProperties;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +23,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties({
-    RabbitMqProperties.class,
-    ChatRabbitMqProperties.class
+  RabbitMqProperties.class,
+  ChatRabbitMqProperties.class
 })
 public class RabbitMqConfig {
 
   private final RabbitMqProperties rabbitMqProperties;
   private final ChatRabbitMqProperties chatRabbitMqProperties;
+  private final ObjectMapper objectMapper;
 
   // chat.queue 라는 Queue 생성
   @Bean
@@ -46,16 +48,17 @@ public class RabbitMqConfig {
   @Bean
   public Binding binding(Queue queue, TopicExchange exchange) {
     return BindingBuilder
-        .bind(queue)
-        .to(exchange)
-        .with(ROUTING_KEY);
+      .bind(queue)
+      .to(exchange)
+      .with(ROUTING_KEY);
   }
 
   // RabbitMQ와의 메시지 통신을 담당하는 클래스
   @Bean
-  public RabbitTemplate rabbitTemplate() {
-    RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory());
-    rabbitTemplate.setMessageConverter(jsonMessageConverter());
+  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+    Jackson2JsonMessageConverter jackson2JsonMessageConverter) {
+    RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter);
     return rabbitTemplate;
   }
 
@@ -74,6 +77,6 @@ public class RabbitMqConfig {
   // 메시지를 JSON형식으로 직렬화하고 역직렬화하는데 사용되는 변환기
   @Bean
   public Jackson2JsonMessageConverter jsonMessageConverter() {
-    return new Jackson2JsonMessageConverter();
+    return new Jackson2JsonMessageConverter(objectMapper);
   }
 }
