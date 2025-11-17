@@ -40,7 +40,7 @@ public interface FulfillmentFormControllerDocs {
         "messageId":"69168a85c7ab845b344146c1",
         "senderNickname":"닉변한닉네임임",
         "message":null,
-        "sendDate":[2025,11,14,10,48,53],
+        "sendDate": "2025-11-17T11:18:24",
         "profileUrl":"https://picsum.photos/640/350311a9233-9111-48ea-9157-e4d5d6bb291208",
         "mine":false,
         "chatMessageType":"FULFILLMENT_FORM",
