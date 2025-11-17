@@ -28,9 +28,10 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FulfillmentFormImg extends BasePostgresEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID FulfillmentFormImgId;
+  private UUID fulfillmentFormImgId;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
@@ -52,11 +53,11 @@ public class FulfillmentFormImg extends BasePostgresEntity {
 
   public static FulfillmentFormImg of(FulfillmentForm fulfillmentForm, FileMetadata metadata) {
     return FulfillmentFormImg.builder()
-        .fulfillmentForm(fulfillmentForm)
-        .originalFilename(metadata.originalFilename())
-        .storedPath(metadata.storedPath())
-        .fileExtension(metadata.fileExtension())
-        .sizeBytes(metadata.sizeBytes())
-        .build();
+      .fulfillmentForm(fulfillmentForm)
+      .originalFilename(metadata.originalFilename())
+      .storedPath(metadata.storedPath())
+      .fileExtension(metadata.fileExtension())
+      .sizeBytes(metadata.sizeBytes())
+      .build();
   }
 }

@@ -145,16 +145,9 @@ public class FulfillmentFormService {
   public void rejectFulfillmentForm(Member member, UUID fulfillmentFormId, FulfillmentFormRejectRequest request) {
     FulfillmentForm fulfillmentForm = handleFulfillmentStatusForClient(member, fulfillmentFormId, REJECTED_FULFILLMENT_FORM);
 
-    // 이미 수락된 성공양식은 거절 불가
-    if (fulfillmentForm.getFulfillmentFormStatus() == ACCEPTED_FULFILLMENT_FORM) {
-      log.error("수락된 성공양식은 거절이 불가능합니다. 성공양식 ID : {}", fulfillmentForm.getFulfillmentFormId());
-      throw new CustomException(ErrorCode.FULFILLMENT_FORM_ALREADY_ACCEPTED);
-    }
-
     validateFulfillmentFormMember(member, fulfillmentForm, MemberType.CLIENT);
 
     // TODO 성공양식이 거절됐다는 알림 발송 로직 추가해야될듯
-
     // 트렌젝션 커밋 이후에만 호출되도록 보장 (채팅 발송은 채팅 메시지 서비스에서 수행)
     TransactionSynchronizationManager.registerSynchronization(
       new TransactionSynchronization() {
@@ -201,11 +194,16 @@ public class FulfillmentFormService {
       fulfillmentForm.setAgentBankAccount(agentBankAccount);
     }
 
-    // TODO 성공양식이 수정됐다는 알림 발송 로직 추가해야될듯
-    chatMessageService.sendFulfillmentFormUpdatedMessage(
-      fulfillmentForm.getChatRoomId(),
-      fulfillmentForm.getFulfillmentFormId(),
-      member);
+    TransactionSynchronizationManager.registerSynchronization(
+      new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+          // TODO 성공양식이 수정됐다는 알림 발송 로직 추가해야될듯
+          chatMessageService.sendFulfillmentFormUpdatedMessage(
+            fulfillmentForm.getChatRoomId(),
+            fulfillmentForm.getFulfillmentFormId(), member);
+        }
+      });
   }
 
   /**
@@ -234,6 +232,12 @@ public class FulfillmentFormService {
       }
 
       case REJECTED_FULFILLMENT_FORM -> {
+        // 이미 수락된 성공양식은 거절 불가
+        if (fulfillmentForm.getFulfillmentFormStatus() == ACCEPTED_FULFILLMENT_FORM) {
+          log.error("수락된 성공양식은 거절이 불가능합니다. 성공양식 ID : {}", fulfillmentForm.getFulfillmentFormId());
+          throw new CustomException(ErrorCode.FULFILLMENT_FORM_ALREADY_ACCEPTED);
+        }
+
         fulfillmentForm.setFulfillmentFormStatus(REJECTED_FULFILLMENT_FORM);
         log.debug("의뢰인 성공양식 거절감지. 현재 상태 : {}", fulfillmentForm.getFulfillmentFormStatus());
       }

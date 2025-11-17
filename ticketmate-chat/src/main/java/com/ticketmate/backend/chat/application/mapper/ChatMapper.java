@@ -20,7 +20,7 @@ public interface ChatMapper {
     ChatRoom chatRoom,
     Member member,
     Map<UUID, ApplicationForm> applicationFormMap,
-    Map<UUID, Member> mmemberMap,
+    Map<UUID, Member> memberMap,
     int unRead
   );
 

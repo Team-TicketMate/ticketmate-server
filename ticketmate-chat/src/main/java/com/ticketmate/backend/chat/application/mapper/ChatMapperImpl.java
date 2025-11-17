@@ -34,24 +34,24 @@ public class ChatMapperImpl implements ChatMapper {
       .toList();
 
     return ChatMessageResponse.builder()
-        .messageId(message.getChatMessageId())
-        .senderNickname(message.getSenderNickName())
-        .message(message.getMessage())
-        .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
-        .read(message.isRead())
-        .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
-        .mine(message.getSenderId().equals(currentMemberId))
-        .chatMessageType(message.getChatMessageType())
-        .pictureMessageUrlList(pictureMessageUrlList)
-        .referenceId(message.getReferenceId())
-        .build();
+      .messageId(message.getChatMessageId())
+      .senderNickname(message.getSenderNickName())
+      .message(message.getMessage())
+      .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
+      .read(message.isRead())
+      .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
+      .mine(message.getSenderId().equals(currentMemberId))
+      .chatMessageType(message.getChatMessageType())
+      .pictureMessageUrlList(pictureMessageUrlList)
+      .referenceId(message.getReferenceId())
+      .build();
   }
 
   @Override
-  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> mmemberMap, int unRead) {
+  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> memberMap, int unRead) {
     // 매핑을 위한 값 세팅
     UUID opponentId = ChatRoomService.opponentIdOf(chatRoom, member);
-    Member other = mmemberMap.get(opponentId);
+    Member other = memberMap.get(opponentId);
     ApplicationForm applicationForm = applicationFormMap.get(chatRoom.getApplicationFormId());
     String concertThumbnailStoredPath = applicationForm.getConcert().getConcertThumbnailStoredPath();
     String profileImgStoredPath = other.getProfileImgStoredPath();
