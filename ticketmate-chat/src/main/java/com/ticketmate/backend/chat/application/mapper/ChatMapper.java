@@ -23,7 +23,7 @@ public interface ChatMapper {
     Map<UUID, Member> memberMap,
     int unRead
   );
-
+  
   ChatRoomContextResponse toChatRoomContextResponse(
     ChatRoom chatRoom,
     UUID currentMemberId,
