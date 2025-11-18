@@ -57,6 +57,7 @@ public class ChatMessageService {
   private final RabbitTemplate rabbitTemplate;
   private final LastReadMessageRepository lastReadMessageRepository;
   private final ChatRoomRepository chatRoomRepository;
+  private final ChatRoomService chatRoomService;
   private final ChatMessageRepository chatMessageRepository;
   private final ChatRabbitMqProperties chatRabbitMqProperties;
   private final ChatMapper chatMapper;
@@ -70,7 +71,7 @@ public class ChatMessageService {
   public void sendMessage(String chatRoomId, ChatMessageRequest request, Member sender) {
 
     // 메시지를 보낼 채팅방 조회
-    ChatRoom chatRoom = findChatRoom(chatRoomId);
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     ChatMessage chatMessage = handleNewChatMessage(sender, request, chatRoom);
 
@@ -110,8 +111,7 @@ public class ChatMessageService {
         "lastMessageId", ack.getLastReadMessageId())
     );
 
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-      .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     long updatedMessage = chatMessageRepository.markReadUpTo(chatRoomId, reader.getMemberId());
     log.debug("'읽음' 처리된 메시지 개수  = {}", updatedMessage);
@@ -149,7 +149,7 @@ public class ChatMessageService {
   public void sendFulfillmentFormMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
 
     // 대상 채팅방
-    ChatRoom chatRoom = findChatRoom(chatRoomId);
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     handleFulfillmentDecision(chatRoom,
       FulfillmentFormMessageRequest.builder()
@@ -168,7 +168,7 @@ public class ChatMessageService {
   public void sendFulfillmentFormAcceptMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
 
     // 대상 채팅방
-    ChatRoom chatRoom = findChatRoom(chatRoomId);
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     handleFulfillmentDecision(chatRoom,
       FulfillmentFormMessageRequest.builder()
@@ -186,7 +186,7 @@ public class ChatMessageService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void sendFulfillmentFormRejectMessage(String chatRoomId, UUID fulfillmentFormId, Member sender, String rejectMemo) {
     // 대상 채팅방
-    ChatRoom chatRoom = findChatRoom(chatRoomId);
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     handleFulfillmentDecision(chatRoom,
       FulfillmentFormMessageRequest.builder()
@@ -202,7 +202,7 @@ public class ChatMessageService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void sendFulfillmentFormUpdatedMessage(String chatRoomId, UUID fulfillmentFormId, Member sender) {
     // 대상 채팅방
-    ChatRoom chatRoom = findChatRoom(chatRoomId);
+    ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
 
     handleFulfillmentDecision(chatRoom,
       FulfillmentFormMessageRequest.builder()
@@ -310,14 +310,6 @@ public class ChatMessageService {
 
     log.debug("메시지가 저장완료 Sender : {}", chatMessage.getSenderId());
     return chatMessage;
-  }
-
-  /**
-   * 요청된 채팅방을 조회하는 메서드
-   */
-  private ChatRoom findChatRoom(String chatRoomId) {
-    return chatRoomRepository.findById(chatRoomId)
-      .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
   }
 
   /**
