@@ -27,8 +27,8 @@ import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -84,18 +85,34 @@ public class FulfillmentFormService {
     // 콘서트 추출
     Concert concert = applicationForm.getConcert();
 
-    UUID fulfillmentFormId = Optional.of(request)
-      .map(req -> FulfillmentForm.create(client, member, concert, applicationForm, chatRoomId, agentBankAccount,
-        req.getParticularMemo(), PENDING_FULFILLMENT_FORM))
-      .map(form -> Optional.ofNullable(request.getFulfillmentFormImgList())
-        .filter(list -> list.stream().anyMatch(f -> f != null && !f.isEmpty()))
-        .map(list -> fulfillmentFormImgService.saveFulfillmentImgInfo(form, list))
-        .orElse(form))
-      .map(fulfillmentFormRepository::save)
-      // TODO 티켓팅이 성공했다는 알림 발송 로직 추가해야될듯
-      .map(FulfillmentForm::getFulfillmentFormId)
-      .orElseThrow(() -> new CustomException(ErrorCode.FULFILLMENT_FORM_UPLOAD_ERROR));
+    // 성공양식 엔티티 생성
+    FulfillmentForm fulfillmentFormForSave = FulfillmentForm.create(
+      client,
+      member,
+      concert,
+      applicationForm,
+      chatRoomId,
+      agentBankAccount,
+      request.getParticularMemo(),
+      PENDING_FULFILLMENT_FORM
+    );
 
+    // 이미지가 있다면 업로드 및 연관 관계 설정
+    List<MultipartFile> imgList = request.getFulfillmentFormImgList();
+    if (hasNonEmptyFileList(imgList)) {
+      fulfillmentFormImgService.saveFulfillmentImgInfo(fulfillmentFormForSave, imgList);
+    }
+
+    // 저장 및 결과 검증
+    FulfillmentForm fulfillmentForm = fulfillmentFormRepository.save(fulfillmentFormForSave);
+
+    if (fulfillmentForm == null || fulfillmentForm.getFulfillmentFormId() == null) {
+      throw new CustomException(ErrorCode.FULFILLMENT_FORM_UPLOAD_ERROR);
+    }
+
+    UUID fulfillmentFormId = fulfillmentForm.getFulfillmentFormId();
+
+    // TODO 티켓팅이 성공했다는 알림 발송 로직 추가해야될듯
     // 트렌젝션 커밋 이후에만 호출되도록 보장 (채팅 발송은 채팅 메시지 서비스에서 수행)
     TransactionSynchronizationManager.registerSynchronization(
       new TransactionSynchronization() {
@@ -204,6 +221,13 @@ public class FulfillmentFormService {
             fulfillmentForm.getFulfillmentFormId(), member);
         }
       });
+  }
+
+  /**
+   * 이미지가 실제로 있는지 검증
+   */
+  private boolean hasNonEmptyFileList(List<MultipartFile> imgList) {
+    return imgList != null && imgList.stream().anyMatch(f -> f != null && !f.isEmpty());
   }
 
   /**
