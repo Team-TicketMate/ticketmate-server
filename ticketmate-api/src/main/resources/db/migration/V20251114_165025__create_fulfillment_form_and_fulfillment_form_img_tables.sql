@@ -13,6 +13,7 @@ CREATE TABLE public.fulfillment_form
       CHECK ( fulfillment_form_status IN (
                                           'PENDING_FULFILLMENT_FORM',
                                           'ACCEPTED_FULFILLMENT_FORM',
+                                          'UPDATE_FULFILLMENT_FORM',
                                           'REJECTED_FULFILLMENT_FORM'
         )),
   created_date                                TIMESTAMPTZ(0) NOT NULL,
