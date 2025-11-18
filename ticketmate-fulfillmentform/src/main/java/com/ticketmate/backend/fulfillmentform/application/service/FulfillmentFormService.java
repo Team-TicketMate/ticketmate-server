@@ -4,6 +4,7 @@ import static com.ticketmate.backend.common.core.util.CommonUtil.nullOrEmpty;
 import static com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM;
 import static com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus.PENDING_FULFILLMENT_FORM;
 import static com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus.REJECTED_FULFILLMENT_FORM;
+import static com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus.UPDATE_FULFILLMENT_FORM;
 import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.UPDATABLE_STATUSES;
 
 import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
@@ -210,6 +211,8 @@ public class FulfillmentFormService {
       agentBankAccountService.validateAgentAccountOwner(agentBankAccount, member);
       fulfillmentForm.setAgentBankAccount(agentBankAccount);
     }
+
+    fulfillmentForm.setFulfillmentFormStatus(UPDATE_FULFILLMENT_FORM);
 
     TransactionSynchronizationManager.registerSynchronization(
       new TransactionSynchronization() {
