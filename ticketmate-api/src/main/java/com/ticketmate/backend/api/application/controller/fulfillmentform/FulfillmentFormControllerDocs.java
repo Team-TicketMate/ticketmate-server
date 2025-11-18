@@ -51,7 +51,7 @@ public interface FulfillmentFormControllerDocs {
        
       ### 채팅방 `chatMessageType` 관련 반환값
       - 성공양식쪽을 설계하면서 채팅과도 연계되어있어 채팅 메시지 타입 내부에 필드값을 추가했습니다.
-      - 기존 텍스트 메시지와 사진 메시지 뿐만이 아닌 성공양식이 등록,수락,거절,수정 됐는지데 대한 필드를 추가했습니다.
+      - 기존 텍스트 메시지와 사진 메시지 뿐만이 아닌 성공양식이 등록,수락,거절,수정 됐는지에 대한 필드를 추가했습니다.
             
         `FULFILLMENT_FORM("성공양식 전송")`
         
@@ -64,10 +64,10 @@ public interface FulfillmentFormControllerDocs {
       - 해당 필드값은 성공양식의 상태가 변경될때마다 채팅방 내부에 위의 JSON 데이터 처럼 전송됩니다.
             
       ## 예시
-       `chatMessageType":"FULFILLMENT_FORM` : 성공양식이 처음으로 등록되었을때
-       `chatMessageType":"ACCEPTED_FULFILLMENT_FORM` : 성공양식이 수락되었을때
-       `chatMessageType":"REJECTED_FULFILLMENT_FORM` : 성공양식이 거절되었을때
-       `chatMessageType":"UPDATE_FULFILLMENT_FORM` : 성공양식이 수정되었을때       
+       `chatMessageType": "FULFILLMENT_FORM` : 성공양식이 처음으로 등록되었을때
+       `chatMessageType": "ACCEPTED_FULFILLMENT_FORM` : 성공양식이 수락되었을때
+       `chatMessageType": "REJECTED_FULFILLMENT_FORM` : 성공양식이 거절되었을때
+       `chatMessageType": "UPDATE_FULFILLMENT_FORM` : 성공양식이 수정되었을때       
        
       - 프론트는 해당 필드타입을 보고 적절하게 UI를 설계하면 될 것 같습니다.
             
@@ -254,7 +254,7 @@ public interface FulfillmentFormControllerDocs {
   @Operation(
     summary = "성공양식 수정",
     description = """
-      대리인이 사진이 작성한 성공양식을 수정하는 API입니다.
+      대리인이 작성한 성공양식을 수정하는 API입니다.
                 
       ### 요청 파라미터
       - `fulfillment-form-id` : 성공양식 ID
@@ -267,7 +267,7 @@ public interface FulfillmentFormControllerDocs {
        
        
       ### 응답값
-        - API반환값은 따로 없지만 1:1채팅방 내부에 의뢰인이 수정했다는 플래그를 전송합니다.
+        - API반환값은 따로 없지만 1:1채팅방 내부에 대리인이 수정했다는 플래그를 전송합니다.
             
       ### 1:1채팅방 플래그 전송 예시
        ```json
