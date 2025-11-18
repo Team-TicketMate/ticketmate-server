@@ -22,11 +22,12 @@ public class FulfillmentFormMapperImpl implements FulfillmentFormMapper {
   @Override
   public FulfillmentFormInfoResponse toFulfillmentFormResponse(FulfillmentForm fulfillmentForm) {
     return new FulfillmentFormInfoResponse(
-        fulfillmentForm.getFulfillmentFormId(),
-        toFulfillmentFormImgList(fulfillmentForm.getSuccessTicketingStoredPathList()),
-        fulfillmentForm.getParticularMemo(),
-        mapper.toAgentBankAccountResponse(fulfillmentForm.getAgentBankAccount()),
-        TimeUtil.toLocalDateTime(fulfillmentForm.getCreatedDate())
+      fulfillmentForm.getFulfillmentFormId(),
+      toFulfillmentFormImgList(fulfillmentForm.getSuccessTicketingStoredPathList()),
+      fulfillmentForm.getParticularMemo(),
+      fulfillmentForm.getFulfillmentFormStatus(),
+      mapper.toAgentBankAccountResponse(fulfillmentForm.getAgentBankAccount()),
+      TimeUtil.toLocalDateTime(fulfillmentForm.getCreatedDate())
     );
   }
 
@@ -35,10 +36,10 @@ public class FulfillmentFormMapperImpl implements FulfillmentFormMapper {
       return List.of();
     }
     return fulfillmentFormImgList.stream()
-        .filter(img -> !CommonUtil.nvl(img.getStoredPath(), "").isEmpty())
-        .map(img -> new FulfillmentFormImgResponse(
-            img.getFulfillmentFormImgId(),
-            storageService.generatePublicUrl(img.getStoredPath())))
-        .toList();
+      .filter(img -> !CommonUtil.nvl(img.getStoredPath(), "").isEmpty())
+      .map(img -> new FulfillmentFormImgResponse(
+        img.getFulfillmentFormImgId(),
+        storageService.generatePublicUrl(img.getStoredPath())))
+      .toList();
   }
 }
