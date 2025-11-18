@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,28 +33,16 @@ public class FulfillmentFormImgService {
   private final StorageService storageService;
 
   @Transactional
-  public FulfillmentForm saveFulfillmentImgInfo(FulfillmentForm fulfillmentForm, List<MultipartFile> imgList) {
-    List<FileMetadata> metadataList = new ArrayList<>();
-
+  public void saveFulfillmentImgInfo(FulfillmentForm fulfillmentForm, List<MultipartFile> imgList) {
     validateFulfillmentFormImgCount(imgList);
 
-    try {
-      for (MultipartFile file : imgList) {
-        FileMetadata metadata = storageService.uploadFile(file, UploadType.FULFILLMENT_FORM);
-        metadataList.add(metadata);
-      }
-    } catch (Exception e) {
-      log.error("성공양식 이미지 업로드 중 오류 발생: {}", e.getMessage());
-      log.error("이미 업로드 된 {} 개 파일 삭제 시도", metadataList.size());
-      metadataList.forEach(metadata -> storageService.deleteFile(metadata.storedPath()));
-      throw new CustomException(ErrorCode.FULFILLMENT_FORM_UPLOAD_ERROR);
-    }
-    for (FileMetadata metadata : metadataList) {
-      FulfillmentFormImg fulfillmentFormImg = FulfillmentFormImg.of(fulfillmentForm, metadata);
-      fulfillmentForm.addFulfillmentFormImg(fulfillmentFormImg);
-    }
+    List<FileMetadata> metadataList = uploadFulfillmentImageListWithRollback(imgList, "성공양식 이미지 업로드",
+      meta -> storageService.deleteFile(meta.storedPath())
+    );
+
+    attachImagesToForm(fulfillmentForm, metadataList);
+
     log.debug("성공양식 이미지 {}개 업로드 성공", metadataList.size());
-    return fulfillmentForm;
   }
 
   public void updateImageListByDeleteAndAdd(FulfillmentForm fulfillmentForm, List<UUID> deleteImgIdList, List<MultipartFile> newSuccessImgList) {
@@ -69,19 +58,7 @@ public class FulfillmentFormImgService {
     Map<UUID, FulfillmentFormImg> currentImgMapById = currentImgEntityList.stream()
       .collect(Collectors.toMap(FulfillmentFormImg::getFulfillmentFormImgId, it -> it));
 
-    List<FulfillmentFormImg> deleteTargetImgList = new ArrayList<>();
-
-    if (!nullOrEmpty(normalizedDeleteIdList)) {
-      for (UUID imgId : normalizedDeleteIdList) {
-        FulfillmentFormImg ownedImg = currentImgMapById.get(imgId);
-        if (ownedImg == null) {
-          log.error("성공양식 소유가 아닌 이미지 삭제 요청 imageId: {}, fulfillmentFormId: {}",
-            imgId, fulfillmentForm.getFulfillmentFormId());
-          throw new CustomException(ErrorCode.FULFILLMENT_IMAGE_NOT_OWNED_BY_FORM);
-        }
-        deleteTargetImgList.add(ownedImg);
-      }
-    }
+    List<FulfillmentFormImg> deleteTargetImgList = resolveDeleteTargetImageList(normalizedDeleteIdList, currentImgMapById, fulfillmentForm);
 
     // 총 개수 검증: 현재 - 삭제 + 추가 ≤ MAX (6개)
     int currentCount = currentImgEntityList.size();
@@ -91,19 +68,11 @@ public class FulfillmentFormImgService {
     validateTotalCount(currentCount, deleteCount, addCount);
 
     // 신규 파일 업로드
-    List<FileMetadata> uploadedMetadataList = new ArrayList<>();
-
-    try {
-      for (MultipartFile file : normalizedNewImageFileList) {
-        FileMetadata metadata = storageService.uploadFile(file, UploadType.FULFILLMENT_FORM);
-        uploadedMetadataList.add(metadata);
-      }
-    } catch (Exception e) {
-      // 업로드 실패시 이미 업로드한 파일 정리
-      uploadedMetadataList.forEach(meta -> safeDeleteStorage(meta.storedPath()));
-      log.error("성공양식 이미지 업로드(수정) 실패: {}", e.getMessage(), e);
-      throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
-    }
+    List<FileMetadata> uploadedMetadataList = uploadFulfillmentImageListWithRollback(
+      normalizedNewImageFileList,
+      "성공양식 이미지 업로드(수정)",
+      meta -> safeDeleteStorage(meta.storedPath())
+    );
 
     // 성공양식 엔티티에 연관되어 있는 필드 삭제 -> 파일은 커밋 직후 삭제
     if (!nullOrEmpty(deleteTargetImgList)) {
@@ -122,6 +91,67 @@ public class FulfillmentFormImgService {
         fulfillmentForm.addFulfillmentFormImg(newImageEntity);
       }
     }
+  }
+
+  /**
+   * 이미지 업로드 및 실패 시 이미 업로드된 파일 롤백
+   */
+  private List<FileMetadata> uploadFulfillmentImageListWithRollback(List<MultipartFile> imgList, String logContextMessage,
+    Consumer<FileMetadata> deleteStrategy) {
+    List<FileMetadata> metadataList = new ArrayList<>();
+
+    if (nullOrEmpty(imgList)) {
+      return metadataList;
+    }
+
+    try {
+      for (MultipartFile file : imgList) {
+        FileMetadata metadata = storageService.uploadFile(file, UploadType.FULFILLMENT_FORM);
+        metadataList.add(metadata);
+      }
+    } catch (Exception e) {
+      log.error("{} 중 오류 발생: {}", logContextMessage, e.getMessage(), e);
+      log.error("이미 업로드 된 {}개 파일 삭제 시도", metadataList.size());
+      metadataList.forEach(deleteStrategy);
+      throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
+    }
+
+    return metadataList;
+  }
+
+  /**
+   * FileMetadata 리스트를 FulfillmentFormImg 엔티티로 변경
+   */
+  private void attachImagesToForm(FulfillmentForm fulfillmentForm, List<FileMetadata> metadataList) {
+    for (FileMetadata metadata : metadataList) {
+      FulfillmentFormImg imgEntity = FulfillmentFormImg.of(fulfillmentForm, metadata);
+      fulfillmentForm.addFulfillmentFormImg(imgEntity);
+    }
+  }
+
+  /**
+   * 삭제 요청된 이미지 ID 리스트에 대해 실제로 해당 폼이 소유한 이미지인지 검증후 삭제 대상 엔티티 리스트를 반환
+   */
+  private List<FulfillmentFormImg> resolveDeleteTargetImageList(List<UUID> deleteImgIdList,
+    Map<UUID, FulfillmentFormImg> currentImgMapById,
+    FulfillmentForm fulfillmentForm) {
+    if (nullOrEmpty(deleteImgIdList)) {
+      return List.of();
+    }
+
+    List<FulfillmentFormImg> deleteTargetImgList = new ArrayList<>();
+
+    for (UUID imgId : deleteImgIdList) {
+      FulfillmentFormImg ownedImg = currentImgMapById.get(imgId);
+      if (ownedImg == null) {
+        log.error("성공양식 소유가 아닌 이미지 삭제 요청 imageId: {}, fulfillmentFormId: {}",
+          imgId, fulfillmentForm.getFulfillmentFormId());
+        throw new CustomException(ErrorCode.FULFILLMENT_IMAGE_NOT_OWNED_BY_FORM);
+      }
+      deleteTargetImgList.add(ownedImg);
+    }
+
+    return deleteTargetImgList;
   }
 
   private void safeDeleteStorage(String storedPath) {
