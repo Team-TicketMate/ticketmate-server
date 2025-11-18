@@ -53,15 +53,18 @@ public class FulfillmentForm extends BasePostgresEntity {
   private Member agent; // 대리인
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false)
   private Concert concert;  // 콘서트
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false)
   private ApplicationForm applicationForm;  // 신청서
 
   @Column(nullable = false)
   private String chatRoomId;  // 채팅방 ID
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(nullable = false)
   private AgentBankAccount agentBankAccount;  // 대리인 계좌 정보
 
   @Builder.Default
