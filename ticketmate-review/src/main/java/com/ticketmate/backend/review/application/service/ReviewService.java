@@ -185,7 +185,7 @@ public class ReviewService {
   private void validateEditor(Review review, Member client) {
     if (!review.getClient().getMemberId().equals(client.getMemberId())) {
       log.error("리뷰 수정/삭제 권한이 없습니다. reviewId={}, clientId={}", review.getReviewId(), client.getMemberId());
-      throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW);
+      throw new CustomException(ErrorCode.NO_AUTH_TO_EDIT_REVIEW);
     }
   }
 

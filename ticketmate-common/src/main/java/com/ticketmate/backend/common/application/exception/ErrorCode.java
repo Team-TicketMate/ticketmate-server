@@ -294,6 +294,8 @@ public enum ErrorCode {
 
   NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 성공양식에 대한 리뷰를 작성할 권한이 없습니다."),
 
+  NO_AUTH_TO_EDIT_REVIEW(HttpStatus.FORBIDDEN, "해당 리뷰에 대한 수정/삭제 권한이 없습니다."),
+
 
   NO_AUTH_TO_REVIEW_COMMENT(HttpStatus.FORBIDDEN, "해당 리뷰에 댓글을 작성할 권한이 없습니다."),
 
