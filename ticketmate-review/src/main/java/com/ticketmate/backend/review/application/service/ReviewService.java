@@ -190,10 +190,10 @@ public class ReviewService {
   }
 
   /**
-   * 리뷰 수정 기간(1달)이 만료되었는지 검증
+   * 리뷰 수정 기간(30일)이 만료되었는지 검증
    */
   private void validateEditPeriod(Review review, Member member) {
-    Instant oneMonthAgo = TimeUtil.now().minus(1, ChronoUnit.MONTHS);
+    Instant oneMonthAgo = TimeUtil.now().minus(30, ChronoUnit.DAYS);
 
     if (review.getCreatedDate().isBefore(oneMonthAgo)) {
       log.error("리뷰 수정 기간이 만료되었습니다. reviewId={}, memberId={}",
