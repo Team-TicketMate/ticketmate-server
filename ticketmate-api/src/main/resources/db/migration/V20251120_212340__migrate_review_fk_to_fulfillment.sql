@@ -32,18 +32,23 @@ ALTER TABLE public.review
     ADD COLUMN fulfillment_form_fulfillment_form_id UUID;
 
 -- 성공한 리뷰 매핑
-UPDATE review r
+UPDATE public.review r
 SET fulfillment_form_fulfillment_form_id = f.fulfillment_form_id
     FROM fulfillment_form f
 WHERE r.application_form_application_form_id = f.application_form_application_form_id;
 
 -- fulfillment_form_id NOT NULL 적용
-ALTER TABLE review
+ALTER TABLE public.review
     ALTER COLUMN fulfillment_form_fulfillment_form_id SET NOT NULL;
 
 -- fulfillment_form_id UNIQUE 제약 추가
-ALTER TABLE review
-    ADD CONSTRAINT review_fulfillment_form_fulfillment_form_id_fkey UNIQUE (fulfillment_form_fulfillment_form_id);
+ALTER TABLE public.review
+    ADD CONSTRAINT review_fulfillment_form_fulfillment_form_id_key UNIQUE (fulfillment_form_fulfillment_form_id);
+
+-- fulfillment_form_id FK 제약 추가
+ALTER TABLE public.review
+    ADD CONSTRAINT fk_review_fulfillment_form
+        FOREIGN KEY (fulfillment_form_fulfillment_form_id) REFERENCES public.fulfillment_form (fulfillment_form_id);
 
 -- application_form_id 컬럼 삭제
 ALTER TABLE public.review
