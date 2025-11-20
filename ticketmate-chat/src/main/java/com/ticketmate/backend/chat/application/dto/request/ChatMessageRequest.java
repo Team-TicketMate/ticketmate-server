@@ -2,7 +2,7 @@ package com.ticketmate.backend.chat.application.dto.request;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
 
-public sealed interface ChatMessageRequest permits TextMessageRequest, PictureMessageRequest {
+public sealed interface ChatMessageRequest permits TextMessageRequest, PictureMessageRequest, FulfillmentFormMessageRequest {
 
   /**
    * 사진을 보냈는지, 텍스트를 보냈는지에 대한 타입을 반환하는 메서드

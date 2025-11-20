@@ -15,5 +15,7 @@ public enum UploadType {
 
   CHAT,
 
-  REVIEW;
+  REVIEW,
+
+  FULFILLMENT_FORM;
 }
