@@ -22,7 +22,7 @@ public class ReviewMapperImpl implements ReviewMapper {
   public ReviewInfoResponse toReviewInfoResponse(Review review) {
     return new ReviewInfoResponse(
         review.getReviewId(),
-        review.getApplicationForm().getConcert().getConcertName(),
+        review.getFulfillmentForm().getConcert().getConcertName(),
         review.getRating(),
         review.getComment(),
         toReviewImgResponseList(review.getReviewImgList()),
@@ -35,7 +35,7 @@ public class ReviewMapperImpl implements ReviewMapper {
   public ReviewFilteredResponse toReviewFilteredResponse(Review review) {
     return new ReviewFilteredResponse(
         review.getReviewId(),
-        review.getApplicationForm().getConcert().getConcertName(),
+        review.getFulfillmentForm().getConcert().getConcertName(),
         review.getRating(),
         review.getComment(),
         toReviewImgResponseList(review.getReviewImgList()),
