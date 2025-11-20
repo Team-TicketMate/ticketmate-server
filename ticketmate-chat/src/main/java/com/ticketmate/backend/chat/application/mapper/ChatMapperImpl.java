@@ -28,6 +28,7 @@ public class ChatMapperImpl implements ChatMapper {
   @Override
   public ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId) {
     String profileImgStoredPath = message.getSenderProfileImgStoredPath();
+
     List<String> pictureMessageUrlList = message.getPictureMessageStoredPathList().stream()
       .map(storageService::generatePublicUrl)
       .toList();
@@ -42,14 +43,15 @@ public class ChatMapperImpl implements ChatMapper {
       .mine(message.getSenderId().equals(currentMemberId))
       .chatMessageType(message.getChatMessageType())
       .pictureMessageUrlList(pictureMessageUrlList)
+      .referenceId(message.getReferenceId())
       .build();
   }
 
   @Override
-  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> mmemberMap, int unRead) {
+  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> memberMap, int unRead) {
     // 매핑을 위한 값 세팅
     UUID opponentId = ChatRoomService.opponentIdOf(chatRoom, member);
-    Member other = mmemberMap.get(opponentId);
+    Member other = memberMap.get(opponentId);
     ApplicationForm applicationForm = applicationFormMap.get(chatRoom.getApplicationFormId());
     String concertThumbnailStoredPath = applicationForm.getConcert().getConcertThumbnailStoredPath();
     String profileImgStoredPath = other.getProfileImgStoredPath();
