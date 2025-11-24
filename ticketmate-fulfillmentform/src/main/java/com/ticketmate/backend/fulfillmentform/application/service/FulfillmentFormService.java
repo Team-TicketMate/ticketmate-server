@@ -276,7 +276,7 @@ public class FulfillmentFormService {
   /**
    * ID를 통해 성공양식을 조회하는 메서드
    */
-  private FulfillmentForm findFulfillmentFormById(UUID fulfillmentFormId) {
+  public FulfillmentForm findFulfillmentFormById(UUID fulfillmentFormId) {
     return fulfillmentFormRepository.findById(fulfillmentFormId).orElseThrow(
       () -> {
         log.error("성공양식을 찾지 못했습니다. 요청받은 성공양식 ID: {}", fulfillmentFormId);

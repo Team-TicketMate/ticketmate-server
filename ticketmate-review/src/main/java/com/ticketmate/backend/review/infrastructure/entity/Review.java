@@ -1,9 +1,9 @@
 package com.ticketmate.backend.review.infrastructure.entity;
 
-import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -40,7 +40,7 @@ public class Review extends BasePostgresEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false, unique = true)
-  private ApplicationForm applicationForm;
+  private FulfillmentForm fulfillmentForm;
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(nullable = false)
@@ -66,9 +66,9 @@ public class Review extends BasePostgresEntity {
   @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<ReviewImg> reviewImgList = new ArrayList<>();
 
-  public static Review create(ApplicationForm applicationForm, Member client, Member agent, float rating, String comment) {
+  public static Review create(FulfillmentForm fulfillmentForm, Member client, Member agent, float rating, String comment) {
     return Review.builder()
-        .applicationForm(applicationForm)
+        .fulfillmentForm(fulfillmentForm)
         .client(client)
         .agent(agent)
         .rating(rating)
