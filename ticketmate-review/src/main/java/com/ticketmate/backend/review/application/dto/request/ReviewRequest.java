@@ -15,8 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ReviewRequest {
-  @NotNull(message = "신청서 ID는 필수입니다.")
-  private UUID applicationFormId;
+  @NotNull(message = "성공양식 ID는 필수입니다.")
+  private UUID fulfillmentFormId;
 
   @NotNull(message = "별점은 필수입니다.")
   @DecimalMin(value = "0.0", message = "별점은 0.0 이상이어야 합니다.")
