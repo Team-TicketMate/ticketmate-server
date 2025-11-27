@@ -77,19 +77,20 @@ public class ReviewService {
     // 이미지 파일 개수 검증
     validateImageCount(request.getReviewImgList(), 0, 0);
 
+    Review review = Review.create(fulfillmentForm, fulfillmentForm.getClient(), fulfillmentForm.getAgent(), request.getRating(), request.getComment());
+
+    addReviewImages(request.getReviewImgList(), review);
+
+    UUID reviewId = reviewRepository.save(review).getReviewId();
+
     try {
-      Review review = Review.create(fulfillmentForm, fulfillmentForm.getClient(), fulfillmentForm.getAgent(), request.getRating(), request.getComment());
-
-      addReviewImages(request.getReviewImgList(), review);
-
       // 대리인 통계 업데이트
       agentPerformanceService.addReviewStats(review.getAgent(), request.getRating());
-
-      return reviewRepository.save(review).getReviewId();
     } catch (Exception e) {
-      log.error("리뷰 생성 중 오류: {}", e.getMessage(), e);
-      throw new CustomException(ErrorCode.REVIEW_SAVE_ERROR);
+      log.error("리뷰를 성공적으로 생성했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
     }
+
+    return reviewId;
   }
 
   @Transactional
@@ -122,8 +123,12 @@ public class ReviewService {
     // 리뷰 내용 업데이트
     review.update(request.getRating(), request.getComment());
 
-    // 대리인 통계 업데이트
-    agentPerformanceService.updateReviewStats(review.getAgent(), oldRating, request.getRating());
+    try {
+      // 대리인 통계 업데이트
+      agentPerformanceService.updateReviewStats(review.getAgent(), oldRating, request.getRating());
+    } catch (Exception e) {
+      log.error("리뷰를 성공적으로 수정했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+    }
   }
 
   @Transactional
@@ -137,8 +142,12 @@ public class ReviewService {
     List<ReviewImg> imagesToDelete = review.getReviewImgList();
     deleteImages(imagesToDelete, review);
 
-    // 대리인 통계 업데이트
-    agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
+    try {
+      // 대리인 통계 업데이트
+      agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
+    } catch (Exception e) {
+      log.error("리뷰를 성공적으로 삭제했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+    }
 
     // TODO: Soft Delete를 통한 삭제
   }
