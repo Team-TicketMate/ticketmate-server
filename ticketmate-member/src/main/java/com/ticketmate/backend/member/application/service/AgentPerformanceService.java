@@ -6,6 +6,7 @@ import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceS
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -17,7 +18,7 @@ public class AgentPerformanceService {
   /**
    * 리뷰 생성 시 통계 업데이트
    */
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void addReviewStats(Member agent, double rating) {
     AgentPerformanceSummary summary = findSummary(agent);
     summary.updateAverageRating(true, rating);
@@ -28,7 +29,7 @@ public class AgentPerformanceService {
   /**
    * 리뷰 삭제 시 통계 업데이트
    */
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void deleteReviewStats(Member agent, double rating) {
     AgentPerformanceSummary summary = findSummary(agent);
     summary.updateAverageRating(false, rating);
@@ -39,7 +40,7 @@ public class AgentPerformanceService {
   /**
    * 리뷰 수정 시 통계 업데이트
    */
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateReviewStats(Member agent, double oldRating, double newRating) {
     AgentPerformanceSummary summary = findSummary(agent);
     double ratingDiff = newRating - oldRating;
