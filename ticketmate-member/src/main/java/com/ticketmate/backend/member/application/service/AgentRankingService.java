@@ -1,10 +1,11 @@
 package com.ticketmate.backend.member.application.service;
 
-import com.ticketmate.backend.member.infrastructure.config.AgentPerformanceScoreConfig;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
+import com.ticketmate.backend.member.infrastructure.properties.AgentPerformanceScoreProperties;
 import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +14,10 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@EnableConfigurationProperties(AgentPerformanceScoreProperties.class)
 public class AgentRankingService {
   private final AgentPerformanceSummaryRepository agentPerformanceSummaryRepository;
-  private final AgentPerformanceScoreConfig config;
+  private final AgentPerformanceScoreProperties config;
 
   /**
    * 대리인 총점 업데이트
@@ -53,22 +55,22 @@ public class AgentRankingService {
 
     // 리뷰 품질 점수 (-1.0 ~ +1.0)
     // 낮은 리뷰는 낮은 score로 이어지게 하기 위함
-    double reviewQuality = (avgRating - config.getReviewQualityThreshold()) / 2.0;
-    double reviewScore = Math.sqrt(s.getReviewCount()) * reviewQuality * config.getReviewMultiplier();
+    double reviewQuality = (avgRating - config.reviewQualityThreshold()) / 2.0;
+    double reviewScore = Math.sqrt(s.getReviewCount()) * reviewQuality * config.reviewMultiplier();
 
     // 팔로워 점수 - log 스케일
-    double followerScore = Math.log(s.getAgent().getFollowerCount() + 1) * config.getFollowerMultiplier();
+    double followerScore = Math.log(s.getAgent().getFollowerCount() + 1) * config.followerMultiplier();
 
     // 평균 별점 점수
-    double ratingScore = avgRating * config.getRatingMultiplier();
+    double ratingScore = avgRating * config.ratingMultiplier();
 
     // 최근 30일 성공 수 점수
-    double successScore = s.getRecentSuccessCount() * config.getSuccessMultiplier();
+    double successScore = s.getRecentSuccessCount() * config.successMultiplier();
 
     double totalScore = reviewScore + followerScore + ratingScore + successScore;
 
     log.debug(
-      "Agent {} : review:{}, follower:{}, rating:{}, success:{} - total:{}",
+      "Agent({}) : review:{}, follower:{}, rating:{}, success:{} - total:{}",
       s.getAgent().getMemberId(),
       reviewScore,
       followerScore,
