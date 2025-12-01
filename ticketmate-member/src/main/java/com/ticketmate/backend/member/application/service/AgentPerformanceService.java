@@ -51,6 +51,18 @@ public class AgentPerformanceService {
   }
 
   /**
+   * 성공양식 수락 시 통계 업데이트
+   */
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void addRecentSuccessStats(Member agent) {
+    AgentPerformanceSummary summary = findSummary(agent);
+    summary.updateRecentSuccessCount();
+
+    log.debug("티켓팅 성공으로 대리인(ID: {})의 최근 30일 성공 수가 {}로 증가했습니다.",
+        agent.getMemberId(), summary.getRecentSuccessCount());
+  }
+
+  /**
    * 요약 정보 조회
    */
   private AgentPerformanceSummary findSummary(Member agent) {
