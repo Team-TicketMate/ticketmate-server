@@ -87,7 +87,7 @@ public class ReviewService {
       // 대리인 통계 업데이트
       agentPerformanceService.addReviewStats(review.getAgent(), request.getRating());
     } catch (Exception e) {
-      log.error("리뷰를 성공적으로 생성했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+      log.error("리뷰 생성 후 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
     }
 
     return reviewId;
@@ -127,7 +127,7 @@ public class ReviewService {
       // 대리인 통계 업데이트
       agentPerformanceService.updateReviewStats(review.getAgent(), oldRating, request.getRating());
     } catch (Exception e) {
-      log.error("리뷰를 성공적으로 수정했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+      log.error("리뷰 수정 후 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
     }
   }
 
@@ -146,7 +146,7 @@ public class ReviewService {
       // 대리인 통계 업데이트
       agentPerformanceService.deleteReviewStats(review.getAgent(), review.getRating());
     } catch (Exception e) {
-      log.error("리뷰를 성공적으로 삭제했지만 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+      log.error("리뷰 삭제 후 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
     }
 
     // TODO: Soft Delete를 통한 삭제
