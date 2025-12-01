@@ -79,9 +79,9 @@ public class ReviewService {
 
     Review review = Review.create(fulfillmentForm, fulfillmentForm.getClient(), fulfillmentForm.getAgent(), request.getRating(), request.getComment());
 
-    addReviewImages(request.getReviewImgList(), review);
+    review = reviewRepository.save(review);
 
-    UUID reviewId = reviewRepository.save(review).getReviewId();
+    addReviewImages(request.getReviewImgList(), review);
 
     try {
       // 대리인 통계 업데이트
@@ -90,7 +90,7 @@ public class ReviewService {
       log.error("리뷰 생성 후 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
     }
 
-    return reviewId;
+    return review.getReviewId();
   }
 
   @Transactional
