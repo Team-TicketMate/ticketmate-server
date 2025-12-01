@@ -72,6 +72,7 @@ messaging.yml
 config-imports.yml
 aws-s3.yml
 admin.yml
+agent-performance.yml
 
 ### FCM ConfigFile ###
 ticketmate-firebase-key.json
