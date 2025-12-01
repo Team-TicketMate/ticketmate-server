@@ -23,10 +23,11 @@ public interface ChatMapper {
     Map<UUID, Member> memberMap,
     int unRead
   );
-  
+
   ChatRoomContextResponse toChatRoomContextResponse(
     ChatRoom chatRoom,
     UUID currentMemberId,
+    UUID fulfillmentFormId,
     TicketOpenType ticketOpenType,
     String opponentMemberNickname,
     ConcertInfoResponse concertInfo

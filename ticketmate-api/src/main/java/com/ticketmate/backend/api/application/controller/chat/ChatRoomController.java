@@ -1,6 +1,7 @@
 package com.ticketmate.backend.api.application.controller.chat;
 
 import com.chuseok22.logging.annotation.LogMonitoring;
+import com.ticketmate.backend.api.application.service.EnterChatRoomService;
 import com.ticketmate.backend.applicationform.application.dto.response.ApplicationFormInfoResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
@@ -30,19 +31,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/chat-room")
 @Tag(
-    name = "채팅방 관련 API",
-    description = "1:1 채팅방 관련 API 제공"
+  name = "채팅방 관련 API",
+  description = "1:1 채팅방 관련 API 제공"
 )
 public class ChatRoomController implements ChatRoomControllerDocs {
 
   private final ChatRoomService chatRoomService;
+  private final EnterChatRoomService enterChatRoomService;
 
   @Override
   @PostMapping("")
   @LogMonitoring
   public ResponseEntity<String> generateChatRoom(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @Valid @RequestBody ChatRoomRequest request) {
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @Valid @RequestBody ChatRoomRequest request) {
     return ResponseEntity.ok(chatRoomService.generateChatRoom(request));
   }
 
@@ -50,8 +52,8 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @GetMapping("")
   @LogMonitoring
   public ResponseEntity<Page<ChatRoomResponse>> getChatRoomList(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @ParameterObject @Valid ChatRoomFilteredRequest request) {
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @ParameterObject @Valid ChatRoomFilteredRequest request) {
     return ResponseEntity.ok(chatRoomService.getChatRoomList(customOAuth2User.getMember(), request));
   }
 
@@ -59,9 +61,9 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @GetMapping("/{chat-room-id}/message")
   @LogMonitoring
   public ResponseEntity<Slice<ChatMessageResponse>> getChatMessages(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("chat-room-id") String chatRoomId,
-      @ParameterObject @Valid ChatMessageFilteredRequest request) {
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @PathVariable("chat-room-id") String chatRoomId,
+    @ParameterObject @Valid ChatMessageFilteredRequest request) {
     return ResponseEntity.ok(chatRoomService.getChatMessage(customOAuth2User.getMember(), chatRoomId, request));
   }
 
@@ -69,17 +71,17 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @GetMapping("/{chat-room-id}/context")
   @LogMonitoring
   public ResponseEntity<ChatRoomContextResponse> enterChatRoom(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("chat-room-id") String chatRoomId) {
-    return ResponseEntity.ok(chatRoomService.enterChatRoom(customOAuth2User.getMember(), chatRoomId));
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @PathVariable("chat-room-id") String chatRoomId) {
+    return ResponseEntity.ok(enterChatRoomService.enterChatRoom(customOAuth2User.getMember(), chatRoomId));
   }
 
   @Override
   @GetMapping("/{chat-room-id}/application-form")
   @LogMonitoring
   public ResponseEntity<ApplicationFormInfoResponse> chatRoomApplicationFormInfo(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("chat-room-id") String chatRoomId) {
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @PathVariable("chat-room-id") String chatRoomId) {
     return ResponseEntity.ok(chatRoomService.getChatRoomApplicationFormInfo(customOAuth2User.getMember(), chatRoomId));
   }
 
@@ -87,8 +89,8 @@ public class ChatRoomController implements ChatRoomControllerDocs {
   @PatchMapping("/{chat-room-id}/cancel-progress")
   @LogMonitoring
   public ResponseEntity<Void> cancelProgress(
-      @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
-      @PathVariable("chat-room-id") String chatRoomId) {
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @PathVariable("chat-room-id") String chatRoomId) {
     chatRoomService.cancelProgress(customOAuth2User.getMember(), chatRoomId);
     return ResponseEntity.ok().build();
   }

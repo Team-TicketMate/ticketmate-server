@@ -12,7 +12,6 @@ import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRe
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
-import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.mapper.ChatMapper;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
@@ -21,8 +20,6 @@ import com.ticketmate.backend.chat.infrastructure.repository.ChatRoomRepository;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
-import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
-import com.ticketmate.backend.concert.application.service.ConcertService;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
@@ -58,7 +55,6 @@ public class ChatRoomService {
   private final ChatMessageRepository chatMessageRepository;
   private final ChatMapper chatMapper;
   private final RedisTemplate<String, String> redisTemplate;
-  private final ConcertService concertService;
 
   /**
    * 자신이 아닌 상대방의 id를 찾아주는 메서드입니다.
@@ -194,34 +190,6 @@ public class ChatRoomService {
   }
 
   /**
-   * 채팅방 입장시 반환하는 데이터
-   */
-  @Transactional(readOnly = true)
-  public ChatRoomContextResponse enterChatRoom(Member member, String chatRoomId) {
-    // 입장할 채팅방 조회
-    ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-      .orElseThrow(() -> {
-          log.error("채팅방 조회에 실패했습니다.");
-          return new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
-        }
-      );
-
-    // 채팅방 내부 참가자 유효성 검증
-    validateRoomMember(chatRoom, member);
-
-    // 콘서트 정보 조회
-    UUID concertId = chatRoom.getConcertId();
-    ConcertInfoResponse response = concertService.getConcertInfo(concertId);
-
-    // 상대방 닉네임 추출
-    UUID opponentId = chatRoom.getOpponentId(member.getMemberId());
-    Member opponentMember = memberService.findMemberById(opponentId);
-
-    return chatMapper.toChatRoomContextResponse(chatRoom, member.getMemberId(), chatRoom.getTicketOpenType(),
-      opponentMember.getNickname(), response);
-  }
-
-  /**
    * @param chatRoomId 채팅방 고유 ID
    * @return 현재 진행중인 신청폼 정보 (1:N , 콘서트 :회차)
    */
@@ -281,10 +249,10 @@ public class ChatRoomService {
    */
   public ChatRoom findChatRoomById(String chatRoomId) {
     return chatRoomRepository.findById(chatRoomId).orElseThrow(
-        () -> {
-          log.error("채팅방을 찾지 못했습니다. 요청받은 채팅방 ID : {}", chatRoomId);
-          throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
-        }
+      () -> {
+        log.error("채팅방을 찾지 못했습니다. 요청받은 채팅방 ID : {}", chatRoomId);
+        throw new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+      }
     );
   }
 

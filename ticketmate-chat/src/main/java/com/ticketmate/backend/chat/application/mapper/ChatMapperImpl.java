@@ -70,10 +70,11 @@ public class ChatMapperImpl implements ChatMapper {
 
   @Override
   public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId,
-    TicketOpenType ticketOpenType, String opponentMemberNickname, ConcertInfoResponse response) {
+    UUID fulfillmentFormId, TicketOpenType ticketOpenType, String opponentMemberNickname, ConcertInfoResponse response) {
     return ChatRoomContextResponse.builder()
       .concertName(response.concertName())
       .concertType(response.concertType())
+      .fulfillmentFormId(fulfillmentFormId)
       .opponentMemberId(chatRoom.getOpponentId(currentMemberId))
       .opponentMemberNickName(opponentMemberNickname)
       .ticketReservationSite(response.ticketReservationSite())
