@@ -17,17 +17,19 @@ public interface ChatMapper {
   ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId);
 
   ChatRoomResponse toChatRoomResponse(
-      ChatRoom chatRoom,
-      Member member,
-      Map<UUID, ApplicationForm> applicationFormMap,
-      Map<UUID, Member> mmemberMap,
-      int unRead
+    ChatRoom chatRoom,
+    Member member,
+    Map<UUID, ApplicationForm> applicationFormMap,
+    Map<UUID, Member> memberMap,
+    int unRead
   );
 
   ChatRoomContextResponse toChatRoomContextResponse(
-      ChatRoom chatRoom,
-      UUID currentMemberId,
-      TicketOpenType ticketOpenType,
-      ConcertInfoResponse concertInfo
+    ChatRoom chatRoom,
+    UUID currentMemberId,
+    UUID fulfillmentFormId,
+    TicketOpenType ticketOpenType,
+    String opponentMemberNickname,
+    ConcertInfoResponse concertInfo
   );
 }

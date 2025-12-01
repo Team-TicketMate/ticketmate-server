@@ -1,11 +1,12 @@
 package com.ticketmate.backend.review.application.service;
 
-import com.ticketmate.backend.applicationform.application.service.ApplicationFormService;
-import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
+import com.ticketmate.backend.fulfillmentform.application.service.FulfillmentFormService;
+import com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus;
+import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.member.application.service.AgentPerformanceService;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
@@ -43,12 +44,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ReviewService {
   private final S3Service s3Service;
-  private final ApplicationFormService applicationFormService;
   private final ReviewRepository reviewRepository;
   private final ReviewImgRepository reviewImgRepository;
   private final ReviewMapper reviewMapper;
   private final AgentPerformanceService agentPerformanceService;
   private final MemberService memberService;
+  private final FulfillmentFormService fulfillmentFormService;
 
   @Transactional(readOnly = true)
   public ReviewInfoResponse getReview(UUID reviewId) {
@@ -69,15 +70,15 @@ public class ReviewService {
   @Transactional
   public UUID createReview(ReviewRequest request, Member member) {
     // 신청서 조회 및 검증
-    ApplicationForm applicationForm = applicationFormService.findApplicationFormById(request.getApplicationFormId());
-    validateReviewer(applicationForm, member);
-    validateReviewable(applicationForm);
+    FulfillmentForm fulfillmentForm = fulfillmentFormService.findFulfillmentFormById(request.getFulfillmentFormId());
+    validateReviewer(fulfillmentForm, member);
+    validateReviewable(fulfillmentForm);
 
     // 이미지 파일 개수 검증
     validateImageCount(request.getReviewImgList(), 0, 0);
 
     try {
-      Review review = Review.create(applicationForm, applicationForm.getClient(), applicationForm.getAgent(), request.getRating(), request.getComment());
+      Review review = Review.create(fulfillmentForm, fulfillmentForm.getClient(), fulfillmentForm.getAgent(), request.getRating(), request.getComment());
 
       addReviewImages(request.getReviewImgList(), review);
 
@@ -101,16 +102,12 @@ public class ReviewService {
     validateEditor(review, member);
 
     // 리뷰 수정 기간 검증
-    Instant oneMonthAgo = TimeUtil.now().minus(1, ChronoUnit.MONTHS);
-    if (review.getCreatedDate().isBefore(oneMonthAgo)) {
-      log.error("리뷰 수정 기간이 만료되어 수정하지 못했습니다. reviewId: {}, memberId: {}", reviewId, member.getMemberId());
-      throw new CustomException(ErrorCode.REVIEW_EDIT_PERIOD_EXPIRED);
-    }
+    validateEditPeriod(review, member);
 
     // 이미지 파일 개수 검증
     List<UUID> deleteIdList = request.getDeleteImgIdList();
     List<ReviewImg> imagesToDelete = new ArrayList<>();
-    if (CommonUtil.nullOrEmpty(deleteIdList)) {
+    if (!CommonUtil.nullOrEmpty(deleteIdList)) {
       imagesToDelete = reviewImgRepository.findAllById(deleteIdList);
     }
     validateImageCount(request.getNewReviewImgList(), review.getReviewImgList().size(), imagesToDelete.size());
@@ -167,15 +164,17 @@ public class ReviewService {
    */
   private void validateReviewCommenter(Review review, Member agent) {
     if (!review.getAgent().getMemberId().equals(agent.getMemberId())) {
+      log.error("리뷰 댓글 작성 권한이 없습니다. reviewId={}, agentId={}", review.getReviewId(), agent.getMemberId());
       throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW_COMMENT);
     }
   }
 
   /**
-   * 리뷰 작성자가 실제 신청서의 의뢰인인지 검증
+   * 리뷰 작성자가 성공양식의 의뢰인인지 검증
    */
-  private void validateReviewer(ApplicationForm applicationForm, Member client) {
-    if (!applicationForm.getClient().getMemberId().equals(client.getMemberId())) {
+  private void validateReviewer(FulfillmentForm fulfillmentForm, Member client) {
+    if (!fulfillmentForm.getClient().getMemberId().equals(client.getMemberId())) {
+      log.error("리뷰 작성 권한이 없습니다. fulfillmentFormId={}, clientId={}", fulfillmentForm.getFulfillmentFormId(), client.getMemberId());
       throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW);
     }
   }
@@ -185,20 +184,38 @@ public class ReviewService {
    */
   private void validateEditor(Review review, Member client) {
     if (!review.getClient().getMemberId().equals(client.getMemberId())) {
-      throw new CustomException(ErrorCode.NO_AUTH_TO_REVIEW);
+      log.error("리뷰 수정/삭제 권한이 없습니다. reviewId={}, clientId={}", review.getReviewId(), client.getMemberId());
+      throw new CustomException(ErrorCode.NO_AUTH_TO_EDIT_REVIEW);
+    }
+  }
+
+  /**
+   * 리뷰 수정 기간(30일)이 만료되었는지 검증
+   */
+  private void validateEditPeriod(Review review, Member member) {
+    Instant oneMonthAgo = TimeUtil.now().minus(30, ChronoUnit.DAYS);
+
+    if (review.getCreatedDate().isBefore(oneMonthAgo)) {
+      log.error("리뷰 수정 기간이 만료되었습니다. reviewId={}, memberId={}",
+          review.getReviewId(), member.getMemberId());
+      throw new CustomException(ErrorCode.REVIEW_EDIT_PERIOD_EXPIRED);
     }
   }
 
   /**
    * 성공 여부, 중복 여부 검증
    */
-  private void validateReviewable(ApplicationForm applicationForm) {
-    // TODO: 성공 상태의 신청서가 아니면 리뷰 작성 불가
-//    if (!applicationForm.getApplicationFormStatus().equals(ApplicationFormStatus.SUCCEEDED)) {
-//      throw new CustomException(ErrorCode.CANNOT_REVIEW_NOT_SUCCEEDED_FORM);
-//    }
+  private void validateReviewable(FulfillmentForm fulfillmentForm) {
+    // 성공 상태의 신청서가 아니면 리뷰 작성 불가
+    if (!fulfillmentForm.getFulfillmentFormStatus().equals(FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM)) {
+      log.error("리뷰 작성이 불가능한 상태입니다. fulfillmentFormId={}, status={}",
+          fulfillmentForm.getFulfillmentFormId(),
+          fulfillmentForm.getFulfillmentFormStatus());
+      throw new CustomException(ErrorCode.CANNOT_REVIEW_NOT_SUCCEEDED_FORM);
+    }
     // 이미 해당 신청서에 대한 리뷰가 존재하는지 확인
-    if (reviewRepository.existsByApplicationForm(applicationForm)) {
+    if (reviewRepository.existsByFulfillmentForm(fulfillmentForm)) {
+      log.error("이미 해당 티켓팅에 대한 리뷰가 존재합니다. fulfillmentFormId={}", fulfillmentForm.getFulfillmentFormId());
       throw new CustomException(ErrorCode.REVIEW_ALREADY_EXISTS);
     }
   }
@@ -207,7 +224,11 @@ public class ReviewService {
    * 이미지 파일 개수 검증
    */
   private void validateImageCount(List<MultipartFile> imageFileList, int currentFileCount, int deleteFileCount) {
-    if (imageFileList != null && currentFileCount - deleteFileCount + imageFileList.size() > ReviewConstants.MAX_IMAGE_COUNT) {
+    int newCount = (imageFileList == null ? 0 : imageFileList.size());
+    int total = currentFileCount - deleteFileCount + newCount;
+
+    if (total > ReviewConstants.MAX_IMAGE_COUNT) {
+      log.error("리뷰 이미지 업로드 개수를 초과했습니다. total={}, max={}", total, ReviewConstants.MAX_IMAGE_COUNT);
       throw new CustomException(ErrorCode.IMAGE_UPLOAD_LIMIT_EXCEEDED);
     }
   }
@@ -223,7 +244,7 @@ public class ReviewService {
       }
     } catch (Exception e) {
       storedPaths.forEach(path -> s3Service.safeDeleteFile(path.storedPath()));
-      log.error("리뷰 이미지 업로드 중 오류: {}, 업로드된 {}개 파일 롤백.", e.getMessage(), storedPaths.size(), e);
+      log.error("리뷰 이미지 업로드 중 오류가 발생했습니다: {}, 업로드된 {}개 파일을 롤백합니다.", e.getMessage(), storedPaths.size(), e);
       throw new CustomException(ErrorCode.FILE_UPLOAD_ERROR);
     }
     return storedPaths;

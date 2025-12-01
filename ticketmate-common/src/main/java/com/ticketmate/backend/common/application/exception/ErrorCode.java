@@ -82,7 +82,6 @@ public enum ErrorCode {
 
   INVALID_MEMBER_ROLE_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 회원 권한 요청입니다."),
 
-
   // PHONE
 
   INVALID_PHONE(HttpStatus.BAD_REQUEST, "전화번호 형식이 잘못되었습니다."),
@@ -293,13 +292,16 @@ public enum ErrorCode {
 
   // REVIEW
 
-  NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."),
+  NO_AUTH_TO_REVIEW(HttpStatus.FORBIDDEN, "해당 성공양식에 대한 리뷰를 작성할 권한이 없습니다."),
+
+  NO_AUTH_TO_EDIT_REVIEW(HttpStatus.FORBIDDEN, "해당 리뷰에 대한 수정/삭제 권한이 없습니다."),
+
 
   NO_AUTH_TO_REVIEW_COMMENT(HttpStatus.FORBIDDEN, "해당 리뷰에 댓글을 작성할 권한이 없습니다."),
 
-  CANNOT_REVIEW_NOT_SUCCEEDED_FORM(HttpStatus.BAD_REQUEST, "성공한 신청서에 대해서만 리뷰를 작성할 수 있습니다."),
+  CANNOT_REVIEW_NOT_SUCCEEDED_FORM(HttpStatus.BAD_REQUEST, "성공한 티켓팅에 대해서만 리뷰를 작성할 수 있습니다."),
 
-  REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 신청서에 대한 리뷰가 존재합니다."),
+  REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 성공양식에 대한 리뷰가 존재합니다."),
 
   IMAGE_UPLOAD_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "리뷰 이미지는 최대 3개까지 등록 가능합니다."),
 
@@ -308,7 +310,7 @@ public enum ErrorCode {
   REVIEW_EDIT_PERIOD_EXPIRED(HttpStatus.BAD_REQUEST, "리뷰 수정 가능 기간이 지났습니다."),
 
   REVIEW_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "리뷰 등록 중 오류가 발생했습니다."),
-  
+
   // AES-GCM
 
   AES_KEY_LENGTH_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 키 길이가 올바르지 않습니다. AES-256 키는 32바이트여야 합니다."),
@@ -345,7 +347,28 @@ public enum ErrorCode {
 
   INVALID_ACCOUNT_HOLDER(HttpStatus.BAD_REQUEST, "올바르지 않은 예금주 양식입니다."),
 
-  INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다.");
+  INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다."),
+
+  // FULFILLMENT
+  INVALID_FULFILLMENT_FORM_IMG_COUNT(HttpStatus.BAD_REQUEST, "성공양식 이미지 첨부파일은 최대 6개까지 등록가능합니다."),
+
+  FULFILLMENT_FORM_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "성공양식 업로드에 실패했습니다"),
+
+  ALREADY_EXISTS_FULFILLMENT_FORM(HttpStatus.BAD_REQUEST, "이미 채팅방 내부에 성공양식이 존재합니다."),
+
+  INVALID_FULFILLMENT_MESSAGE_TYPE(HttpStatus.BAD_REQUEST, "유효하지않은 성공양식 타입입니다."),
+
+  FULFILLMENT_MEMBER_NOT_AGENT(HttpStatus.BAD_REQUEST, "요청한 성공양식에 존재하지 않는 대리인입니다."),
+
+  FULFILLMENT_MEMBER_NOT_CLIENT(HttpStatus.BAD_REQUEST, "요청한 성공양식에 존재하지 않는 의뢰인입니다."),
+
+  FULFILLMENT_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "성공양식 조회에 실패했습니다."),
+
+  FULFILLMENT_IMAGE_NOT_OWNED_BY_FORM(HttpStatus.BAD_REQUEST, "해당 이미지는 성공양식의 소유가 아닌 이미지 입니다."),
+
+  FULFILLMENT_FORM_ALREADY_ACCEPTED(HttpStatus.BAD_REQUEST, "수락된 성공양식은 거절이 불가능합니다."),
+
+  FULFILLMENT_FORM_NOT_UPDATABLE(HttpStatus.BAD_REQUEST, "성공양식 수정은 거절/수락대기 상태에만 수정이 가능합니다.");
 
   private final HttpStatus status;
   private final String message;

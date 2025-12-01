@@ -107,13 +107,19 @@ public interface ReviewControllerDocs {
           author = "Yooonjeong",
           description = "리뷰 CRUD 구현",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/533"
+      ),
+      @ApiChangeLog(
+          date = "2025-11-21",
+          author = "Yooonjeong",
+          description = "성공한 티켓팅에만 리뷰 작성 가능 검증 추가",
+          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/640"
       )
   })
   @Operation(
       summary = "리뷰 생성",
       description = """
         ### 요청 파라미터 (multipart/form-data)
-        - `applicationFormId` (UUID, required): 리뷰 대상 신청서 ID
+        - `fulfillmentFormId` (UUID, required): 리뷰 대상 성공양식 ID
         - `rating` (Float, required): 별점 (0.0 이상, 5.0 이하)
         - `comment` (String, required): 리뷰 내용 (10자 이상, 300자 이하)
         - `reviewImgList` (List<MultipartFile>, optional): 리뷰 이미지 파일 목록 (최대 3개)
@@ -123,25 +129,26 @@ public interface ReviewControllerDocs {
 
         ### 사용 방법
         1. 로그인된 사용자(의뢰인)가 멀티파트 폼으로 요청합니다. 서버는 인증 주체(`CustomOAuth2User`)에서 `member`를 사용합니다.
-        2. 서버는 신청서를 조회/검증 후 리뷰를 생성하고, (첨부 시) 이미지를 업로드합니다.
+        2. 서버는 성공양식을 조회/검증 후 리뷰를 생성하고, (첨부 시) 이미지를 업로드합니다.
         3. 성공 시 생성된 `reviewId`(UUID)를 본문으로 반환합니다.
 
         ### 유의 사항
         - 이미지 첨부는 최대 3개까지만 허용됩니다.
         - 파일의 확장자는 jpg, jpeg, png, JPG, JPEG, PNG 만 가능합니다.
         - 필수 검증:
-          - `applicationFormId`: null 불가
+          - `fulfillmentFormId`: null 불가
           - `rating`: 0.0 이상 5.0 이하
           - `comment`: 10~300자
-        - 권한 검증: 신청서의 의뢰인과 로그인 사용자가 일치해야 합니다.
-        - 동일 신청서에 대한 리뷰가 이미 존재하면 생성할 수 없습니다.
+        - 권한 검증: 성공양식의 의뢰인과 로그인 사용자가 일치해야 합니다.
+        - 동일 성공양식에 대한 리뷰가 이미 존재하면 생성할 수 없습니다.
         - 파일 업로드 중 오류가 발생하면 업로드된 파일은 안전하게 롤백됩니다.
         - **Swagger에서는 파일 없이 요청하면 400 오류가 발생할 수 있습니다. 실제 요청 시 이미지가 없다면 reviewImgList 필드는 아예 포함하지 말고 요청해 주세요.**
 
         ### 예외 처리
-        - `APPLICATION_FORM_NOT_FOUND` (400): "대리 티켓팅 신청서를 찾을 수 없습니다."
-        - `NO_AUTH_TO_REVIEW` (403): "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."
-        - `REVIEW_ALREADY_EXISTS` (409): "이미 해당 신청서에 대한 리뷰가 존재합니다."
+        - `FULFILLMENT_FORM_NOT_FOUND` (400): "성공양식 조회에 실패했습니다."
+        - `NO_AUTH_TO_REVIEW` (403): "해당 성공양식에 대한 리뷰를 작성할 권한이 없습니다."
+        - `CANNOT_REVIEW_NOT_SUCCEEDED_FORM` (400): "성공한 티켓팅에 대해서만 리뷰를 작성할 수 있습니다."
+        - `REVIEW_ALREADY_EXISTS` (409): "이미 해당 성공양식에 대한 리뷰가 존재합니다."
         - `IMAGE_UPLOAD_LIMIT_EXCEEDED` (400): "리뷰 이미지는 최대 3개까지 등록 가능합니다."
         - `FILE_UPLOAD_ERROR` (500): "파일 업로드 중 오류가 발생했습니다."
         """
@@ -185,7 +192,7 @@ public interface ReviewControllerDocs {
 
         ### 예외 처리
         - `REVIEW_NOT_FOUND` (404): "해당 리뷰를 찾을 수 없습니다."
-        - `NO_AUTH_TO_REVIEW` (403): "해당 신청서에 대한 리뷰를 작성할 권한이 없습니다."
+        - `NO_AUTH_TO_EDIT_REVIEW` (403): "해당 리뷰에 대한 수정/삭제 권한이 없습니다."
         - `REVIEW_EDIT_PERIOD_EXPIRED` (400): "리뷰 수정 가능 기간이 지났습니다."
         - `IMAGE_UPLOAD_LIMIT_EXCEEDED` (400): "리뷰 이미지는 최대 3개까지 등록 가능합니다."
         - `FILE_UPLOAD_ERROR` (500): "파일 업로드 중 오류가 발생했습니다."
@@ -222,7 +229,7 @@ public interface ReviewControllerDocs {
 
         ### 예외 처리
         - `REVIEW_NOT_FOUND` (404): "해당 리뷰를 찾을 수 없습니다."
-        - `NO_AUTH_TO_REVIEW` (403): "해당 리뷰에 대한 댓글 작성 권한이 없습니다."
+        - `NO_AUTH_TO_REVIEW_COMMENT` (403): "해당 리뷰에 대한 댓글 작성 권한이 없습니다."
         """
   )
   ResponseEntity<Void> addAgentComment(UUID reviewId, AgentCommentRequest request, CustomOAuth2User customOAuth2User);

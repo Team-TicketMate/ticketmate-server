@@ -28,66 +28,60 @@ public class ChatMapperImpl implements ChatMapper {
   @Override
   public ChatMessageResponse toChatMessageResponse(ChatMessage message, UUID currentMemberId) {
     String profileImgStoredPath = message.getSenderProfileImgStoredPath();
+
     List<String> pictureMessageUrlList = message.getPictureMessageStoredPathList().stream()
-        .map(storageService::generatePublicUrl)
-        .toList();
+      .map(storageService::generatePublicUrl)
+      .toList();
 
     return ChatMessageResponse.builder()
-        .messageId(message.getChatMessageId())
-        .senderNickname(message.getSenderNickName())
-        .message(message.getMessage())
-        .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
-        .read(message.isRead())
-        .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
-        .mine(message.getSenderId().equals(currentMemberId))
-        .chatMessageType(message.getChatMessageType())
-        .pictureMessageUrlList(pictureMessageUrlList)
-        .build();
+      .messageId(message.getChatMessageId())
+      .senderNickname(message.getSenderNickName())
+      .message(message.getMessage())
+      .sendDate(TimeUtil.toLocalDateTime(message.getSendDate()))
+      .read(message.isRead())
+      .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
+      .mine(message.getSenderId().equals(currentMemberId))
+      .chatMessageType(message.getChatMessageType())
+      .pictureMessageUrlList(pictureMessageUrlList)
+      .referenceId(message.getReferenceId())
+      .build();
   }
 
   @Override
-  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> mmemberMap, int unRead) {
+  public ChatRoomResponse toChatRoomResponse(ChatRoom chatRoom, Member member, Map<UUID, ApplicationForm> applicationFormMap, Map<UUID, Member> memberMap, int unRead) {
     // 매핑을 위한 값 세팅
     UUID opponentId = ChatRoomService.opponentIdOf(chatRoom, member);
-    Member other = mmemberMap.get(opponentId);
+    Member other = memberMap.get(opponentId);
     ApplicationForm applicationForm = applicationFormMap.get(chatRoom.getApplicationFormId());
     String concertThumbnailStoredPath = applicationForm.getConcert().getConcertThumbnailStoredPath();
     String profileImgStoredPath = other.getProfileImgStoredPath();
 
     return ChatRoomResponse.builder()
-        .unReadMessageCount(unRead)
-        .chatRoomId(chatRoom.getChatRoomId())
-        .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
-        .ticketOpenType(chatRoom.getTicketOpenType())
-        .lastChatMessage(chatRoom.getLastMessage())
-        .concertThumbnailUrl(storageService.generatePublicUrl(concertThumbnailStoredPath))
-        .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
-        .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
-        .build();
+      .unReadMessageCount(unRead)
+      .chatRoomId(chatRoom.getChatRoomId())
+      .chatRoomName(other.getNickname())  // 상대방 닉네임 출력
+      .ticketOpenType(chatRoom.getTicketOpenType())
+      .lastChatMessage(chatRoom.getLastMessage())
+      .concertThumbnailUrl(storageService.generatePublicUrl(concertThumbnailStoredPath))
+      .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
+      .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
+      .build();
   }
 
   @Override
-  public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId, TicketOpenType ticketOpenType, ConcertInfoResponse response) {
-    UUID otherMemberId = resolveOpponentMemberId(chatRoom, currentMemberId);
-
+  public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId,
+    UUID fulfillmentFormId, TicketOpenType ticketOpenType, String opponentMemberNickname, ConcertInfoResponse response) {
     return ChatRoomContextResponse.builder()
-        .concertName(response.concertName())
-        .concertType(response.concertType())
-        .ticketReservationSite(response.ticketReservationSite())
-        .concertThumbnailUrl(response.concertThumbnailUrl())
-        .ticketOpenDateInfoResponseList(response.ticketOpenDateInfoResponseList())
-        .chatRoomId(chatRoom.getChatRoomId())
-        .opponentMemberId(otherMemberId)
-        .ticketOpenType(ticketOpenType)
-        .build();
-  }
-
-  /**
-   * 상대방 ID 추출 메서드
-   */
-  private UUID resolveOpponentMemberId(ChatRoom chatRoom, UUID currentMemberId) {
-    UUID clientId = chatRoom.getClientMemberId();
-    UUID agentId  = chatRoom.getAgentMemberId();
-    return currentMemberId.equals(clientId) ? agentId : clientId;
+      .concertName(response.concertName())
+      .concertType(response.concertType())
+      .fulfillmentFormId(fulfillmentFormId)
+      .opponentMemberId(chatRoom.getOpponentId(currentMemberId))
+      .opponentMemberNickName(opponentMemberNickname)
+      .ticketReservationSite(response.ticketReservationSite())
+      .concertThumbnailUrl(response.concertThumbnailUrl())
+      .ticketOpenDateInfoResponseList(response.ticketOpenDateInfoResponseList())
+      .chatRoomId(chatRoom.getChatRoomId())
+      .ticketOpenType(ticketOpenType)
+      .build();
   }
 }
