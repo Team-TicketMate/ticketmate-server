@@ -83,10 +83,16 @@ public interface ConcertAgentAvailabilityControllerDocs {
           author = "Yooonjeong",
           description = "대리인 목록 정렬 기능 추가",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/374"
+      ),
+      @ApiChangeLog(
+        date = "2025-12-02",
+        author = "Yooonjeong",
+        description = "대리인 성공 순 및 총점(AI 추천순) 정렬 기능 추가",
+        issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/641"
       )
   })
   @Operation(
-      summary = "공연별 수락 대리인 목록 조회 (정렬 기능 추가)",
+      summary = "공연별 수락 대리인 목록 조회 (정렬 기능 포함)",
       description = """
           이 API는 인증이 필요합니다.
           
@@ -115,10 +121,14 @@ public interface ConcertAgentAvailabilityControllerDocs {
           - 페이지네이션 파라미터를 **null**로 전송할 경우, 기본값이 적용됩니다.
           - Slice 타입을 사용하므로 클라이언트는 **first**, **last** 플래그를 보고 무한 스크롤을 구현할 수 있습니다.
           - **introduction** 필드는 **null**이 아닌 빈 문자열(**""**)로 반환됩니다.
-          - **[중요] 정렬 기능 초기 구현 안내**
-            - 현재 정렬 기능은 1차 구현 단계입니다.
-            - 후기, 팔로잉, 성공 등의 기능이 아직 구현되지 않아, 현재는 어떤 정렬 필드를 선택해도 **실질적으로는 등록일 순(`createdDate`)으로 정렬**됩니다.
-            - 1차 정렬 기준의 점수가 모든 대리인에게 동일하여, 2차 정렬 기준인 등록일 순으로 정렬되기 때문입니다.
+          - **`TOTAL_SCORE` (AI 추천)** 정렬 기능이 적용되었습니다.
+            - 총점은 후기, 팔로워, 별점, 최근 성공 수를 기반으로 **매일 새벽 4시** 및 애플리케이션 시작 시를 통해 미리 계산되어 DB에 저장됩니다.
+            - **총점 계산 공식**:
+                * **리뷰**: `sqrt(후기수) * 품질 점수 * 배수`
+                * **팔로워**: `log(1 + 팔로워수) * 배수`
+                * **별점**: `평균별점 * 배수`
+                * **성공**: `최근 30일 성공 수 * 배수`
+            - 다른 정렬 필드(`AVERAGE_RATING`, `REVIEW_COUNT` 등)도 해당 지표를 기준으로 정렬됩니다.
           
           ### 주요 오류 코드
             - **CONCERT_NOT_FOUND**: 콘서트를 찾을 수 없음
