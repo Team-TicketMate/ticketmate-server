@@ -12,14 +12,18 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AgentPerformanceScheduler {
-  private final AgentRankingService agentPerformanceBatchService;
+  private final AgentRankingService agentRankingService;
 
   /**
    * 애플리케이션 시작 시 실행
    */
   @EventListener(ApplicationReadyEvent.class)
   public void initUpdateRanking() {
-    agentPerformanceBatchService.updateTotalScoreRanking();
+    try {
+      agentRankingService.updateTotalScoreRanking();
+    } catch (Exception e) {
+      log.error("애플리케이션 시작 시 대리인 랭킹 업데이트에 실패했습니다.", e);
+    }
   }
 
   /**
@@ -27,6 +31,10 @@ public class AgentPerformanceScheduler {
    */
   @Scheduled(cron = "0 0 4 * * *")
   public void runAgentRankingUpdate() {
-    agentPerformanceBatchService.updateTotalScoreRanking();
+    try{
+      agentRankingService.updateTotalScoreRanking();
+    } catch (Exception e) {
+      log.error("정기 대리인 랭킹 업데이트에 실패했습니다.", e);
+    }
   }
 }
