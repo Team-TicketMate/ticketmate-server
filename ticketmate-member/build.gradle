@@ -17,7 +17,6 @@ dependencies {
     implementation project(':ticketmate-notification')
     implementation project(':ticketmate-storage')
     implementation project(':ticketmate-crypto')
-    implementation project(':ticketmate-fulfillmentform')
 
     // PostgreSQL
     api libs.postgresql.driver
