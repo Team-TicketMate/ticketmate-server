@@ -9,7 +9,7 @@ env:
   PROJECT_NAME: ticket-mate
   DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}
   APP_IMAGE_SUFFIX: "-back"
-  DOMAIN_NAME: "app.dev.ticketmate.site"
+  DOMAIN_NAME: "api.dev.ticketmate.site"
   BLUE_PORT: "8094"
   GREEN_PORT: "8095"
   TEST_PORT: ""
