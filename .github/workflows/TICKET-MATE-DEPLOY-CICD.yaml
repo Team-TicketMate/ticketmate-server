@@ -1,38 +1,35 @@
-name: TICKET-MATE-BE-CICD
+name: TICKET-MATE-DEPLOY-CICD
 
 on:
   push:
     branches:
-      - main
-      - test
+      - deploy
 
 env:
   PROJECT_NAME: ticket-mate
   DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_USERNAME }}
   APP_IMAGE_SUFFIX: "-back"
-  DOMAIN_NAME: "api.ticketmate.site"
-  BLUE_PORT: "8086"
-  GREEN_PORT: "8087"
-  TEST_PORT: "8088"
-  DEPLOY_PORT: "8089"
+  DOMAIN_NAME: "app.dev.ticketmate.site"
+  BLUE_PORT: "8094"
+  GREEN_PORT: "8095"
+  TEST_PORT: ""
   APP_EXPOSE_PORT: "8080"
-  MOUNT_DIR: "/home/ticketmate98/Desktop/projects/ticket-mate"
-  SPRING_PROFILE_MAIN: "prod"
+  MOUNT_DIR: "/volume1/project/ticket-mate/server"
+  SPRING_PROFILE_MAIN: "deploy"
   SPRING_PROFILE_TEST: "prod"
-  SPRING_PROFILE_DEPLOY: "deploy"
-  NGINX_RP_CONF: "/etc/nginx/sites-available/ticketmate.site"
-  NGINX_BACKUP_DIR: "/home/ticketmate98/Desktop/projects/ticket-mate/nginx/backups"
+  NGINX_RP_CONF: "/etc/nginx/sites-enabled/server.ReverseProxy.conf"
+  NGINX_BACKUP_DIR: "/volume1/project/ticket-mate/nginx/backups"
 
 jobs:
   build:
-    if: ${{ !startsWith(github.event.head_commit.message, 'version(') }}
+    if: ${{ !startsWith(github.event.head_commit.message, 'version(') }} # 특정 커밋 메시지 워크플로 실행 제외
     runs-on: ubuntu-latest
 
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
-      - name: Java 설정
+      - name: JDK 설정
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -150,15 +147,16 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.DEPLOY_SERVER_HOST }}
+          username: ${{ secrets.DEPLOY_SERVER_USER }}
+          password: ${{ secrets.DEPLOY_SERVER_PASSWORD }}
+          port: ${{ secrets.DEPLOY_SERVER_PORT }}
           script: |
             set -e
+            export PATH=$PATH:/usr/local/bin
             
-            echo "환경변수 설정.."
-            PW="${{ secrets.SERVER_PASSWORD }}"
+            echo "[공통]환경변수 설정.."
+            PW="${{ secrets.DEPLOY_SERVER_PASSWORD }}"
             BRANCH="${{ github.ref_name }}"
             REPO="${{ env.DOCKERHUB_REPO }}"
             PROJECT="${{ env.PROJECT_NAME }}"
@@ -172,17 +170,15 @@ jobs:
             BLUE_PORT="${{ env.BLUE_PORT }}"
             GREEN_PORT="${{ env.GREEN_PORT }}"
             TEST_PORT="${{ env.TEST_PORT }}"
-            DEPLOY_PORT="${{ env.DEPLOY_PORT }}"
             NGINX_RP_CONF="${{ env.NGINX_RP_CONF }}"
             BACKUP_DIR="${{ env.NGINX_BACKUP_DIR }}"
             
             PROFILE_MAIN="${{ env.SPRING_PROFILE_MAIN }}"
             PROFILE_TEST="${{ env.SPRING_PROFILE_TEST }}"
-            PROFILE_DEPLOY="${{ env.SPRING_PROFILE_DEPLOY}}"
             
             echo "브랜치=${BRANCH}"
             echo "이미지=${IMAGE}"
-            echo "도메인=${DOMAIN} | BLUE_PORT=${BLUE_PORT} GREEN_PORT=${GREEN_PORT} | TEST_PORT=${TEST_PORT} | DEPLOY_PORT=${DEPLOY_PORT}"
+            echo "도메인=${DOMAIN} | BLUE_PORT=${BLUE_PORT} GREEN_PORT=${GREEN_PORT} | TEST_PORT=${TEST_PORT}"
             
             echo "[도커 풀] ${IMAGE}"
             echo "$PW" | sudo -S docker pull "${IMAGE}"
@@ -210,8 +206,8 @@ jobs:
                 -v "${MOUNT_DIR}":/app \
                 "${IMAGE}"
             
-              echo "[test] 헬스체크 (최대 180회, 1초간격)"
-              for i in $(seq 1 180); do
+              echo "[test] 헬스체크 (최대 120회, 1초간격)"
+              for i in $(seq 1 120); do
                 if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
                    curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
@@ -220,7 +216,7 @@ jobs:
                   HEALTH_OK=1
                   break
                 fi
-                echo "헬스체크 진행중... (시도 ${i}/180)"
+                echo "헬스체크 진행중... (시도 ${i}/120)"
                 sleep 1
               done
             
@@ -237,59 +233,6 @@ jobs:
               echo "$PW" | sudo -S docker image prune -af
             
               echo "✅ test 서버 배포가 성공적으로 완료되었습니다."
-              exit 0
-            fi
-            
-            # deploy 브랜치
-            if [ "${BRANCH}" = "deploy" ]; then
-              CONTAINER_NAME="${CONTAINER_NAME}-deploy"
-              PORT="${DEPLOY_PORT}"
-              echo "[deploy] ${CONTAINER_NAME} 을 포트 ${PORT}로 기동"
-
-              echo "컨테이너 ${CONTAINER_NAME} 존재 여부 확인 중..."
-              if sudo docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
-                echo "컨테이너 ${CONTAINER_NAME} 이(가) 존재합니다. 중지 및 삭제 중..."
-                echo "$PW" | sudo -S docker rm -f ${CONTAINER_NAME}
-                echo "컨테이너 ${CONTAINER_NAME} 이(가) 삭제되었습니다."
-              else
-                echo "존재하는 컨테이너 ${CONTAINER_NAME} 이(가) 없습니다."
-              fi
-
-              echo "새로운 컨테이너 ${CONTAINER_NAME} 실행 중..."
-              echo "$PW" | sudo -S docker run -d -p ${PORT}:${APP_PORT} --name ${CONTAINER_NAME} \
-                -e TZ=Asia/Seoul \
-                -e "SPRING_PROFILES_ACTIVE=${PROFILE_DEPLOY}" \
-                -v /etc/localtime:/etc/localtime:ro \
-                -v "${MOUNT_DIR}":/app \
-                "${IMAGE}"
-
-              echo "[deploy] 헬스체크 (최대 180회, 1초간격)"
-              for i in $(seq 1 180); do
-                if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
-                   curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
-                   curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
-                   curl -fsS "http://127.0.0.1:${PORT}/docs/swagger-ui/index.html" >/dev/null 2>&1 ; then
-                  echo "헬스체크 성공 (시도 ${i})"
-                  HEALTH_OK=1
-                  break
-                fi
-                echo "헬스체크 진행중... (시도 ${i}/180)"
-                sleep 1
-              done
-
-              if [ "${HEALTH_OK:-0}" != "1" ]; then
-                echo "[오류] 헬스체크 실패 -> 배포 중단, 로그 출력"
-                echo "$PW" | sudo -S docker logs --tail=200 ${CONTAINER_NAME}
-                echo "배포 실패로 인한 컨테이너 정리 중..."
-                echo "$PW" | sudo -S docker rm -f ${CONTAINER_NAME} || true
-                exit 1
-              fi
-
-              # <none> 태그로 남은 이미지 정리
-              echo "불필요한 dangling(<none>) 이미지 정리..."
-              echo "$PW" | sudo -S docker image prune -af
-
-              echo "✅ deploy 서버 배포가 성공적으로 완료되었습니다."
               exit 0
             fi
             
@@ -320,13 +263,13 @@ jobs:
                 {
                   raw = $0;
             
-                  # [수정됨] 주석 제거 후 중괄호 추적(주석 내 { } 무시)
+                  # 주석 제거 후 중괄호 추적(주석 내 { } 무시)
                   line = raw;
                   sub(/#.*/, "", line);
                   depth += gsub(/\{/, "{", line);
                   depth -= gsub(/\}/, "}", line);
             
-                  # [수정됨] server_name 라인에서 토큰 단위로 정확 매칭 (여러 도메인 한 줄 대응)
+                  # server_name 라인에서 토큰 단위로 정확 매칭 (여러 도메인 한 줄 대응)
                   if (!inserver && line ~ /^[[:space:]]*server_name[[:space:]]+/) {
                   tmp = line;
                   sub(/^[[:space:]]*server_name[[:space:]]+/, "", tmp);
@@ -381,8 +324,8 @@ jobs:
               -v "${MOUNT_DIR}":/app \
               "${IMAGE}"
             
-            echo "[main] 헬스체크 (최대 180회, 1초간격)"
-            for i in $(seq 1 180); do
+            echo "[main] 헬스체크 (최대 120회, 1초간격)"
+            for i in $(seq 1 120); do
               if curl -fsS "http://127.0.0.1:${PORT}/actuator/health" >/dev/null 2>&1 || \
                  curl -fsS "http://127.0.0.1:${PORT}/healthz" >/dev/null 2>&1 || \
                  curl -fsS "http://127.0.0.1:${PORT}/" >/dev/null 2>&1 || \
@@ -391,7 +334,7 @@ jobs:
                 HEALTH_OK=1
                 break
               fi  
-              echo "헬스체크 진행중... (시도 ${i}/180)"
+              echo "헬스체크 진행중... (시도 ${i}/120)"
               sleep 1
             done
             
