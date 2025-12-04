@@ -24,6 +24,7 @@ import com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatu
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.fulfillmentform.infrastructure.repository.FulfillmentFormRepository;
 import com.ticketmate.backend.member.application.service.AgentBankAccountService;
+import com.ticketmate.backend.member.application.service.AgentPerformanceService;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
@@ -52,6 +53,7 @@ public class FulfillmentFormService {
   private final AgentBankAccountService agentBankAccountService;
   private final ApplicationFormService applicationFormService;
   private final FulfillmentFormMapper mapper;
+  private final AgentPerformanceService agentPerformanceService;
 
   /**
    * 티켓팅 성공시 대리인이 성공양식을 작성 및 저장하는 로직
@@ -148,6 +150,13 @@ public class FulfillmentFormService {
     validateFulfillmentFormMember(member, fulfillmentForm, MemberType.CLIENT);
 
     // TODO 성공양식이 수락됐다는 알림 발송 로직 추가해야될듯
+
+    try {
+      // 대리인 통계 업데이트
+      agentPerformanceService.addRecentSuccessStats(fulfillmentForm.getAgent());
+    } catch (Exception e) {
+      log.error("성공양식 수락 후 대리인 통계 업데이트에 실패했습니다. {}", e.getMessage(), e);
+    }
 
     // 트렌젝션 커밋 이후에만 호출되도록 보장 (채팅 발송은 채팅 메시지 서비스에서 수행)
     TransactionSynchronizationManager.registerSynchronization(

@@ -161,6 +161,12 @@ public interface ReviewControllerDocs {
           author = "Yooonjeong",
           description = "리뷰 CRUD 구현",
           issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/533"
+      ),
+      @ApiChangeLog(
+        date = "2025-11-21",
+        author = "Yooonjeong",
+        description = "성공한 티켓팅에만 리뷰 작성 가능 검증 추가",
+        issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/640"
       )
   })
   @Operation(
@@ -178,7 +184,7 @@ public interface ReviewControllerDocs {
 
         ### 사용 방법
         1. 작성자 본인만 수정할 수 있습니다.
-        2. 리뷰 작성일로부터 **1개월 이내**(타임존: `Asia/Seoul`)에만 수정할 수 있습니다.
+        2. 리뷰 작성일로부터 **30일 이내**(타임존: `Asia/Seoul`)에만 수정할 수 있습니다.
         3. 이미지 규칙:
            - 최종 보유 이미지 수는 **최대 3장**이어야 합니다.
            - 서버는 `현재 보유 수 - 삭제 예정 수 + 추가 예정 수 ≤ 3`을 검증합니다.
