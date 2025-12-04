@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- [전체 파일] ticket-mate blue/green 공용 logback 설정 -->
+<configuration scan="true" scanPeriod="60 seconds">
+
+  <!-- 로그 루트 디렉터리 (컨테이너 내부 기준) -->
+  <property name="LOG_ROOT" value="logs"/>
+
+  <!-- blue/green 공용 애플리케이션 이름 -->
+  <property name="APP_NAME" value="ticket-mate-back"/>
+
+  <!-- 콘솔 로그 (로컬 디버깅용) -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- 파일 로그: RollingFileAppender + TimeBasedRollingPolicy (+ prudent) -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <!-- 여러 JVM/컨테이너가 같은 파일에 쓰기 위한 prudent 모드 활성화 -->
+    <prudent>true</prudent>
+
+    <!-- 년/월/일 별 디렉터리 구조 + 날짜 단위 롤링 -->
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_ROOT}/%d{yyyy/MM/dd}/${APP_NAME}.log</fileNamePattern>
+
+      <!-- 보관 기간 (일 기준) -->
+      <maxHistory>30</maxHistory>
+
+      <!-- 시작 시 오래된 로그 정리 -->
+      <cleanHistoryOnStart>true</cleanHistoryOnStart>
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</configuration>

@@ -5,6 +5,7 @@ import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioS
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioAdminInfo;
+import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioFilteredAdminInfo;
 import com.ticketmate.backend.admin.portfolio.application.mapper.PortfolioAdminMapper;
 import com.ticketmate.backend.admin.portfolio.infrastructure.event.PortfolioHandledEvent;
 import com.ticketmate.backend.admin.portfolio.infrastructure.repository.PortfolioRepositoryCustom;
@@ -45,13 +46,14 @@ public class PortfolioAdminService {
    */
   @Transactional(readOnly = true)
   public Page<PortfolioFilteredAdminResponse> filteredPortfolio(PortfolioFilteredRequest request) {
-    return portfolioRepositoryCustom.filteredPortfolio(
-        request.getUsername(),
-        request.getNickname(),
-        request.getName(),
-        request.getPortfolioStatus(),
-        request.toPageable()
+    Page<PortfolioFilteredAdminInfo> portfolioFilteredAdminInfoPage = portfolioRepositoryCustom.filteredPortfolio(
+      request.getUsername(),
+      request.getNickname(),
+      request.getName(),
+      request.getPortfolioStatus(),
+      request.toPageable()
     );
+    return portfolioFilteredAdminInfoPage.map(portfolioAdminMapper::toPortfolioFilteredAdminResponse);
   }
 
   /**
