@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- [전체 파일] ticket-mate blue/green 공용 logback 설정 -->
+<configuration scan="true" scanPeriod="60 seconds">
+
+  <!-- 로그 루트 디렉터리 (컨테이너 내부 기준) -->
+  <property name="LOG_ROOT" value="logs"/>
+
+  <!-- blue/green 공용 애플리케이션 이름 -->
+  <property name="APP_NAME" value="ticket-mate-back"/>
+
+  <!-- 콘솔 로그 (로컬 디버깅용) -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- 파일 로그: RollingFileAppender + TimeBasedRollingPolicy (+ prudent) -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <!-- [수정] 여러 JVM/컨테이너가 같은 파일에 쓰기 위한 prudent 모드 활성화 -->
+    <!-- logback 문서: RollingFileAppender + TimeBasedRollingPolicy 에서 prudent 모드 지원 -->
+    <!--   - 여러 JVM이 같은 파일에 쓸 수 있음 (파일 lock 기반) :contentReference[oaicite:2]{index=2} -->
+    <!--   - 대신 압축 불가, file 속성 사용 불가 :contentReference[oaicite:3]{index=3} -->
+    <prudent>true</prudent>
+
+    <!-- [수정] prudent 모드에서는 file 속성을 쓰지 않는다 (active 파일도 pattern 기반으로 결정)
+         예전 설정에 있던 <file>${LOG_ROOT}/${APP_NAME}.log</file> 는 제거 -->
+    <!-- <file>${LOG_ROOT}/${APP_NAME}.log</file> -->
+
+    <!-- [수정] 년/월/일 별 디렉터리 구조 + 날짜 단위 롤링 -->
+    <!--  예:
+          /app/logs/2025/12/04/ticket-mate-back.log
+          /app/logs/2025/12/05/ticket-mate-back.log
+         slf4j/logback 문서에 따라 fileNamePattern 안에 '/' 는 디렉터리 구분자로 동작함 :contentReference[oaicite:4]{index=4} -->
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_ROOT}/%d{yyyy/MM/dd}/${APP_NAME}.log</fileNamePattern>
+
+      <!-- 보관 기간 (일 기준) -->
+      <!-- <maxHistory>30</maxHistory>-->
+
+      <!-- 시작 시 오래된 로그 정리 -->
+      <!-- <cleanHistoryOnStart>true</cleanHistoryOnStart>-->
+    </rollingPolicy>
+
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- 루트 로거: DEBUG 이상 모두 파일에 기록 -->
+  <!-- [요구사항] 로그 파일은 DEBUG 레벨부터 기록 -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</configuration>
