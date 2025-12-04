@@ -5,8 +5,8 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioAdminInfo;
+import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioFilteredAdminInfo;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.infrastructure.entity.QMember;
@@ -43,7 +43,7 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
    * @param portfolioStatus 포트폴리오 타입
    */
   @Override
-  public Page<PortfolioFilteredAdminResponse> filteredPortfolio(
+  public Page<PortfolioFilteredAdminInfo> filteredPortfolio(
       String username,
       String nickname,
       String name,
@@ -59,8 +59,8 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
     );
 
     // 쿼리 작성
-    JPAQuery<PortfolioFilteredAdminResponse> contentQuery = queryFactory
-        .select(Projections.constructor(PortfolioFilteredAdminResponse.class,
+    JPAQuery<PortfolioFilteredAdminInfo> contentQuery = queryFactory
+        .select(Projections.constructor(PortfolioFilteredAdminInfo.class,
             PORTFOLIO.portfolioId,
             PORTFOLIO.member.memberId,
             PORTFOLIO.member.username,
