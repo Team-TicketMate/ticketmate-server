@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -24,4 +25,9 @@ public @interface RedisLock {
    * 락 자동해제 시간 (기본: 5초)
    */
   long leaseTime() default 5L;
+
+  /**
+   * 시간 단위 (기본: 초)
+   */
+  TimeUnit timeUnit() default TimeUnit.SECONDS;
 }
