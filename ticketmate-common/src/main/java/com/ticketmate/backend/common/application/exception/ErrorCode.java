@@ -202,6 +202,8 @@ public enum ErrorCode {
 
   LOCK_ACQUISITION_INTERRUPT(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득 중 인터럽트가 발생했습니다."),
 
+  INVALID_LOCK_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock Key가 비어있습니다."),
+
   // APPLICATION_FORM
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
