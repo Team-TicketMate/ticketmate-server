@@ -69,8 +69,8 @@ public class ChatRoomService {
   }
 
   /**
-   * 새로운 채팅방 생성
-   * 수락된 신청서 PK를 통해
+   * 수락된 신청서 PK를 통해 새로운 채팅방 생성
+   * 채팅방이 존재하는경우 기존 채팅방 PK 반환
    *
    * @param applicationFormId 신청서 PK
    * @return chatRoomId
