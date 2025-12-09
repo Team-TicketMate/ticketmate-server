@@ -10,7 +10,6 @@ import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationF
 import com.ticketmate.backend.applicationform.infrastructure.repository.ApplicationFormRepository;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
-import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
 import com.ticketmate.backend.chat.application.mapper.ChatMapper;
@@ -20,7 +19,7 @@ import com.ticketmate.backend.chat.infrastructure.repository.ChatRoomRepository;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
-import com.ticketmate.backend.member.application.service.MemberService;
+import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
 import java.util.List;
@@ -47,7 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomService {
 
-  private final MemberService memberService;
   private final ChatRoomRepository chatRoomRepository;
   private final MemberRepository memberRepository;
   private final ApplicationFormService applicationFormService;
@@ -71,33 +69,26 @@ public class ChatRoomService {
   }
 
   /**
-   * 새로운 채팅방 생성
-   * 대리인Pk, 의뢰인PK, 공연PK, 공연 오픈 타입에 따른 고유한 채팅방을 생성합니다
+   * 수락된 신청서 PK를 통해 새로운 채팅방 생성
+   * 채팅방이 존재하는경우 기존 채팅방 PK 반환
    *
-   * @param request agentId, clientId, concertId, ticketOpenType
+   * @param applicationFormId 신청서 PK
    * @return chatRoomId
    */
   @Transactional
-  public String generateChatRoom(ChatRoomRequest request) {
-    boolean exists = chatRoomRepository.existsByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
-      request.getAgentId(),
-      request.getClientId(),
-      request.getConcertId(),
-      request.getTicketOpenType()
-    );
-    if (exists) {
-      log.error("채팅방에 이미 존재합니다.");
-      throw new CustomException(ErrorCode.ALREADY_EXIST_CHAT_ROOM);
+  public String generateChatRoom(UUID applicationFormId) {
+    ApplicationForm applicationForm = applicationFormService.findApplicationFormById(applicationFormId);
+    Optional<ChatRoom> chatRoomOpt = chatRoomRepository.findByApplicationFormId(applicationFormId);
+
+    if (chatRoomOpt.isPresent()) {
+      ChatRoom chatRoom = chatRoomOpt.get();
+      log.warn("신청서: {}에 대한 채팅방: {}이 이미 존재합니다", applicationForm.getApplicationFormId(), chatRoom.getChatRoomId());
+      return chatRoom.getChatRoomId();
     }
-    Member agent = memberService.findMemberById(request.getAgentId());
-    Member client = memberService.findMemberById(request.getClientId());
-    ApplicationForm applicationForm = applicationFormRepository
-      .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-        request.getClientId(),
-        request.getAgentId(),
-        request.getConcertId(),
-        request.getTicketOpenType()
-      ).orElseThrow(() -> new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND));
+
+    Member agent = applicationForm.getAgent();
+    Member client = applicationForm.getClient();
+    Concert concert = applicationForm.getConcert();
 
     ChatRoom chatRoom = ChatRoom.builder()
       .agentMemberId(agent.getMemberId())
@@ -107,8 +98,8 @@ public class ChatRoomService {
       .lastMessage("")
       .lastMessageId("")
       .applicationFormId(applicationForm.getApplicationFormId())
-      .concertId(request.getConcertId())
-      .ticketOpenType(request.getTicketOpenType())
+      .concertId(concert.getConcertId())
+      .ticketOpenType(applicationForm.getTicketOpenType())
       .build();
     ChatRoom savedChatRoom = chatRoomRepository.save(chatRoom);
     return savedChatRoom.getChatRoomId();

@@ -22,6 +22,7 @@ import com.ticketmate.backend.applicationform.application.validator.ApplicationF
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormAction;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
+import com.ticketmate.backend.applicationform.core.evnet.ApplicationFormAcceptedEvent;
 import com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationFormDetail;
@@ -49,6 +50,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +69,7 @@ public class ApplicationFormService {
   private final NotificationService notificationService;
   private final ApplicationFormMapper applicationFormMapper;
   private final RejectionReasonService rejectionReasonService;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 대리인를 지정하여 공연 신청 폼을 작성합니다
@@ -264,6 +267,10 @@ public class ApplicationFormService {
      * 채팅방은 공연당 하나씩 생성합니다.
      * 선예매/일반예매는 각각 다른 공연으로 취급되어 한 공연당 2개의 채팅방이 존재할 수 있습니다.
      */
+
+    // 신청서 수락 이벤트 발행
+    ApplicationFormAcceptedEvent event = new ApplicationFormAcceptedEvent(applicationForm.getApplicationFormId());
+    eventPublisher.publishEvent(event);
 
     // 알림전송
     NotificationPayload payload = buildApproveNotificationPayload(agent);
