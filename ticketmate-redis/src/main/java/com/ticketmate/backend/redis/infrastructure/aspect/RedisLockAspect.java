@@ -12,6 +12,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -29,9 +31,8 @@ import org.springframework.stereotype.Component;
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class RedisLockAspect {
 
-  private static final String LOCK_KEY_PREFIX = "lock:";
-
   private final RedisLockManager redisLockManager;
+  private final BeanFactory beanFactory;
   private final ExpressionParser expressionParser = new SpelExpressionParser();
   private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -44,6 +45,8 @@ public class RedisLockAspect {
 
     // SpEL 컨텍스트에 메서드 파라미터 바인딩
     StandardEvaluationContext context = new StandardEvaluationContext();
+    context.setBeanResolver(new BeanFactoryResolver(beanFactory)); // @beanName 참조
+
     if (parameterNames != null) {
       for (int index = 0; index < parameterNames.length; index++) {
         context.setVariable(parameterNames[index], args[index]);
@@ -64,9 +67,7 @@ public class RedisLockAspect {
       throw new CustomException(ErrorCode.INVALID_LOCK_KEY);
     }
 
-    String lockKey = LOCK_KEY_PREFIX + evaluatedKey;
-
     // RedisLockManager 를 통해 Lock 획득 -> 메서드 실행 -> Lock 해제
-    return redisLockManager.executeLock(lockKey, redisLock.waitTime(), redisLock.leaseTime(), joinPoint::proceed);
+    return redisLockManager.executeLock(evaluatedKey, redisLock.waitTime(), redisLock.leaseTime(), joinPoint::proceed);
   }
 }
