@@ -68,6 +68,12 @@ public class RedisLockAspect {
     }
 
     // RedisLockManager 를 통해 Lock 획득 -> 메서드 실행 -> Lock 해제
-    return redisLockManager.executeLock(evaluatedKey, redisLock.waitTime(), redisLock.leaseTime(), joinPoint::proceed);
+    return redisLockManager.executeLock(
+      evaluatedKey,
+      redisLock.waitTime(),
+      redisLock.leaseTime(),
+      redisLock.timeUnit(),
+      joinPoint::proceed
+    );
   }
 }

@@ -22,17 +22,18 @@ public class RedisLockManager {
    * @param lockKey   락 식별자로 사용할 키
    * @param waitTime  락 획득을 위한 최대 대기 시간
    * @param leaseTime 락 자동해제 시간
+   * @param timeUnit 시간 단위
    * @param task      락 획득 후 실행할 작업
    * @param <T>       작업 실행 결과 타입
    */
-  public <T> T executeLock(String lockKey, long waitTime, long leaseTime, LockTask<T> task) throws Throwable {
+  public <T> T executeLock(String lockKey, long waitTime, long leaseTime, TimeUnit timeUnit, LockTask<T> task) throws Throwable {
     RLock lock = redissonClient.getLock(lockKey);
 
     boolean acquired = false; // 락 획득 여부 플래그
 
     try {
       // 락 획득 시도
-      if (!lock.tryLock(waitTime, leaseTime, TimeUnit.SECONDS)) {
+      if (!lock.tryLock(waitTime, leaseTime, timeUnit)) {
         // 락 획득 실패(=waitTime 내에 다른 프로세스가 락을 놓지 않음)
         log.error("락 획득 실패 - 다른 요청 처리 중. lockKey: {}", lockKey);
         throw new CustomException(ErrorCode.LOCK_ACQUISITION_FAILURE);
