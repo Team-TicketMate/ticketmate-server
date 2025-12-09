@@ -29,7 +29,7 @@ public final class RedisLockKeyBuilder {
   }
 
   public RedisLockKeyBuilder append(Object value) {
-    if (value == null) {
+    if (value == null || value.toString().isBlank()) {
       throw new CustomException(ErrorCode.INVALID_LOCK_KEY_SEGMENT);
     }
     this.builder
