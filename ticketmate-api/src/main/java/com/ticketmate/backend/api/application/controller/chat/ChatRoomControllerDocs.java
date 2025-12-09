@@ -6,7 +6,6 @@ import com.ticketmate.backend.applicationform.application.dto.response.Applicati
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageFilteredRequest;
 import com.ticketmate.backend.chat.application.dto.request.ChatRoomFilteredRequest;
-import com.ticketmate.backend.chat.application.dto.request.ChatRoomRequest;
 import com.ticketmate.backend.chat.application.dto.response.ChatMessageResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomContextResponse;
 import com.ticketmate.backend.chat.application.dto.response.ChatRoomResponse;
@@ -16,45 +15,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 
 public interface ChatRoomControllerDocs {
-
-  @ApiChangeLogs({
-    @ApiChangeLog(
-      date = "2025-08-01",
-      author = "Chuseok22",
-      description = "채팅방 생성 API 개발",
-      issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/444"
-    )
-  })
-  @Operation(
-    summary = "채팅방 생성",
-    description = """
-                
-      이 API는 인증이 필요합니다.
-                
-      ### 요청 파라미터
-      - **agentId (UUID)** : 대리인 PK [필수]
-      - **clientId (UUID)** : 의뢰인 PK [필수]
-      - **concertId UUID)** : 공연 PK [필수]
-      - **ticketOpenType (String)** : 공연 타입 (선예매, 일반예매) [필수]
-                
-      ### 반환값
-      - **chatRoomId** : 채팅방 고유 PK
-                
-      ### 사용 방법
-      `TicketOpenType`
-                
-      PRE_OPEN("선예매")
-                
-      GENERAL_OPEN("일반예매")
-                
-      ### 유의사항
-      - 이미 고유한 채팅방이 존재하는 경우 에러를 반환합니다
-      """
-  )
-  ResponseEntity<String> generateChatRoom(
-    CustomOAuth2User customOAuth2User,
-    ChatRoomRequest request
-  );
 
   @ApiChangeLogs({
     @ApiChangeLog(
