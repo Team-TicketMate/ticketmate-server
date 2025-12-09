@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String>, ChatRoomRepositoryCustom {
 
-  boolean existsByApplicationFormId(UUID applicationFormId);
+  Optional<ChatRoom> findByApplicationFormId(UUID applicationFormId);
 
   Optional<ChatRoom> findByAgentMemberIdAndClientMemberIdAndConcertIdAndTicketOpenType(
       UUID agentMemberId,

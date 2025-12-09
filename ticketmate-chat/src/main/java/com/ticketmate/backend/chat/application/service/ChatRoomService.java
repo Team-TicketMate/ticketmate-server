@@ -78,10 +78,12 @@ public class ChatRoomService {
   @Transactional
   public String generateChatRoom(UUID applicationFormId) {
     ApplicationForm applicationForm = applicationFormService.findApplicationFormById(applicationFormId);
-    boolean exists = chatRoomRepository.existsByApplicationFormId(applicationFormId);
-    if (exists) {
-      log.error("채팅방에 이미 존재합니다.");
-      throw new CustomException(ErrorCode.ALREADY_EXIST_CHAT_ROOM);
+    Optional<ChatRoom> chatRoomOpt = chatRoomRepository.findByApplicationFormId(applicationFormId);
+
+    if (chatRoomOpt.isPresent()) {
+      ChatRoom chatRoom = chatRoomOpt.get();
+      log.warn("신청서: {}에 대한 채팅방: {}이 이미 존재합니다", applicationForm.getApplicationFormId(), chatRoom.getChatRoomId());
+      return chatRoom.getChatRoomId();
     }
 
     Member agent = applicationForm.getAgent();
