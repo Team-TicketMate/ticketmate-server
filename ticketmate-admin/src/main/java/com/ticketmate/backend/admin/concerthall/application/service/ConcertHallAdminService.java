@@ -14,6 +14,7 @@ import com.ticketmate.backend.concerthall.core.constant.City;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepository;
 import com.ticketmate.backend.concerthall.infrastructure.repository.ConcertHallRepositoryCustom;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class ConcertHallAdminService {
    *                webSiteUrl 웹사이트 URL
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('concert-hall', #request.concertHallName)")
   public void saveConcertHallInfo(ConcertHallInfoRequest request) {
 
     // 중복된 공연장이름 검증
@@ -92,6 +94,7 @@ public class ConcertHallAdminService {
    *                webSiteUrl 사이트 URL
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('concert-hall', #concertHallId)")
   public void editConcertHallInfo(UUID concertHallId, ConcertHallInfoEditRequest request) {
     Optional.of(concertHallId)
         .map(concertHallService::findConcertHallById)
