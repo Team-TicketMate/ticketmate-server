@@ -56,7 +56,7 @@ public class RedisLockManager {
       if (acquired && lock.isHeldByCurrentThread()) {
         try {
           lock.unlock();
-          log.debug("현재 스레드가 락을 가지고 있어 해제합니다.");
+          log.debug("현재 스레드가 락을 가지고 있어 해제합니다. lockKey: {}", lockKey);
         } catch (Exception e) {
           log.warn("Redisson Lock 해제 중 오류 발생. LockKey: {}", lockKey, e);
         }
