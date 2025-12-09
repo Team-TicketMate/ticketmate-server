@@ -208,6 +208,8 @@ public enum ErrorCode {
 
   INVALID_LOCK_KEY_SEGMENT(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock key 인자가 올바르지 않습니다."),
 
+  REDIS_LOCK_DOMAIN_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock Key Domain을 찾을 수 없습니다."),
+
   // APPLICATION_FORM
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
