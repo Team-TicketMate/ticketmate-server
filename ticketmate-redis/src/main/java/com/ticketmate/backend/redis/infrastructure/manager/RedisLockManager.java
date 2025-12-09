@@ -19,13 +19,13 @@ public class RedisLockManager {
   /**
    * Redisson Lock을 획득합니다
    *
-   * @param lockKey 락 식별자로 사용할 키
-   * @param waitTime 락 획득을 위한 최대 대기 시간
+   * @param lockKey   락 식별자로 사용할 키
+   * @param waitTime  락 획득을 위한 최대 대기 시간
    * @param leaseTime 락 자동해제 시간
-   * @param task    락 획득 후 실행할 작업
-   * @param <T>     작업 실행 결과 타입
+   * @param task      락 획득 후 실행할 작업
+   * @param <T>       작업 실행 결과 타입
    */
-  public <T> T executeLock(String lockKey, long waitTime, long leaseTime, LockTask<T> task) {
+  public <T> T executeLock(String lockKey, long waitTime, long leaseTime, LockTask<T> task) throws Throwable {
     RLock lock = redissonClient.getLock(lockKey);
 
     boolean acquired = false; // 락 획득 여부 플래그
@@ -42,16 +42,7 @@ public class RedisLockManager {
       log.debug("redis lock 획득 성공 lockKey: {}", lockKey);
 
       // 락 획득 성공 시, 실제 해야 할 작업(task.run())을 실행
-      try {
-        return task.run();
-      } catch (Throwable throwable) {
-        // 작업 실행 도중 예외 발생 시 로깅 후 재발행
-        log.error("작업 실행 중 예외 발생 - LockKey: {}", lockKey, throwable);
-        if (throwable instanceof RuntimeException) {
-          throw (RuntimeException) throwable;
-        }
-        throw new RuntimeException("작업 실행 중 알 수 없는 예외 발생", throwable);
-      }
+      return task.run();
 
     } catch (InterruptedException e) {
       // 락 획득 대기 중에 스레드가 인터럽트되었을 경우

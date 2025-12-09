@@ -37,7 +37,7 @@ public class RedisLockAspect {
   private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
   @Around("@annotation(redisLock)")
-  public Object around(ProceedingJoinPoint joinPoint, RedisLock redisLock) {
+  public Object around(ProceedingJoinPoint joinPoint, RedisLock redisLock) throws Throwable {
     MethodSignature signature = (MethodSignature) joinPoint.getSignature();
     Method method = signature.getMethod();
     String[] parameterNames = parameterNameDiscoverer.getParameterNames(method);
