@@ -19,6 +19,7 @@ import com.ticketmate.backend.notification.core.service.NotificationService;
 import com.ticketmate.backend.portfolio.application.service.PortfolioService;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,7 @@ public class PortfolioAdminService {
    * @param request     변경하려는 포트폴리오 상태
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #portfolioId)")
   public void changePortfolioStatus(UUID portfolioId, PortfolioStatusUpdateRequest request) {
     Portfolio portfolio = portfolioService.findPortfolioById(portfolioId);
     Member client = portfolio.getMember();

@@ -14,6 +14,7 @@ jar {
 dependencies {
     implementation project(':ticketmate-common')
     implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-redis')
     implementation project(':ticketmate-member')
 
     // MapStruct

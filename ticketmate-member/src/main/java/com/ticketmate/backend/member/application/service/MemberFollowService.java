@@ -11,6 +11,7 @@ import com.ticketmate.backend.member.infrastructure.repository.MemberFollowRepos
 import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
 import com.ticketmate.backend.notification.application.type.FollowingNotificationType;
 import com.ticketmate.backend.notification.core.service.NotificationService;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class MemberFollowService {
    * @param request followeeId 팔로우 대상 PK
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('member-follow', #follower.memberId, #request.followeeId)")
   public void follow(Member follower, MemberFollowRequest request) {
     Member followee = memberService.findMemberById(request.getFolloweeId());
 
@@ -54,6 +56,7 @@ public class MemberFollowService {
    *
    * @param request followeeId 언팔로우 대상 PK
    */
+  @RedisLock(key = "@redisLockKeyManager.generate('member-follow', #follower.memberId, #request.followeeId)")
   @Transactional
   public void unfollow(Member follower, MemberFollowRequest request) {
     Member followee = memberService.findMemberById(request.getFolloweeId());

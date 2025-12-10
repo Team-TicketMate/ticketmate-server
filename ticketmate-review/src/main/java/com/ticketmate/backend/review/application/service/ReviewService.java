@@ -11,6 +11,7 @@ import com.ticketmate.backend.member.application.service.AgentPerformanceService
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.review.application.dto.request.AgentCommentRequest;
 import com.ticketmate.backend.review.application.dto.request.ReviewEditRequest;
 import com.ticketmate.backend.review.application.dto.request.ReviewFilteredRequest;
@@ -68,6 +69,7 @@ public class ReviewService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('review', #member.memberId, #request.fulfillmentFormId)")
   public UUID createReview(ReviewRequest request, Member member) {
     // 신청서 조회 및 검증
     FulfillmentForm fulfillmentForm = fulfillmentFormService.findFulfillmentFormById(request.getFulfillmentFormId());
@@ -94,6 +96,7 @@ public class ReviewService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('review', #reviewId)")
   public void updateReview(UUID reviewId, ReviewEditRequest request, Member member) {
     Review review = findReviewById(reviewId);
 
@@ -132,6 +135,7 @@ public class ReviewService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('review', #reviewId)")
   public void deleteReview(UUID reviewId, Member member) {
     Review review = findReviewById(reviewId);
 
@@ -153,6 +157,7 @@ public class ReviewService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('review', #agent.memberId, #reviewId)")
   public void addAgentComment(UUID reviewId, AgentCommentRequest request, Member agent) {
     Review review = findReviewById(reviewId);
 
