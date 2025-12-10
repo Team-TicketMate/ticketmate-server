@@ -83,7 +83,7 @@ public class ApplicationFormService {
    *                ticketOpenType 선예매/일반예매 타입
    */
   @Transactional
-  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #client.getMemberId(), #request.agentId, #request.concertId, #request.ticketOpenType)")
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #client.memberId, #request.agentId, #request.concertId, #request.ticketOpenType)")
   public void createApplicationForm(ApplicationFormRequest request, Member client) {
 
     // 대리인 검증
