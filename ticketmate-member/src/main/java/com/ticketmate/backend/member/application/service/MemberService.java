@@ -13,6 +13,7 @@ import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.core.vo.Phone;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.model.FileMetadata;
 import com.ticketmate.backend.storage.core.service.StorageService;
@@ -48,6 +49,7 @@ public class MemberService {
    * 회원 정보 수정
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('member', #member.memberId)")
   public void updateMemberInfo(Member member, MemberInfoUpdateRequest request) {
     if (!CommonUtil.nvl(request.getNickname(), "").isEmpty()) {
       log.debug("닉네임 변경 - 기존:{}, 변경:{}", member.getNickname(), request.getNickname());
@@ -67,6 +69,25 @@ public class MemberService {
       member.setIntroduction(request.getIntroduction());
     }
     updateInitialProfileSet(member, true);
+  }
+
+  /**
+   * 회원 탈퇴
+   */
+  @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('member', #member.memberId)")
+  public void withdraw(Member member, MemberWithdrawRequest request) {
+    // 회원 탈퇴 사유 저장
+    memberWithdrawalHistoryService.saveWithdrawalHistory(member, request);
+
+    // 전화번호 차단
+    phoneBlockService.executePhoneBlock(member.getPhone(), BlockType.WITHDRAWAL);
+
+    // AccountStatus 탈퇴 상태 변경
+    updateAccountStatus(member, AccountStatus.WITHDRAWN);
+
+    // member 논리 삭제
+    // TODO: 구현 필요
   }
 
   /**
@@ -137,24 +158,6 @@ public class MemberService {
   @Transactional
   public void updateFollowerCount(Member member, long count) {
     memberRepository.updateFollowerCount(member.getMemberId(), count);
-  }
-
-  /**
-   * 회원 탈퇴
-   */
-  @Transactional
-  public void withdraw(Member member, MemberWithdrawRequest request) {
-    // 회원 탈퇴 사유 저장
-    memberWithdrawalHistoryService.saveWithdrawalHistory(member, request);
-
-    // 전화번호 차단
-    phoneBlockService.executePhoneBlock(member.getPhone(), BlockType.WITHDRAWAL);
-
-    // AccountStatus 탈퇴 상태 변경
-    updateAccountStatus(member, AccountStatus.WITHDRAWN);
-
-    // member 논리 삭제
-    // TODO: 구현 필요
   }
 
   /**

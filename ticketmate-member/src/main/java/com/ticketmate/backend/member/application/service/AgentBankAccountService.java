@@ -17,6 +17,7 @@ import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.AgentBankAccountRepository;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ public class AgentBankAccountService {
   private final MemberService memberService;
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('agent-account', #member.memberId)")
   public void saveAgentBankAccount(Member member, AgentSaveBankAccountRequest request) {
     memberService.validateMemberType(member, MemberType.AGENT);
 
@@ -93,6 +95,7 @@ public class AgentBankAccountService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('agent-account', #member.memberId)")
   public void changePrimaryAccount(UUID agentBankAccountId, Member member) {
     memberService.validateMemberType(member, MemberType.AGENT);
 
@@ -115,6 +118,7 @@ public class AgentBankAccountService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('agent-account', #member.memberId)")
   public void changeAccountInfo(UUID agentBankAccountId, Member member, AgentUpdateBankAccountRequest request) {
     memberService.validateMemberType(member, MemberType.AGENT);
 
@@ -154,6 +158,7 @@ public class AgentBankAccountService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('agent-account', #member.memberId)")
   public void deleteBankAccount(UUID agentBankAccountId, Member member) {
     memberService.validateMemberType(member, MemberType.AGENT);
 
