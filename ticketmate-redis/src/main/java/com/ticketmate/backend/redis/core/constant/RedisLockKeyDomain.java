@@ -13,6 +13,7 @@ public enum RedisLockKeyDomain {
   CONCERT_HALL("concert-hall"),
   PORTFOLIO("portfolio"),
   APPLICATION_FORM("application-form"),
+  CONCERT_AGENT_AVAILABILITY("concert-agent-availability"),
   REPORT("report");
 
   private final String domainKey;
