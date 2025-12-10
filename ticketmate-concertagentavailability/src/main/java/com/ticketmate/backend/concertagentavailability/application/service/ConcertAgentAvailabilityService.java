@@ -17,6 +17,7 @@ import com.ticketmate.backend.concertagentavailability.infrastructure.repository
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class ConcertAgentAvailabilityService {
    *                introduction 한줄소개
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('concert-agent-availability', #agent.memberId, #request.concertId)")
   public void setAcceptingOption(Member agent, ConcertAgentAvailabilityRequest request) {
     Concert concert = concertService.findConcertById(request.getConcertId());
     memberService.validateMemberType(agent, MemberType.AGENT);
