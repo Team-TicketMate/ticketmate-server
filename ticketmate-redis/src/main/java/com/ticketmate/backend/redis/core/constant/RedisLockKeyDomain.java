@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RedisLockKeyDomain {
   MEMBER("member"),
+  MEMBER_FOLLOW("member-follow"),
+  AGENT_ACCOUNT("agent-account"),
+  AGENT_RANKING("agent-ranking"),
   CONCERT("concert"),
   CONCERT_HALL("concert-hall"),
   PORTFOLIO("portfolio"),
