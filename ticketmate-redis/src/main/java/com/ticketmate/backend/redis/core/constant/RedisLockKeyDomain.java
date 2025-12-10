@@ -18,6 +18,7 @@ public enum RedisLockKeyDomain {
   APPLICATION_FORM("application-form"),
   CONCERT_AGENT_AVAILABILITY("concert-agent-availability"),
   FULFILLMENT_FORM("fulfillment-form"),
+  REVIEW("review"),
   REPORT("report");
 
   private final String domainKey;
