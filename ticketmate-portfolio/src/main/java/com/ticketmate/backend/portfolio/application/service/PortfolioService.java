@@ -17,6 +17,7 @@ import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.model.FileMetadata;
 import com.ticketmate.backend.storage.core.service.StorageService;
@@ -48,6 +49,7 @@ public class PortfolioService {
    *                portfolioImgList 첨부파일 이미지 리스트
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #client.memberId)")
   public UUID uploadPortfolio(PortfolioRequest request, Member client) {
 
     // 검증
