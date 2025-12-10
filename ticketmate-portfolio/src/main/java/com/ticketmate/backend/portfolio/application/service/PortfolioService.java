@@ -49,7 +49,7 @@ public class PortfolioService {
    *                portfolioImgList 첨부파일 이미지 리스트
    */
   @Transactional
-  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #client.memberId)")
+  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #client.memberId)", leaseTime = 20L)
   public UUID uploadPortfolio(PortfolioRequest request, Member client) {
 
     // 검증
