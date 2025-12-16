@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FcmTokenSaveRequest {
 
-  @NotBlank(message = "FCM 토큰을 입력해주세요")
+  @NotBlank(message = "fcmToken이 비어있습니다")
   private String fcmToken; // FCM 토큰
 
   private DeviceType deviceType;

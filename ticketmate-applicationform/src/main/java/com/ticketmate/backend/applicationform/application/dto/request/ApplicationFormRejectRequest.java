@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormRejectRequest {
 
-  @NotNull
+  @NotNull(message = "applicationFormRejectedType이 비어있습니다")
   private ApplicationFormRejectedType applicationFormRejectedType;  // 거절 사유
 
   private String otherMemo;  // 사유가 '기타' 일경우 받아올 메모

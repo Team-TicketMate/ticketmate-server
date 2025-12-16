@@ -15,6 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PortfolioStatusUpdateRequest {
 
-  @NotNull(message = "변경하려는 포트폴리오 상태를 입력하세요.")
+  @NotNull(message = "portfolioStatus가 비어있습니다")
   private PortfolioStatus portfolioStatus;
 }

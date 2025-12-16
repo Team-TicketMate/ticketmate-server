@@ -20,7 +20,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatRoomFilteredRequest {
 
-  @Size(max = 30, message = "검색어는 최대 30자 입니다.")
+  @Size(max = 30, message = "searchKeyword는 최대 30자 입력 가능합니다")
   private String searchKeyword;  // 검색 키워드
 
   private TicketOpenType ticketOpenType;  // 선예매 일반예매

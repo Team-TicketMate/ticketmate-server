@@ -17,6 +17,7 @@ import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
 import com.ticketmate.backend.portfolio.infrastructure.entity.PortfolioImg;
 import com.ticketmate.backend.portfolio.infrastructure.repository.PortfolioRepository;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.model.FileMetadata;
 import com.ticketmate.backend.storage.core.service.StorageService;
@@ -48,6 +49,7 @@ public class PortfolioService {
    *                portfolioImgList 첨부파일 이미지 리스트
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #client.memberId)", leaseTime = 20L)
   public UUID uploadPortfolio(PortfolioRequest request, Member client) {
 
     // 검증
@@ -138,7 +140,7 @@ public class PortfolioService {
    */
   private void validatePortfolioImgCount(List<MultipartFile> imgList) {
     if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > MAX_IMG_COUNT) {
-      log.error("포트폴리오 이미지 첨부파일은 최소 1개 최대 20개까지 등록가능합니다. 요청개수: {}", imgList.size());
+      log.error("포트폴리오 이미지 첨부파일은 최소 1개 최대 20개까지 등록 가능합니다. 요청개수: {}", imgList.size());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }
   }

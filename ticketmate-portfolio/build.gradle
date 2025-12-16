@@ -15,6 +15,7 @@ dependencies {
     implementation project(':ticketmate-common')
     implementation project(':ticketmate-member')
     implementation project(':ticketmate-storage')
+    implementation project(':ticketmate-redis')
     implementation project(':ticketmate-ai')
     implementation project(':ticketmate-querydsl')
 

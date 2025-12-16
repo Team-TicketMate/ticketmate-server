@@ -17,10 +17,10 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportRequest {
-  @NotNull
+  @NotNull(message = "reportedMemberId가 비어있습니다")
   private UUID reportedMemberId;
 
-  @NotNull
+  @NotNull(message = "reportReason이 비어있습니다")
   private ReportReason reportReason;
 
   private String description;

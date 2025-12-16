@@ -18,6 +18,7 @@ dependencies {
     implementation project(':ticketmate-applicationform')
     implementation project(':ticketmate-concert')
     implementation project(':ticketmate-fulfillmentform')
+    implementation project(':ticketmate-redis')
 
     // MapStruct
     implementation libs.mapstruct
