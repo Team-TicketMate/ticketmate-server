@@ -23,7 +23,6 @@ public final class AuthConstants {
   public static final String API_RESPONSE_PREFIX = "/api/";
   public static final String ADMIN_RESPONSE_PREFIX = "/admin/";
   public static final String LOGOUT_API_PATH = "/api/auth/logout";
-  public static final String LOGOUT_SUCCESS_URL = "/";
   public static final String OAUTH2_LOGIN_URL = "/api/oauth2/authorization";
 
   // SMS
