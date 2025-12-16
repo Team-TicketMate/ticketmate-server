@@ -24,18 +24,18 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormDetailRequest {
 
-  @NotNull(message = "공연일자를 입력하세요")
+  @NotNull(message = "performanceDate가 비어있습니다")
   private LocalDateTime performanceDate; // 공연일자
 
-  @NotNull(message = "티켓 요청 매수를 입력해주세요")
+  @NotNull(message = "requestCount가 비어있습니다")
   @Min(value = APPLICATION_FORM_MIN_REQUEST_COUNT)
   @Max(value = APPLICATION_FORM_MAX_REQUEST_COUNT)
   private Integer requestCount; // 요청매수
 
   @Valid
-  @Size(max = HOPE_AREA_MAX_SIZE, message = "희망 구역은 최대 5개까지 등록 가능합니다.")
+  @Size(max = HOPE_AREA_MAX_SIZE, message = "hopeAreaList는 최대 5개 등록 가능합니다.")
   private List<HopeAreaRequest> hopeAreaList; // 희망구역 리스트
 
-  @Size(max = 100, message = "요청사항은 최대 100자까지만 작성 가능합니다.")
+  @Size(max = 100, message = "requirement는 최대 100자 입력 가능합니다.")
   private String requirement; // 요청사항
 }

@@ -3,6 +3,7 @@ package com.ticketmate.backend.member.application.service;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.properties.AgentPerformanceScoreProperties;
 import com.ticketmate.backend.member.infrastructure.repository.AgentPerformanceSummaryRepository;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,6 +24,7 @@ public class AgentRankingService {
    * 대리인 총점 업데이트
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('agent-ranking')", leaseTime = 180L)
   public void updateTotalScoreRanking() {
     log.debug("대리인 총점 업데이트를 시작합니다.");
 

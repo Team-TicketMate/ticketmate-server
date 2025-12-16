@@ -25,21 +25,37 @@ public class CustomLogoutHandler implements LogoutHandler {
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 
-    // 쿠키에서 리프레시 토큰 추출 및 삭제
-    String refreshToken = AuthUtil.extractRefreshTokenFromRequest(request);
-    String memberId = tokenProvider.getMemberId(refreshToken);
-    tokenStore.remove(AuthUtil.getRefreshTokenTtlKey(memberId));
+    try {
+      // 쿠키에서 리프레시 토큰 추출 및 삭제
+      String refreshToken = AuthUtil.extractRefreshTokenFromRequest(request);
+      String memberId = tokenProvider.getMemberId(refreshToken);
+      tokenStore.remove(AuthUtil.getRefreshTokenTtlKey(memberId));
+    } catch (Exception e) {
+      log.warn("로그아웃 중 refreshToken 추출 및 삭제 실패: {}", e.getMessage(), e);
+    }
 
-    // 쿠키 삭제
-    deleteCookieAndAttachToResponse(request, response, AuthConstants.ACCESS_TOKEN_KEY);
-    deleteCookieAndAttachToResponse(request, response, AuthConstants.REFRESH_TOKEN_KEY);
+    try {
+      // 쿠키 삭제
+      deleteCookieAndAttachToResponse(request, response, AuthConstants.ACCESS_TOKEN_KEY);
+      deleteCookieAndAttachToResponse(request, response, AuthConstants.REFRESH_TOKEN_KEY);
+    } catch (Exception e) {
+      log.warn("로그아웃 쿠키 삭제 중 오류 발생: {}", e.getMessage(), e);
+    }
   }
 
   /**
    * cookieName에 해당하는 쿠키를 삭제 후 response에 추가합니다
    */
   private void deleteCookieAndAttachToResponse(HttpServletRequest request, HttpServletResponse response, String cookieName) {
-    Cookie cookie = CookieUtil.extractedByCookieName(request.getCookies(), cookieName);
+    Cookie[] cookies = request.getCookies();
+    Cookie cookie = CookieUtil.extractedByCookieName(cookies, cookieName);
+
+    // 쿠키가 없어도 Set-Cookie를 내려주기위한 기본 쿠키 생성
+    if (cookie == null) {
+      cookie = new Cookie(cookieName, "");
+      cookie.setPath("/");
+    }
+
     response.addCookie(CookieUtil.deleteCookie(cookie));
   }
 }

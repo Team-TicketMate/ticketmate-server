@@ -9,7 +9,8 @@ import com.ticketmate.backend.auth.infrastructure.constant.AuthConstants;
 import com.ticketmate.backend.auth.infrastructure.constant.SecurityUrls;
 import com.ticketmate.backend.auth.infrastructure.filter.TokenAuthenticationFilter;
 import com.ticketmate.backend.auth.infrastructure.handler.CustomLogoutHandler;
-import com.ticketmate.backend.auth.infrastructure.handler.CustomSuccessHandler;
+import com.ticketmate.backend.auth.infrastructure.handler.CustomLoginSuccessHandler;
+import com.ticketmate.backend.auth.infrastructure.handler.CustomLogoutSuccessHandler;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomClientRegistrationRepository;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2UserService;
 import com.ticketmate.backend.auth.infrastructure.properties.AuthProperties;
@@ -28,6 +29,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -36,11 +38,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
   private final TokenProvider tokenProvider;
-  private final CustomSuccessHandler customSuccessHandler;
+  private final CustomLoginSuccessHandler customLoginSuccessHandler;
   private final CustomOAuth2UserService customOAuth2UserService;
   private final CustomAdminUserService customAdminUserService;
   private final CustomClientRegistrationRepository customClientRegistrationRepository;
   private final CustomLogoutHandler customLogoutHandler;
+  private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
   private final AuthValidator authValidator;
   private final PasswordEncoder passwordEncoder;
 
@@ -66,9 +69,9 @@ public class SecurityConfig {
       )
       // 로그아웃
       .logout(logout -> logout
-        .logoutUrl(AuthConstants.LOGOUT_API_PATH) // LOGOUT_URL 경로로 접근 시 로그아웃
+        .logoutRequestMatcher(new AntPathRequestMatcher(AuthConstants.LOGOUT_API_PATH, HttpMethod.POST.name())) // LOGOUT_URL 경로로 접근 시 로그아웃
         .addLogoutHandler(customLogoutHandler) // 로그아웃 핸들러 등록 (쿠키 삭제)
-        .logoutSuccessUrl(AuthConstants.LOGOUT_SUCCESS_URL) // 로그아웃 성공 후 페이지 이동
+        .logoutSuccessHandler(customLogoutSuccessHandler) // 로그아웃 성공시 200OK
       )
       // 세션 설정: STATELESS
       .sessionManagement(session -> session
@@ -82,7 +85,7 @@ public class SecurityConfig {
         .userInfoEndpoint(userInfoEndpointConfig ->
           userInfoEndpointConfig
             .userService(customOAuth2UserService))
-        .successHandler(customSuccessHandler))
+        .successHandler(customLoginSuccessHandler))
       // JWT Filter
       .addFilterAfter(
         new TokenAuthenticationFilter(tokenProvider, customOAuth2UserService, authValidator),

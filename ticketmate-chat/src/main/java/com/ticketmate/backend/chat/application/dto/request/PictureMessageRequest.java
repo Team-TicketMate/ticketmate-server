@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public final class PictureMessageRequest implements ChatMessageRequest {
 
-  @NotNull(message = "채팅을 전송할 이미지를 업로드하세요.")
+  @NotNull(message = "chatMessagePictureList가 비어있습니다")
   private List<MultipartFile> chatMessagePictureList;
 
   @Override

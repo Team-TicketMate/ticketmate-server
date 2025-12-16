@@ -17,10 +17,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConcertDateRequest {
 
-  @NotNull(message = "공연일자를 입력해주세요")
+  @NotNull(message = "performanceDate가 비어있습니다")
   private LocalDateTime performanceDate;
 
-  @Min(value = 1, message = "최대 예매 매수는 1 이상이여야 합니다")
-  @Max(value = Integer.MAX_VALUE, message = "최대 예매 매수는 정수 최대 범위를 넘을 수 없습니다.")
+  @Min(value = 1, message = "session 값은 1 이상이여야 합니다")
+  @Max(value = Integer.MAX_VALUE, message = "session 값은 정수 최대 범위를 넘을 수 없습니다.")
   private int session;
 }

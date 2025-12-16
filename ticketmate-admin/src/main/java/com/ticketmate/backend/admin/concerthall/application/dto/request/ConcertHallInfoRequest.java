@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConcertHallInfoRequest {
 
-  @NotBlank(message = "공연장 명을 입력해주세요")
+  @NotBlank(message = "concertHallName이 비어있습니다")
   private String concertHallName;
 
   private String address;

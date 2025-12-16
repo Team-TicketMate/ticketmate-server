@@ -16,9 +16,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MemberWithdrawRequest {
 
-  @NotNull(message = "회원탈퇴 사유를 입력하세요")
+  @NotNull(message = "withdrawalReasonType이 비어있습니다")
   private WithdrawalReasonType withdrawalReasonType;
 
-  @Size(max = 20, message = "기타 사유는 최대 20자까지 작성 가능합니다")
+  @Size(max = 20, message = "otherReason는 최대 20자 입력 가능합니다")
   private String otherReason;
 }

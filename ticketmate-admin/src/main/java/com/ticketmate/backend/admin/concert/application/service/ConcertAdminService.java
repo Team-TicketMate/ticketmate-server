@@ -21,6 +21,7 @@ import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepositor
 import com.ticketmate.backend.concert.infrastructure.repository.ConcertRepositoryCustom;
 import com.ticketmate.backend.concerthall.application.service.ConcertHallService;
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.storage.core.constant.UploadType;
 import com.ticketmate.backend.storage.core.model.FileMetadata;
 import com.ticketmate.backend.storage.core.service.StorageService;
@@ -62,6 +63,7 @@ public class ConcertAdminService {
    */
   @Transactional
   @CacheEvict(cacheNames = "searches", allEntries = true)
+  @RedisLock(key = "@redisLockKeyManager.generate('concert', #request.concertName)")
   public void saveConcert(ConcertInfoRequest request) {
 
     // 중복된 공연이름 검증
@@ -69,8 +71,8 @@ public class ConcertAdminService {
 
     // 공연장 검색 (요청된 공연장 PK가 null이 아닌 경우)
     ConcertHall concertHall = request.getConcertHallId() != null
-        ? concertHallService.findConcertHallById(request.getConcertHallId())
-        : null;
+      ? concertHallService.findConcertHallById(request.getConcertHallId())
+      : null;
 
     // 공연 썸네일 이미지 저장
     FileMetadata concertThumbnailMetadata = storageService.uploadFile(request.getConcertThumbNail(), UploadType.CONCERT);
@@ -110,11 +112,11 @@ public class ConcertAdminService {
   @Transactional(readOnly = true)
   public Page<ConcertFilteredResponse> filteredConcert(ConcertFilteredRequest request) {
     Page<ConcertFilteredInfo> concertFilteredInfoPage = concertRepositoryCustom.filteredConcertForAdmin(
-        request.getConcertName(),
-        request.getConcertHallName(),
-        request.getConcertType(),
-        request.getTicketReservationSite(),
-        request.toPageable()
+      request.getConcertName(),
+      request.getConcertHallName(),
+      request.getConcertType(),
+      request.getTicketReservationSite(),
+      request.toPageable()
     );
     return concertFilteredInfoPage.map(concertMapper::toConcertFilteredResponse);
   }
@@ -146,6 +148,7 @@ public class ConcertAdminService {
    */
   @Transactional
   @CacheEvict(cacheNames = "searches", allEntries = true)
+  @RedisLock(key = "@redisLockKeyManager.generate('concert', #concertId)")
   public void editConcertInfo(UUID concertId, ConcertInfoEditRequest request) {
     // 공연 조회
     Concert concert = concertService.findConcertById(concertId);
@@ -232,13 +235,13 @@ public class ConcertAdminService {
    */
   private Concert createConcertEntity(ConcertInfoRequest request, ConcertHall concertHall, String concertThumbnailStoredPath, String seatingChartStoredPath) {
     return Concert.builder()
-        .concertName(request.getConcertName())
-        .concertHall(concertHall)
-        .concertType(request.getConcertType())
-        .concertThumbnailStoredPath(concertThumbnailStoredPath)
-        .seatingChartStoredPath(seatingChartStoredPath)
-        .ticketReservationSite(request.getTicketReservationSite())
-        .build();
+      .concertName(request.getConcertName())
+      .concertHall(concertHall)
+      .concertType(request.getConcertType())
+      .concertThumbnailStoredPath(concertThumbnailStoredPath)
+      .seatingChartStoredPath(seatingChartStoredPath)
+      .ticketReservationSite(request.getTicketReservationSite())
+      .build();
   }
 
   /**
@@ -250,14 +253,14 @@ public class ConcertAdminService {
    */
   private void generateOrUpdateConcertEmbedding(Concert concert, ConcertHall concertHall) {
     String embeddingText = CommonUtil.combineTexts(
-        concert.getConcertName(),
-        concert.getConcertType().getDescription(),
-        concertHall != null ? concertHall.getConcertHallName() : null
+      concert.getConcertName(),
+      concert.getConcertType().getDescription(),
+      concertHall != null ? concertHall.getConcertHallName() : null
     );
     vertexAiEmbeddingService.fetchOrGenerateEmbedding(
-        concert.getConcertId(),
-        embeddingText,
-        EmbeddingType.CONCERT
+      concert.getConcertId(),
+      embeddingText,
+      EmbeddingType.CONCERT
     );
   }
 }

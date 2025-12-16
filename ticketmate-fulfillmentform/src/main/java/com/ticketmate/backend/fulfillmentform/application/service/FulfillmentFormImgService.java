@@ -176,7 +176,7 @@ public class FulfillmentFormImgService {
    */
   private void validateFulfillmentFormImgCount(List<MultipartFile> imgList) {
     if (imgList.size() > MAX_IMG_COUNT) {
-      log.error("성공양식 이미지 첨부파일은 최대 6개까지 등록가능합니다. 요청개수: {}", imgList.size());
+      log.error("성공양식 이미지 첨부파일은 최대 6개까지 등록 가능합니다. 요청개수: {}", imgList.size());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }
   }

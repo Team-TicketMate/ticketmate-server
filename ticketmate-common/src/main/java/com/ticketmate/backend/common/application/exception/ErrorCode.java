@@ -202,6 +202,14 @@ public enum ErrorCode {
 
   LOCK_ACQUISITION_INTERRUPT(HttpStatus.INTERNAL_SERVER_ERROR, "락 획득 중 인터럽트가 발생했습니다."),
 
+  INVALID_LOCK_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock Key가 올바르지 않습니다."),
+
+  INVALID_LOCK_KEY_DOMAIN(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock Key 생성을 위한 domain이 올바르지 않습니다."),
+
+  INVALID_LOCK_KEY_SEGMENT(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock key 인자가 올바르지 않습니다."),
+
+  REDIS_LOCK_DOMAIN_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "Redisson Lock Key Domain을 찾을 수 없습니다."),
+
   // APPLICATION_FORM
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
@@ -350,7 +358,7 @@ public enum ErrorCode {
   INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "올바르지 않은 은행 양식입니다."),
 
   // FULFILLMENT
-  INVALID_FULFILLMENT_FORM_IMG_COUNT(HttpStatus.BAD_REQUEST, "성공양식 이미지 첨부파일은 최대 6개까지 등록가능합니다."),
+  INVALID_FULFILLMENT_FORM_IMG_COUNT(HttpStatus.BAD_REQUEST, "성공양식 이미지 첨부파일은 최대 6개까지 등록 가능합니다."),
 
   FULFILLMENT_FORM_UPLOAD_ERROR(HttpStatus.BAD_REQUEST, "성공양식 업로드에 실패했습니다"),
 

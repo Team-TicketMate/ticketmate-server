@@ -23,12 +23,12 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class FulfillmentFormInfoRequest {
 
-  @Size(max = MAX_IMG_COUNT, message = "티켓팅 성공 첨부사진은 최대 6개까지 등록 가능합니다.")
+  @Size(max = MAX_IMG_COUNT, message = "fulfillmentFormImgList는 최대 6개 등록 가능합니다.")
   private List<MultipartFile> fulfillmentFormImgList;
 
-  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "상세설명은 최대 100자까지 입력 가능합니다.")
+  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "particularMemo는 최대 100자 입력 가능합니다.")
   private String particularMemo;
 
-  @NotNull(message = "대리인 계좌 ID는 필수입니다.")
+  @NotNull(message = "agentBankAccountId가 비어있습니다")
   private UUID agentBankAccountId;
 }
