@@ -24,10 +24,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormDetailRequest {
 
-  @NotNull(message = "공연일자를 입력하세요")
+  @NotNull(message = "performanceDate가 비어있습니다")
   private LocalDateTime performanceDate; // 공연일자
 
-  @NotNull(message = "티켓 요청 매수를 입력해주세요")
+  @NotNull(message = "requestCount가 비어있습니다")
   @Min(value = APPLICATION_FORM_MIN_REQUEST_COUNT)
   @Max(value = APPLICATION_FORM_MAX_REQUEST_COUNT)
   private Integer requestCount; // 요청매수

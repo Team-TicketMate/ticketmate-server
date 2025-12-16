@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class PortfolioRequest {
 
-  @NotBlank(message = "자기소개를 입력하세요")
+  @NotBlank(message = "portfolioDescription이 비어있습니다")
   @Size(min = 20, max = 200, message = "자기소개는 20자 이상, 200자 이하로 입력해 주세요.")
   private String portfolioDescription;
 

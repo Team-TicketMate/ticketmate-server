@@ -22,11 +22,11 @@ import org.springframework.data.domain.Pageable;
 @AllArgsConstructor
 public class SearchRequest {
 
-  @NotBlank(message = "검색어를 입력하세요.")
+  @NotBlank(message = "keyword가 비어있습니다")
   @Size(max = 20, message = "검색어는 최대 20자까지 입력 가능합니다.")
   private String keyword; // 검색 키워드
 
-  @NotNull(message = "검색 타입을 입력하세요.")
+  @NotNull(message = "searchType이 비어있습니다")
   private SearchType searchType; // 검색 타입
 
   @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")

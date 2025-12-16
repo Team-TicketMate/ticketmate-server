@@ -19,16 +19,16 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormRequest {
 
-  @NotNull(message = "대리인 PK 값을 입력해주세요")
+  @NotNull(message = "agentId가 비어있습니다")
   private UUID agentId; // 대리인 PK
 
-  @NotNull(message = "콘서트 PK 값을 입력해주세요")
+  @NotNull(message = "concertId가 비어있습니다")
   private UUID concertId; // 콘서트 PK
 
   @Valid
-  @NotEmpty(message = "신청서에는 최소 1개 이상의 신청서 세부사항이 포함되어야 합니다")
+  @NotEmpty(message = "applicationFormDetailRequestList가 비어있습니다(최소 1개)")
   private List<ApplicationFormDetailRequest> applicationFormDetailRequestList; // 신청서 세부사항 List
 
-  @NotNull(message = "선예매/일반예매 타입을 입력해주세요")
+  @NotNull(message = "ticketOpenType이 비어있습니다")
   private TicketOpenType ticketOpenType; // 선예매/일반예매 여부
 }

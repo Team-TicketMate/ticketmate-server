@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ReportUpdateRequest {
-  @NotNull
+  @NotNull(message = "reportStatus가 비어있습니다")
   private ReportStatus reportStatus;
   // TODO: 추후 수정 기능 확장 고려
 }

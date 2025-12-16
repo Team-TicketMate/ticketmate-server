@@ -29,6 +29,6 @@ public class FulfillmentFormInfoRequest {
   @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "상세설명은 최대 100자까지 입력 가능합니다.")
   private String particularMemo;
 
-  @NotNull(message = "대리인 계좌 ID는 필수입니다.")
+  @NotNull(message = "agentBankAccountId가 비어있습니다")
   private UUID agentBankAccountId;
 }

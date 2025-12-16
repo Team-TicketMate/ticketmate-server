@@ -15,15 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ReviewRequest {
-  @NotNull(message = "성공양식 ID는 필수입니다.")
+  @NotNull(message = "fulfillmentFormId가 비어있습니다")
   private UUID fulfillmentFormId;
 
-  @NotNull(message = "별점은 필수입니다.")
+  @NotNull(message = "rating이 비어있습니다")
   @DecimalMin(value = "0.0", message = "별점은 0.0 이상이어야 합니다.")
   @DecimalMax(value = "5.0", message = "별점은 5.0 이하이어야 합니다.")
   private Float rating;
 
-  @NotBlank(message = "리뷰 내용은 필수입니다.")
+  @NotBlank(message = "comment가 비어있습니다")
   @Size(min = 10, max = 300, message = "리뷰 내용은 10자 이상 300자 이하로 작성해야 합니다.")
   private String comment;
 
