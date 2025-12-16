@@ -17,7 +17,7 @@ public class ReviewEditRequest {
   @DecimalMax(value = "5.0", message = "별점은 5.0 이하이어야 합니다.")
   private Float rating;
 
-  @Size(min = 10, max = 300, message = "리뷰 내용은 10자 이상 300자 이하로 작성해야 합니다.")
+  @Size(min = 10, max = 300, message = "comment는 최소 10자 최대 300자 입력 가능합니다")
   private String comment;
 
   private List<UUID> deleteImgIdList = new ArrayList<>();

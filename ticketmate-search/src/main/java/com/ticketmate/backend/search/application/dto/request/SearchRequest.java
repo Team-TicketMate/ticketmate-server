@@ -23,7 +23,7 @@ import org.springframework.data.domain.Pageable;
 public class SearchRequest {
 
   @NotBlank(message = "keyword가 비어있습니다")
-  @Size(max = 20, message = "검색어는 최대 20자까지 입력 가능합니다.")
+  @Size(max = 20, message = "keyword는 최대 20자 입력 가능합니다.")
   private String keyword; // 검색 키워드
 
   @NotNull(message = "searchType이 비어있습니다")

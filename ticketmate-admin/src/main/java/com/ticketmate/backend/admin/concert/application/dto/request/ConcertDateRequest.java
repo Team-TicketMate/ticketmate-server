@@ -21,6 +21,6 @@ public class ConcertDateRequest {
   private LocalDateTime performanceDate;
 
   @Min(value = 1, message = "session 값은 1 이상이여야 합니다")
-  @Max(value = Integer.MAX_VALUE, message = "sessino 값은 정수 최대 범위를 넘을 수 없습니다.")
+  @Max(value = Integer.MAX_VALUE, message = "session 값은 정수 최대 범위를 넘을 수 없습니다.")
   private int session;
 }

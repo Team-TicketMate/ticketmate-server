@@ -33,9 +33,9 @@ public class ApplicationFormDetailRequest {
   private Integer requestCount; // 요청매수
 
   @Valid
-  @Size(max = HOPE_AREA_MAX_SIZE, message = "희망 구역은 최대 5개까지 등록 가능합니다.")
+  @Size(max = HOPE_AREA_MAX_SIZE, message = "hopeAreaList는 최대 5개 등록 가능합니다.")
   private List<HopeAreaRequest> hopeAreaList; // 희망구역 리스트
 
-  @Size(max = 100, message = "요청사항은 최대 100자까지만 작성 가능합니다.")
+  @Size(max = 100, message = "requirement는 최대 100자 입력 가능합니다.")
   private String requirement; // 요청사항
 }

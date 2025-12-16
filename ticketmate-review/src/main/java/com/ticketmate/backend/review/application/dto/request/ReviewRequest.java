@@ -24,9 +24,9 @@ public class ReviewRequest {
   private Float rating;
 
   @NotBlank(message = "comment가 비어있습니다")
-  @Size(min = 10, max = 300, message = "리뷰 내용은 10자 이상 300자 이하로 작성해야 합니다.")
+  @Size(min = 10, max = 300, message = "comment는 최소 10자 최대 300자 입력 가능합니다")
   private String comment;
 
-  @Size(max = 3, message = "리뷰 첨부파일은 최대 3개까지 등록 가능합니다.")
+  @Size(max = 3, message = "reviewImgList는 최대 3개 등록 가능합니다.")
   private List<MultipartFile> reviewImgList = new ArrayList<>();
 }

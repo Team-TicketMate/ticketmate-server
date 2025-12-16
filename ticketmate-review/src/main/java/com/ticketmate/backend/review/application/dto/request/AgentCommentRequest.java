@@ -10,6 +10,6 @@ import lombok.Setter;
 public class AgentCommentRequest {
 
   @NotBlank(message = "comment가 비어있습니다")
-  @Size(max = 300, message = "댓글 내용은 300자 이하로 작성해야 합니다.")
+  @Size(max = 300, message = "comment는 최대 300자 입력 가능합니다")
   private String comment;
 }
