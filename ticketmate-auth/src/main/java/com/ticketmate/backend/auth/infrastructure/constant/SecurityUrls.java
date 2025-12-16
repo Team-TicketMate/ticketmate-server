@@ -16,6 +16,7 @@ public class SecurityUrls {
 
     // AUTH
     "/api/auth/login", // 로그인 (관리자)
+    "/api/auth/logout", // 로그아웃
     "/api/auth/reissue", // accessToken 재발급
     "/api/auth/2fa/setup", // 2FA setup
     "/api/auth/2fa/setup/verify", // 2FA setup verify
