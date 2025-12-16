@@ -3,7 +3,6 @@ package com.ticketmate.backend.notification.infrastructure.service;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.WebpushConfig;
-import com.google.firebase.messaging.WebpushNotification;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.notification.application.dto.request.NotificationPayload;
 import com.ticketmate.backend.notification.core.constant.NotificationConstants;
@@ -65,7 +64,7 @@ public class WebNotificationService implements NotificationService {
   @Transactional
   public void sendToAll(NotificationPayload payload) {
     fcmTokenService.findAllTokens()
-        .forEach(fcmToken -> sendNotification(fcmToken, payload));
+      .forEach(fcmToken -> sendNotification(fcmToken, payload));
   }
 
   /**
@@ -76,21 +75,16 @@ public class WebNotificationService implements NotificationService {
    */
   private void sendNotification(FcmToken fcmToken, NotificationPayload request) {
     try {
-      WebpushNotification webpushNotification = WebpushNotification.builder()
-          .setTitle(request.getTitle())
-          .setBody(request.getBody())
-          .setIcon(NotificationConstants.NOTIFICATION_ICON_PATH)
-          .build();
-
       WebpushConfig webpushConfig = WebpushConfig.builder()
-          .setNotification(webpushNotification)
-          .putHeader(NotificationConstants.NOTIFICATION_TTL_PREFIX, NotificationConstants.NOTIFICATION_TTL)
-          .build();
+        .putHeader(NotificationConstants.NOTIFICATION_TTL_PREFIX, NotificationConstants.NOTIFICATION_TTL)
+        .build();
 
       Message message = Message.builder()
-          .setToken(fcmToken.getToken())
-          .setWebpushConfig(webpushConfig)
-          .build();
+        .setToken(fcmToken.getToken())
+        .setWebpushConfig(webpushConfig)
+        .putData("title", request.getTitle())
+        .putData("body", request.getBody())
+        .build();
 
       String response = FirebaseMessaging.getInstance().send(message);
       log.debug("알림 전송 성공. 응답: {}", response);
