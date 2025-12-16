@@ -23,7 +23,7 @@ public class HopeAreaRequest {
   @Max(value = HOPE_AREA_MAX_SIZE, message = "순위는 1부터 5 사이의 정수만 입력 가능합니다.")
   private int priority; // 순위
 
-  @NotBlank(message = "희망 구역을 입력하세요.")
+  @NotBlank(message = "location이 비어있습니다")
   private String location; // 구역
 
   @Positive(message = "가격은 1 이상의 정수만 입력 가능합니다.")

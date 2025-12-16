@@ -16,7 +16,7 @@ import lombok.Setter;
 public class VerifyCodeRequest {
 
   @NotEmpty(message = "전화번호를 입력해주세요")
-  @Pattern(regexp = "^010[0-9]{8}$", message = "전화번호는 010으로 시작하는 11자리 문자열만 입력가능합니다 (예: 01012345678)")
+  @Pattern(regexp = "^010[0-9]{8}$", message = "전화번호는 010으로 시작하는 11자리 문자열만 입력 가능합니다 (예: 01012345678)")
   private String phoneNumber;
 
   @NotEmpty(message = "인증번호 6자리를 입력해주세요")

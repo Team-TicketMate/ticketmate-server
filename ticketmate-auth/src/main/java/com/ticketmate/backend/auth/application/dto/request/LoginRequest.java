@@ -14,9 +14,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LoginRequest {
 
-  @NotBlank(message = "로그인 아이디를 입력하세요")
+  @NotBlank(message = "username이 비어있습니다")
   private String username;
 
-  @NotBlank(message = "로그인 비밀번호를 입력하세요")
+  @NotBlank(message = "password가 비어있습니다")
   private String password;
 }

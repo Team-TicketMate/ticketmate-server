@@ -18,6 +18,6 @@ import lombok.ToString;
 @NoArgsConstructor
 public class FulfillmentFormRejectRequest {
 
-  @Size(max = MAX_REJECTED_MEMO_LENGTH, message = "거절사유는 최대 100자까지 입력 가능합니다.")
+  @Size(max = MAX_REJECTED_MEMO_LENGTH, message = "rejectMemo는 최대 100자 입력 가능합니다.")
   private String rejectedMemo;
 }

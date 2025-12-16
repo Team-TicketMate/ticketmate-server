@@ -22,8 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class FulfillmentFormUpdateRequest {
 
   private List<UUID> deleteImgIdList;  // 삭제하고 싶은 기존 사진 리스트
+  
   private List<MultipartFile> newSuccessImgList;  // 추가로 등록하고 싶은 사진 리스트
+  
   private UUID agentBankAccountId;  // 수정할 대리인 계좌번호 ID
-  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "상세설명은 최대 100자까지 입력 가능합니다.")
+  
+  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "particularMemo는 최대 100자 입력 가능합니다.")
   private String particularMemo;  // 수정할 상세설명
 }
