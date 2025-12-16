@@ -29,6 +29,7 @@ import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.core.constant.MemberType;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -59,6 +60,7 @@ public class FulfillmentFormService {
    * 티켓팅 성공시 대리인이 성공양식을 작성 및 저장하는 로직
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('fulfillment-form', #member.memberId, #chatRoomId)")
   public UUID saveFulfillmentFormInfo(Member member, String chatRoomId, FulfillmentFormInfoRequest request) {
     // 대리인 자격 검증
     memberService.validateMemberType(member, MemberType.AGENT);
@@ -144,6 +146,7 @@ public class FulfillmentFormService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('fulfillment-form', #fulfillmentFormId)")
   public void acceptFulfillmentForm(Member member, UUID fulfillmentFormId) {
     FulfillmentForm fulfillmentForm = handleFulfillmentStatusForClient(member, fulfillmentFormId, FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM);
 
@@ -169,6 +172,7 @@ public class FulfillmentFormService {
   }
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('fulfillment-form', #fulfillmentFormId)")
   public void rejectFulfillmentForm(Member member, UUID fulfillmentFormId, FulfillmentFormRejectRequest request) {
     FulfillmentForm fulfillmentForm = handleFulfillmentStatusForClient(member, fulfillmentFormId, REJECTED_FULFILLMENT_FORM);
 
@@ -189,6 +193,7 @@ public class FulfillmentFormService {
    * 대리인이 자신이 작성한 성공양식을 수정하는 로직
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('fulfillment-form', #fulfillmentFormId)")
   public void updateFulfillmentForm(Member member, UUID fulfillmentFormId, FulfillmentFormUpdateRequest request) {
     // 대리인 검증
     memberService.validateMemberType(member, MemberType.AGENT);

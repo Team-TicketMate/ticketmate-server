@@ -2,7 +2,6 @@ package com.ticketmate.backend.redis.infrastructure.manager;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.redis.infrastructure.properties.RedissonProperties;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,35 +15,35 @@ import org.springframework.stereotype.Component;
 public class RedisLockManager {
 
   private final RedissonClient redissonClient;
-  private final RedissonProperties properties;
 
   /**
    * Redisson Lock을 획득합니다
    *
-   * @param lockKey 락 식별자로 사용할 키
-   * @param task    락 획득 후 실행할 작업
-   * @param <T>     작업 실행 결과 타입
+   * @param lockKey   락 식별자로 사용할 키
+   * @param waitTime  락 획득을 위한 최대 대기 시간
+   * @param leaseTime 락 자동해제 시간
+   * @param timeUnit 시간 단위
+   * @param task      락 획득 후 실행할 작업
+   * @param <T>       작업 실행 결과 타입
    */
-  public <T> T executeLock(String lockKey, LockTask<T> task) {
+  public <T> T executeLock(String lockKey, long waitTime, long leaseTime, TimeUnit timeUnit, LockTask<T> task) throws Throwable {
     RLock lock = redissonClient.getLock(lockKey);
+
+    boolean acquired = false; // 락 획득 여부 플래그
 
     try {
       // 락 획득 시도
-      if (!lock.tryLock(properties.waitTime(), properties.leaseTime(), TimeUnit.SECONDS)) {
+      if (!lock.tryLock(waitTime, leaseTime, timeUnit)) {
         // 락 획득 실패(=waitTime 내에 다른 프로세스가 락을 놓지 않음)
         log.error("락 획득 실패 - 다른 요청 처리 중. lockKey: {}", lockKey);
         throw new CustomException(ErrorCode.LOCK_ACQUISITION_FAILURE);
       }
 
+      acquired = true;
+      log.debug("redis lock 획득 성공 lockKey: {}", lockKey);
+
       // 락 획득 성공 시, 실제 해야 할 작업(task.run())을 실행
-      try {
-        log.debug("redis lock 획득 성공 lockKey: {}", lockKey);
-        return task.run();
-      } catch (Exception e) {
-        // 작업 실행 도중 예외 발생 시 로깅 후 재발행
-        log.error("작업 실행 중 예외 발생");
-        throw new RuntimeException("작업 실행 중 예외 발생", e);
-      }
+      return task.run();
 
     } catch (InterruptedException e) {
       // 락 획득 대기 중에 스레드가 인터럽트되었을 경우
@@ -54,9 +53,13 @@ public class RedisLockManager {
 
     } finally {
       // 락 해제 - 현재 스레드가 아직도 락을 보유 중이면 `unlock()`
-      if (lock.isHeldByCurrentThread()) {
-        log.debug("현재 스레드가 락을 가지고 있어 해제합니다.");
-        lock.unlock();
+      if (acquired && lock.isHeldByCurrentThread()) {
+        try {
+          lock.unlock();
+          log.debug("현재 스레드가 락을 가지고 있어 해제합니다. lockKey: {}", lockKey);
+        } catch (Exception e) {
+          log.warn("Redisson Lock 해제 중 오류 발생. LockKey: {}", lockKey, e);
+        }
       }
     }
   }
@@ -74,6 +77,6 @@ public class RedisLockManager {
      *
      * @return 작업 실행 결과
      */
-    T run() throws Exception;
+    T run() throws Throwable;
   }
 }

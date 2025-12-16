@@ -9,6 +9,7 @@ import com.ticketmate.backend.admin.report.application.mapper.ReportMapper;
 import com.ticketmate.backend.admin.report.infrastructure.repository.ReportRepositoryCustom;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
 import com.ticketmate.backend.report.infrastructure.repository.ReportRepository;
 import java.util.UUID;
@@ -61,6 +62,7 @@ public class ReportAdminService {
      * @param request reportStatus
      */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('report', #reportId)")
   public void updateReport(UUID reportId, ReportUpdateRequest request) {
     Report report = reportRepository.findById(reportId)
         .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
