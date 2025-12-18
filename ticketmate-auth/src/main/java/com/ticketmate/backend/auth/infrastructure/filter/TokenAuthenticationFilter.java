@@ -176,10 +176,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     assertAdminAuthenticated(token, apiRequestType);
 
     // sms 본인인증 검증
-    assertPhoneVerification(member, uri);
-
-    // 기본 프로필 설정 검증
-    assertInitialProfileSet(member, uri, httpMethod);
+    if (!member.isPhoneNumberVerified()) {
+      assertPhoneVerification(member, uri);
+    } else {
+      // 기본 프로필 설정 검증
+      assertInitialProfileSet(member, uri, httpMethod);
+    }
 
     // 인증 성공
     filterChain.doFilter(request, response);

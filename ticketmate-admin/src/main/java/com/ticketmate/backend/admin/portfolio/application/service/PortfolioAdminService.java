@@ -5,6 +5,7 @@ import com.ticketmate.backend.admin.portfolio.application.dto.request.PortfolioS
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.response.PortfolioFilteredAdminResponse;
 import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioAdminInfo;
+import com.ticketmate.backend.admin.portfolio.application.dto.view.PortfolioFilteredAdminInfo;
 import com.ticketmate.backend.admin.portfolio.application.mapper.PortfolioAdminMapper;
 import com.ticketmate.backend.admin.portfolio.infrastructure.event.PortfolioHandledEvent;
 import com.ticketmate.backend.admin.portfolio.infrastructure.repository.PortfolioRepositoryCustom;
@@ -18,6 +19,7 @@ import com.ticketmate.backend.notification.core.service.NotificationService;
 import com.ticketmate.backend.portfolio.application.service.PortfolioService;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import com.ticketmate.backend.portfolio.infrastructure.entity.Portfolio;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,13 +47,14 @@ public class PortfolioAdminService {
    */
   @Transactional(readOnly = true)
   public Page<PortfolioFilteredAdminResponse> filteredPortfolio(PortfolioFilteredRequest request) {
-    return portfolioRepositoryCustom.filteredPortfolio(
-        request.getUsername(),
-        request.getNickname(),
-        request.getName(),
-        request.getPortfolioStatus(),
-        request.toPageable()
+    Page<PortfolioFilteredAdminInfo> portfolioFilteredAdminInfoPage = portfolioRepositoryCustom.filteredPortfolio(
+      request.getUsername(),
+      request.getNickname(),
+      request.getName(),
+      request.getPortfolioStatus(),
+      request.toPageable()
     );
+    return portfolioFilteredAdminInfoPage.map(portfolioAdminMapper::toPortfolioFilteredAdminResponse);
   }
 
   /**
@@ -72,6 +75,7 @@ public class PortfolioAdminService {
    * @param request     변경하려는 포트폴리오 상태
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('portfolio', #portfolioId)")
   public void changePortfolioStatus(UUID portfolioId, PortfolioStatusUpdateRequest request) {
     Portfolio portfolio = portfolioService.findPortfolioById(portfolioId);
     Member client = portfolio.getMember();

@@ -17,6 +17,7 @@ dependencies {
     implementation project(':ticketmate-applicationform')
     implementation project(':ticketmate-member')
     implementation project(':ticketmate-querydsl')
+    implementation project(':ticketmate-redis')
     implementation project(':ticketmate-storage')
 
     // MapStructure

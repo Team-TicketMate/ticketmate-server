@@ -4,6 +4,7 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import com.ticketmate.backend.report.application.dto.request.ReportRequest;
 import com.ticketmate.backend.report.infrastructure.entity.Report;
 import com.ticketmate.backend.report.infrastructure.repository.ReportRepository;
@@ -21,6 +22,7 @@ public class ReportService {
   private final MemberService memberService;
 
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('report', #reporter.memberId, #request.reportedMemberId)")
   public void createReport(Member reporter, ReportRequest request) {
     // 자기 자신 신고 검증
     if (reporter.getMemberId().equals(request.getReportedMemberId())) {

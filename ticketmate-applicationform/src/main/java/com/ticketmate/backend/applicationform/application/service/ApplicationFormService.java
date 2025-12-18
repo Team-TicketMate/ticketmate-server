@@ -22,6 +22,7 @@ import com.ticketmate.backend.applicationform.application.validator.ApplicationF
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormAction;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormRejectedType;
 import com.ticketmate.backend.applicationform.core.constant.ApplicationFormStatus;
+import com.ticketmate.backend.applicationform.core.evnet.ApplicationFormAcceptedEvent;
 import com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationFormDetail;
@@ -44,11 +45,13 @@ import com.ticketmate.backend.notification.application.dto.request.NotificationP
 import com.ticketmate.backend.notification.application.type.ApplicationFormApproveNotificationType;
 import com.ticketmate.backend.notification.application.type.ApplicationFormRejectNotificationType;
 import com.ticketmate.backend.notification.core.service.NotificationService;
+import com.ticketmate.backend.redis.application.annotation.RedisLock;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +70,7 @@ public class ApplicationFormService {
   private final NotificationService notificationService;
   private final ApplicationFormMapper applicationFormMapper;
   private final RejectionReasonService rejectionReasonService;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 대리인를 지정하여 공연 신청 폼을 작성합니다
@@ -79,6 +83,7 @@ public class ApplicationFormService {
    *                ticketOpenType 선예매/일반예매 타입
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #client.memberId, #request.agentId, #request.concertId, #request.ticketOpenType)")
   public void createApplicationForm(ApplicationFormRequest request, Member client) {
 
     // 대리인 검증
@@ -96,7 +101,7 @@ public class ApplicationFormService {
 
     // TicketOpenDate 확인
     TicketOpenDate ticketOpenDate = concertService
-        .findTicketOpenDateByConcertIdAndTicketOpenType(concert.getConcertId(), request.getTicketOpenType());
+      .findTicketOpenDateByConcertIdAndTicketOpenType(concert.getConcertId(), request.getTicketOpenType());
 
     // ApplicationForm 생성
     ApplicationForm applicationForm = ApplicationForm.create(client, agent, concert, ticketOpenDate, request.getTicketOpenType());
@@ -122,13 +127,13 @@ public class ApplicationFormService {
   @Transactional(readOnly = true)
   public Page<ApplicationFormFilteredResponse> filteredApplicationForm(ApplicationFormFilteredRequest request) {
     Page<ApplicationFormFilteredInfo> applicationFormFilteredInfoPage = applicationFormRepositoryCustom
-        .filteredApplicationForm(
-            request.getClientId(),
-            request.getAgentId(),
-            request.getConcertId(),
-            request.getApplicationFormStatusSet(),
-            request.toPageable()
-        );
+      .filteredApplicationForm(
+        request.getClientId(),
+        request.getAgentId(),
+        request.getConcertId(),
+        request.getApplicationFormStatusSet(),
+        request.toPageable()
+      );
     return applicationFormFilteredInfoPage.map(applicationFormMapper::toApplicationFormFilteredResponse);
   }
 
@@ -151,10 +156,10 @@ public class ApplicationFormService {
     List<ApplicationFormDetailResponse> applicationFormDetailResponseList = getApplicationFormDetailResponseList(applicationFormId);
 
     return new ApplicationFormInfoResponse(
-        concertInfoResponse,
-        applicationFormDetailResponseList,
-        applicationForm.getApplicationFormStatus(),
-        applicationForm.getTicketOpenType()
+      concertInfoResponse,
+      applicationFormDetailResponseList,
+      applicationForm.getApplicationFormStatus(),
+      applicationForm.getTicketOpenType()
     );
   }
 
@@ -166,6 +171,7 @@ public class ApplicationFormService {
    * @param client            의뢰인 (신청서 작성자)
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #applicationFormId)")
   public void editApplicationForm(UUID applicationFormId, ApplicationFormEditRequest editRequest, Member client) {
 
     // 작성된 신청서 확인
@@ -192,6 +198,7 @@ public class ApplicationFormService {
    * @param client            의뢰인
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #applicationFormId)")
   public void cancelApplicationForm(UUID applicationFormId, Member client) {
 
     // 작성된 신청서 확인
@@ -214,6 +221,7 @@ public class ApplicationFormService {
    *                          otherMemo 거절 메모 (거절 사유가 '기타' 일 때)
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #applicationFormId)")
   public void rejectApplicationForm(UUID applicationFormId, Member agent, ApplicationFormRejectRequest request) {
 
     // 거절 사유 및 메모 검증
@@ -246,6 +254,7 @@ public class ApplicationFormService {
    * @param agent             대리인 PK
    */
   @Transactional
+  @RedisLock(key = "@redisLockKeyManager.generate('application-form', #applicationFormId)")
   public void acceptedApplicationForm(UUID applicationFormId, Member agent) {
 
     // DB에서 신청서 조회
@@ -265,6 +274,10 @@ public class ApplicationFormService {
      * 선예매/일반예매는 각각 다른 공연으로 취급되어 한 공연당 2개의 채팅방이 존재할 수 있습니다.
      */
 
+    // 신청서 수락 이벤트 발행
+    ApplicationFormAcceptedEvent event = new ApplicationFormAcceptedEvent(applicationForm.getApplicationFormId());
+    eventPublisher.publishEvent(event);
+
     // 알림전송
     NotificationPayload payload = buildApproveNotificationPayload(agent);
 
@@ -281,12 +294,12 @@ public class ApplicationFormService {
   @Transactional(readOnly = true)
   public Boolean isDuplicateApplicationForm(Member client, ApplicationFormDuplicateRequest request) {
     return applicationFormRepository
-        .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-            client.getMemberId(),
-            request.getAgentId(),
-            request.getConcertId(),
-            request.getTicketOpenType()
-        ).isPresent();
+      .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
+        client.getMemberId(),
+        request.getAgentId(),
+        request.getConcertId(),
+        request.getTicketOpenType()
+      ).isPresent();
   }
 
   /**
@@ -297,11 +310,11 @@ public class ApplicationFormService {
    */
   public ApplicationForm findApplicationFormById(UUID applicationFormId) {
     return applicationFormRepository.findById(applicationFormId)
-        .orElseThrow(() -> {
-              log.error("신청서를 찾을 수 없습니다. 요청PK: {}", applicationFormId);
-              return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
-            }
-        );
+      .orElseThrow(() -> {
+          log.error("신청서를 찾을 수 없습니다. 요청PK: {}", applicationFormId);
+          return new CustomException(ErrorCode.APPLICATION_FORM_NOT_FOUND);
+        }
+      );
   }
 
   /**
@@ -314,7 +327,7 @@ public class ApplicationFormService {
    */
   private void validateDuplicateApplicationForm(UUID clientId, UUID agentId, UUID concertId, TicketOpenType ticketOpenType) {
     applicationFormRepository.findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-        clientId, agentId, concertId, ticketOpenType).ifPresent(applicationForm -> {
+      clientId, agentId, concertId, ticketOpenType).ifPresent(applicationForm -> {
       log.error("중복된 신청서 요청입니다. 신청서 PK: {}", applicationForm.getApplicationFormId());
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
     });
@@ -327,7 +340,7 @@ public class ApplicationFormService {
    */
   private List<ApplicationFormDetailResponse> getApplicationFormDetailResponseList(UUID applicationFormId) {
     List<ApplicationFormDetail> applicationFormDetailList = applicationFormDetailRepositoryCustom
-        .findAllApplicationFormDetailWithHopeAreaListByApplicationFormId(applicationFormId);
+      .findAllApplicationFormDetailWithHopeAreaListByApplicationFormId(applicationFormId);
     return applicationFormMapper.toApplicationFormDetailResponseList(applicationFormDetailList);
   }
 
@@ -336,16 +349,16 @@ public class ApplicationFormService {
    */
   private ApplicationFormDetail createApplicationFormDetailEntity(ApplicationFormDetailRequest detailRequest, ConcertDate concertDate) {
     ApplicationFormDetail applicationFormDetail = ApplicationFormDetail
-        .create(concertDate, detailRequest.getRequestCount(), detailRequest.getRequirement());
+      .create(concertDate, detailRequest.getRequestCount(), detailRequest.getRequirement());
 
     // 희망구역 설정
     if (!CommonUtil.nullOrEmpty(detailRequest.getHopeAreaList())) {
       for (HopeAreaRequest hopeAreaRequest : detailRequest.getHopeAreaList()) {
         HopeArea hopeArea = HopeArea.create(
-            applicationFormDetail,
-            hopeAreaRequest.getPriority(),
-            hopeAreaRequest.getLocation(),
-            hopeAreaRequest.getPrice()
+          applicationFormDetail,
+          hopeAreaRequest.getPriority(),
+          hopeAreaRequest.getLocation(),
+          hopeAreaRequest.getPrice()
         );
         applicationFormDetail.addHopeArea(hopeArea);
       }
@@ -360,16 +373,16 @@ public class ApplicationFormService {
   private void processApplicationFormDetailRequestList(ApplicationForm applicationForm, List<ApplicationFormDetailRequest> detailRequestList, TicketOpenDate ticketOpenDate) {
     // 신청서 세부사항 검증
     ApplicationFormDetailValidator
-        .of(detailRequestList)
-        .performanceDateNonNullAndDistinct()
-        .requestCountRange(APPLICATION_FORM_MIN_REQUEST_COUNT, ticketOpenDate.getRequestMaxCount())
-        .requirementMaxLength(REQUIREMENT_MAX_LENGTH)
-        .hopeAreaList(HOPE_AREA_MAX_SIZE);
+      .of(detailRequestList)
+      .performanceDateNonNullAndDistinct()
+      .requestCountRange(APPLICATION_FORM_MIN_REQUEST_COUNT, ticketOpenDate.getRequestMaxCount())
+      .requirementMaxLength(REQUIREMENT_MAX_LENGTH)
+      .hopeAreaList(HOPE_AREA_MAX_SIZE);
 
     for (ApplicationFormDetailRequest detailRequest : detailRequestList) {
       // 공연일자 엔티티 조회
       ConcertDate concertDate = concertService.findConcertDateByConcertIdAndPerformanceDate(
-          applicationForm.getConcert().getConcertId(), detailRequest.getPerformanceDate()
+        applicationForm.getConcert().getConcertId(), detailRequest.getPerformanceDate()
       );
 
       // ApplicationFormDetail 생성
@@ -439,7 +452,7 @@ public class ApplicationFormService {
     // 본인 소유 신청서 검증
     if (!applicationForm.getClient().getMemberId().equals(client.getMemberId())) {
       log.error("본인이 작성한 신청서만 수정이 가능합니다. 신청서 소유자: {}, 요청된 의뢰인: {}",
-          applicationForm.getClient().getMemberId(), client.getMemberId());
+        applicationForm.getClient().getMemberId(), client.getMemberId());
       throw new CustomException(ErrorCode.ACCESS_DENIED);
     }
   }
@@ -454,7 +467,7 @@ public class ApplicationFormService {
     // 신청서가 해당 대리인에게 작성되었는지 검증
     if (!applicationForm.getAgent().getMemberId().equals(agent.getMemberId())) {
       log.error("요청받은 대리인만 신청서 수락/거절이 가능합니다. 신청서 대상 대리인: {}, 요청된 대리인: {}",
-          applicationForm.getAgent().getMemberId(), agent.getMemberId());
+        applicationForm.getAgent().getMemberId(), agent.getMemberId());
       throw new CustomException(ErrorCode.ACCESS_DENIED);
     }
   }
@@ -487,10 +500,10 @@ public class ApplicationFormService {
   private NotificationPayload buildRejectNotificationPayload(Member agent, ApplicationFormRejectRequest request) {
 
     ApplicationFormRejectNotificationType notificationType =
-        CommonUtil.stringToEnum(
-            ApplicationFormRejectNotificationType.class,
-            request.getApplicationFormRejectedType().name()
-        );
+      CommonUtil.stringToEnum(
+        ApplicationFormRejectNotificationType.class,
+        request.getApplicationFormRejectedType().name()
+      );
     return notificationType.toPayload(agent.getNickname(), request.getOtherMemo());
   }
 }

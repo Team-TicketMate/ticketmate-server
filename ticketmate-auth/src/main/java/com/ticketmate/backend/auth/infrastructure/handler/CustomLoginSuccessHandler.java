@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class CustomLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final JwtManager jwtManager;
   private final OAuth2Properties properties;

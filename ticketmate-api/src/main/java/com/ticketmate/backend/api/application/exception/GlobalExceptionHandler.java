@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
-import com.ticketmate.backend.common.application.exception.ValidErrorResponse;
 import java.security.Principal;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +17,6 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -37,23 +33,17 @@ public class GlobalExceptionHandler {
    * Validation 예외 처리
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ValidErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+  public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
     log.error("ValidationException 발생: {}", e.getMessage(), e);
-    // Validation 에러 정보를 담을 Map 생성
-    Map<String, String> validation = new HashMap<>();
-    for (FieldError fieldError : e.getFieldErrors()) {
-      validation.put(fieldError.getField(), fieldError.getDefaultMessage());
+
+    ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+    String errorMessage = errorCode.getMessage();
+    if (e.getFieldError() != null) {
+      errorMessage = e.getFieldError().getDefaultMessage();
     }
+    ErrorResponse response = ErrorResponse.from(errorCode, errorMessage);
 
-    // 공통 응답 DTO를 활용해 반환
-    // ErrorCode.INVALID_REQUEST -> 400
-    ValidErrorResponse response = ValidErrorResponse.builder()
-        .errorCode(HttpStatus.BAD_REQUEST.toString())
-        .errorMessage("잘못된 요청입니다.")
-        .validation(validation)
-        .build();
-
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    return ResponseEntity.status(errorCode.getStatus()).body(response);
   }
 
   /**

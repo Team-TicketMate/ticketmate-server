@@ -16,12 +16,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormDuplicateRequest {
 
-  @NotNull(message = "대리인 PK 값을 입력하세요")
+  @NotNull(message = "agentId가 비어있습니다")
   private UUID agentId;
 
-  @NotNull(message = "공연 PK 값을 입력하세요")
+  @NotNull(message = "concertId가 비어있습니다")
   private UUID concertId;
 
-  @NotNull(message = "선예매/일반예매 타입을 입력하세요")
+  @NotNull(message = "ticketOpenType이 비어있습니다")
   private TicketOpenType ticketOpenType;
 }

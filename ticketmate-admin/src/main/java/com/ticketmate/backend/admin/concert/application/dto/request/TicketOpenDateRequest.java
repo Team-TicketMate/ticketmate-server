@@ -26,6 +26,6 @@ public class TicketOpenDateRequest {
 
   private Boolean isBankTransfer; // 무통장 입금 여부
 
-  @NotNull(message = "선예매/일반예매 타입을 입력하세요")
+  @NotNull(message = "ticketOpenType이 비어있습니다")
   private TicketOpenType ticketOpenType; // 선예매, 일반예매 타입
 }
