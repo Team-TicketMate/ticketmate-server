@@ -148,6 +148,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
 
   /**
    * 키워드를 사용하여 공연명, 공연장명, 공연 타입에 대해 LIKE 검색을 수행하고 일치하는 공연 ID 목록을 반환합니다.
+   * 티켓 오픈 일자가 지나지 않고 삭제되지 않은 공연만 반환합니다.
    *
    * @param keyword 검색할 키워드
    * @param limit   반환할 결과의 수
@@ -156,17 +157,23 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   @Override
   public List<UUID> findConcertIdsByKeyword(String keyword, int limit) {
     // 동적 WHERE 절 조합
-    BooleanExpression whereClause = QueryDslUtil.anyOf(
+    BooleanExpression whereClause = QueryDslUtil.allOf(
+      QueryDslUtil.anyOf(
         QueryDslUtil.likeIgnoreCase(CONCERT.concertName, keyword),
         QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, keyword),
         QueryDslUtil.likeIgnoreCase(CONCERT.concertType.stringValue(), keyword)
+      ),
+      TICKET_OPEN_DATE.openDate.goe(Instant.now()),
+      CONCERT.deleted.isFalse()
     );
     return queryFactory
-        .select(CONCERT.concertId)
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .where(whereClause)
-        .limit(limit)
-        .fetch();
+      .select(CONCERT.concertId)
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .join(TICKET_OPEN_DATE).on(TICKET_OPEN_DATE.concert.eq(CONCERT))
+      .where(whereClause)
+      .distinct()
+      .limit(limit)
+      .fetch();
   }
 }
