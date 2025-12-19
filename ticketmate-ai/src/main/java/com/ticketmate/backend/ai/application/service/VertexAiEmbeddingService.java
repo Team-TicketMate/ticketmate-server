@@ -118,7 +118,7 @@ public class VertexAiEmbeddingService {
    *
    * @param queryVector   검색에 사용할 임베딩 벡터
    * @param limit         조회할 최대 아이디 개수
-   * @return 유사도 순으로 정렬된 대리인 ID 리스트
+   * @return 유사도 순으로 정렬된 공연 ID 리스트
    */
   @Transactional(readOnly = true)
   public List<UUID> findNearestConcertEmbeddings(float[] queryVector, int limit) {
