@@ -16,15 +16,34 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
   void deleteByText(String text);
 
   /**
-   * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드
+   * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드 (공연)
+   * 티켓 오픈 날짜가 지나지 않고 삭제되지 않은 공연만 반환
    *
    * @param vector        비교할 기준 벡터
    * @param limit         반환할 결과의 수
-   * @param embeddingType 검색할 임베딩의 타입 (CONCERT, AGENT 등)
+   * @return 유사도 순으로 정렬된 target_id 리스트
+   */
+  @Query(value = "SELECT target_id FROM embedding e "
+    + "WHERE e.embedding_type = 'CONCERT' "
+    + "AND EXISTS "
+    + "(SELECT 1 FROM ticket_open_date t "
+    + "JOIN concert c ON t.concert_concert_id = c.concert_id "
+    + "WHERE e.target_id = t.concert_concert_id "
+    + "AND t.open_date >= NOW() "
+    + "AND c.deleted = false) "
+    + "ORDER BY e.embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
+  List<UUID> findNearestConcertEmbeddings(@Param("vector") float[] vector, @Param("limit") int limit);
+
+  /**
+   * 주어진 벡터와 가장 유사한 임베딩의 target_id 목록을 반환하는 메서드 (대리인)
+   *
+   * @param vector        비교할 기준 벡터
+   * @param limit         반환할 결과의 수
    * @return 유사도 순으로 정렬된 target_id 리스트
    */
   @Query(value = "SELECT target_id FROM embedding "
-                 + "WHERE embedding_type = :#{#embeddingType.name()} "
-                 + "ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
-  List<UUID> findNearestEmbeddings(@Param("vector") float[] vector, @Param("limit") int limit, @Param("embeddingType") EmbeddingType embeddingType);
+    + "WHERE embedding_type = 'AGENT' "
+    + "ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
+  List<UUID> findNearestAgentEmbeddings(@Param("vector") float[] vector, @Param("limit") int limit);
+
 }
