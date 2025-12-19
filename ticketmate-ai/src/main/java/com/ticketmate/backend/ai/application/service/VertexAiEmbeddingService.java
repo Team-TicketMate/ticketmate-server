@@ -113,16 +113,28 @@ public class VertexAiEmbeddingService {
   }
 
   /**
-   * 벡터 탐색 결과 반환
+   * 벡터 탐색 결과 반환 (공연)
    * 지정된 queryVector로 유사도가 높은 순서대로 정렬된 리스트 조회
    *
    * @param queryVector   검색에 사용할 임베딩 벡터
    * @param limit         조회할 최대 아이디 개수
-   * @param embeddingType 조회할 임베딩 타입
+   * @return 유사도 순으로 정렬된 공연 ID 리스트
+   */
+  @Transactional(readOnly = true)
+  public List<UUID> findNearestConcertEmbeddings(float[] queryVector, int limit) {
+    return embeddingRepository.findNearestConcertEmbeddings(queryVector, limit);
+  }
+
+  /**
+   * 벡터 탐색 결과 반환 (대리인)
+   * 지정된 queryVector로 유사도가 높은 순서대로 정렬된 리스트 조회
+   *
+   * @param queryVector   검색에 사용할 임베딩 벡터
+   * @param limit         조회할 최대 아이디 개수
    * @return 유사도 순으로 정렬된 대리인 ID 리스트
    */
   @Transactional(readOnly = true)
-  public List<UUID> findNearestEmbeddings(float[] queryVector, int limit, EmbeddingType embeddingType) {
-    return embeddingRepository.findNearestEmbeddings(queryVector, limit, embeddingType);
+  public List<UUID> findNearestAgentEmbeddings(float[] queryVector, int limit) {
+    return embeddingRepository.findNearestAgentEmbeddings(queryVector, limit);
   }
 }

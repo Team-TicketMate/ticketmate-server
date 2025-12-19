@@ -12,24 +12,30 @@ import org.springframework.http.ResponseEntity;
 public interface SearchControllerDocs {
 
   @ApiChangeLogs({
-      @ApiChangeLog(
-          date = "2025-08-29",
-          author = "Chuseok22",
-          description = "검색 request DTO 기본값 수정",
-          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
-      ),
-      @ApiChangeLog(
-          date = "2025-07-19",
-          author = "Yooonjeong",
-          description = "공연, 대리인 임베딩 기반 하이브리드 검색 구현",
-          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/376"
-      ),
-      @ApiChangeLog(
-          date = "2025-08-18",
-          author = "Yooonjeong",
-          description = "최근 검색어 기능 구현",
-          issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/375"
-      )
+    @ApiChangeLog(
+      date = "2025-07-19",
+      author = "Yooonjeong",
+      description = "공연, 대리인 임베딩 기반 하이브리드 검색 구현",
+      issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/376"
+    ),
+    @ApiChangeLog(
+      date = "2025-08-18",
+      author = "Yooonjeong",
+      description = "최근 검색어 기능 구현",
+      issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/375"
+    ),
+    @ApiChangeLog(
+      date = "2025-08-29",
+      author = "Chuseok22",
+      description = "검색 request DTO 기본값 수정",
+      issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/492"
+    ),
+    @ApiChangeLog(
+      date = "2025-12-18",
+      author = "Yooonjeong",
+      description = "공연 검색 결과 모집 중인 공연으로 제한",
+      issueUrl = "https://github.com/Team-TicketMate/ticketmate-server/issues/687"
+    )
   })
   @Operation(
       summary = "공연・대리인 하이브리드 검색",
@@ -80,6 +86,7 @@ public interface SearchControllerDocs {
           - `pageNumber`/`pageSize`를 `null` 또는 생략 시 기본값이 적용됩니다.
           - 반환 타입이 `Slice`이므로, `first`/`last` 플래그를 보고 무한 스크롤 구현이 가능합니다.
           - **score** 필드로 결과 랭킹을 판단할 수 있습니다.
+          - 공연 검색의 경우, 선예매/일반예매 중 티켓팅 일자가 지나지 않은 것이 한 개라도 있는 공연만 반환됩니다.
           """
   )
   ResponseEntity<SearchResponse<?>> search(SearchRequest request, CustomOAuth2User customOAuth2User);
