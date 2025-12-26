@@ -4,6 +4,16 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
+import com.ticketmate.backend.common.application.exception.annotation.EmailErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotEmptyErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.PatternErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
+import com.ticketmate.backend.common.core.util.CommonUtil;
+import java.lang.reflect.Field;
 import java.security.Principal;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -17,6 +27,7 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,11 +47,10 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
     log.error("ValidationException 발생: {}", e.getMessage(), e);
 
-    ErrorCode errorCode = ErrorCode.INVALID_REQUEST;
+    FieldError fieldError = e.getFieldError();
+    ErrorCode errorCode = extractValidationErrorCode(e, fieldError);
     String errorMessage = errorCode.getMessage();
-    if (e.getFieldError() != null) {
-      errorMessage = e.getFieldError().getDefaultMessage();
-    }
+
     ErrorResponse response = ErrorResponse.from(errorCode, errorMessage);
 
     return ResponseEntity.status(errorCode.getStatus()).body(response);
@@ -115,5 +125,78 @@ public class GlobalExceptionHandler {
       return message;
     }
     return new MessageFormat(message).format(args);
+  }
+
+  /**
+   * FieldError에서 Validation 전용 ErrorCode 어노테이션을 추출하여 ErrorCode를 반환
+   */
+  private ErrorCode extractValidationErrorCode(MethodArgumentNotValidException exception, FieldError fieldError) {
+    if (fieldError == null) {
+      return ErrorCode.INVALID_REQUEST;
+    }
+
+    try {
+      Object target = exception.getBindingResult().getTarget();
+      if (target == null) {
+        return ErrorCode.INVALID_REQUEST;
+      }
+
+      String fieldName = fieldError.getField();
+
+      String validationCode = fieldError.getCode();
+      if (CommonUtil.nvl(validationCode, "").isEmpty()) {
+        return ErrorCode.INVALID_REQUEST;
+      }
+
+      Class<?> targetClass = target.getClass();
+      Field field = targetClass.getDeclaredField(fieldName);
+
+      // validation 타입에 따라 해당 ErrorCode 어노테이션 찾기
+      return switch (validationCode) {
+        case "NotBlank" -> {
+          NotBlankErrorCode annotation = field.getAnnotation(NotBlankErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "NotNull" -> {
+          NotNullErrorCode annotation = field.getAnnotation(NotNullErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "NotEmpty" -> {
+          NotEmptyErrorCode annotation = field.getAnnotation(NotEmptyErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Size" -> {
+          SizeErrorCode annotation = field.getAnnotation(SizeErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Min" -> {
+          MinErrorCode annotation = field.getAnnotation(MinErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Max" -> {
+          MaxErrorCode annotation = field.getAnnotation(MaxErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Pattern" -> {
+          PatternErrorCode annotation = field.getAnnotation(PatternErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Email" -> {
+          EmailErrorCode annotation = field.getAnnotation(EmailErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        default -> {
+          log.warn("처리되지 않은 validation 타입: {}", validationCode);
+          yield ErrorCode.INVALID_REQUEST;
+        }
+      };
+
+    } catch (NoSuchFieldException ex) {
+      log.warn("필드를 찾을 수 없습니다: field={}", fieldError.getField(), ex);
+    } catch (Exception ex) {
+      log.warn("ErrorCode 추출 중 예외 발생: {}", ex.getMessage(), ex);
+    }
+
+    return ErrorCode.INVALID_REQUEST;
   }
 }
