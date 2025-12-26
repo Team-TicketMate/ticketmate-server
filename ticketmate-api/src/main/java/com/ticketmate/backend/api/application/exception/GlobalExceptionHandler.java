@@ -169,11 +169,11 @@ public class GlobalExceptionHandler {
           SizeErrorCode annotation = field.getAnnotation(SizeErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
-        case "Min" -> {
+        case "Min", "DecimalMin" -> {
           MinErrorCode annotation = field.getAnnotation(MinErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
-        case "Max" -> {
+        case "Max", "DecimalMax" -> {
           MaxErrorCode annotation = field.getAnnotation(MaxErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
