@@ -1,5 +1,8 @@
 package com.ticketmate.backend.member.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import com.ticketmate.backend.member.core.constant.WithdrawalReasonType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,9 +19,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MemberWithdrawRequest {
 
-  @NotNull(message = "withdrawalReasonType이 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.WITHDRAWAL_REASON_TYPE_EMPTY)
   private WithdrawalReasonType withdrawalReasonType;
 
-  @Size(max = 20, message = "otherReason는 최대 20자 입력 가능합니다")
+  @Size(max = 20)
+  @SizeErrorCode(ErrorCode.OTHER_REASON_TOO_LONG)
   private String otherReason;
 }

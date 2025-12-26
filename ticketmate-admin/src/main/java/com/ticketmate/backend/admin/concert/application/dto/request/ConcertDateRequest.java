@@ -1,5 +1,9 @@
 package com.ticketmate.backend.admin.concert.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -17,10 +21,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConcertDateRequest {
 
-  @NotNull(message = "performanceDate가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.PERFORMANCE_DATE_EMPTY)
   private LocalDateTime performanceDate;
 
-  @Min(value = 1, message = "session 값은 1 이상이여야 합니다")
-  @Max(value = Integer.MAX_VALUE, message = "session 값은 정수 최대 범위를 넘을 수 없습니다.")
+  @Min(value = 1)
+  @MinErrorCode(ErrorCode.SESSION_TOO_LOW)
+  @Max(value = Integer.MAX_VALUE)
+  @MaxErrorCode(ErrorCode.SESSION_TOO_HIGH)
   private int session;
 }

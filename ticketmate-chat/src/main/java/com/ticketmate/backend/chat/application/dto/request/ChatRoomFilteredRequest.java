@@ -1,5 +1,8 @@
 package com.ticketmate.backend.chat.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -20,11 +23,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatRoomFilteredRequest {
 
-  @Size(max = 30, message = "searchKeyword는 최대 30자 입력 가능합니다")
+  @Size(max = 30)
+  @SizeErrorCode(ErrorCode.SEARCH_KEYWORD_TOO_LONG)
   private String searchKeyword;  // 검색 키워드
 
   private TicketOpenType ticketOpenType;  // 선예매 일반예매
 
-  @Min(value = 1, message = "페이지 번호는 최소 1부터 입니다.")
+  @Min(value = 1)
+  @MinErrorCode(ErrorCode.PAGE_NUMBER_TOO_SMALL_MIN_1)
   private Integer pageNumber;  // 페이지 번호 (1부터 시작)
 }

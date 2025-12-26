@@ -1,5 +1,7 @@
 package com.ticketmate.backend.admin.portfolio.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.portfolio.core.constant.PortfolioStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,6 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class PortfolioStatusUpdateRequest {
 
-  @NotNull(message = "portfolioStatus가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.PORTFOLIO_STATUS_EMPTY)
   private PortfolioStatus portfolioStatus;
 }

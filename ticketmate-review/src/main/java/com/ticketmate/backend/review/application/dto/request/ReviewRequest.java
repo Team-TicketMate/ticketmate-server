@@ -1,5 +1,11 @@
 package com.ticketmate.backend.review.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -15,18 +21,25 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ReviewRequest {
-  @NotNull(message = "fulfillmentFormId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.FULFILLMENT_FORM_ID_EMPTY)
   private UUID fulfillmentFormId;
 
-  @NotNull(message = "rating이 비어있습니다")
-  @DecimalMin(value = "0.0", message = "별점은 0.0 이상이어야 합니다.")
-  @DecimalMax(value = "5.0", message = "별점은 5.0 이하이어야 합니다.")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.RATING_EMPTY)
+  @DecimalMin(value = "0.0")
+  @MinErrorCode(ErrorCode.RATING_TOO_LOW)
+  @DecimalMax(value = "5.0")
+  @MaxErrorCode(ErrorCode.RATING_TOO_HIGH)
   private Float rating;
 
-  @NotBlank(message = "comment가 비어있습니다")
-  @Size(min = 10, max = 300, message = "comment는 최소 10자 최대 300자 입력 가능합니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.COMMENT_EMPTY)
+  @Size(min = 10, max = 300)
+  @SizeErrorCode(ErrorCode.COMMENT_LENGTH_INVALID)
   private String comment;
 
-  @Size(max = 3, message = "reviewImgList는 최대 3개 등록 가능합니다.")
+  @Size(max = 3)
+  @SizeErrorCode(ErrorCode.REVIEW_IMG_LIST_EXCEED)
   private List<MultipartFile> reviewImgList = new ArrayList<>();
 }

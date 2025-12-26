@@ -1,5 +1,7 @@
 package com.ticketmate.backend.concertagentavailability.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -15,7 +17,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConcertAgentAvailabilityRequest {
 
-  @NotNull(message = "concertId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.CONCERT_ID_EMPTY)
   private UUID concertId;
 
   private Boolean accepting = true;

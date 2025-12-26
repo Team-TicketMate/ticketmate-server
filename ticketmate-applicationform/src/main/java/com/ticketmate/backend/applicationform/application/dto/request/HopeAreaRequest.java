@@ -2,6 +2,11 @@ package com.ticketmate.backend.applicationform.application.dto.request;
 
 import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.PositiveErrorCode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,13 +24,17 @@ import lombok.Setter;
 @AllArgsConstructor
 public class HopeAreaRequest {
 
-  @Min(value = 1, message = "순위는 1부터 5 사이의 정수만 입력 가능합니다.")
-  @Max(value = HOPE_AREA_MAX_SIZE, message = "순위는 1부터 5 사이의 정수만 입력 가능합니다.")
+  @Min(value = 1)
+  @MinErrorCode(ErrorCode.PRIORITY_RANGE_INVALID)
+  @Max(value = HOPE_AREA_MAX_SIZE)
+  @MaxErrorCode(ErrorCode.PRIORITY_RANGE_INVALID)
   private int priority; // 순위
 
-  @NotBlank(message = "location이 비어있습니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.LOCATION_EMPTY)
   private String location; // 구역
 
-  @Positive(message = "가격은 1 이상의 정수만 입력 가능합니다.")
+  @Positive
+  @PositiveErrorCode(ErrorCode.PRICE_TOO_LOW)
   private int price; // 가격
 }
