@@ -12,7 +12,7 @@ public final class PageableConstants {
   public static final int DEFAULT_PAGE_SIZE = 10;
 
   /*
-======================================Custom Chatting Paging Data======================================
-*/
+  ======================================Custom Chatting Paging Data======================================
+  */
   public static final int CHAT_MESSAGE_DEFAULT_PAGE_SIZE = 20;
 }
