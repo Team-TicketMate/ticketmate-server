@@ -1,6 +1,6 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_REJECTED_MEMO_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.REJECTED_MEMO_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
@@ -20,7 +20,7 @@ import lombok.ToString;
 @NoArgsConstructor
 public class FulfillmentFormRejectRequest {
 
-  @Size(max = MAX_REJECTED_MEMO_LENGTH)
+  @Size(max = REJECTED_MEMO_MAX_LENGTH)
   @SizeErrorCode(ErrorCode.REJECT_MEMO_TOO_LONG)
   private String rejectedMemo;
 }

@@ -1,11 +1,9 @@
 package com.ticketmate.backend.admin.concert.application.dto.request;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -26,8 +24,6 @@ public class TicketOpenDateRequest {
 
   @Min(value = 1)
   @MinErrorCode(ErrorCode.REQUEST_MAX_COUNT_TOO_LOW)
-  @Max(value = Integer.MAX_VALUE)
-  @MaxErrorCode(ErrorCode.REQUEST_MAX_COUNT_TOO_HIGH)
   private Integer requestMaxCount; // 최대 예매 매수
 
   private Boolean isBankTransfer; // 무통장 입금 여부

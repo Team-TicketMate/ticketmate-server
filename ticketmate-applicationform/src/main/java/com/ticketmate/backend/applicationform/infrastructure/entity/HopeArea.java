@@ -1,6 +1,6 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.HOPE_AREA_MAX_SIZE;
 
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import jakarta.persistence.Column;
@@ -51,10 +51,10 @@ public class HopeArea extends BasePostgresEntity {
 
   public static HopeArea create(ApplicationFormDetail applicationFormDetail, int priority, String location, int price) {
     return HopeArea.builder()
-        .applicationFormDetail(applicationFormDetail)
-        .priority(priority)
-        .location(location)
-        .price(price)
-        .build();
+      .applicationFormDetail(applicationFormDetail)
+      .priority(priority)
+      .location(location)
+      .price(price)
+      .build();
   }
 }

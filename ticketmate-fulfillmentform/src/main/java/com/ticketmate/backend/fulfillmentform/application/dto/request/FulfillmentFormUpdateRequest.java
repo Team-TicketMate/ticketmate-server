@@ -1,6 +1,6 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_PARTICULAR_MEMO_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
@@ -29,7 +29,7 @@ public class FulfillmentFormUpdateRequest {
   
   private UUID agentBankAccountId;  // 수정할 대리인 계좌번호 ID
 
-  @Size(max = MAX_PARTICULAR_MEMO_LENGTH)
+  @Size(max = PARTICULAR_MEMO_MAX_LENGTH)
   @SizeErrorCode(ErrorCode.PARTICULAR_MEMO_TOO_LONG)
   private String particularMemo;  // 수정할 상세설명
 }

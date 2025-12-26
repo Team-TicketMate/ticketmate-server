@@ -1,10 +1,10 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.BIRTHDAY_LENGTH;
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.BIRTHYEAR_LENGTH;
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.NICKNAME_MAX_LENGTH;
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.NICKNAME_MIN_LENGTH;
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.PHONE_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.BIRTHDAY_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.BIRTHYEAR_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MIN_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.PHONE_MAX_LENGTH;
 
 import com.ticketmate.backend.common.infrastructure.converter.NullIfBlankConverter;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;

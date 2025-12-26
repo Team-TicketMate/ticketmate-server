@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.ErrorResponse;
+import com.ticketmate.backend.common.application.exception.annotation.DecimalMaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.DecimalMinErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.EmailErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
@@ -11,6 +13,7 @@ import com.ticketmate.backend.common.application.exception.annotation.NotBlankEr
 import com.ticketmate.backend.common.application.exception.annotation.NotEmptyErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.PatternErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.PositiveErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import java.lang.reflect.Field;
@@ -169,12 +172,20 @@ public class GlobalExceptionHandler {
           SizeErrorCode annotation = field.getAnnotation(SizeErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
-        case "Min", "DecimalMin" -> {
+        case "Min" -> {
           MinErrorCode annotation = field.getAnnotation(MinErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
-        case "Max", "DecimalMax" -> {
+        case "Max" -> {
           MaxErrorCode annotation = field.getAnnotation(MaxErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "DecimalMin" -> {
+          DecimalMinErrorCode annotation = field.getAnnotation(DecimalMinErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "DecimalMax" -> {
+          DecimalMaxErrorCode annotation = field.getAnnotation(DecimalMaxErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
         case "Pattern" -> {
@@ -183,6 +194,10 @@ public class GlobalExceptionHandler {
         }
         case "Email" -> {
           EmailErrorCode annotation = field.getAnnotation(EmailErrorCode.class);
+          yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
+        }
+        case "Positive" -> {
+          PositiveErrorCode annotation = field.getAnnotation(PositiveErrorCode.class);
           yield annotation != null ? annotation.value() : ErrorCode.INVALID_REQUEST;
         }
         default -> {

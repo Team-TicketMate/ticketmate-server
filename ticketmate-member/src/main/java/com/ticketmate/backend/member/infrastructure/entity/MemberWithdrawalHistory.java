@@ -1,8 +1,8 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.NICKNAME_MAX_LENGTH;
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.PHONE_MAX_LENGTH;
-import static com.ticketmate.backend.member.infrastructure.constant.BlockConstants.WITHDRAW_REASON_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.PHONE_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.MemberWithdrawal.WITHDRAW_OTHER_REASON_MAX_LENGTH;
 
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.member.core.constant.WithdrawalReasonType;
@@ -49,16 +49,16 @@ public class MemberWithdrawalHistory extends BasePostgresEntity {
   @Column(nullable = false)
   private WithdrawalReasonType withdrawalReasonType;
 
-  @Column(length = WITHDRAW_REASON_MAX_SIZE)
+  @Column(length = WITHDRAW_OTHER_REASON_MAX_LENGTH)
   private String otherReason;
 
   public static MemberWithdrawalHistory create(UUID memberId, Phone phone, String nickname, WithdrawalReasonType withdrawalReasonType, String otherReason) {
     return MemberWithdrawalHistory.builder()
-        .memberId(memberId)
-        .phone(phone)
-        .nickname(nickname)
-        .withdrawalReasonType(withdrawalReasonType)
-        .otherReason(otherReason)
-        .build();
+      .memberId(memberId)
+      .phone(phone)
+      .nickname(nickname)
+      .withdrawalReasonType(withdrawalReasonType)
+      .otherReason(otherReason)
+      .build();
   }
 }

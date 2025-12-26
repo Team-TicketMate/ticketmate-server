@@ -1,5 +1,7 @@
 package com.ticketmate.backend.member.application.dto.request;
 
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.MemberWithdrawal.WITHDRAW_OTHER_REASON_MAX_LENGTH;
+
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
@@ -23,7 +25,7 @@ public class MemberWithdrawRequest {
   @NotNullErrorCode(ErrorCode.WITHDRAWAL_REASON_TYPE_EMPTY)
   private WithdrawalReasonType withdrawalReasonType;
 
-  @Size(max = 20)
+  @Size(max = WITHDRAW_OTHER_REASON_MAX_LENGTH)
   @SizeErrorCode(ErrorCode.OTHER_REASON_TOO_LONG)
   private String otherReason;
 }

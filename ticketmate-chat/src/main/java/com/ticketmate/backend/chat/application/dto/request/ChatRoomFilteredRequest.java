@@ -30,6 +30,6 @@ public class ChatRoomFilteredRequest {
   private TicketOpenType ticketOpenType;  // 선예매 일반예매
 
   @Min(value = 1)
-  @MinErrorCode(ErrorCode.PAGE_NUMBER_TOO_SMALL_MIN_1)
+  @MinErrorCode(ErrorCode.PAGE_NUMBER_TOO_SMALL)
   private Integer pageNumber;  // 페이지 번호 (1부터 시작)
 }

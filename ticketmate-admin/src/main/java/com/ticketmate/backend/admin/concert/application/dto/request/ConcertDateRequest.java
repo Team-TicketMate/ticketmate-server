@@ -27,7 +27,5 @@ public class ConcertDateRequest {
 
   @Min(value = 1)
   @MinErrorCode(ErrorCode.SESSION_TOO_LOW)
-  @Max(value = Integer.MAX_VALUE)
-  @MaxErrorCode(ErrorCode.SESSION_TOO_HIGH)
   private int session;
 }

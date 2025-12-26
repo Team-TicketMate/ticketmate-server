@@ -1,8 +1,8 @@
 package com.ticketmate.backend.applicationform.application.dto.request;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MAX_REQUEST_COUNT;
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.APPLICATION_FORM_MAX_REQUEST_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.APPLICATION_FORM_MIN_REQUEST_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.HOPE_AREA_MAX_SIZE;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;

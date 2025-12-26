@@ -1,5 +1,30 @@
 package com.ticketmate.backend.common.application.exception;
 
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.AgentBankAccount.MAX_ACCOUNT_HOLDER_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.PRIORITY_MAX_VALUE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.PRIORITY_MIN_VALUE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.REQUIREMENT_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Chat.CHAT_MESSAGE_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Chat.SEARCH_KEYWORD_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.FULLFILLMENT_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.REJECTED_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.INTRODUCTION_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MIN_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.MemberWithdrawal.WITHDRAW_OTHER_REASON_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_DESCRIPTION_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_DESCRIPTION_MIN_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_IMG_MIN_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.COMMENT_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.COMMENT_MIN_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.RATING_MAX;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.RATING_MIN;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.REVIEW_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Search.KEYWORD_MAX_LENGTH;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -15,6 +40,122 @@ public enum ErrorCode {
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근이 거부되었습니다."),
+
+  // ──────────── Validation Error ────────────
+
+  // Auth
+  USERNAME_EMPTY(HttpStatus.BAD_REQUEST, "username이 비어있습니다"),
+  PASSWORD_EMPTY(HttpStatus.BAD_REQUEST, "password가 비어있습니다"),
+
+  // ApplicationForm
+  AGENT_ID_EMPTY(HttpStatus.BAD_REQUEST, "agentId가 비어있습니다"),
+  CONCERT_ID_EMPTY(HttpStatus.BAD_REQUEST, "concertId가 비어있습니다"),
+  APPLICATION_FORM_DETAIL_LIST_EMPTY(HttpStatus.BAD_REQUEST, "applicationFormDetailRequestList가 비어있습니다"),
+  TICKET_OPEN_TYPE_EMPTY(HttpStatus.BAD_REQUEST, "ticketOpenType이 비어있습니다"),
+
+  // Review
+  FULFILLMENT_FORM_ID_EMPTY(HttpStatus.BAD_REQUEST, "fulfillmentFormId가 비어있습니다"),
+  RATING_EMPTY(HttpStatus.BAD_REQUEST, "rating이 비어있습니다"),
+  RATING_TOO_LOW(HttpStatus.BAD_REQUEST, String.format("별점은 %f 이상이어야 합니다.", RATING_MIN)),
+  RATING_TOO_HIGH(HttpStatus.BAD_REQUEST, String.format("별점은 %f 이하이어야 합니다.", RATING_MAX)),
+  COMMENT_EMPTY(HttpStatus.BAD_REQUEST, "comment가 비어있습니다"),
+  COMMENT_LENGTH_INVALID(HttpStatus.BAD_REQUEST, String.format("comment는 최소 %d자 최대 %d자 입력 가능합니다", COMMENT_MIN_LENGTH, COMMENT_MAX_LENGTH)),
+  REVIEW_IMG_LIST_EXCEED(HttpStatus.BAD_REQUEST, String.format("reviewImgList는 최대 %d개 등록 가능합니다.", REVIEW_IMG_MAX_COUNT)),
+
+  // Member
+  NICKNAME_LENGTH_INVALID(HttpStatus.BAD_REQUEST, String.format("nickname은 최소 %d자 최대 %d자 입력 가능합니다.", NICKNAME_MIN_LENGTH, NICKNAME_MAX_LENGTH)),
+  INTRODUCTION_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("introduction은 최대 %d자 입력 가능합니다", INTRODUCTION_MAX_LENGTH)),
+
+  // Chat
+  MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "message가 비어있습니다"),
+  MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("message는 최대 %d자 입력 가능합니다", CHAT_MESSAGE_MAX_LENGTH)),
+
+  // Chat Message
+  CHAT_MESSAGE_PICTURE_LIST_EMPTY(HttpStatus.BAD_REQUEST, "chatMessagePictureList가 비어있습니다"),
+  SEARCH_KEYWORD_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("searchKeyword는 최대 %d자 입력 가능합니다", SEARCH_KEYWORD_MAX_LENGTH)),
+  CHAT_MESSAGE_PAGE_SIZE_TOO_SMALL(HttpStatus.BAD_REQUEST, "체팅메시지당 데이터 최솟값은 20개 입니다."),
+  CHAT_MESSAGE_PAGE_SIZE_TOO_LARGE(HttpStatus.BAD_REQUEST, "체팅메시지당 데이터 최댓값을 초과했습니다."),
+
+  // Search
+  KEYWORD_EMPTY(HttpStatus.BAD_REQUEST, "keyword가 비어있습니다"),
+  KEYWORD_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("keyword는 최대 %d자 입력 가능합니다.", KEYWORD_MAX_LENGTH)),
+  SEARCH_TYPE_EMPTY(HttpStatus.BAD_REQUEST, "searchType이 비어있습니다"),
+
+  // Report
+  REPORTED_MEMBER_ID_EMPTY(HttpStatus.BAD_REQUEST, "reportedMemberId가 비어있습니다"),
+  REPORT_REASON_EMPTY(HttpStatus.BAD_REQUEST, "reportReason이 비어있습니다"),
+
+  // SMS
+  PHONE_NUMBER_EMPTY(HttpStatus.BAD_REQUEST, "전화번호를 입력해주세요"),
+  PHONE_NUMBER_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "전화번호는 010으로 시작하는 11자리 문자열만 입력 가능합니다 (예: 01012345678)"),
+  VERIFICATION_CODE_EMPTY(HttpStatus.BAD_REQUEST, "인증번호 6자리를 입력해주세요"),
+  VERIFICATION_CODE_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "인증번호는 숫자 6자리만 입력 가능합니다"),
+
+  // Portfolio
+  PORTFOLIO_DESCRIPTION_EMPTY(HttpStatus.BAD_REQUEST, "portfolioDescription이 비어있습니다"),
+  PORTFOLIO_DESCRIPTION_LENGTH_INVALID(HttpStatus.BAD_REQUEST, String.format("portfolioDescription은 최소 %d자 최대 %d자 입력 가능합니다", PORTFOLIO_DESCRIPTION_MIN_LENGTH, PORTFOLIO_DESCRIPTION_MAX_LENGTH)),
+  PORTFOLIO_IMG_LIST_SIZE_INVALID(HttpStatus.BAD_REQUEST, String.format("portfolioImgList는 최소 %d개 최대 %d개 등록 가능합니다.", PORTFOLIO_IMG_MIN_COUNT, PORTFOLIO_IMG_MAX_COUNT)),
+
+  // Agent Bank Account
+  BANK_CODE_EMPTY(HttpStatus.BAD_REQUEST, "bankCode가 비어있습니다"),
+  ACCOUNT_HOLDER_EMPTY(HttpStatus.BAD_REQUEST, "accountHolder가 비어있습니다"),
+  ACCOUNT_HOLDER_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("accountHolder는 최대 %d자 입력 가능합니다", MAX_ACCOUNT_HOLDER_LENGTH)),
+  ACCOUNT_HOLDER_WHITESPACE_ONLY(HttpStatus.BAD_REQUEST, "accountHolder는 공백만으로 구성될 수 없습니다."),
+  ACCOUNT_NUMBER_EMPTY(HttpStatus.BAD_REQUEST, "accountNumber가 비어있습니다"),
+  ACCOUNT_NUMBER_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "accountNumber는 숫자 11~16자리여야 하고 '-' 문자가 없어야 합니다."),
+  PRIMARY_ACCOUNT_EMPTY(HttpStatus.BAD_REQUEST, "primaryAccount가 비어있습니다"),
+
+  // FullfillmentForm
+  FULFILLMENT_FORM_IMG_LIST_SIZE_INVALID(HttpStatus.BAD_REQUEST, String.format("fulfillmentFormImgList는 최대 %d개 등록 가능합니다.", FULLFILLMENT_IMG_MAX_COUNT)),
+  PARTICULAR_MEMO_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("particularMemo는 최대 %d자 입력 가능합니다.", PARTICULAR_MEMO_MAX_LENGTH)),
+  AGENT_BANK_ACCOUNT_ID_EMPTY(HttpStatus.BAD_REQUEST, "agentBankAccountId가 비어있습니다"),
+  REJECT_MEMO_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("rejectMemo는 최대 %d자 입력 가능합니다.", REJECTED_MEMO_MAX_LENGTH)),
+
+  // TOTP
+  TOTP_CODE_EMPTY(HttpStatus.BAD_REQUEST, "TOTP code가 비어있습니다"),
+  TOTP_CODE_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "TOTP 코드는 6자리 숫자여야 합니다"),
+
+  // ApplicationForm
+  PERFORMANCE_DATE_EMPTY(HttpStatus.BAD_REQUEST, "performanceDate가 비어있습니다"),
+  REQUEST_COUNT_EMPTY(HttpStatus.BAD_REQUEST, "requestCount가 비어있습니다"),
+  HOPE_AREA_LIST_SIZE_INVALID(HttpStatus.BAD_REQUEST, String.format("hopeAreaList는 최대 %d개 등록 가능합니다.", HOPE_AREA_MAX_SIZE)),
+  REQUIREMENT_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("requirement는 최대 %d자 입력 가능합니다.", REQUIREMENT_MAX_LENGTH)),
+  PRIORITY_RANGE_INVALID(HttpStatus.BAD_REQUEST, String.format("순위는 %d부터 %d 사이의 정수만 입력 가능합니다.", PRIORITY_MIN_VALUE, PRIORITY_MAX_VALUE)),
+  LOCATION_EMPTY(HttpStatus.BAD_REQUEST, "location이 비어있습니다"),
+  PRICE_TOO_LOW(HttpStatus.BAD_REQUEST, "가격은 1 이상의 정수만 입력 가능합니다."),
+  APPLICATION_FORM_REJECTED_TYPE_EMPTY(HttpStatus.BAD_REQUEST, "applicationFormRejectedType이 비어있습니다"),
+  APPLICATION_FORM_DETAIL_REQUEST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "신청서에는 최소 1개 이상의 신청서 세부사항이 포함되어야 합니다"),
+
+  // Notification
+  FCM_TOKEN_EMPTY(HttpStatus.BAD_REQUEST, "fcmToken이 비어있습니다"),
+
+  // Member Follow
+  FOLLOWEE_ID_EMPTY(HttpStatus.BAD_REQUEST, "팔로우/언팔로우 대상 회원 PK를 입력하세요"),
+
+  // Member Withdrawal
+  WITHDRAWAL_REASON_TYPE_EMPTY(HttpStatus.BAD_REQUEST, "withdrawalReasonType이 비어있습니다"),
+  OTHER_REASON_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("otherReason는 최대 %d자 입력 가능합니다", WITHDRAW_OTHER_REASON_MAX_LENGTH)),
+
+  // Concert
+  CONCERT_NAME_EMPTY(HttpStatus.BAD_REQUEST, "concertName이 비어있습니다."),
+  CONCERT_TYPE_EMPTY(HttpStatus.BAD_REQUEST, "concertType이 비어있습니다"),
+  CONCERT_THUMBNAIL_EMPTY(HttpStatus.BAD_REQUEST, "concertThumbNail이 비어있습니다"),
+  CONCERT_DATE_REQUEST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "concertDateRequestList가 비어있습니다"),
+  TICKET_OPEN_DATE_REQUEST_LIST_EMPTY(HttpStatus.BAD_REQUEST, "ticketOpenDateRequestList가 비어있습니다"),
+  REQUEST_MAX_COUNT_TOO_LOW(HttpStatus.BAD_REQUEST, "최대 예매 매수는 1 이상이여야 합니다"),
+  SESSION_TOO_LOW(HttpStatus.BAD_REQUEST, "session 값은 1 이상이여야 합니다"),
+  PORTFOLIO_STATUS_EMPTY(HttpStatus.BAD_REQUEST, "portfolioStatus가 비어있습니다"),
+  REPORT_STATUS_EMPTY(HttpStatus.BAD_REQUEST, "reportStatus가 비어있습니다"),
+  CONCERT_HALL_NAME_EMPTY(HttpStatus.BAD_REQUEST, "concertHallName이 비어있습니다"),
+  WEB_SITE_URL_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "웹사이트 URL 형식이 올바르지 않습니다."),
+
+  // Pageable
+  PAGE_NUMBER_TOO_SMALL(HttpStatus.BAD_REQUEST, "페이지 번호는 1이상 값을 입력해야합니다."),
+  PAGE_NUMBER_TOO_LARGE(HttpStatus.BAD_REQUEST, "정수 최대 범위를 넘을 수 없습니다."),
+  PAGE_SIZE_TOO_SMALL(HttpStatus.BAD_REQUEST, "페이지 당 데이터 최솟값은 1개 입니다."),
+  PAGE_SIZE_TOO_LARGE(HttpStatus.BAD_REQUEST, "페이지 당 데이터 최댓값을 초과했습니다."),
+
+  // ──────────── Business Error ────────────
 
   // AUTH
 
@@ -100,7 +241,7 @@ public enum ErrorCode {
 
   WITHDRAWAL_REASON_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "회원 탈퇴 사유는 필수입니다."),
 
-  OTHER_REASON_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "회원탈퇴 기타사유는 최대 {0}자 까지만 작성 가능합니다."),
+  OTHER_REASON_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, String.format("회원탈퇴 기타사유는 최대 %d자 까지만 작성 가능합니다.", WITHDRAW_OTHER_REASON_MAX_LENGTH)),
 
   // PHONE_BLOCK
 
@@ -214,7 +355,7 @@ public enum ErrorCode {
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
 
-  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "회망구역은 최대 {0}개까지만 등록 가능합니다."),
+  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, String.format("회망구역은 최대 %d개까지만 등록 가능합니다.", HOPE_AREA_MAX_SIZE)),
 
   PRIORITY_ALREADY_EXISTS(HttpStatus.CONFLICT, "요청한 순위가 이미 설정되어있습니다."),
 
@@ -230,7 +371,7 @@ public enum ErrorCode {
 
   DUPLICATE_APPLICATION_FORM_DETAIL(HttpStatus.CONFLICT, "중복된 신청서 세부사항입니다."),
 
-  APPLICATION_FORM_REQUIREMENT_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, "요청사항 최대 글자 수 {0}자를 초과했습니다."),
+  APPLICATION_FORM_REQUIREMENT_LENGTH_EXCEED(HttpStatus.BAD_REQUEST, String.format("요청사항 최대 글자 수 %d자를 초과했습니다.", REQUIREMENT_MAX_LENGTH)),
 
   // NOTIFICATION
 
