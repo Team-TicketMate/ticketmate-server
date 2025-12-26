@@ -1,6 +1,6 @@
 package com.ticketmate.backend.member.application.service;
 
-import static com.ticketmate.backend.member.infrastructure.constant.BlockConstants.WITHDRAW_BLOCK_DURATION;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.MemberWithdrawal.WITHDRAW_BLOCK_DURATION;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -31,10 +31,10 @@ public class PhoneBlockService {
     Instant newBlockedUntil = calculateBlockedUntil(blockType);
 
     phoneBlockRepository.findByPhone(phone)
-        .ifPresentOrElse(
-            phoneBlock -> updatePhoneBlock(phoneBlock, blockType, newBlockedUntil),
-            () -> createPhoneBlock(phone, blockType, newBlockedUntil)
-        );
+      .ifPresentOrElse(
+        phoneBlock -> updatePhoneBlock(phoneBlock, blockType, newBlockedUntil),
+        () -> createPhoneBlock(phone, blockType, newBlockedUntil)
+      );
   }
 
   /**
@@ -48,12 +48,12 @@ public class PhoneBlockService {
     }
 
     phoneBlockRepository.findByPhone(phone)
-        .filter(PhoneBlock::isCurrentlyBlocked)
-        .ifPresent(phoneBlock -> {
-          log.warn("차단된 전화번호: {}, 차단유형: {}, 차단기간: {}",
-              phoneBlock.getPhone(), phoneBlock.getBlockType(), phoneBlock.getBlockedUntil());
-          throw new CustomException(ErrorCode.PHONE_BLOCKED);
-        });
+      .filter(PhoneBlock::isCurrentlyBlocked)
+      .ifPresent(phoneBlock -> {
+        log.warn("차단된 전화번호: {}, 차단유형: {}, 차단기간: {}",
+          phoneBlock.getPhone(), phoneBlock.getBlockType(), phoneBlock.getBlockedUntil());
+        throw new CustomException(ErrorCode.PHONE_BLOCKED);
+      });
   }
 
   // BlockType에 따른 차단 기간 반환

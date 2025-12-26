@@ -1,6 +1,6 @@
 package com.ticketmate.backend.member.infrastructure.entity;
 
-import static com.ticketmate.backend.member.core.constant.MemberInfoConstants.PHONE_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.PHONE_MAX_LENGTH;
 
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
@@ -50,10 +50,10 @@ public class PhoneBlock extends BasePostgresEntity {
 
   public static PhoneBlock create(Phone phone, BlockType blockType, Instant blockedUntil) {
     return PhoneBlock.builder()
-        .phone(phone)
-        .blockType(blockType)
-        .blockedUntil(blockedUntil)
-        .build();
+      .phone(phone)
+      .blockType(blockType)
+      .blockedUntil(blockedUntil)
+      .build();
   }
 
   // 현재 시점 기준으로 차단 여부

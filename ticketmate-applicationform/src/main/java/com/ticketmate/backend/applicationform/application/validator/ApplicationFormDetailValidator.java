@@ -1,6 +1,5 @@
 package com.ticketmate.backend.applicationform.application.validator;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.REQUIREMENT_MAX_LENGTH;
 
 import com.ticketmate.backend.applicationform.application.dto.request.ApplicationFormDetailRequest;
 import com.ticketmate.backend.common.application.exception.CustomException;
@@ -69,7 +68,7 @@ public class ApplicationFormDetailValidator {
       String requirement = request.getRequirement();
       if (requirement != null && requirement.length() > maxLengthInclusive) {
         log.error("요청사항 최대 길이 초과: {}자 (허용: {}자)", requirement.length(), maxLengthInclusive);
-        throw new CustomException(ErrorCode.APPLICATION_FORM_REQUIREMENT_LENGTH_EXCEED, REQUIREMENT_MAX_LENGTH);
+        throw new CustomException(ErrorCode.APPLICATION_FORM_REQUIREMENT_LENGTH_EXCEED);
       }
     }
     return this;
@@ -81,9 +80,9 @@ public class ApplicationFormDetailValidator {
   public ApplicationFormDetailValidator hopeAreaList(int maxSize) {
     for (ApplicationFormDetailRequest request : requestList) {
       HopeAreaValidator
-          .of(request.getHopeAreaList())
-          .maxSize(maxSize)
-          .priorityUnique();
+        .of(request.getHopeAreaList())
+        .maxSize(maxSize)
+        .priorityUnique();
     }
     return this;
   }

@@ -1,5 +1,7 @@
 package com.ticketmate.backend.applicationform.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -16,12 +18,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormDuplicateRequest {
 
-  @NotNull(message = "agentId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.AGENT_ID_EMPTY)
   private UUID agentId;
 
-  @NotNull(message = "concertId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.CONCERT_ID_EMPTY)
   private UUID concertId;
 
-  @NotNull(message = "ticketOpenType이 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.TICKET_OPEN_TYPE_EMPTY)
   private TicketOpenType ticketOpenType;
 }

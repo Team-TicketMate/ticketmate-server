@@ -1,5 +1,7 @@
 package com.ticketmate.backend.review.application.service;
 
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Review.REVIEW_IMG_MAX_COUNT;
+
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.core.util.CommonUtil;
@@ -19,7 +21,6 @@ import com.ticketmate.backend.review.application.dto.request.ReviewRequest;
 import com.ticketmate.backend.review.application.dto.response.ReviewFilteredResponse;
 import com.ticketmate.backend.review.application.dto.response.ReviewInfoResponse;
 import com.ticketmate.backend.review.application.mapper.ReviewMapper;
-import com.ticketmate.backend.review.infrastructure.constant.ReviewConstants;
 import com.ticketmate.backend.review.infrastructure.entity.Review;
 import com.ticketmate.backend.review.infrastructure.entity.ReviewImg;
 import com.ticketmate.backend.review.infrastructure.repository.ReviewImgRepository;
@@ -44,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
+
   private final S3Service s3Service;
   private final ReviewRepository reviewRepository;
   private final ReviewImgRepository reviewImgRepository;
@@ -65,7 +67,7 @@ public class ReviewService {
     memberService.validateMemberType(agent, MemberType.AGENT);
 
     return reviewRepository.findByAgent(agent, request.toPageable())
-        .map(reviewMapper::toReviewFilteredResponse);
+      .map(reviewMapper::toReviewFilteredResponse);
   }
 
   @Transactional
@@ -170,7 +172,7 @@ public class ReviewService {
 
   private Review findReviewById(UUID reviewId) {
     return reviewRepository.findById(reviewId)
-        .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+      .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
   }
 
   /**
@@ -211,7 +213,7 @@ public class ReviewService {
 
     if (review.getCreatedDate().isBefore(oneMonthAgo)) {
       log.error("리뷰 수정 기간이 만료되었습니다. reviewId={}, memberId={}",
-          review.getReviewId(), member.getMemberId());
+        review.getReviewId(), member.getMemberId());
       throw new CustomException(ErrorCode.REVIEW_EDIT_PERIOD_EXPIRED);
     }
   }
@@ -223,8 +225,8 @@ public class ReviewService {
     // 성공 상태의 신청서가 아니면 리뷰 작성 불가
     if (!fulfillmentForm.getFulfillmentFormStatus().equals(FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM)) {
       log.error("리뷰 작성이 불가능한 상태입니다. fulfillmentFormId={}, status={}",
-          fulfillmentForm.getFulfillmentFormId(),
-          fulfillmentForm.getFulfillmentFormStatus());
+        fulfillmentForm.getFulfillmentFormId(),
+        fulfillmentForm.getFulfillmentFormStatus());
       throw new CustomException(ErrorCode.CANNOT_REVIEW_NOT_SUCCEEDED_FORM);
     }
     // 이미 해당 신청서에 대한 리뷰가 존재하는지 확인
@@ -241,8 +243,8 @@ public class ReviewService {
     int newCount = (imageFileList == null ? 0 : imageFileList.size());
     int total = currentFileCount - deleteFileCount + newCount;
 
-    if (total > ReviewConstants.MAX_IMAGE_COUNT) {
-      log.error("리뷰 이미지 업로드 개수를 초과했습니다. total={}, max={}", total, ReviewConstants.MAX_IMAGE_COUNT);
+    if (total > REVIEW_IMG_MAX_COUNT) {
+      log.error("리뷰 이미지 업로드 개수를 초과했습니다. total={}, max={}", total, REVIEW_IMG_MAX_COUNT);
       throw new CustomException(ErrorCode.IMAGE_UPLOAD_LIMIT_EXCEEDED);
     }
   }
@@ -276,8 +278,8 @@ public class ReviewService {
 
     // Review에 ReviewImg 추가
     List<ReviewImg> newReviewImageList = storedPathList.stream()
-        .map(path -> ReviewImg.create(review, path))
-        .collect(Collectors.toList());
+      .map(path -> ReviewImg.create(review, path))
+      .collect(Collectors.toList());
     review.addReviewImgs(newReviewImageList);
   }
 
@@ -285,7 +287,9 @@ public class ReviewService {
    * S3와 DB에서 이미지 삭제
    */
   private void deleteImages(List<ReviewImg> deleteImgList, Review review) {
-    if (deleteImgList == null || deleteImgList.isEmpty()) return;
+    if (deleteImgList == null || deleteImgList.isEmpty()) {
+      return;
+    }
 
     // S3에서 파일 삭제
     deleteImgList.forEach(img -> s3Service.safeDeleteFile(img.getStoredPath()));

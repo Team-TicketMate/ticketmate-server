@@ -1,6 +1,9 @@
 package com.ticketmate.backend.chat.application.dto.request;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageSortField;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
 import com.ticketmate.backend.common.infrastructure.constant.PageableConstants;
 import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
 import jakarta.validation.constraints.Max;
@@ -19,12 +22,16 @@ import org.springframework.data.domain.Sort.Direction;
 @AllArgsConstructor
 public class ChatMessageFilteredRequest {
 
-  @Min(value = 1, message = "페이지 번호는 1이상 값을 입력해야합니다.")
-  @Max(value = Integer.MAX_VALUE, message = "정수 최대 범위를 넘을 수 없습니다.")
+  @Min(value = 1)
+  @MinErrorCode(ErrorCode.PAGE_NUMBER_TOO_SMALL)
+  @Max(value = Integer.MAX_VALUE)
+  @MaxErrorCode(ErrorCode.PAGE_NUMBER_TOO_LARGE)
   private Integer pageNumber; // 페이지 번호 (1부터 시작)
 
-  @Min(value = 20, message = "체팅메시지당 데이터 최솟값은 20개 입니다.")
-  @Max(value = PageableConstants.MAX_PAGE_SIZE, message = "체팅메시지당 데이터 최댓값은 " + PageableConstants.MAX_PAGE_SIZE + "개 입니다.")
+  @Min(value = 20)
+  @MinErrorCode(ErrorCode.CHAT_MESSAGE_PAGE_SIZE_TOO_SMALL)
+  @Max(value = PageableConstants.MAX_PAGE_SIZE)
+  @MaxErrorCode(ErrorCode.CHAT_MESSAGE_PAGE_SIZE_TOO_LARGE)
   private Integer pageSize; // 페이지 사이즈
 
   private ChatMessageSortField sortField; // 정렬 필드

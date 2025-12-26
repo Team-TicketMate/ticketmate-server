@@ -1,10 +1,10 @@
 package com.ticketmate.backend.member.application.service;
 
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.AgentBankAccount.MAX_ACCOUNT_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.AgentBankAccount.MAX_ACCOUNT_HOLDER_LENGTH;
 import static com.ticketmate.backend.common.core.util.CommonUtil.normalizeAndRemoveSpecialCharacters;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.ACCOUNT_NUMBER_PATTERN;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.MAX_ACCOUNT_COUNT;
-import static com.ticketmate.backend.member.infrastructure.constant.AgentBankAccountConstants.MAX_ACCOUNT_HOLDER_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -74,7 +74,7 @@ public class AgentBankAccountService {
     String accountHolder = normalizeAndRemoveSpecialCharacters(request.getAccountHolder());
 
     AgentBankAccount agentBankAccount = AgentBankAccount
-        .create(member, request.getBankCode(), accountHolder, accountNumber, primaryAccount);
+      .create(member, request.getBankCode(), accountHolder, accountNumber, primaryAccount);
 
     agentBankAccountRepository.save(agentBankAccount);
   }
@@ -87,8 +87,8 @@ public class AgentBankAccountService {
 
     // 대표계좌 먼저 그 다음 최신 생성일 정렬
     agentBankAccountList.sort(
-        Comparator.comparing(AgentBankAccount::isPrimaryAccount).reversed()
-            .thenComparing(AgentBankAccount::getCreatedDate, Comparator.nullsLast(Comparator.reverseOrder()))
+      Comparator.comparing(AgentBankAccount::isPrimaryAccount).reversed()
+        .thenComparing(AgentBankAccount::getCreatedDate, Comparator.nullsLast(Comparator.reverseOrder()))
     );
 
     return mapper.toAgentBankAccountResponseList(agentBankAccountList);
@@ -109,7 +109,7 @@ public class AgentBankAccountService {
 
     // 그 후 원하는 계좌 하나만 true로 설정
     int updatedAccountNumber = agentBankAccountRepository
-        .setPrimaryAccountExclusively(member.getMemberId(), agentBankAccountId);
+      .setPrimaryAccountExclusively(member.getMemberId(), agentBankAccountId);
 
     if (updatedAccountNumber <= 0) {
       log.error("대표계좌 변경 중 오류가 발생했습니다.");
@@ -132,10 +132,10 @@ public class AgentBankAccountService {
     String accountHolderOfNvl = nvl(request.getAccountHolder(), "");
 
     String accountHolder = (!Objects.equals(accountHolderOfNvl, "")) ?
-        normalizeAndRemoveSpecialCharacters(accountHolderOfNvl) : agentBankAccount.getAccountHolder();
+      normalizeAndRemoveSpecialCharacters(accountHolderOfNvl) : agentBankAccount.getAccountHolder();
 
     String accountNumber = (request.getAccountNumber() != null) ?
-        normalizeAccountNumber(request.getAccountNumber()) : agentBankAccount.getAccountNumberEnc();
+      normalizeAccountNumber(request.getAccountNumber()) : agentBankAccount.getAccountNumberEnc();
 
     if (accountHolder == null || accountHolder.isEmpty() || accountHolder.length() > MAX_ACCOUNT_HOLDER_LENGTH) {
       log.error("예금주 형식이 맞지 않습니다. 요청한 예금주 문자열 : {}", accountHolder);
@@ -206,10 +206,10 @@ public class AgentBankAccountService {
    */
   public AgentBankAccount findAgentAccountById(UUID agentBankAccountId) {
     return agentBankAccountRepository.findById(agentBankAccountId).orElseThrow(
-        () -> {
-          log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
-          throw new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
-        }
+      () -> {
+        log.error("계좌를 찾지 못했습니다. 요청받은 계좌 ID: {}", agentBankAccountId);
+        return new CustomException(ErrorCode.BANK_ACCOUNT_NOT_FOUND);
+      }
     );
   }
 

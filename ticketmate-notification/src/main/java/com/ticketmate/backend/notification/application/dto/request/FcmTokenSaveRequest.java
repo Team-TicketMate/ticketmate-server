@@ -1,5 +1,7 @@
 package com.ticketmate.backend.notification.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
 import com.ticketmate.backend.notification.core.constant.DeviceType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -15,7 +17,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FcmTokenSaveRequest {
 
-  @NotBlank(message = "fcmToken이 비어있습니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.FCM_TOKEN_EMPTY)
   private String fcmToken; // FCM 토큰
 
   private DeviceType deviceType;

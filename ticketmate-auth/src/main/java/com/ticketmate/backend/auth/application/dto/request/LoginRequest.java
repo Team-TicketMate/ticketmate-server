@@ -1,5 +1,7 @@
 package com.ticketmate.backend.auth.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,9 +16,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LoginRequest {
 
-  @NotBlank(message = "username이 비어있습니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.USERNAME_EMPTY)
   private String username;
 
-  @NotBlank(message = "password가 비어있습니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.PASSWORD_EMPTY)
   private String password;
 }

@@ -1,6 +1,6 @@
 package com.ticketmate.backend.portfolio.application.service;
 
-import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstants.MAX_IMG_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_IMG_MAX_COUNT;
 
 import com.ticketmate.backend.ai.application.service.VertexAiEmbeddingService;
 import com.ticketmate.backend.ai.core.constant.EmbeddingType;
@@ -57,11 +57,11 @@ public class PortfolioService {
     validatePortfolioImgCount(request.getPortfolioImgList());
 
     return Optional.of(request)
-        .map(req -> Portfolio.create(client, req.getPortfolioDescription(), PortfolioStatus.PENDING_REVIEW)) // dto 기반 Portfolio 엔티티 생성
-        .map(portfolio -> processPortfolioImgList(portfolio, request.getPortfolioImgList()))
-        .map(portfolioRepository::save)
-        .map(Portfolio::getPortfolioId)
-        .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_UPLOAD_ERROR));
+      .map(req -> Portfolio.create(client, req.getPortfolioDescription(), PortfolioStatus.PENDING_REVIEW)) // dto 기반 Portfolio 엔티티 생성
+      .map(portfolio -> processPortfolioImgList(portfolio, request.getPortfolioImgList()))
+      .map(portfolioRepository::save)
+      .map(Portfolio::getPortfolioId)
+      .orElseThrow(() -> new CustomException(ErrorCode.PORTFOLIO_UPLOAD_ERROR));
   }
 
   /**
@@ -71,10 +71,10 @@ public class PortfolioService {
    */
   public Portfolio findPortfolioById(UUID portfolioId) {
     return portfolioRepository.findById(portfolioId)
-        .orElseThrow(() -> {
-          log.error("요청한 PK값에 해당하는 포트폴리오를 찾을 수 없습니다. 요청 PK: {}", portfolioId);
-          return new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND);
-        });
+      .orElseThrow(() -> {
+        log.error("요청한 PK값에 해당하는 포트폴리오를 찾을 수 없습니다. 요청 PK: {}", portfolioId);
+        return new CustomException(ErrorCode.PORTFOLIO_NOT_FOUND);
+      });
   }
 
   /**
@@ -89,24 +89,24 @@ public class PortfolioService {
 
     if (!agentPerformanceSummaryRepository.existsById(member.getMemberId())) {
       AgentPerformanceSummary summary = AgentPerformanceSummary.builder()
-          .agent(member)
-          .totalScore(0.0)
-          .averageRating(0.0)
-          .reviewCount(0)
-          .recentSuccessCount(0)
-          .build();
+        .agent(member)
+        .totalScore(0.0)
+        .averageRating(0.0)
+        .reviewCount(0)
+        .recentSuccessCount(0)
+        .build();
       agentPerformanceSummaryRepository.save(summary);
     }
 
     // 임베딩 저장 Text 생성 (닉네임 + 한줄 소개)
     String embeddingText = CommonUtil.combineTexts(
-        member.getNickname(), portfolio.getPortfolioDescription()
+      member.getNickname(), portfolio.getPortfolioDescription()
     );
     // 임베딩 저장
     vertexAiEmbeddingService.fetchOrGenerateEmbedding(
-        member.getMemberId(),
-        embeddingText,
-        EmbeddingType.AGENT
+      member.getMemberId(),
+      embeddingText,
+      EmbeddingType.AGENT
     );
   }
 
@@ -139,7 +139,7 @@ public class PortfolioService {
    * 요청된 첨부파일 개수 검증 (1~20개)
    */
   private void validatePortfolioImgCount(List<MultipartFile> imgList) {
-    if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > MAX_IMG_COUNT) {
+    if (CommonUtil.nullOrEmpty(imgList) || imgList.size() > PORTFOLIO_IMG_MAX_COUNT) {
       log.error("포트폴리오 이미지 첨부파일은 최소 1개 최대 20개까지 등록 가능합니다. 요청개수: {}", imgList.size());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }

@@ -2,6 +2,8 @@ package com.ticketmate.backend.chat.application.dto.request;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
 import com.ticketmate.backend.chat.infrastructure.constant.ChatConstants;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,7 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public final class PictureMessageRequest implements ChatMessageRequest {
 
-  @NotNull(message = "chatMessagePictureList가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.CHAT_MESSAGE_PICTURE_LIST_EMPTY)
   private List<MultipartFile> chatMessagePictureList;
 
   @Override
