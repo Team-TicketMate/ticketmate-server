@@ -7,11 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @Email validation 실패 시 사용할 ErrorCode를 지정합니다.
+ * @Positive validation 실패 시 사용할 ErrorCode를 지정합니다.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EmailErrorCode {
+public @interface PositiveErrorCode {
 
   ErrorCode value();
 }
