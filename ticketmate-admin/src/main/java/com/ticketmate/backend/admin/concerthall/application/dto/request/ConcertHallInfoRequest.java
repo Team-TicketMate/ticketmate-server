@@ -1,5 +1,7 @@
 package com.ticketmate.backend.admin.concerthall.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +16,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ConcertHallInfoRequest {
 
-  @NotBlank(message = "concertHallName이 비어있습니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.CONCERT_HALL_NAME_EMPTY)
   private String concertHallName;
 
   private String address;

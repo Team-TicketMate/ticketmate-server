@@ -1,7 +1,9 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_PARTICULAR_MEMO_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +28,8 @@ public class FulfillmentFormUpdateRequest {
   private List<MultipartFile> newSuccessImgList;  // 추가로 등록하고 싶은 사진 리스트
   
   private UUID agentBankAccountId;  // 수정할 대리인 계좌번호 ID
-  
-  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "particularMemo는 최대 100자 입력 가능합니다.")
+
+  @Size(max = PARTICULAR_MEMO_MAX_LENGTH)
+  @SizeErrorCode(ErrorCode.PARTICULAR_MEMO_TOO_LONG)
   private String particularMemo;  // 수정할 상세설명
 }

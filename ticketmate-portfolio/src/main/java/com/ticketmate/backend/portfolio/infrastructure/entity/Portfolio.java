@@ -1,6 +1,6 @@
 package com.ticketmate.backend.portfolio.infrastructure.entity;
 
-import static com.ticketmate.backend.portfolio.infrastructure.constant.PortfolioConstants.MAX_IMG_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Portfolio.PORTFOLIO_IMG_MAX_COUNT;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -58,15 +58,15 @@ public class Portfolio extends BasePostgresEntity {
 
   public static Portfolio create(Member member, String portfolioDescription, PortfolioStatus portfolioStatus) {
     return Portfolio.builder()
-        .member(member)
-        .portfolioDescription(portfolioDescription)
-        .portfolioImgList(new ArrayList<>())
-        .portfolioStatus(portfolioStatus)
-        .build();
+      .member(member)
+      .portfolioDescription(portfolioDescription)
+      .portfolioImgList(new ArrayList<>())
+      .portfolioStatus(portfolioStatus)
+      .build();
   }
 
   public void addPortfolioImg(PortfolioImg img) {
-    if (this.getPortfolioImgList().size() >= MAX_IMG_COUNT) {
+    if (this.getPortfolioImgList().size() >= PORTFOLIO_IMG_MAX_COUNT) {
       throw new CustomException(ErrorCode.PORTFOLIO_IMG_COUNT_EXCEED);
     }
     this.getPortfolioImgList().add(img);

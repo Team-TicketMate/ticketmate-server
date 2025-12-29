@@ -1,5 +1,8 @@
 package com.ticketmate.backend.sms.application.dto;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotEmptyErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.PatternErrorCode;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -15,11 +18,15 @@ import lombok.Setter;
 @AllArgsConstructor
 public class VerifyCodeRequest {
 
-  @NotEmpty(message = "전화번호를 입력해주세요")
-  @Pattern(regexp = "^010[0-9]{8}$", message = "전화번호는 010으로 시작하는 11자리 문자열만 입력 가능합니다 (예: 01012345678)")
+  @NotEmpty
+  @NotEmptyErrorCode(ErrorCode.PHONE_NUMBER_EMPTY)
+  @Pattern(regexp = "^010[0-9]{8}$")
+  @PatternErrorCode(ErrorCode.PHONE_NUMBER_PATTERN_INVALID)
   private String phoneNumber;
 
-  @NotEmpty(message = "인증번호 6자리를 입력해주세요")
-  @Pattern(regexp = "\\d{6}", message = "인증번호는 숫자 6자리만 입력 가능합니다")
+  @NotEmpty
+  @NotEmptyErrorCode(ErrorCode.VERIFICATION_CODE_EMPTY)
+  @Pattern(regexp = "\\d{6}")
+  @PatternErrorCode(ErrorCode.VERIFICATION_CODE_PATTERN_INVALID)
   private String code;
 }

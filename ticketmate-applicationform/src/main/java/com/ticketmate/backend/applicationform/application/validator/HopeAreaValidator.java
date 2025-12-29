@@ -1,7 +1,5 @@
 package com.ticketmate.backend.applicationform.application.validator;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
-
 import com.ticketmate.backend.applicationform.application.dto.request.HopeAreaRequest;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -30,7 +28,7 @@ public class HopeAreaValidator {
   public HopeAreaValidator maxSize(int maxSize) {
     if (!CommonUtil.nullOrEmpty(requestList) && requestList.size() > maxSize) {
       log.error("희망구역 개수 초과: {}개 요청 (허용: {}개)", requestList.size(), maxSize);
-      throw new CustomException(ErrorCode.HOPE_AREAS_SIZE_EXCEED, HOPE_AREA_MAX_SIZE);
+      throw new CustomException(ErrorCode.HOPE_AREAS_SIZE_EXCEED);
     }
     return this;
   }

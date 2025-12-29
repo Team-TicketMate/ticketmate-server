@@ -1,8 +1,11 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_IMG_COUNT;
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_PARTICULAR_MEMO_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -23,12 +26,15 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class FulfillmentFormInfoRequest {
 
-  @Size(max = MAX_IMG_COUNT, message = "fulfillmentFormImgList는 최대 6개 등록 가능합니다.")
+  @Size(max = FULFILLMENT_IMG_MAX_COUNT)
+  @SizeErrorCode(ErrorCode.FULFILLMENT_FORM_IMG_LIST_SIZE_INVALID)
   private List<MultipartFile> fulfillmentFormImgList;
 
-  @Size(max = MAX_PARTICULAR_MEMO_LENGTH, message = "particularMemo는 최대 100자 입력 가능합니다.")
+  @Size(max = PARTICULAR_MEMO_MAX_LENGTH)
+  @SizeErrorCode(ErrorCode.PARTICULAR_MEMO_TOO_LONG)
   private String particularMemo;
 
-  @NotNull(message = "agentBankAccountId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.AGENT_BANK_ACCOUNT_ID_EMPTY)
   private UUID agentBankAccountId;
 }

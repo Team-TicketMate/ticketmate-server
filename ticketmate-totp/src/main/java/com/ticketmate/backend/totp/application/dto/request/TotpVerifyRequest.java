@@ -1,5 +1,8 @@
 package com.ticketmate.backend.totp.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.PatternErrorCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -15,7 +18,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TotpVerifyRequest {
 
-  @NotBlank(message = "TOTP code가 비어있습니다")
-  @Pattern(regexp = "^[0-9]{6}$", message = "TOTP 코드는 6자리 숫자여야 합니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.TOTP_CODE_EMPTY)
+  @Pattern(regexp = "^[0-9]{6}$")
+  @PatternErrorCode(ErrorCode.TOTP_CODE_PATTERN_INVALID)
   private String code;
 }
