@@ -1,6 +1,9 @@
 package com.ticketmate.backend.chat.application.dto.request;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -16,8 +19,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public final class TextMessageRequest implements ChatMessageRequest {
 
-  @NotBlank(message = "message가 비어있습니다")
-  @Size(max = 500, message = "message는 최대 500자 입력 가능합니다")
+  @NotBlank
+  @NotBlankErrorCode(ErrorCode.MESSAGE_EMPTY)
+  @Size(max = 500)
+  @SizeErrorCode(ErrorCode.MESSAGE_TOO_LONG)
   private String message;
 
   @Override

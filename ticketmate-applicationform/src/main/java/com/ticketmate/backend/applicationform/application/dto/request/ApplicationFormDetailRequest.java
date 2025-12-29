@@ -1,9 +1,12 @@
 package com.ticketmate.backend.applicationform.application.dto.request;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MAX_REQUEST_COUNT;
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.APPLICATION_FORM_MIN_REQUEST_COUNT;
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.APPLICATION_FORM_MAX_REQUEST_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.APPLICATION_FORM_MIN_REQUEST_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.HOPE_AREA_MAX_SIZE;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,18 +27,22 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationFormDetailRequest {
 
-  @NotNull(message = "performanceDate가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.PERFORMANCE_DATE_EMPTY)
   private LocalDateTime performanceDate; // 공연일자
 
-  @NotNull(message = "requestCount가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.REQUEST_COUNT_EMPTY)
   @Min(value = APPLICATION_FORM_MIN_REQUEST_COUNT)
   @Max(value = APPLICATION_FORM_MAX_REQUEST_COUNT)
   private Integer requestCount; // 요청매수
 
   @Valid
-  @Size(max = HOPE_AREA_MAX_SIZE, message = "hopeAreaList는 최대 5개 등록 가능합니다.")
+  @Size(max = HOPE_AREA_MAX_SIZE)
+  @SizeErrorCode(ErrorCode.HOPE_AREA_LIST_SIZE_INVALID)
   private List<HopeAreaRequest> hopeAreaList; // 희망구역 리스트
 
-  @Size(max = 100, message = "requirement는 최대 100자 입력 가능합니다.")
+  @Size(max = 100)
+  @SizeErrorCode(ErrorCode.REQUIREMENT_TOO_LONG)
   private String requirement; // 요청사항
 }

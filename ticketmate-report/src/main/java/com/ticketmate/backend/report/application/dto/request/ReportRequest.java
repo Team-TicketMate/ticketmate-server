@@ -1,5 +1,7 @@
 package com.ticketmate.backend.report.application.dto.request;
 
+import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.report.core.constant.ReportReason;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -17,10 +19,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportRequest {
-  @NotNull(message = "reportedMemberId가 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.REPORTED_MEMBER_ID_EMPTY)
   private UUID reportedMemberId;
 
-  @NotNull(message = "reportReason이 비어있습니다")
+  @NotNull
+  @NotNullErrorCode(ErrorCode.REPORT_REASON_EMPTY)
   private ReportReason reportReason;
 
   private String description;
