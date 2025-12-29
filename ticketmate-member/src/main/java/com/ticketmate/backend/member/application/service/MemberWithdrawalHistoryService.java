@@ -1,6 +1,6 @@
 package com.ticketmate.backend.member.application.service;
 
-import static com.ticketmate.backend.member.infrastructure.constant.BlockConstants.WITHDRAW_REASON_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.MemberWithdrawal.WITHDRAW_OTHER_REASON_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -26,11 +26,11 @@ public class MemberWithdrawalHistoryService {
   public void saveWithdrawalHistory(Member member, MemberWithdrawRequest request) {
     String otherReason = handleOtherReason(request.getWithdrawalReasonType(), request.getOtherReason());
     MemberWithdrawalHistory history = MemberWithdrawalHistory.create(
-        member.getMemberId(),
-        member.getPhone(),
-        member.getNickname(),
-        request.getWithdrawalReasonType(),
-        otherReason
+      member.getMemberId(),
+      member.getPhone(),
+      member.getNickname(),
+      request.getWithdrawalReasonType(),
+      otherReason
     );
     MemberWithdrawalHistory savedHistory = memberWithdrawalHistoryRepository.save(history);
     log.debug("회원: {}에 대한 회원 탈퇴 이력 저장: {}", member.getMemberId(), savedHistory.getMemberWithdrawalHistoryId());
@@ -43,9 +43,9 @@ public class MemberWithdrawalHistoryService {
     }
     if (withdrawalReasonType == WithdrawalReasonType.OTHER) {
       String normalize = CommonUtil.normalizeAndRemoveSpecialCharacters(otherReason);
-      if (normalize.length() > WITHDRAW_REASON_MAX_SIZE) {
-        log.error("회원 탈퇴 기타 사유 글자 수 오류. 최대: {}, 요청: {}", WITHDRAW_REASON_MAX_SIZE, normalize.length());
-        throw new CustomException(ErrorCode.OTHER_REASON_LENGTH_EXCEED, WITHDRAW_REASON_MAX_SIZE);
+      if (normalize.length() > WITHDRAW_OTHER_REASON_MAX_LENGTH) {
+        log.error("회원 탈퇴 기타 사유 글자 수 오류. 최대: {}, 요청: {}", WITHDRAW_OTHER_REASON_MAX_LENGTH, normalize.length());
+        throw new CustomException(ErrorCode.OTHER_REASON_LENGTH_EXCEED);
       }
       return normalize;
     }

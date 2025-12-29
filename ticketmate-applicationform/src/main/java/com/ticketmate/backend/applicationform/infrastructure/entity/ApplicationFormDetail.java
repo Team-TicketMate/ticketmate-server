@@ -1,7 +1,7 @@
 package com.ticketmate.backend.applicationform.infrastructure.entity;
 
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.HOPE_AREA_MAX_SIZE;
-import static com.ticketmate.backend.applicationform.infrastructure.constant.ApplicationFormConstants.REQUIREMENT_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.HOPE_AREA_MAX_SIZE;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.REQUIREMENT_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
@@ -64,20 +64,20 @@ public class ApplicationFormDetail extends BasePostgresEntity {
 
   public static ApplicationFormDetail create(ConcertDate concertDate, int requestCount, String requirement) {
     return ApplicationFormDetail.builder()
-        .concertDate(concertDate)
-        .requestCount(requestCount)
-        .requirement(requirement)
-        .hopeAreaList(new ArrayList<>())
-        .build();
+      .concertDate(concertDate)
+      .requestCount(requestCount)
+      .requirement(requirement)
+      .hopeAreaList(new ArrayList<>())
+      .build();
   }
 
   // 희망구역 설정 메서드
   public void addHopeArea(HopeArea hopeArea) {
     if (hopeAreaList.size() >= HOPE_AREA_MAX_SIZE) {
-      throw new CustomException(ErrorCode.HOPE_AREAS_SIZE_EXCEED, HOPE_AREA_MAX_SIZE);
+      throw new CustomException(ErrorCode.HOPE_AREAS_SIZE_EXCEED);
     }
     if (hopeAreaList.stream().anyMatch(area ->
-        Objects.equals(area.getPriority(), hopeArea.getPriority()))) {
+      Objects.equals(area.getPriority(), hopeArea.getPriority()))) {
       throw new CustomException(ErrorCode.PRIORITY_ALREADY_EXISTS);
     }
     hopeAreaList.add(hopeArea);

@@ -1,6 +1,6 @@
 package com.ticketmate.backend.fulfillmentform.infrastructure.entity;
 
-import static com.ticketmate.backend.fulfillmentform.infrastructure.constant.FulfillmentFormConstants.MAX_IMG_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
 
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.common.application.exception.CustomException;
@@ -93,7 +93,7 @@ public class FulfillmentForm extends BasePostgresEntity {
   }
 
   public void addFulfillmentFormImg(FulfillmentFormImg img) {
-    if (this.getSuccessTicketingStoredPathList().size() >= MAX_IMG_COUNT) {
+    if (this.getSuccessTicketingStoredPathList().size() >= FULFILLMENT_IMG_MAX_COUNT) {
       throw new CustomException(ErrorCode.INVALID_FULFILLMENT_FORM_IMG_COUNT);
     }
 

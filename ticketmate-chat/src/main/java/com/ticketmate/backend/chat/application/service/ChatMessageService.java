@@ -1,10 +1,10 @@
 package com.ticketmate.backend.chat.application.service;
 
-import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.CHAT_PICTURE_MAX_SIZE;
 import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.ISO_SEC;
 import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.LAST_READ_MESSAGE_POINTER_KEY;
 import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.TTL;
 import static com.ticketmate.backend.chat.infrastructure.constant.ChatConstants.UN_READ_MESSAGE_COUNTER_KEY;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.Chat.CHAT_IMG_MAX_COUNT;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nvl;
 
 import com.ticketmate.backend.chat.application.dto.request.ChatMessageRequest;
@@ -345,7 +345,7 @@ public class ChatMessageService {
     if (CommonUtil.nullOrEmpty(pictureList)) {
       throw new CustomException(ErrorCode.CHAT_PICTURE_EMPTY);
     }
-    if (pictureList.size() > CHAT_PICTURE_MAX_SIZE) {
+    if (pictureList.size() > CHAT_IMG_MAX_COUNT) {
       throw new CustomException(ErrorCode.CHAT_PICTURE_SIZE_EXCEED);
     }
 
