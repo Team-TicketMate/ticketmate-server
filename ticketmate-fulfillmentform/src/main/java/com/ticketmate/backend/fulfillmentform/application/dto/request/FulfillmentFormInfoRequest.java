@@ -1,7 +1,7 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.FULLFILLMENT_IMG_MAX_COUNT;
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 public class FulfillmentFormInfoRequest {
 
-  @Size(max = FULLFILLMENT_IMG_MAX_COUNT)
+  @Size(max = FULFILLMENT_IMG_MAX_COUNT)
   @SizeErrorCode(ErrorCode.FULFILLMENT_FORM_IMG_LIST_SIZE_INVALID)
   private List<MultipartFile> fulfillmentFormImgList;
 

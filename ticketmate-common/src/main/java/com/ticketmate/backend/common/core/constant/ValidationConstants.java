@@ -85,10 +85,10 @@ public class ValidationConstants {
   }
 
   @UtilityClass
-  public static class FullfillmentForm {
+  public static class FulfillmentForm {
 
     // 성공 사진 이미지 최대 개수
-    public static final int FULLFILLMENT_IMG_MAX_COUNT = 6;
+    public static final int FULFILLMENT_IMG_MAX_COUNT = 6;
     // 상세 설명 최대 길이
     public static final int PARTICULAR_MEMO_MAX_LENGTH = 100;
     // 거절 사유 최대 길이

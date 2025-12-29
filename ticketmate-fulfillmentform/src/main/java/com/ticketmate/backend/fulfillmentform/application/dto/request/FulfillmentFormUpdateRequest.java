@@ -1,6 +1,6 @@
 package com.ticketmate.backend.fulfillmentform.application.dto.request;
 
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;

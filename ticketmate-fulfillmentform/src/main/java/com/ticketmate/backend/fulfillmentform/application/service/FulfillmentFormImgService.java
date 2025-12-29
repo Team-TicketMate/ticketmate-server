@@ -1,6 +1,6 @@
 package com.ticketmate.backend.fulfillmentform.application.service;
 
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.FULLFILLMENT_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nullOrEmpty;
 
 import com.ticketmate.backend.common.application.exception.CustomException;
@@ -165,7 +165,7 @@ public class FulfillmentFormImgService {
   private void validateTotalCount(int currentCount, int deleteCount, int addCount) {
     int finalCount = currentCount - deleteCount + addCount;
 
-    if (finalCount > FULLFILLMENT_IMG_MAX_COUNT) {
+    if (finalCount > FULFILLMENT_IMG_MAX_COUNT) {
       log.error("이미지 개수 초과: 현재={}, 삭제={}, 추가={} -> 최종={}", currentCount, deleteCount, addCount, finalCount);
       throw new CustomException(ErrorCode.INVALID_FULFILLMENT_FORM_IMG_COUNT);
     }
@@ -175,7 +175,7 @@ public class FulfillmentFormImgService {
    * 요청된 첨부파일 개수 검증
    */
   private void validateFulfillmentFormImgCount(List<MultipartFile> imgList) {
-    if (imgList.size() > FULLFILLMENT_IMG_MAX_COUNT) {
+    if (imgList.size() > FULFILLMENT_IMG_MAX_COUNT) {
       log.error("성공양식 이미지 첨부파일은 최대 6개까지 등록 가능합니다. 요청개수: {}", imgList.size());
       throw new CustomException(ErrorCode.INVALID_PORTFOLIO_IMG_COUNT);
     }

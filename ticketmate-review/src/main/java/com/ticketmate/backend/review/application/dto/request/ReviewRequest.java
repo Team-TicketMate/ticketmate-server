@@ -1,8 +1,8 @@
 package com.ticketmate.backend.review.application.dto.request;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
-import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.DecimalMaxErrorCode;
+import com.ticketmate.backend.common.application.exception.annotation.DecimalMinErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotBlankErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.SizeErrorCode;
@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class ReviewRequest {
+
   @NotNull
   @NotNullErrorCode(ErrorCode.FULFILLMENT_FORM_ID_EMPTY)
   private UUID fulfillmentFormId;
@@ -28,9 +29,9 @@ public class ReviewRequest {
   @NotNull
   @NotNullErrorCode(ErrorCode.RATING_EMPTY)
   @DecimalMin(value = "0.0")
-  @MinErrorCode(ErrorCode.RATING_TOO_LOW)
+  @DecimalMinErrorCode(ErrorCode.RATING_TOO_LOW)
   @DecimalMax(value = "5.0")
-  @MaxErrorCode(ErrorCode.RATING_TOO_HIGH)
+  @DecimalMaxErrorCode(ErrorCode.RATING_TOO_HIGH)
   private Float rating;
 
   @NotBlank

@@ -7,9 +7,9 @@ import static com.ticketmate.backend.common.core.constant.ValidationConstants.Ap
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.ApplicationForm.REQUIREMENT_MAX_LENGTH;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.Chat.CHAT_MESSAGE_MAX_LENGTH;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.Chat.SEARCH_KEYWORD_MAX_LENGTH;
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.FULLFILLMENT_IMG_MAX_COUNT;
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
-import static com.ticketmate.backend.common.core.constant.ValidationConstants.FullfillmentForm.REJECTED_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
+import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.REJECTED_MEMO_MAX_LENGTH;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.INTRODUCTION_MAX_LENGTH;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MAX_LENGTH;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.Member.NICKNAME_MIN_LENGTH;
@@ -105,8 +105,8 @@ public enum ErrorCode {
   ACCOUNT_NUMBER_PATTERN_INVALID(HttpStatus.BAD_REQUEST, "accountNumber는 숫자 11~16자리여야 하고 '-' 문자가 없어야 합니다."),
   PRIMARY_ACCOUNT_EMPTY(HttpStatus.BAD_REQUEST, "primaryAccount가 비어있습니다"),
 
-  // FullfillmentForm
-  FULFILLMENT_FORM_IMG_LIST_SIZE_INVALID(HttpStatus.BAD_REQUEST, String.format("fulfillmentFormImgList는 최대 %d개 등록 가능합니다.", FULLFILLMENT_IMG_MAX_COUNT)),
+  // FulfillmentForm
+  FULFILLMENT_FORM_IMG_LIST_SIZE_INVALID(HttpStatus.BAD_REQUEST, String.format("fulfillmentFormImgList는 최대 %d개 등록 가능합니다.", FULFILLMENT_IMG_MAX_COUNT)),
   PARTICULAR_MEMO_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("particularMemo는 최대 %d자 입력 가능합니다.", PARTICULAR_MEMO_MAX_LENGTH)),
   AGENT_BANK_ACCOUNT_ID_EMPTY(HttpStatus.BAD_REQUEST, "agentBankAccountId가 비어있습니다"),
   REJECT_MEMO_TOO_LONG(HttpStatus.BAD_REQUEST, String.format("rejectMemo는 최대 %d자 입력 가능합니다.", REJECTED_MEMO_MAX_LENGTH)),
@@ -355,7 +355,7 @@ public enum ErrorCode {
 
   APPLICATION_FORM_NOT_FOUND(HttpStatus.BAD_REQUEST, "대리 티켓팅 신청서를 찾을 수 없습니다."),
 
-  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, String.format("회망구역은 최대 %d개까지만 등록 가능합니다.", HOPE_AREA_MAX_SIZE)),
+  HOPE_AREAS_SIZE_EXCEED(HttpStatus.BAD_REQUEST, String.format("희망구역은 최대 %d개까지만 등록 가능합니다.", HOPE_AREA_MAX_SIZE)),
 
   PRIORITY_ALREADY_EXISTS(HttpStatus.CONFLICT, "요청한 순위가 이미 설정되어있습니다."),
 

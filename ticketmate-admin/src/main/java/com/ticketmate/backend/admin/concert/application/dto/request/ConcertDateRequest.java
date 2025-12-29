@@ -1,10 +1,8 @@
 package com.ticketmate.backend.admin.concert.application.dto.request;
 
 import com.ticketmate.backend.common.application.exception.ErrorCode;
-import com.ticketmate.backend.common.application.exception.annotation.MaxErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.MinErrorCode;
 import com.ticketmate.backend.common.application.exception.annotation.NotNullErrorCode;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
