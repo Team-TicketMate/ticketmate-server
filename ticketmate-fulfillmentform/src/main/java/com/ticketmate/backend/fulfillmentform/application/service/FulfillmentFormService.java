@@ -14,6 +14,7 @@ import com.ticketmate.backend.chat.application.service.ChatRoomService;
 import com.ticketmate.backend.chat.infrastructure.entity.ChatRoom;
 import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
+import com.ticketmate.backend.common.core.event.fulfillmentform.FulfillmentFormEvent;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.fulfillmentform.application.dto.request.FulfillmentFormInfoRequest;
 import com.ticketmate.backend.fulfillmentform.application.dto.request.FulfillmentFormRejectRequest;
@@ -35,6 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -55,6 +57,7 @@ public class FulfillmentFormService {
   private final ApplicationFormService applicationFormService;
   private final FulfillmentFormMapper mapper;
   private final AgentPerformanceService agentPerformanceService;
+  private final ApplicationEventPublisher eventPublisher;
 
   /**
    * 티켓팅 성공시 대리인이 성공양식을 작성 및 저장하는 로직
@@ -151,6 +154,8 @@ public class FulfillmentFormService {
     FulfillmentForm fulfillmentForm = handleFulfillmentStatusForClient(member, fulfillmentFormId, FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM);
 
     validateFulfillmentFormMember(member, fulfillmentForm, MemberType.CLIENT);
+
+    eventPublisher.publishEvent(new FulfillmentFormEvent(fulfillmentFormId));
 
     // TODO 성공양식이 수락됐다는 알림 발송 로직 추가해야될듯
 
@@ -270,6 +275,11 @@ public class FulfillmentFormService {
       case ACCEPTED_FULFILLMENT_FORM -> {
         fulfillmentForm.setFulfillmentFormStatus(FulfillmentFormStatus.ACCEPTED_FULFILLMENT_FORM);
         log.debug("의뢰인 성공양식 수락감지. 현재 상태 : {}", fulfillmentForm.getFulfillmentFormStatus());
+
+        if (fulfillmentForm.getFulfillmentFormStatus() == ACCEPTED_FULFILLMENT_FORM) {
+          log.error("이미 수락된 성공양식입니다.");
+          throw new CustomException(ErrorCode.FULFILLMENT_FORM_ALREADY_ACCEPTED);
+        }
       }
 
       case REJECTED_FULFILLMENT_FORM -> {
