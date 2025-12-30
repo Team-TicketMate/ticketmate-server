@@ -412,6 +412,7 @@ public interface ApplicationFormControllerDocs {
           ### 활용 방법
           - 의뢰인이 신청서 작성 전 중복 확인용으로 사용
           - 중복(true)인 경우 이미 신청한 신청서가 있으므로 추가 신청 불필요
+          - '대기', '승인' 된 신청서에 대해서 중복 조회를 진행합니다
           """
   )
   ResponseEntity<Boolean> isDuplicateApplicationForm(
