@@ -285,21 +285,21 @@ public class ApplicationFormService {
   }
 
   /**
-   * 특정 의뢰인이 이미 해당 공연, 해당 대리인, 일반/선 예매로 신청서를 작성했는지 여부를 반환합니다
+   * 특정 의뢰인이 이미 해당 공연, 해당 대리인, 일반/선 예매로 신청서를 작성했는지 여부를 반환합니다 (대기, 승인인 상태의 신청서 대상)
    *
    * @param client  의뢰인 객체
    * @param request 대리인 PK, 공연 PK, 예매 타입
    * @return 중복된 신청서라면 true 반환
    */
   @Transactional(readOnly = true)
-  public Boolean isDuplicateApplicationForm(Member client, ApplicationFormDuplicateRequest request) {
-    return applicationFormRepository
-      .findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-        client.getMemberId(),
-        request.getAgentId(),
-        request.getConcertId(),
-        request.getTicketOpenType()
-      ).isPresent();
+  public boolean isDuplicateApplicationForm(Member client, ApplicationFormDuplicateRequest request) {
+    return applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenTypeAndApplicationFormStatusIn(
+      client.getMemberId(),
+      request.getAgentId(),
+      request.getConcertId(),
+      request.getTicketOpenType(),
+      ApplicationFormConstants.DUPLICATE_CHECK_APPLICATION_FORM_STATUS
+    );
   }
 
   /**
@@ -318,7 +318,7 @@ public class ApplicationFormService {
   }
 
   /**
-   * 중복 신청서 검증
+   * 중복 신청서 검증 (대기, 승인인 상태의 신청서 대상)
    *
    * @param clientId       의뢰인PK
    * @param agentId        대리인PK
@@ -326,11 +326,17 @@ public class ApplicationFormService {
    * @param ticketOpenType 선예매/일반예매
    */
   private void validateDuplicateApplicationForm(UUID clientId, UUID agentId, UUID concertId, TicketOpenType ticketOpenType) {
-    applicationFormRepository.findByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenType(
-      clientId, agentId, concertId, ticketOpenType).ifPresent(applicationForm -> {
-      log.error("중복된 신청서 요청입니다. 신청서 PK: {}", applicationForm.getApplicationFormId());
+    boolean exists = applicationFormRepository.existsByClientMemberIdAndAgentMemberIdAndConcertConcertIdAndTicketOpenTypeAndApplicationFormStatusIn(
+      clientId,
+      agentId,
+      concertId,
+      ticketOpenType,
+      ApplicationFormConstants.DUPLICATE_CHECK_APPLICATION_FORM_STATUS
+    );
+    if (exists) {
+      log.error("중복된 신청서 요청입니다. agentId: {}, clientId: {}, concertId: {}, ticketOpenType: {}", clientId, agentId, concertId, ticketOpenType);
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
-    });
+    }
   }
 
   /**
