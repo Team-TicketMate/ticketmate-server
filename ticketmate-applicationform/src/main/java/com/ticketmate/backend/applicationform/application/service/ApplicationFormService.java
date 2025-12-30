@@ -334,7 +334,7 @@ public class ApplicationFormService {
       ApplicationFormConstants.DUPLICATE_CHECK_APPLICATION_FORM_STATUS
     );
     if (exists) {
-      log.error("중복된 신청서 요청입니다. agentId: {}, clientId: {}, concertId: {}, ticketOpenType: {}", clientId, agentId, concertId, ticketOpenType);
+      log.error("중복된 신청서 요청입니다. clientId: {}, agentId: {}, concertId: {}, ticketOpenType: {}", clientId, agentId, concertId, ticketOpenType);
       throw new CustomException(ErrorCode.DUPLICATE_APPLICATION_FROM_REQUEST);
     }
   }
