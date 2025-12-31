@@ -7,7 +7,7 @@ import com.ticketmate.backend.common.application.exception.CustomException;
 import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.persistence.BasePostgresEntity;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
-import com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus;
+import com.ticketmate.backend.fulfillmentform.core.constant.fulfillmentform.FulfillmentFormStatus;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.CascadeType;

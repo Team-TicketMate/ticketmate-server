@@ -10,7 +10,7 @@ import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.concert.application.dto.response.ConcertInfoResponse;
 import com.ticketmate.backend.concert.application.service.ConcertService;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
-import com.ticketmate.backend.fulfillmentform.infrastructure.repository.FulfillmentFormRepository;
+import com.ticketmate.backend.fulfillmentform.infrastructure.repository.fulfillmentform.FulfillmentFormRepository;
 import com.ticketmate.backend.member.application.service.MemberService;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import java.util.UUID;

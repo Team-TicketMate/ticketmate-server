@@ -12,7 +12,7 @@ import com.ticketmate.backend.concertagentavailability.infrastructure.entity.Con
 import com.ticketmate.backend.concerthall.infrastructure.entity.ConcertHall;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentFormImg;
-import com.ticketmate.backend.infrastructure.entity.SuccessHistory;
+import com.ticketmate.backend.fulfillmentform.infrastructure.entity.SuccessHistory;
 import com.ticketmate.backend.member.infrastructure.entity.AgentBankAccount;
 import com.ticketmate.backend.member.infrastructure.entity.AgentPerformanceSummary;
 import com.ticketmate.backend.member.infrastructure.entity.Member;

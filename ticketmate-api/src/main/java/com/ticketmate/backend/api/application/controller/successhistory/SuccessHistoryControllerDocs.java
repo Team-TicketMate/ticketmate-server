@@ -2,8 +2,8 @@ package com.ticketmate.backend.api.application.controller.successhistory;
 
 import com.chuseok22.apichangelog.annotation.ApiChangeLog;
 import com.chuseok22.apichangelog.annotation.ApiChangeLogs;
-import com.ticketmate.backend.application.dto.request.SuccessHistoryFilteredRequest;
-import com.ticketmate.backend.application.dto.response.SuccessHistoryResponse;
+import com.ticketmate.backend.fulfillmentform.application.dto.successhistory.request.SuccessHistoryFilteredRequest;
+import com.ticketmate.backend.fulfillmentform.application.dto.successhistory.response.SuccessHistoryResponse;
 import com.ticketmate.backend.auth.infrastructure.oauth2.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.UUID;
@@ -33,9 +33,6 @@ public interface SuccessHistoryControllerDocs {
         - **pageSize (int)** : 요청할 페이지 사이즈 [필수X]
         - **sortField (String)** : 정렬 필드 [필수X]
         - **sortDirection (String)** : 정렬 방향 [필수X]
-                    
-       ### 요청값
-       - `rejectedMemo`(String) : 거절사유[필수X]
         
       ### 반환값 [LIST]
        - **fulfillmentId** : 성공한 성공양식 ID
@@ -46,7 +43,7 @@ public interface SuccessHistoryControllerDocs {
        - **successHistoryStatus** : 성공내역 상태 [NOT_REVIEWED,REVIEWED] 
        - **reviewId** : 리뷰의 ID
        - **reviewRating** : 리뷰의 평점
-       - **clientNickname** : 의뢰인의 ID
+       - **clientNickname** : 의뢰인의 닉네임
         
        ### 유의 사항
        - 성공내역 조회는 대리인/의뢰인 모두 사용 가능합니다.   
