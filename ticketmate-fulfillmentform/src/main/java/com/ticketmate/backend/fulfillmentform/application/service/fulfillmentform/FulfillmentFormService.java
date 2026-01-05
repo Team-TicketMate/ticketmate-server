@@ -273,13 +273,13 @@ public class FulfillmentFormService {
 
     switch (fulfillmentFormStatus) {
       case ACCEPTED_FULFILLMENT_FORM -> {
-        fulfillmentForm.setFulfillmentFormStatus(ACCEPTED_FULFILLMENT_FORM);
-        log.debug("의뢰인 성공양식 수락감지. 현재 상태 : {}", fulfillmentForm.getFulfillmentFormStatus());
-
         if (fulfillmentForm.getFulfillmentFormStatus() == ACCEPTED_FULFILLMENT_FORM) {
           log.error("이미 수락된 성공양식입니다.");
           throw new CustomException(ErrorCode.FULFILLMENT_FORM_ALREADY_ACCEPTED);
         }
+
+        fulfillmentForm.setFulfillmentFormStatus(ACCEPTED_FULFILLMENT_FORM);
+        log.debug("의뢰인 성공양식 수락감지. 현재 상태 : {}", fulfillmentForm.getFulfillmentFormStatus());
       }
 
       case REJECTED_FULFILLMENT_FORM -> {
