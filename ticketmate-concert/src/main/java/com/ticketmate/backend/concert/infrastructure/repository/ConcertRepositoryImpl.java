@@ -285,12 +285,15 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
           )
       );
 
-    ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-      Instant.class,
-      "least({0}, {1})",
-      preOpenDateExpression,
-      generalOpenDateExpression
-    );
+    ComparableExpression<Instant> earliestOpenDateExpression = new CaseBuilder()
+      .when(preOpenDateExpression.isNull())
+      .then(generalOpenDateExpression)
+      .when(generalOpenDateExpression.isNull())
+      .then(preOpenDateExpression)
+      .when(preOpenDateExpression.lt(generalOpenDateExpression))
+      .then(preOpenDateExpression)
+      .otherwise(generalOpenDateExpression);
+
 
     // enum.property -> 표현식 매핑
     Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
@@ -412,12 +415,15 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         CONCERT.seatingChartStoredPath
       );
 
-    ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-      Instant.class,
-      "least({0}, {1})",
-      preOpenDateExpression,
-      generalOpenDateExpression
-    );
+    ComparableExpression<Instant> earliestOpenDateExpression = new CaseBuilder()
+      .when(preOpenDateExpression.isNull())
+      .then(generalOpenDateExpression)
+      .when(generalOpenDateExpression.isNull())
+      .then(preOpenDateExpression)
+      .when(preOpenDateExpression.lt(generalOpenDateExpression))
+      .then(preOpenDateExpression)
+      .otherwise(generalOpenDateExpression);
+
 
     // enum.property -> 표현식 매핑
     Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
