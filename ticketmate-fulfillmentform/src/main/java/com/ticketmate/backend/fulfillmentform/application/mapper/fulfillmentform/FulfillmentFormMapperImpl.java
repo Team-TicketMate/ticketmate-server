@@ -1,9 +1,9 @@
-package com.ticketmate.backend.fulfillmentform.application.mapper;
+package com.ticketmate.backend.fulfillmentform.application.mapper.fulfillmentform;
 
 import com.ticketmate.backend.common.core.util.CommonUtil;
 import com.ticketmate.backend.common.infrastructure.util.TimeUtil;
-import com.ticketmate.backend.fulfillmentform.application.dto.response.FulfillmentFormImgResponse;
-import com.ticketmate.backend.fulfillmentform.application.dto.response.FulfillmentFormInfoResponse;
+import com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.response.FulfillmentFormImgResponse;
+import com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.response.FulfillmentFormInfoResponse;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentFormImg;
 import com.ticketmate.backend.member.application.mapper.AgentBankAccountMapper;

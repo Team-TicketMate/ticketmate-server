@@ -1,6 +1,6 @@
-package com.ticketmate.backend.fulfillmentform.application.dto.response;
+package com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.response;
 
-import com.ticketmate.backend.fulfillmentform.core.constant.FulfillmentFormStatus;
+import com.ticketmate.backend.fulfillmentform.core.constant.fulfillmentform.FulfillmentFormStatus;
 import com.ticketmate.backend.member.application.dto.response.AgentBankAccountResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

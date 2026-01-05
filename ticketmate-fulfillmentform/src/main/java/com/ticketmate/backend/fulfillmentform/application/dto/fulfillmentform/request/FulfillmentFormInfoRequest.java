@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.application.dto.request;
+package com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.request;
 
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
