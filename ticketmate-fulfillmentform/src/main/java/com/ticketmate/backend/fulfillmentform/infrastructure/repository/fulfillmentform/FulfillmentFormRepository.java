@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.infrastructure.repository;
+package com.ticketmate.backend.fulfillmentform.infrastructure.repository.fulfillmentform;
 
 import com.ticketmate.backend.applicationform.infrastructure.entity.ApplicationForm;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;

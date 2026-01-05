@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.application.service;
+package com.ticketmate.backend.fulfillmentform.application.service.fulfillmentform;
 
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.FULFILLMENT_IMG_MAX_COUNT;
 import static com.ticketmate.backend.common.core.util.CommonUtil.nullOrEmpty;
