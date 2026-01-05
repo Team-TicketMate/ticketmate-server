@@ -277,8 +277,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         CONCERT.concertType,
         CONCERT.ticketReservationSite,
         CONCERT.concertThumbnailStoredPath,
-        CONCERT.seatingChartStoredPath,
-        CONCERT.createdDate
+        CONCERT.seatingChartStoredPath
       )
       .having(
         preOpenDateExpression.isNotNull()
@@ -351,7 +350,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
         .then(TICKET_OPEN_DATE.openDate)
         .otherwise((Instant) null)
-    ).as("ticketPreOpenDate");
+    );
 
     ComparableExpression<Instant> generalOpenDateExpression = Expressions.dateTimeTemplate(
       Instant.class,
@@ -360,7 +359,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
         .then(TICKET_OPEN_DATE.openDate)
         .otherwise((Instant) null)
-    ).as("ticketGeneralOpenDate");
+    );
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
     JPAQuery<ConcertFilteredInfo> contentQuery = queryFactory
@@ -373,7 +372,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
 
         // 성능 최적화를 위한 CASE WHEN
         // 선예매 오픈일
-        preOpenDateExpression,
+        preOpenDateExpression.as("ticketPreOpenDate"),
         // 선예매 무통장 여부
         Expressions.booleanTemplate(
           "bool_or({0})",
@@ -383,7 +382,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
             .otherwise((Boolean) null)
         ).as("preOpenBankTransfer"),
         // 일반 예매 오픈일
-        generalOpenDateExpression,
+        generalOpenDateExpression.as("ticketGeneralOpenDate"),
         // 일반 예매 무통장 여부
         Expressions.booleanTemplate(
           "bool_or({0})",
@@ -410,8 +409,7 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
         CONCERT.concertType,
         CONCERT.ticketReservationSite,
         CONCERT.concertThumbnailStoredPath,
-        CONCERT.seatingChartStoredPath,
-        CONCERT.createdDate
+        CONCERT.seatingChartStoredPath
       );
 
     ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
