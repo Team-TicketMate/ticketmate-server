@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -29,9 +28,9 @@ public class SuccessHistoryService {
   private final MemberService memberService;
   private final SuccessHistoryMapper mapper;
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void createSuccessHistory(UUID fulfillmentFormId) {
     if (successHistoryRepository.existsByFulfillmentForm_FulfillmentFormId(fulfillmentFormId)) {
+      log.debug("성공내역이 이미 존재합니다.");
       return;
     }
 

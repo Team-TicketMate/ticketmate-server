@@ -14,7 +14,7 @@ public class SuccessHistoryEventHandler {
 
   private final SuccessHistoryService successHistoryService;
 
-  @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   public void createSuccessHistoryForEvent(FulfillmentFormEvent event) {
     successHistoryService.createSuccessHistory(event.fulfillmentFormId());
   }
