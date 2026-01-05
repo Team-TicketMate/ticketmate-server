@@ -58,27 +58,27 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     Instant now = TimeUtil.now();
 
     List<Tuple> rows = queryFactory
-        .select(
-            CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath,
-            CONCERT.concertType,
-            TICKET_OPEN_DATE.openDate,
-            TICKET_OPEN_DATE.requestMaxCount,
-            TICKET_OPEN_DATE.isBankTransfer,
-            TICKET_OPEN_DATE.ticketOpenType,
-            CONCERT_DATE.performanceDate,
-            CONCERT_DATE.session,
-            CONCERT.ticketReservationSite
-        )
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .leftJoin(CONCERT_DATE).on(CONCERT_DATE.concert.eq(CONCERT))
-        .leftJoin(TICKET_OPEN_DATE).on(TICKET_OPEN_DATE.concert.eq(CONCERT))
-        .where(CONCERT.concertId.eq(concertId))
-        .fetch();
+      .select(
+        CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath,
+        CONCERT.concertType,
+        TICKET_OPEN_DATE.openDate,
+        TICKET_OPEN_DATE.requestMaxCount,
+        TICKET_OPEN_DATE.isBankTransfer,
+        TICKET_OPEN_DATE.ticketOpenType,
+        CONCERT_DATE.performanceDate,
+        CONCERT_DATE.session,
+        CONCERT.ticketReservationSite
+      )
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .leftJoin(CONCERT_DATE).on(CONCERT_DATE.concert.eq(CONCERT))
+      .leftJoin(TICKET_OPEN_DATE).on(TICKET_OPEN_DATE.concert.eq(CONCERT))
+      .where(CONCERT.concertId.eq(concertId))
+      .fetch();
     if (rows.isEmpty()) {
       throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
     }
@@ -91,38 +91,38 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
       dateMap.putIfAbsent(session, new ConcertDateInfo(
-          t.get(CONCERT_DATE.performanceDate),
-          session
+        t.get(CONCERT_DATE.performanceDate),
+        session
       ));
     }
     List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfo::session))
-        .toList();
+      .sorted(Comparator.comparing(ConcertDateInfo::session))
+      .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
     Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
       openMap.putIfAbsent(type, new TicketOpenDateInfo(
-          t.get(TICKET_OPEN_DATE.openDate),
-          t.get(TICKET_OPEN_DATE.requestMaxCount),
-          t.get(TICKET_OPEN_DATE.isBankTransfer),
-          type
+        t.get(TICKET_OPEN_DATE.openDate),
+        t.get(TICKET_OPEN_DATE.requestMaxCount),
+        t.get(TICKET_OPEN_DATE.isBankTransfer),
+        type
       ));
     }
     List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
-        .toList();
+      .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
+      .toList();
 
     return new ConcertInfo(
-        firstRow.get(CONCERT.concertName),
-        firstRow.get(CONCERT_HALL.concertHallName),
-        firstRow.get(CONCERT.concertThumbnailStoredPath),
-        firstRow.get(CONCERT.seatingChartStoredPath),
-        firstRow.get(CONCERT.concertType),
-        concertDateInfoResponseList,
-        ticketOpenDateInfoResponseList,
-        firstRow.get(CONCERT.ticketReservationSite)
+      firstRow.get(CONCERT.concertName),
+      firstRow.get(CONCERT_HALL.concertHallName),
+      firstRow.get(CONCERT.concertThumbnailStoredPath),
+      firstRow.get(CONCERT.seatingChartStoredPath),
+      firstRow.get(CONCERT.concertType),
+      concertDateInfoResponseList,
+      ticketOpenDateInfoResponseList,
+      firstRow.get(CONCERT.ticketReservationSite)
     );
   }
 
@@ -130,27 +130,27 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
   public ConcertInfo findConcertInfoByConcertIdForAdmin(UUID concertId) {
 
     List<Tuple> rows = queryFactory
-        .select(
-            CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath,
-            CONCERT.concertType,
-            TICKET_OPEN_DATE.openDate,
-            TICKET_OPEN_DATE.requestMaxCount,
-            TICKET_OPEN_DATE.isBankTransfer,
-            TICKET_OPEN_DATE.ticketOpenType,
-            CONCERT_DATE.performanceDate,
-            CONCERT_DATE.session,
-            CONCERT.ticketReservationSite
-        )
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .leftJoin(CONCERT_DATE).on(CONCERT_DATE.concert.eq(CONCERT))
-        .leftJoin(TICKET_OPEN_DATE).on(TICKET_OPEN_DATE.concert.eq(CONCERT))
-        .where(CONCERT.concertId.eq(concertId))
-        .fetch();
+      .select(
+        CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath,
+        CONCERT.concertType,
+        TICKET_OPEN_DATE.openDate,
+        TICKET_OPEN_DATE.requestMaxCount,
+        TICKET_OPEN_DATE.isBankTransfer,
+        TICKET_OPEN_DATE.ticketOpenType,
+        CONCERT_DATE.performanceDate,
+        CONCERT_DATE.session,
+        CONCERT.ticketReservationSite
+      )
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .leftJoin(CONCERT_DATE).on(CONCERT_DATE.concert.eq(CONCERT))
+      .leftJoin(TICKET_OPEN_DATE).on(TICKET_OPEN_DATE.concert.eq(CONCERT))
+      .where(CONCERT.concertId.eq(concertId))
+      .fetch();
     if (rows.isEmpty()) {
       throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
     }
@@ -163,39 +163,39 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
     for (Tuple t : rows) {
       int session = t.get(CONCERT_DATE.session);
       dateMap.putIfAbsent(session, new ConcertDateInfo(
-          t.get(CONCERT_DATE.performanceDate),
-          session
+        t.get(CONCERT_DATE.performanceDate),
+        session
       ));
     }
     List<ConcertDateInfo> concertDateInfoResponseList = dateMap.values().stream()
-        .sorted(Comparator.comparing(ConcertDateInfo::session))
-        .toList();
+      .sorted(Comparator.comparing(ConcertDateInfo::session))
+      .toList();
 
     // —— 티켓 오픈일 중복 제거 (key: ticketOpenType) —— //
     Map<TicketOpenType, TicketOpenDateInfo> openMap = new LinkedHashMap<>();
     for (Tuple t : rows) {
       TicketOpenType type = t.get(TICKET_OPEN_DATE.ticketOpenType);
       openMap.putIfAbsent(type, new TicketOpenDateInfo(
-          t.get(TICKET_OPEN_DATE.openDate),
-          t.get(TICKET_OPEN_DATE.requestMaxCount),
-          t.get(TICKET_OPEN_DATE.isBankTransfer),
-          type
+        t.get(TICKET_OPEN_DATE.openDate),
+        t.get(TICKET_OPEN_DATE.requestMaxCount),
+        t.get(TICKET_OPEN_DATE.isBankTransfer),
+        type
       ));
     }
 
     List<TicketOpenDateInfo> ticketOpenDateInfoResponseList = openMap.values().stream()
-        .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
-        .toList();
+      .sorted(Comparator.comparing(TicketOpenDateInfo::openDate))
+      .toList();
 
     return new ConcertInfo(
-        firstRow.get(CONCERT.concertName),
-        firstRow.get(CONCERT_HALL.concertHallName),
-        firstRow.get(CONCERT.concertThumbnailStoredPath),
-        firstRow.get(CONCERT.seatingChartStoredPath),
-        firstRow.get(CONCERT.concertType),
-        concertDateInfoResponseList,
-        ticketOpenDateInfoResponseList,
-        firstRow.get(CONCERT.ticketReservationSite)
+      firstRow.get(CONCERT.concertName),
+      firstRow.get(CONCERT_HALL.concertHallName),
+      firstRow.get(CONCERT.concertThumbnailStoredPath),
+      firstRow.get(CONCERT.seatingChartStoredPath),
+      firstRow.get(CONCERT.concertType),
+      concertDateInfoResponseList,
+      ticketOpenDateInfoResponseList,
+      firstRow.get(CONCERT.ticketReservationSite)
     );
   }
 
@@ -210,109 +210,110 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    */
   @Override
   public Page<ConcertFilteredInfo> filteredConcert(
-      String concertName,
-      String concertHallName,
-      ConcertType concertType,
-      TicketReservationSite ticketReservationSite,
-      Pageable pageable) {
+    String concertName,
+    String concertHallName,
+    ConcertType concertType,
+    TicketReservationSite ticketReservationSite,
+    Pageable pageable) {
 
     Instant now = TimeUtil.now();
 
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
-        QueryDslUtil.likeIgnoreCase(CONCERT.concertName, concertName),
-        QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, concertHallName),
-        QueryDslUtil.eqIfNotNull(CONCERT.concertType, concertType),
-        QueryDslUtil.eqIfNotNull(CONCERT.ticketReservationSite, ticketReservationSite)
+      QueryDslUtil.likeIgnoreCase(CONCERT.concertName, concertName),
+      QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, concertHallName),
+      QueryDslUtil.eqIfNotNull(CONCERT.concertType, concertType),
+      QueryDslUtil.eqIfNotNull(CONCERT.ticketReservationSite, ticketReservationSite)
     );
 
     // CASE WHEN 로직 추출
     DateTimeExpression<Instant> preOpenDateExpression = buildOpenDateExpression(
-        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
+      TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
     );
     DateTimeExpression<Instant> generalOpenDateExpression = buildOpenDateExpression(
-        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
+      TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
     );
     ComparableExpression<Boolean> preOpenBankTransfer = buildBackTransferExpression(
-        TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
+      TICKET_OPEN_DATE, TicketOpenType.PRE_OPEN, now
     );
     ComparableExpression<Boolean> generalOpenBankTransfer = buildBackTransferExpression(
-        TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
+      TICKET_OPEN_DATE, TicketOpenType.GENERAL_OPEN, now
     );
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
     JPAQuery<ConcertFilteredInfo> contentQuery = queryFactory
-        .select(Projections.constructor(ConcertFilteredInfo.class,
-            CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertType,
-            CONCERT.ticketReservationSite,
+      .select(Projections.constructor(ConcertFilteredInfo.class,
+        CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertType,
+        CONCERT.ticketReservationSite,
 
-            // 성능 최적화를 위한 CASE WHEN
-            // 선예매 오픈일
-            preOpenDateExpression.as("ticketPreOpenDate"),
-            // 선예매 무통장 여부
-            Expressions.booleanTemplate("bool_or({0})", preOpenBankTransfer).as("preOpenBankTransfer"),
-            // 일반 예매 오픈일
-            generalOpenDateExpression.as("ticketGeneralOpenDate"),
-            // 일반 예매 무통장 여부
-            Expressions.booleanTemplate("bool_or({0})", generalOpenBankTransfer).as("generalOpenBankTransfer"),
+        // 성능 최적화를 위한 CASE WHEN
+        // 선예매 오픈일
+        preOpenDateExpression.as("ticketPreOpenDate"),
+        // 선예매 무통장 여부
+        Expressions.booleanTemplate("bool_or({0})", preOpenBankTransfer).as("preOpenBankTransfer"),
+        // 일반 예매 오픈일
+        generalOpenDateExpression.as("ticketGeneralOpenDate"),
+        // 일반 예매 무통장 여부
+        Expressions.booleanTemplate("bool_or({0})", generalOpenBankTransfer).as("generalOpenBankTransfer"),
 
-            CONCERT_DATE.performanceDate.min().as("startDate"), // 공연 시작일
-            CONCERT_DATE.performanceDate.max().as("endDate"), // 공연 종료일
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath
-        ))
-        .from(CONCERT)
-        // 공연장은 필수가 아니므로 Left Join
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        // 공연일(ConcertDate), 티켓오픈일(TicketOpenDate)은 필수이므로 Inner Join
-        .join(CONCERT_DATE).on(CONCERT.concertId.eq(CONCERT_DATE.concert.concertId))
-        .join(TICKET_OPEN_DATE).on(CONCERT.concertId.eq(TICKET_OPEN_DATE.concert.concertId))
-        .where(whereClause)
-        .groupBy(CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertType,
-            CONCERT.ticketReservationSite,
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath
-        )
-        .having(
-            preOpenDateExpression.isNotNull()
-                .or(generalOpenDateExpression.isNotNull()
-                )
-        );
+        CONCERT_DATE.performanceDate.min().as("startDate"), // 공연 시작일
+        CONCERT_DATE.performanceDate.max().as("endDate"), // 공연 종료일
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath
+      ))
+      .from(CONCERT)
+      // 공연장은 필수가 아니므로 Left Join
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      // 공연일(ConcertDate), 티켓오픈일(TicketOpenDate)은 필수이므로 Inner Join
+      .join(CONCERT_DATE).on(CONCERT.concertId.eq(CONCERT_DATE.concert.concertId))
+      .join(TICKET_OPEN_DATE).on(CONCERT.concertId.eq(TICKET_OPEN_DATE.concert.concertId))
+      .where(whereClause)
+      .groupBy(CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertType,
+        CONCERT.ticketReservationSite,
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath,
+        CONCERT.createdDate
+      )
+      .having(
+        preOpenDateExpression.isNotNull()
+          .or(generalOpenDateExpression.isNotNull()
+          )
+      );
 
     ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-        Instant.class,
-        "least({0}, {1})",
-        preOpenDateExpression,
-        generalOpenDateExpression
+      Instant.class,
+      "least({0}, {1})",
+      preOpenDateExpression,
+      generalOpenDateExpression
     );
 
     // enum.property -> 표현식 매핑
     Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
-        ConcertSortField.TICKET_OPEN_DATE.getProperty(),
-        earliestOpenDateExpression
+      ConcertSortField.TICKET_OPEN_DATE.getProperty(),
+      earliestOpenDateExpression
     );
 
     // applySorting 동적 정렬 적용
     QueryDslUtil.applySorting(
-        contentQuery,
-        pageable,
-        Concert.class,
-        CONCERT.getMetadata().getName(),
-        customSortMap
+      contentQuery,
+      pageable,
+      Concert.class,
+      CONCERT.getMetadata().getName(),
+      customSortMap
     );
 
     // countQuery 생성
     JPAQuery<Long> countQuery = queryFactory
-        .select(CONCERT.count())
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .where(whereClause);
+      .select(CONCERT.count())
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .where(whereClause);
 
     return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);
   }
@@ -329,117 +330,118 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    */
   @Override
   public Page<ConcertFilteredInfo> filteredConcertForAdmin(
-      String concertName,
-      String concertHallName,
-      ConcertType concertType,
-      TicketReservationSite ticketReservationSite,
-      Pageable pageable) {
+    String concertName,
+    String concertHallName,
+    ConcertType concertType,
+    TicketReservationSite ticketReservationSite,
+    Pageable pageable) {
 
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
-        QueryDslUtil.likeIgnoreCase(CONCERT.concertName, concertName),
-        QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, concertHallName),
-        QueryDslUtil.eqIfNotNull(CONCERT.concertType, concertType),
-        QueryDslUtil.eqIfNotNull(CONCERT.ticketReservationSite, ticketReservationSite)
+      QueryDslUtil.likeIgnoreCase(CONCERT.concertName, concertName),
+      QueryDslUtil.likeIgnoreCase(CONCERT_HALL.concertHallName, concertHallName),
+      QueryDslUtil.eqIfNotNull(CONCERT.concertType, concertType),
+      QueryDslUtil.eqIfNotNull(CONCERT.ticketReservationSite, ticketReservationSite)
     );
 
     ComparableExpression<Instant> preOpenDateExpression = Expressions.dateTimeTemplate(
-        Instant.class,
-        "min({0})",
-        new CaseBuilder()
-            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
-            .then(TICKET_OPEN_DATE.openDate)
-            .otherwise((Instant) null)
+      Instant.class,
+      "min({0})",
+      new CaseBuilder()
+        .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
+        .then(TICKET_OPEN_DATE.openDate)
+        .otherwise((Instant) null)
     ).as("ticketPreOpenDate");
 
     ComparableExpression<Instant> generalOpenDateExpression = Expressions.dateTimeTemplate(
-        Instant.class,
-        "min({0})",
-        new CaseBuilder()
-            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
-            .then(TICKET_OPEN_DATE.openDate)
-            .otherwise((Instant) null)
+      Instant.class,
+      "min({0})",
+      new CaseBuilder()
+        .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
+        .then(TICKET_OPEN_DATE.openDate)
+        .otherwise((Instant) null)
     ).as("ticketGeneralOpenDate");
 
     // 쿼리 작성 (JOIN + GROUP BY + CASE WHEN)
     JPAQuery<ConcertFilteredInfo> contentQuery = queryFactory
-        .select(Projections.constructor(ConcertFilteredInfo.class,
-            CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertType,
-            CONCERT.ticketReservationSite,
+      .select(Projections.constructor(ConcertFilteredInfo.class,
+        CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertType,
+        CONCERT.ticketReservationSite,
 
-            // 성능 최적화를 위한 CASE WHEN
-            // 선예매 오픈일
-            preOpenDateExpression,
-            // 선예매 무통장 여부
-            Expressions.booleanTemplate(
-                "bool_or({0})",
-                new CaseBuilder()
-                    .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
-                    .then((ComparableExpression<Boolean>) TICKET_OPEN_DATE.isBankTransfer)
-                    .otherwise((Boolean) null)
-            ).as("preOpenBankTransfer"),
-            // 일반 예매 오픈일
-            generalOpenDateExpression,
-            // 일반 예매 무통장 여부
-            Expressions.booleanTemplate(
-                "bool_or({0})",
-                new CaseBuilder()
-                    .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
-                    .then((ComparableExpression<Boolean>) TICKET_OPEN_DATE.isBankTransfer)
-                    .otherwise((Boolean) null)
-            ).as("generalOpenBankTransfer"),
-            CONCERT_DATE.performanceDate.min().as("startDate"), // 공연 시작일
-            CONCERT_DATE.performanceDate.max().as("endDate"), // 공연 종료일
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath
-        ))
-        .from(CONCERT)
-        // 공연장은 필수가 아니므로 Left Join
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        // 공연일(ConcertDate), 티켓오픈일(TicketOpenDate)은 필수이므로 Inner Join
-        .join(CONCERT_DATE).on(CONCERT.concertId.eq(CONCERT_DATE.concert.concertId))
-        .join(TICKET_OPEN_DATE).on(CONCERT.concertId.eq(TICKET_OPEN_DATE.concert.concertId))
-        .where(whereClause)
-        .groupBy(CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertType,
-            CONCERT.ticketReservationSite,
-            CONCERT.concertThumbnailStoredPath,
-            CONCERT.seatingChartStoredPath
-        );
+        // 성능 최적화를 위한 CASE WHEN
+        // 선예매 오픈일
+        preOpenDateExpression,
+        // 선예매 무통장 여부
+        Expressions.booleanTemplate(
+          "bool_or({0})",
+          new CaseBuilder()
+            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
+            .then((ComparableExpression<Boolean>) TICKET_OPEN_DATE.isBankTransfer)
+            .otherwise((Boolean) null)
+        ).as("preOpenBankTransfer"),
+        // 일반 예매 오픈일
+        generalOpenDateExpression,
+        // 일반 예매 무통장 여부
+        Expressions.booleanTemplate(
+          "bool_or({0})",
+          new CaseBuilder()
+            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
+            .then((ComparableExpression<Boolean>) TICKET_OPEN_DATE.isBankTransfer)
+            .otherwise((Boolean) null)
+        ).as("generalOpenBankTransfer"),
+        CONCERT_DATE.performanceDate.min().as("startDate"), // 공연 시작일
+        CONCERT_DATE.performanceDate.max().as("endDate"), // 공연 종료일
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath
+      ))
+      .from(CONCERT)
+      // 공연장은 필수가 아니므로 Left Join
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      // 공연일(ConcertDate), 티켓오픈일(TicketOpenDate)은 필수이므로 Inner Join
+      .join(CONCERT_DATE).on(CONCERT.concertId.eq(CONCERT_DATE.concert.concertId))
+      .join(TICKET_OPEN_DATE).on(CONCERT.concertId.eq(TICKET_OPEN_DATE.concert.concertId))
+      .where(whereClause)
+      .groupBy(CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertType,
+        CONCERT.ticketReservationSite,
+        CONCERT.concertThumbnailStoredPath,
+        CONCERT.seatingChartStoredPath,
+        CONCERT.createdDate
+      );
 
     ComparableExpression<Instant> earliestOpenDateExpression = Expressions.dateTimeTemplate(
-        Instant.class,
-        "least({0}, {1})",
-        preOpenDateExpression,
-        generalOpenDateExpression
+      Instant.class,
+      "least({0}, {1})",
+      preOpenDateExpression,
+      generalOpenDateExpression
     );
 
     // enum.property -> 표현식 매핑
     Map<String, ComparableExpression<?>> customSortMap = Collections.singletonMap(
-        ConcertSortField.TICKET_OPEN_DATE.getProperty(),
-        earliestOpenDateExpression
+      ConcertSortField.TICKET_OPEN_DATE.getProperty(),
+      earliestOpenDateExpression
     );
 
     // applySorting 동적 정렬 적용
     QueryDslUtil.applySorting(
-        contentQuery,
-        pageable,
-        Concert.class,
-        CONCERT.getMetadata().getName(),
-        customSortMap
+      contentQuery,
+      pageable,
+      Concert.class,
+      CONCERT.getMetadata().getName(),
+      customSortMap
     );
 
     // countQuery 생성
     JPAQuery<Long> countQuery = queryFactory
-        .select(CONCERT.count())
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .where(whereClause);
+      .select(CONCERT.count())
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .where(whereClause);
 
     return QueryDslUtil.fetchPage(contentQuery, countQuery, pageable);
   }
@@ -453,18 +455,18 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    * @return 지정한 openType의 openDate 중 now 이후인 값의 최소값을 반환하는 DateTimeExpression
    */
   private DateTimeExpression<Instant> buildOpenDateExpression(
-      QTicketOpenDate ticketOpenDate,
-      TicketOpenType ticketOpenType,
-      Instant now
+    QTicketOpenDate ticketOpenDate,
+    TicketOpenType ticketOpenType,
+    Instant now
   ) {
     return Expressions.dateTimeTemplate(
-        Instant.class,
-        "min({0})",
-        new CaseBuilder()
-            .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
-                .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
-            .then(ticketOpenDate.openDate)
-            .otherwise((Instant) null)
+      Instant.class,
+      "min({0})",
+      new CaseBuilder()
+        .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
+          .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
+        .then(ticketOpenDate.openDate)
+        .otherwise((Instant) null)
     );
   }
 
@@ -477,14 +479,14 @@ public class ConcertRepositoryImpl implements ConcertRepositoryCustom {
    * @return now 이후인 openType의 isBankTransfer 값을 담은 ComparableExpression<Boolean>
    */
   private ComparableExpression<Boolean> buildBackTransferExpression(
-      QTicketOpenDate ticketOpenDate,
-      TicketOpenType ticketOpenType,
-      Instant now
+    QTicketOpenDate ticketOpenDate,
+    TicketOpenType ticketOpenType,
+    Instant now
   ) {
     return new CaseBuilder()
-        .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
-            .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
-        .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
-        .otherwise((Boolean) null);
+      .when(ticketOpenDate.ticketOpenType.eq(ticketOpenType)
+        .and(ticketOpenDate.openDate.gt(Expressions.constant(now))))
+      .then((ComparableExpression<Boolean>) ticketOpenDate.isBankTransfer)
+      .otherwise((Boolean) null);
   }
 }
