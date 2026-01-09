@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -102,13 +103,23 @@ public class ChatMessageService {
     String unReadRedisKey = UN_READ_MESSAGE_COUNTER_KEY.formatted(chatRoomId, reader.getMemberId());
     redisTemplate.delete(unReadRedisKey);
 
-    // 채팅방 리스트에 즉시 갱신하기 위한 코드
+    ChatMessage lastReadMessage = chatMessageRepository.findById(ack.getLastReadMessageId())
+      .orElseThrow(() -> new CustomException(ErrorCode.MESSAGE_NOT_FOUND));
+
+    String preview = toPreview(lastReadMessage);
+    String formattedSendDate = formattingSendDate(TimeUtil.toLocalDateTime(lastReadMessage.getSendDate()));
+
     rabbitTemplate.convertAndSend(
       "",
       chatRabbitMqProperties.unreadRoutingKey() + reader.getMemberId(),
-      Map.of("chatRoomId", chatRoomId,
-        "unReadMessageCount", 0,
-        "lastMessageId", ack.getLastReadMessageId())
+      buildUnreadTopicPayload(
+        chatRoomId,
+        0L,
+        lastReadMessage.getChatMessageId(),
+        lastReadMessage.getChatMessageType(),
+        preview,
+        formattedSendDate
+      )
     );
 
     ChatRoom chatRoom = chatRoomService.findChatRoomById(chatRoomId);
@@ -275,14 +286,15 @@ public class ChatMessageService {
       rabbitTemplate.convertAndSend(
         "",
         chatRabbitMqProperties.unreadRoutingKey() + chatRoomMemberId,
-        Map.of(
-          "chatRoomId", chatRoom.getChatRoomId(),
-          "unReadMessageCount", count,
-          "lastMessage", request.toPreview(),
-          "lastMessageType", request.getType(),
-          "sendDate", formattedSendDate,
-          "lastMessageId", message.getChatMessageId()
-        ));
+        buildUnreadTopicPayload(
+          chatRoom.getChatRoomId(),
+          count,
+          message.getChatMessageId(),
+          request.getType(),
+          request.toPreview(),
+          formattedSendDate
+        )
+      );
     }
     return message;
   }
@@ -428,5 +440,30 @@ public class ChatMessageService {
     chatRoom.updateLastMessageId(chatMessage.getChatMessageId());
 
     chatRoom.updateLastMessageType(chatMessage.getChatMessageType());
+  }
+
+  private Map<String, Object> buildUnreadTopicPayload(String chatRoomId, long unReadMessageCount, String lastMessageId,
+    ChatMessageType lastMessageType, String lastMessage, String sendDate
+  ) {
+    Map<String, Object> payload = new LinkedHashMap<>();
+    payload.put("lastMessageId", lastMessageId);
+    payload.put("lastMessageType", lastMessageType);
+    payload.put("unReadMessageCount", unReadMessageCount);
+    payload.put("chatRoomId", chatRoomId);
+    payload.put("lastMessage", lastMessage == null ? "" : lastMessage);
+    payload.put("sendDate", sendDate == null ? "" : sendDate);
+    return payload;
+  }
+
+
+  private String toPreview(ChatMessage chatMessage) {
+    return switch (chatMessage.getChatMessageType()) {
+      case TEXT -> nvl(chatMessage.getMessage(), "");
+      case PICTURE -> ChatMessageType.PICTURE.getDescription();
+      case FULFILLMENT_FORM -> ChatMessageType.FULFILLMENT_FORM.getDescription();
+      case ACCEPTED_FULFILLMENT_FORM -> ChatMessageType.ACCEPTED_FULFILLMENT_FORM.getDescription();
+      case REJECTED_FULFILLMENT_FORM -> ChatMessageType.REJECTED_FULFILLMENT_FORM.getDescription();
+      case UPDATE_FULFILLMENT_FORM -> ChatMessageType.UPDATE_FULFILLMENT_FORM.getDescription();
+    };
   }
 }
