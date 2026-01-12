@@ -25,6 +25,7 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
    */
   @Query(value = "SELECT target_id FROM embedding e "
     + "WHERE e.embedding_type = 'CONCERT' "
+    + "AND (e.embedding_vector <-> CAST(:vector AS vector)) <= 0.90 "
     + "AND EXISTS "
     + "(SELECT 1 FROM ticket_open_date t "
     + "JOIN concert c ON t.concert_concert_id = c.concert_id "
@@ -43,6 +44,7 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, UUID> {
    */
   @Query(value = "SELECT target_id FROM embedding "
     + "WHERE embedding_type = 'AGENT' "
+    + "AND (embedding_vector <-> CAST(:vector AS vector)) <= 0.90 "
     + "ORDER BY embedding_vector <-> CAST(:vector AS vector) LIMIT :limit", nativeQuery = true)
   List<UUID> findNearestAgentEmbeddings(@Param("vector") float[] vector, @Param("limit") int limit);
 

@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.application.dto.request;
+package com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.request;
 
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.REJECTED_MEMO_MAX_LENGTH;
 

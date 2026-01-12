@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.application.dto.response;
+package com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.response;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;

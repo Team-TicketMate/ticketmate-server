@@ -515,9 +515,15 @@ public enum ErrorCode {
 
   FULFILLMENT_IMAGE_NOT_OWNED_BY_FORM(HttpStatus.BAD_REQUEST, "해당 이미지는 성공양식의 소유가 아닌 이미지 입니다."),
 
-  FULFILLMENT_FORM_ALREADY_ACCEPTED(HttpStatus.BAD_REQUEST, "수락된 성공양식은 거절이 불가능합니다."),
+  FULFILLMENT_FORM_ALREADY_ACCEPTED(HttpStatus.BAD_REQUEST, "이미 수락된 성공양식입니다."),
 
-  FULFILLMENT_FORM_NOT_UPDATABLE(HttpStatus.BAD_REQUEST, "성공양식 수정은 거절/수락대기 상태에만 수정이 가능합니다.");
+  FULFILLMENT_FORM_NOT_UPDATABLE(HttpStatus.BAD_REQUEST, "성공양식 수정은 거절/수락대기 상태에만 수정이 가능합니다."),
+
+  // SUCCESS_HISTORY
+  SUCCESS_HISTORY_PAGE_SIZE_TOO_LARGE(HttpStatus.BAD_REQUEST, "성공내역 페이지당 데이터 최댓값을 초과했습니다."),
+
+  SUCCESS_HISTORY_PAGE_SIZE_TOO_SMALL(HttpStatus.BAD_REQUEST, "성공내역의 데이터 최솟값은 10개 입니다.");
+
 
   private final HttpStatus status;
   private final String message;

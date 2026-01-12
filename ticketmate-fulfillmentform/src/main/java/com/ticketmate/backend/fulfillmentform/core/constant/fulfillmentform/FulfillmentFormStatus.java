@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.core.constant;
+package com.ticketmate.backend.fulfillmentform.core.constant.fulfillmentform;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

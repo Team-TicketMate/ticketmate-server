@@ -1,4 +1,4 @@
-package com.ticketmate.backend.fulfillmentform.application.dto.request;
+package com.ticketmate.backend.fulfillmentform.application.dto.fulfillmentform.request;
 
 import static com.ticketmate.backend.common.core.constant.ValidationConstants.FulfillmentForm.PARTICULAR_MEMO_MAX_LENGTH;
 
@@ -24,9 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class FulfillmentFormUpdateRequest {
 
   private List<UUID> deleteImgIdList;  // 삭제하고 싶은 기존 사진 리스트
-  
+
   private List<MultipartFile> newSuccessImgList;  // 추가로 등록하고 싶은 사진 리스트
-  
+
   private UUID agentBankAccountId;  // 수정할 대리인 계좌번호 ID
 
   @Size(max = PARTICULAR_MEMO_MAX_LENGTH)
