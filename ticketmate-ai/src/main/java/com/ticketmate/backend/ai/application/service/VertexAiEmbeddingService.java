@@ -40,23 +40,13 @@ public class VertexAiEmbeddingService {
    * @param embeddingType CONCERT, AGENT, SEARCH
    */
   @Transactional
-  @Caching(
-      cacheable = @Cacheable(
-          value = "embeddings",
-          key = "T(com.ticketmate.backend.common.core.util.CommonUtil)"
-                + ".normalizeAndRemoveSpecialCharacters(#text)"
-                + "+':' + #embeddingType",
-          condition = "#targetId == null",
-          unless = "#result == null"
-      )
-  )
   public Embedding fetchOrGenerateEmbedding(UUID targetId, String text, EmbeddingType embeddingType) {
     // 텍스트 정규화
     String normalizeText = CommonUtil.normalizeAndRemoveSpecialCharacters(text);
 
     // 검색 모드: 캐시나 DB 조회 후 없으면 생성
     return embeddingRepository.findByTextAndEmbeddingType(normalizeText, embeddingType)
-        .orElseGet(() -> createAndSaveEmbedding(targetId, normalizeText, embeddingType));
+      .orElseGet(() -> createAndSaveEmbedding(targetId, normalizeText, embeddingType));
   }
 
   /**
@@ -67,11 +57,11 @@ public class VertexAiEmbeddingService {
     float[] vector = extractVector(generateEmbedding(normalizedText));
 
     return embeddingRepository.save(Embedding.builder()
-        .targetId(targetId)
-        .text(normalizedText)
-        .embeddingVector(vector)
-        .embeddingType(type)
-        .build());
+      .targetId(targetId)
+      .text(normalizedText)
+      .embeddingVector(vector)
+      .embeddingType(type)
+      .build());
   }
 
   /**
@@ -83,9 +73,9 @@ public class VertexAiEmbeddingService {
   private EmbedContentResponse generateEmbedding(String text) {
     try {
       return genAiClient.models.embedContent(
-          googleGenAIProperties.model(),
-          text,
-          EmbedContentConfig.builder().build()
+        googleGenAIProperties.model(),
+        text,
+        EmbedContentConfig.builder().build()
       );
     } catch (ClientException e) {
       log.error("Vertex AI 임베딩 API 호출 실패: {}", e.getMessage());
@@ -101,9 +91,9 @@ public class VertexAiEmbeddingService {
    */
   private float[] extractVector(EmbedContentResponse response) {
     List<Float> embeddingValues = response.embeddings()
-        .flatMap(list -> list.stream().findFirst())
-        .flatMap(ContentEmbedding::values)
-        .orElseThrow(() -> new CustomException(ErrorCode.EMBEDDING_DATA_NOT_FOUND));
+      .flatMap(list -> list.stream().findFirst())
+      .flatMap(ContentEmbedding::values)
+      .orElseThrow(() -> new CustomException(ErrorCode.EMBEDDING_DATA_NOT_FOUND));
     int size = embeddingValues.size();
     float[] vector = new float[size];
     for (int i = 0; i < size; i++) {
