@@ -50,44 +50,44 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
       return Collections.emptyList();
     }
     return queryFactory
-        .select(Projections.constructor(ConcertSearchInfo.class,
-            CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            // 선예매 오픈일
-            Expressions.dateTimeTemplate(
-                Instant.class,
-                "min({0})",
-                new CaseBuilder()
-                    .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
-                    .then(TICKET_OPEN_DATE.openDate)
-                    .otherwise((Instant) null)
-            ).as("ticketPreOpenDate"),
-            // 일반 예매 오픈일
-            Expressions.dateTimeTemplate(
-                Instant.class,
-                "min({0})",
-                new CaseBuilder()
-                    .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
-                    .then(TICKET_OPEN_DATE.openDate)
-                    .otherwise((Instant) null)
-            ).as("ticketGeneralOpenDate"),
-            CONCERT_DATE.performanceDate.min().as("startDate"),
-            CONCERT_DATE.performanceDate.max().as("endDate"),
-            CONCERT.concertThumbnailStoredPath,
-            Expressions.constant(0.0)
-        ))
-        .from(CONCERT)
-        .leftJoin(CONCERT.concertHall, CONCERT_HALL)
-        .join(CONCERT_DATE).on(CONCERT.eq(CONCERT_DATE.concert))
-        .join(TICKET_OPEN_DATE).on(CONCERT.eq(TICKET_OPEN_DATE.concert))
-        .where(CONCERT.concertId.in(concertIds))
-        .groupBy(CONCERT.concertId,
-            CONCERT.concertName,
-            CONCERT_HALL.concertHallName,
-            CONCERT.concertThumbnailStoredPath
-        )
-        .fetch();
+      .select(Projections.constructor(ConcertSearchInfo.class,
+        CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        // 선예매 오픈일
+        Expressions.dateTimeTemplate(
+          Instant.class,
+          "min({0})",
+          new CaseBuilder()
+            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.PRE_OPEN))
+            .then(TICKET_OPEN_DATE.openDate)
+            .otherwise((Instant) null)
+        ).as("ticketPreOpenDate"),
+        // 일반 예매 오픈일
+        Expressions.dateTimeTemplate(
+          Instant.class,
+          "min({0})",
+          new CaseBuilder()
+            .when(TICKET_OPEN_DATE.ticketOpenType.eq(TicketOpenType.GENERAL_OPEN))
+            .then(TICKET_OPEN_DATE.openDate)
+            .otherwise((Instant) null)
+        ).as("ticketGeneralOpenDate"),
+        CONCERT_DATE.performanceDate.min().as("startDate"),
+        CONCERT_DATE.performanceDate.max().as("endDate"),
+        CONCERT.concertThumbnailStoredPath,
+        Expressions.constant(0.0)
+      ))
+      .from(CONCERT)
+      .leftJoin(CONCERT.concertHall, CONCERT_HALL)
+      .join(CONCERT_DATE).on(CONCERT.eq(CONCERT_DATE.concert))
+      .join(TICKET_OPEN_DATE).on(CONCERT.eq(TICKET_OPEN_DATE.concert))
+      .where(CONCERT.concertId.in(concertIds))
+      .groupBy(CONCERT.concertId,
+        CONCERT.concertName,
+        CONCERT_HALL.concertHallName,
+        CONCERT.concertThumbnailStoredPath
+      )
+      .fetch();
   }
 
   /**
@@ -102,20 +102,20 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
       return Collections.emptyList();
     }
     return queryFactory
-        .select(Projections.constructor(AgentSearchInfo.class,
-            MEMBER.memberId,
-            MEMBER.nickname,
-            MEMBER.profileImgStoredPath,
-            PORTFOLIO.portfolioDescription,
-            AGENT_PERFORMANCE_SUMMARY.averageRating,
-            AGENT_PERFORMANCE_SUMMARY.reviewCount,
-            Expressions.constant(0.0)
-        ))
-        .from(MEMBER)
-        .leftJoin(PORTFOLIO).on(PORTFOLIO.member.eq(MEMBER))
-        .innerJoin(AGENT_PERFORMANCE_SUMMARY).on(MEMBER.eq(AGENT_PERFORMANCE_SUMMARY.agent))
-        .where(MEMBER.memberId.in(agentIds))
-        .fetch();
+      .select(Projections.constructor(AgentSearchInfo.class,
+        MEMBER.memberId,
+        MEMBER.nickname,
+        MEMBER.profileImgStoredPath,
+        PORTFOLIO.portfolioDescription,
+        AGENT_PERFORMANCE_SUMMARY.averageRating,
+        AGENT_PERFORMANCE_SUMMARY.reviewCount,
+        Expressions.constant(0.0)
+      ))
+      .from(MEMBER)
+      .leftJoin(PORTFOLIO).on(PORTFOLIO.member.eq(MEMBER))
+      .innerJoin(AGENT_PERFORMANCE_SUMMARY).on(MEMBER.eq(AGENT_PERFORMANCE_SUMMARY.agent))
+      .where(MEMBER.memberId.in(agentIds))
+      .fetch();
   }
 
   /**
@@ -129,21 +129,21 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
   public List<UUID> findAgentIdsByKeyword(String keyword, int limit) {
     // 동적 WHERE 절 조합
     BooleanExpression whereClause = QueryDslUtil.allOf(
-        MEMBER.memberType.eq(MemberType.AGENT),
-        QueryDslUtil.anyOf(
-            QueryDslUtil.likeIgnoreCase(MEMBER.nickname, keyword),
-            QueryDslUtil.likeIgnoreCase(PORTFOLIO.portfolioDescription, keyword)
-        )
+      MEMBER.memberType.eq(MemberType.AGENT),
+      QueryDslUtil.anyOf(
+        QueryDslUtil.likeIgnoreCase(MEMBER.nickname, keyword),
+        QueryDslUtil.likeIgnoreCase(PORTFOLIO.portfolioDescription, keyword)
+      )
     );
 
     return queryFactory
-        .select(MEMBER.memberId)
-        .from(MEMBER)
-        .innerJoin(PORTFOLIO)
-        .on((PORTFOLIO.member).eq(MEMBER))
-        .where(whereClause)
-        .limit(limit)
-        .fetch();
+      .select(MEMBER.memberId)
+      .from(MEMBER)
+      .innerJoin(PORTFOLIO)
+      .on((PORTFOLIO.member).eq(MEMBER))
+      .where(whereClause)
+      .limit(limit)
+      .fetch();
   }
 
   /**
