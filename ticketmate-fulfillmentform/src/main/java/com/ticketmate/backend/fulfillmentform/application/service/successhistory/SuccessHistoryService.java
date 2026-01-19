@@ -7,8 +7,6 @@ import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentF
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.SuccessHistory;
 import com.ticketmate.backend.fulfillmentform.infrastructure.repository.successhistory.SuccessHistoryRepository;
 import com.ticketmate.backend.member.application.service.MemberService;
-import com.ticketmate.backend.member.core.constant.MemberType;
-import com.ticketmate.backend.member.infrastructure.entity.Member;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +38,6 @@ public class SuccessHistoryService {
 
   @Transactional(readOnly = true)
   public Slice<SuccessHistoryResponse> getSuccessHistoryList(UUID agentId, SuccessHistoryFilteredRequest request) {
-    Member agent = memberService.findMemberById(agentId);
-
-    // 조회객체가 대리인이 정말 맞는지
-    memberService.validateMemberType(agent, MemberType.AGENT);
-
     // 페이지네이션 객체 생성
     Pageable pageable = request.toPageable();
 
