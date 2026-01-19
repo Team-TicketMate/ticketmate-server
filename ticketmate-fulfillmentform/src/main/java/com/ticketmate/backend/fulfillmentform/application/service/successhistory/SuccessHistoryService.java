@@ -6,7 +6,6 @@ import com.ticketmate.backend.fulfillmentform.application.mapper.successhistory.
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.FulfillmentForm;
 import com.ticketmate.backend.fulfillmentform.infrastructure.entity.SuccessHistory;
 import com.ticketmate.backend.fulfillmentform.infrastructure.repository.successhistory.SuccessHistoryRepository;
-import com.ticketmate.backend.member.application.service.MemberService;
 import jakarta.persistence.EntityManager;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ public class SuccessHistoryService {
 
   private final SuccessHistoryRepository successHistoryRepository;
   private final EntityManager entityManager;
-  private final MemberService memberService;
   private final SuccessHistoryMapper mapper;
 
   public void createSuccessHistory(UUID fulfillmentFormId) {
