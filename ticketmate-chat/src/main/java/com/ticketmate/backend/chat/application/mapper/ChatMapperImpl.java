@@ -56,6 +56,9 @@ public class ChatMapperImpl implements ChatMapper {
     String concertThumbnailStoredPath = applicationForm.getConcert().getConcertThumbnailStoredPath();
     String profileImgStoredPath = other.getProfileImgStoredPath();
 
+    boolean chatEnabled = chatRoom.canChat();
+    boolean opponentLeft = chatRoom.isLeft(opponentId);
+
     return ChatRoomResponse.builder()
       .unReadMessageCount(unRead)
       .chatRoomId(chatRoom.getChatRoomId())
@@ -65,12 +68,19 @@ public class ChatMapperImpl implements ChatMapper {
       .concertThumbnailUrl(storageService.generatePublicUrl(concertThumbnailStoredPath))
       .lastChatSendTime(TimeUtil.toLocalDateTime(chatRoom.getLastMessageTime()))
       .profileUrl(storageService.generatePublicUrl(profileImgStoredPath))
+      .chatEnabled(chatEnabled)
+      .opponentLeft(opponentLeft)
       .build();
   }
 
   @Override
   public ChatRoomContextResponse toChatRoomContextResponse(ChatRoom chatRoom, UUID currentMemberId,
     UUID fulfillmentFormId, TicketOpenType ticketOpenType, String opponentMemberNickname, ConcertInfoResponse response) {
+
+    UUID opponentId = chatRoom.getOpponentId(currentMemberId);
+    boolean chatEnabled = chatRoom.canChat();
+    boolean opponentLeft = chatRoom.isLeft(opponentId);
+
     return ChatRoomContextResponse.builder()
       .concertName(response.concertName())
       .concertType(response.concertType())
@@ -82,6 +92,8 @@ public class ChatMapperImpl implements ChatMapper {
       .ticketOpenDateInfoResponseList(response.ticketOpenDateInfoResponseList())
       .chatRoomId(chatRoom.getChatRoomId())
       .ticketOpenType(ticketOpenType)
+      .chatEnabled(chatEnabled)
+      .opponentLeft(opponentLeft)
       .build();
   }
 }

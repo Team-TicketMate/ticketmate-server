@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -80,6 +81,16 @@ public class ChatRoomController implements ChatRoomControllerDocs {
     @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
     @PathVariable("chat-room-id") String chatRoomId) {
     chatRoomService.cancelProgress(customOAuth2User.getMember(), chatRoomId);
+    return ResponseEntity.ok().build();
+  }
+
+  @Override
+  @PostMapping("/{chat-room-id}/leave")
+  @LogMonitoring
+  public ResponseEntity<Void> leaveChatRoom(
+    @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    @PathVariable("chat-room-id") String chatRoomId) {
+    chatRoomService.leaveChatRoom(customOAuth2User.getMember(), chatRoomId);
     return ResponseEntity.ok().build();
   }
 }
