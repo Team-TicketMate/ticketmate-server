@@ -22,6 +22,7 @@ import com.ticketmate.backend.common.infrastructure.util.PageableUtil;
 import com.ticketmate.backend.concert.infrastructure.entity.Concert;
 import com.ticketmate.backend.member.infrastructure.entity.Member;
 import com.ticketmate.backend.member.infrastructure.repository.MemberRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -169,8 +170,8 @@ public class ChatRoomService {
     ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
       .orElseThrow(() -> new CustomException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-    // 채팅방 내부 참가자 유효성 검증
-    validateRoomMember(chatRoom, member);
+    // 채팅방 내부 참가자 유효성 검증 및 채팅방 유효성 검증
+    validateActiveParticipant(chatRoom, member);
 
     // 채팅메시지 전용 페이지네이션 객체 생성
     Pageable pageable = request.toPageable();
@@ -224,6 +225,25 @@ public class ChatRoomService {
     applicationForm.setApplicationFormStatus(ApplicationFormStatus.CANCELED_IN_PROCESS);
   }
 
+  // 채팅방 나가기 기능
+  @Transactional
+  public void leaveChatRoom(Member member, String chatRoomId) {
+    ChatRoom chatRoom = findChatRoomById(chatRoomId);
+    validateRoomMember(chatRoom, member);
+
+    UUID memberId = member.getMemberId();
+    if (chatRoom.isLeft(memberId)) {
+      return;
+    }
+
+    chatRoom.leave(memberId, Instant.now());
+    chatRoomRepository.save(chatRoom);
+
+    // 내 unread 키는 의미 없어지니 삭제
+    String key = (UN_READ_MESSAGE_COUNTER_KEY).formatted(chatRoomId, memberId);
+    redisTemplate.delete(key);
+  }
+
   /**
    * 방 참가자 검증
    */
@@ -232,6 +252,14 @@ public class ChatRoomService {
     if (!id.equals(room.getAgentMemberId()) && !id.equals(room.getClientMemberId())) {
       log.error("현재 사용자는 해당 채팅방에 대한 권한이 없습니다.");
       throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
+    }
+  }
+
+  private void validateActiveParticipant(ChatRoom room, Member member) {
+    validateRoomMember(room, member);
+
+    if (room.isLeft(member.getMemberId())) {
+      throw new CustomException(ErrorCode.CHAT_ROOM_LEFT);
     }
   }
 
