@@ -399,9 +399,9 @@ public enum ErrorCode {
 
   CHAT_MESSAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "채팅 메시지 전송중 오류가 발생했습니다."),
 
-  CHAT_ROOM_LEFT(HttpStatus.NOT_FOUND, "채팅방을 나가서 존재하지 않은 채팅방입니다."),
+  CHAT_ROOM_LEFT(HttpStatus.NOT_FOUND, "채팅방을 나가서 존재하지 않는 채팅방입니다."),
 
-  CHAT_DISABLED(HttpStatus.BAD_REQUEST, "해당 채팅방은 상대방이 채팅방을 나가 채팅을 진행 할 수 없습니다."),
+  CHAT_DISABLED(HttpStatus.BAD_REQUEST, "해당 채팅방은 상대방이 채팅방을 나가 채팅을 진행할 수 없습니다."),
 
   // EMBEDDING
 

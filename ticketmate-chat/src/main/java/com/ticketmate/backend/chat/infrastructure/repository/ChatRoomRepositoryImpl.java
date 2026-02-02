@@ -36,7 +36,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
     // 1. 내가 ‘대리인’으로 들어가 있는 방 조건 + 나가지 않은 채팅방(나간시점의 기록이 없는)
     Criteria asAgent = Criteria.where("agentMemberId").is(memberId).and("agentLeftAt").is(null);
-    ;
+    
     if (ticketOpenType != null) {
       asAgent = asAgent.and("ticketOpenType").is(ticketOpenType);
     }
