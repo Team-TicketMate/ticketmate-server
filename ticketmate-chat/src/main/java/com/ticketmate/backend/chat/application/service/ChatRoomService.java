@@ -239,9 +239,10 @@ public class ChatRoomService {
     chatRoom.leave(memberId, Instant.now());
     chatRoomRepository.save(chatRoom);
 
-    // 내 unread 키는 의미 없어지니 삭제
+    // unread 키 삭제
     String key = (UN_READ_MESSAGE_COUNTER_KEY).formatted(chatRoomId, memberId);
     redisTemplate.delete(key);
+    log.debug("채팅방 나가기 완료. 채팅방 상태 : {}, 나간 시간: {}", chatRoom.getRoomStatus(), chatRoom.getClosedDate());
   }
 
   /**
