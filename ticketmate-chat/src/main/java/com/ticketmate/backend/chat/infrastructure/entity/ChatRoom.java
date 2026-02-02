@@ -73,17 +73,17 @@ public class ChatRoom extends BaseMongoDocument {
   private TicketOpenType ticketOpenType; // 신청폼의 선예매, 일반예매인지
 
   @Indexed
-  private Instant agentLeftAt;  // 대리인 퇴장시간
+  private Instant agentLeftDate;  // 대리인 퇴장시간
 
   @Indexed
-  private Instant clientLeftAt;  // 의뢰인 퇴장시간
+  private Instant clientLeftDate;  // 의뢰인 퇴장시간
 
   @Indexed
   @Builder.Default
   private ChatRoomStatus roomStatus = ChatRoomStatus.ACTIVE;  // 한명이라도 나가면 CLOSED 상태
 
   @Indexed
-  private Instant closedAt;
+  private Instant closedDate;
 
   public void updateLastMessage(String message) {
     this.lastMessage = message;
@@ -108,10 +108,10 @@ public class ChatRoom extends BaseMongoDocument {
 
   public boolean isLeft(UUID memberId) {
     if (memberId.equals(agentMemberId)) {
-      return agentLeftAt != null;
+      return agentLeftDate != null;
     }
     if (memberId.equals(clientMemberId)) {
-      return clientLeftAt != null;
+      return clientLeftDate != null;
     }
     return false;
   }
@@ -122,15 +122,15 @@ public class ChatRoom extends BaseMongoDocument {
 
   public boolean canChat() {
     // 상대가 나갔을시 남아있는 사람도 채팅 불가
-    return roomStatus == ChatRoomStatus.ACTIVE && agentLeftAt == null && clientLeftAt == null;
+    return roomStatus == ChatRoomStatus.ACTIVE && agentLeftDate == null && clientLeftDate == null;
   }
 
   // 채팅방을 나갈 시 동작하는 메서드
   public void leave(UUID memberId, Instant now) {
     if (memberId.equals(agentMemberId)) {
-      agentLeftAt = now;
+      agentLeftDate = now;
     } else if (memberId.equals(clientMemberId)) {
-      clientLeftAt = now;
+      clientLeftDate = now;
     } else {
       throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
     }
@@ -138,7 +138,7 @@ public class ChatRoom extends BaseMongoDocument {
     // 한 명이라도 나가면 방은 CLOSED
     if (roomStatus != ChatRoomStatus.CLOSED) {
       roomStatus = ChatRoomStatus.CLOSED;
-      closedAt = now;
+      closedDate = now;
     }
   }
 }
