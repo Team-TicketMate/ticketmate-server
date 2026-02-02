@@ -266,6 +266,8 @@ public class ChatMessageService {
    * 채팅 메시지 저장 + Redis를 이용해 읽지않은 메시지 count, 및 브로드캐스팅을 관리하는 메서드
    */
   private ChatMessage handleNewChatMessage(Member sender, ChatMessageRequest request, ChatRoom chatRoom) {
+    // 현재 채팅을 진행할 수 있는지 검증
+    validateCanChat(chatRoom);
 
     ChatMessage message = saveChatMessage(sender, request, chatRoom);
 
@@ -465,5 +467,12 @@ public class ChatMessageService {
       case REJECTED_FULFILLMENT_FORM -> ChatMessageType.REJECTED_FULFILLMENT_FORM.getDescription();
       case UPDATE_FULFILLMENT_FORM -> ChatMessageType.UPDATE_FULFILLMENT_FORM.getDescription();
     };
+  }
+
+  // 현재 채팅을 진행 수 있는 상태인지(한명이라도 나가면 채팅 불가)
+  private void validateCanChat(ChatRoom room) {
+    if (!room.canChat()) {
+      throw new CustomException(ErrorCode.CHAT_DISABLED);
+    }
   }
 }

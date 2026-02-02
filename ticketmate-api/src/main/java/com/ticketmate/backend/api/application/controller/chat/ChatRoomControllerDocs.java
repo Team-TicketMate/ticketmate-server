@@ -287,4 +287,42 @@ public interface ChatRoomControllerDocs {
       """
   )
   ResponseEntity<Void> cancelProgress(CustomOAuth2User customOAuth2User, String chatRoomId);
+
+  @ApiChangeLogs({
+    @ApiChangeLog(
+      date = "2026-01-28",
+      author = "mr6208",
+      description = "채팅방 나가기 API 설계",
+      issueUrl = ""
+    )
+  })
+  @Operation(
+    summary = "채팅방 나가기 기능",
+    description = """
+                
+      이 API는 인증이 필요합니다.
+                
+      ### 요청 파라미터
+      - **chat-room-id (String)** : 채팅방 고유 ID [필수]
+                
+      ### 반환 데이터 
+      - 상태코드만을 반환합니다.
+            
+      ### 변경된 중요한 부분들
+      - 카카오톡 오픈채팅을 레퍼런스로 참고해서 최대한 비슷하게 설계했습니다.
+      - 1:1 채팅도중 상대방이 나갔을 시 내 기준에서는 과거 채팅목록 조회가 가능하지만 채팅은 불가합니다.
+      - 상대방 기준에서는(나간사람) 채팅방 목록에 나간 채팅방이 보이지 않고 채팅방 내부 조회 자체가 불가능합니다.
+      - 이런 요구사항을 반영하기 위해 기존 응답데이터에 대한 변경이 이루어졌습니다.
+            
+      ### 아래는 채팅방 리스트업 및 채팅방 내부 조회시 추가된 데이터입니다.
+      ```json
+      {
+       "chatEnabled(현재 채팅이 가능한지 알려주는 플래그)": "true/false",
+       "opponentLeft(현재 채팅방에서 상대방이 나갔는지를 알려주는 플래그)": true/false
+      }
+      ```
+            
+      """
+  )
+  ResponseEntity<Void> leaveChatRoom(CustomOAuth2User customOAuth2User, String chatRoomId);
 }

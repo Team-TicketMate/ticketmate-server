@@ -24,10 +24,13 @@ public class ChatRoomContextResponse {
   private List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList; // 티켓 오픈일 List
   private TicketReservationSite ticketReservationSite;  // 예매처
   private ConcertType concertType;  // 공연 카테고리
+  private boolean chatEnabled;  // 현재 채팅이 가능한지
+  private boolean opponentLeft;  // 상대방이 나갔는지
 
   @Builder
   public ChatRoomContextResponse(String chatRoomId, UUID opponentMemberId, UUID fulfillmentFormId, String opponentMemberNickName, String concertName, String concertThumbnailUrl,
-    TicketOpenType ticketOpenType, List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList, TicketReservationSite ticketReservationSite, ConcertType concertType) {
+    TicketOpenType ticketOpenType, List<TicketOpenDateInfoResponse> ticketOpenDateInfoResponseList, TicketReservationSite ticketReservationSite, ConcertType concertType, boolean chatEnabled,
+    boolean opponentLeft) {
     this.chatRoomId = chatRoomId;
     this.opponentMemberId = opponentMemberId;
     this.fulfillmentFormId = fulfillmentFormId;
@@ -38,5 +41,7 @@ public class ChatRoomContextResponse {
     this.ticketOpenDateInfoResponseList = ticketOpenDateInfoResponseList;
     this.ticketReservationSite = ticketReservationSite;
     this.concertType = concertType;
+    this.chatEnabled = chatEnabled;
+    this.opponentLeft = opponentLeft;
   }
 }

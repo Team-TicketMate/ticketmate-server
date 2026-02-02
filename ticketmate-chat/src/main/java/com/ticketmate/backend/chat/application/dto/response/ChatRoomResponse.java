@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ChatRoomResponse {
+
   private String chatRoomId;  // 채팅방 PK
   private String chatRoomName;  // 상대방 닉네임 출력
   private String lastChatMessage;  // 마지막 채팅 메시지
@@ -19,10 +20,12 @@ public class ChatRoomResponse {
   private String concertThumbnailUrl; // 콘서트 썸네일 사진
   private TicketOpenType ticketOpenType;  // 선예매/일예 구분
   private int unReadMessageCount;  // 읽지 않은 메시지 개수
+  private boolean chatEnabled;   // 메시지 전송 가능 여부
+  private boolean opponentLeft;  // 상대가 나갔는지(전송불가)
 
   @Builder
-  public ChatRoomResponse(String chatRoomId, String chatRoomName, String lastChatMessage, LocalDateTime lastChatSendTime, String profileUrl, String concertThumbnailUrl,
-      TicketOpenType ticketOpenType, int unReadMessageCount) {
+  public ChatRoomResponse(String chatRoomId, String chatRoomName, String lastChatMessage, LocalDateTime lastChatSendTime, String profileUrl, String concertThumbnailUrl, TicketOpenType ticketOpenType,
+    int unReadMessageCount, boolean chatEnabled, boolean opponentLeft) {
     this.chatRoomId = chatRoomId;
     this.chatRoomName = chatRoomName;
     this.lastChatMessage = lastChatMessage;
@@ -31,5 +34,7 @@ public class ChatRoomResponse {
     this.concertThumbnailUrl = concertThumbnailUrl;
     this.ticketOpenType = ticketOpenType;
     this.unReadMessageCount = unReadMessageCount;
+    this.chatEnabled = chatEnabled;
+    this.opponentLeft = opponentLeft;
   }
 }
