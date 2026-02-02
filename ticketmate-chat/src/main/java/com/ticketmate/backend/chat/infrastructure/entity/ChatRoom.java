@@ -1,12 +1,16 @@
 package com.ticketmate.backend.chat.infrastructure.entity;
 
 import com.ticketmate.backend.chat.core.constant.ChatMessageType;
+import com.ticketmate.backend.chat.core.constant.ChatRoomStatus;
+import com.ticketmate.backend.common.application.exception.CustomException;
+import com.ticketmate.backend.common.application.exception.ErrorCode;
 import com.ticketmate.backend.common.infrastructure.persistence.BaseMongoDocument;
 import com.ticketmate.backend.concert.core.constant.TicketOpenType;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -68,6 +72,19 @@ public class ChatRoom extends BaseMongoDocument {
 
   private TicketOpenType ticketOpenType; // 신청폼의 선예매, 일반예매인지
 
+  @Indexed
+  private Instant agentLeftDate;  // 대리인 퇴장시간
+
+  @Indexed
+  private Instant clientLeftDate;  // 의뢰인 퇴장시간
+
+  @Indexed
+  @Builder.Default
+  private ChatRoomStatus roomStatus = ChatRoomStatus.ACTIVE;  // 한명이라도 나가면 CLOSED 상태
+
+  @Indexed
+  private Instant closedDate;
+
   public void updateLastMessage(String message) {
     this.lastMessage = message;
   }
@@ -87,5 +104,41 @@ public class ChatRoom extends BaseMongoDocument {
   // 상대방 아이디 추출
   public UUID getOpponentId(UUID currentMemberId) {
     return currentMemberId.equals(agentMemberId) ? clientMemberId : agentMemberId;
+  }
+
+  public boolean isLeft(UUID memberId) {
+    if (memberId.equals(agentMemberId)) {
+      return agentLeftDate != null;
+    }
+    if (memberId.equals(clientMemberId)) {
+      return clientLeftDate != null;
+    }
+    return false;
+  }
+
+  public boolean isParticipant(UUID memberId) {
+    return memberId.equals(agentMemberId) || memberId.equals(clientMemberId);
+  }
+
+  public boolean canChat() {
+    // 상대가 나갔을시 남아있는 사람도 채팅 불가
+    return roomStatus == ChatRoomStatus.ACTIVE && agentLeftDate == null && clientLeftDate == null;
+  }
+
+  // 채팅방을 나갈 시 동작하는 메서드
+  public void leave(UUID memberId, Instant now) {
+    if (memberId.equals(agentMemberId)) {
+      agentLeftDate = now;
+    } else if (memberId.equals(clientMemberId)) {
+      clientLeftDate = now;
+    } else {
+      throw new CustomException(ErrorCode.NO_AUTH_TO_ROOM);
+    }
+
+    // 한 명이라도 나가면 방은 CLOSED
+    if (roomStatus != ChatRoomStatus.CLOSED) {
+      roomStatus = ChatRoomStatus.CLOSED;
+      closedDate = now;
+    }
   }
 }

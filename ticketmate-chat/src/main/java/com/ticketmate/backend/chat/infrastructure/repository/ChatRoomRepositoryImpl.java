@@ -34,8 +34,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
     log.debug("선예매 일반예매 구분 : {}", ticketOpenType);
 
-    // 1. 내가 ‘대리인’으로 들어가 있는 방 조건
-    Criteria asAgent = Criteria.where("agentMemberId").is(memberId);
+    // 1. 내가 ‘대리인’으로 들어가 있는 방 조건 + 나가지 않은 채팅방(나간시점의 기록이 없는)
+    Criteria asAgent = Criteria.where("agentMemberId").is(memberId).and("agentLeftAt").is(null);
+    
     if (ticketOpenType != null) {
       asAgent = asAgent.and("ticketOpenType").is(ticketOpenType);
     }
@@ -43,8 +44,8 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
       asAgent = asAgent.and("clientMemberNickname").regex(keyword, "i");
     }
 
-    // 2. 내가 ‘의뢰인’으로 들어가 있는 방 조건
-    Criteria asClient = Criteria.where("clientMemberId").is(memberId);
+    // 2. 내가 ‘의뢰인’으로 들어가 있는 방 조건 + 위와 동일
+    Criteria asClient = Criteria.where("clientMemberId").is(memberId).and("clientLeftAt").is(null);
     if (ticketOpenType != null) {
       asClient = asClient.and("ticketOpenType").is(ticketOpenType);
     }
@@ -57,9 +58,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 
     // 마지막 채팅 메시지 시간 기준 내림차순 정렬 (6개씩)
     Query query = Query.query(criteria)
-        .with(Sort.by(Sort.Direction.DESC, "lastMessageTime"))
-        .skip((long) pageNumber * PageableConstants.DEFAULT_PAGE_SIZE)
-        .limit(PageableConstants.DEFAULT_PAGE_SIZE);
+      .with(Sort.by(Sort.Direction.DESC, "lastMessageTime"))
+      .skip((long) pageNumber * PageableConstants.DEFAULT_PAGE_SIZE)
+      .limit(PageableConstants.DEFAULT_PAGE_SIZE);
 
     List<ChatRoom> chatRoomList = mongoTemplate.find(query, ChatRoom.class);
     log.debug("조회된 채팅방 객체 개수 : {}", chatRoomList.size());
@@ -68,7 +69,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
     log.debug("Count로 조회된 채팅방 개수 : {}", totalCount);
 
     return new PageImpl<>(chatRoomList,
-        PageRequest.of(pageNumber, PageableConstants.DEFAULT_PAGE_SIZE),
-        totalCount);
+      PageRequest.of(pageNumber, PageableConstants.DEFAULT_PAGE_SIZE),
+      totalCount);
   }
 }
